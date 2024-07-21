@@ -161,7 +161,6 @@ local function PostProcessUnit(unit)
     local isDummy = unit.CategoriesHash['DUMMYUNIT']
     local isLand = unit.CategoriesHash['LAND']
     local isAir = unit.CategoriesHash['AIR']
-    local isNaval = unit.CategoriesHash['NAVAL']
     local isBomber = unit.CategoriesHash['BOMBER']
     local isGunship = unit.CategoriesHash['GROUNDATTACK'] and isAir and (not isBomber)
     local isTransport = unit.CategoriesHash['TRANSPORTATION']
@@ -171,8 +170,6 @@ local function PostProcessUnit(unit)
     local isTech2 = unit.CategoriesHash['TECH2']
     local isTech3 = unit.CategoriesHash['TECH3']
     local isExperimental = unit.CategoriesHash['EXPERIMENTAL']
-    local isACU = unit.CategoriesHash['COMMAND']
-    local isSACU = unit.CategoriesHash['SUBCOMMANDER']
 
     -- do not touch guard scan radius values of engineer-like units, as it is the reason we have
     -- the factory-reclaim-bug that we're keen in keeping that at this point

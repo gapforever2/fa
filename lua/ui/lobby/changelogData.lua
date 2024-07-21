@@ -902,7 +902,7 @@ gamePatches = {
             "- Eternal",
             "- Balthazar",
             "- hdt80bro",
-
+            
         }
     },
     {
