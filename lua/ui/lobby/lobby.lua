@@ -527,7 +527,7 @@ function GetAIPlayerData(name, AIPersonality, slot)
     -- retrieve properties from AI table
     ---@type AILobbyProperties | nil
     local aiLobbyProperties = nil
-    for k, entry in aitypes do
+    for _, entry in aitypes do
         if entry.key == AIPersonality then
             aiLobbyProperties = entry
         end
@@ -5259,7 +5259,6 @@ local MessageHandlers = {
         ---@field SenderId number
         ---@field SenderName string
         ---@field Type string
-
         ---@param data LobbyAddPlayerData
         Accept = function(data)
             -- we need to do quite a bit of checks to prevent malicious values
