@@ -165,6 +165,14 @@ local function getMusicVolumeOption()
     end
 end
 
+
+function GetBooleanStates()
+    return {
+        { text = "<LOC _Off>", key = false },
+        { text = "<LOC _On>", key = true },
+    }
+end
+
 options = {
     gameplay = {
         title = "<LOC _Gameplay>",
@@ -906,6 +914,18 @@ options = {
                 default = __language,
                 custom = {
                     states = __installedlanguages,
+                },
+            },
+			{
+                title = "Имба ассист",
+                key = 'auto_abort_navigation',
+                type = 'toggle',
+                default = true,
+                custom = {
+                    states = {
+                        { text = "<LOC _On>", key = true },
+                        { text = "<LOC _Off>", key = false },
+                    },
                 },
             },
             {
