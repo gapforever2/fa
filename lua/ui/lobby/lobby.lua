@@ -44,7 +44,7 @@ local JSON = import("/lua/system/dkson.lua").json
 local Changelog = import("/lua/ui/lobby/changelog.lua")
 local UTF =  import("/lua/utf.lua")
 -- Uveso - aitypes inside aitypes.lua are now also available as a function.
-local aitypes
+local aiTypes
 local AIKeys = {}
 local AIStrings = {}
 local AITooltips = {}
@@ -55,11 +55,11 @@ function GetAITypes()
     AIKeys = {}
     AIStrings = {}
     AITooltips = {}
-    aitypes = import("/lua/ui/lobby/aitypes.lua").GetAItypes()
-    for _, aidata in aitypes do
-        table.insert(AIKeys, aidata.key)
-        table.insert(AIStrings, aidata.name)
-        table.insert(AITooltips, 'aitype_'..aidata.key)
+    aiTypes = import("/lua/ui/lobby/aitypes.lua").GetAItypes()
+    for _, aiData in aiTypes do
+        table.insert(AIKeys, aiData.key)
+        table.insert(AIStrings, aiData.name)
+        table.insert(AITooltips, 'aitype_'..aiData.key)
     end
 end
 GetAITypes()
@@ -205,9 +205,9 @@ local function ParseWhisper(params)
     local delimStart = string.find(params, " ")
     if delimStart then
         local name = string.sub(params, 1, delimStart-1)
-        local targID = FindIDForName(name)
-        if targID then
-            PrivateChat(targID, string.sub(params, delimStart+1))
+        local targetID = FindIDForName(name)
+        if targetID then
+            PrivateChat(targetID, string.sub(params, delimStart+1))
         else
             AddChatText(LOC("<LOC lobby_0007>Invalid whisper target."))
         end
@@ -236,11 +236,11 @@ local localPlayerID = false
 local gameInfo = false
 local lastKickMessage = UTF.UnescapeString(Prefs.GetFromCurrentProfile('lastKickMessage') or "")
 
-local defaultMode =(HasCommandLineArg("/windowed") and "windowed") or Prefs.GetFromCurrentProfile('options').primary_adapter
+local defaultMode = (HasCommandLineArg("/windowed") and "windowed") or Prefs.GetFromCurrentProfile('options').primary_adapter
 local windowedMode = defaultMode == "windowed" or (HasCommandLineArg("/windowed"))
 
 function SetWindowedLobby(windowed)
-    -- Dont change resolution if user already using windowed mode
+    -- Don't change resolution if user already using windowed mode
     if windowed == windowedMode or defaultMode == 'windowed' then
         return
     end
@@ -3340,7 +3340,6 @@ function CreateUI(maxPlayers)
         GUI.OptionContainer:ScrollSetTop('Vert', 0)
         Prefs.SetToCurrentProfile('LobbyHideDefaultOptions', tostring(checked))
     end
-
     GUI.patchnotesButton = UIUtil.CreateButtonWithDropshadow(GUI.panel, '/Button/medium/', "<LOC _Patchnotes>Актуальный баланс")
     Tooltip.AddButtonTooltip(GUI.patchnotesButton, {text=LOC("Актуальный баланс GAF"), body=LOC("Кликни что-бы узнать про величайший баланс")})
     LayoutHelpers.AtBottomIn(GUI.patchnotesButton, GUI.optionsPanel, 630)
@@ -3348,8 +3347,22 @@ function CreateUI(maxPlayers)
 	LayoutHelpers.SetWidth(GUI.patchnotesButton, 300)
     LayoutHelpers.SetHeight(GUI.patchnotesButton, 45)
     GUI.patchnotesButton.OnClick = function(self, event)
+	    OpenURL('http://gapforever2.github.io/patchnotes')
         Changelog.Changelog(GUI)
     end
+
+	-- KickObs
+	GUI.kickobs = UIUtil.CreateButtonWithDropshadow(GUI.panel, '/Button/medium/', "<LOC _Patchnotes>KickObs")
+    Tooltip.AddButtonTooltip(GUI.kickobs, {text=LOC("KickObs"), body=LOC("Кикнуть всех обсов")})
+    LayoutHelpers.AtBottomIn(GUI.kickobs, GUI.optionsPanel, -95)
+    LayoutHelpers.AtHorizontalCenterIn(GUI.kickobs, GUI.optionsPanel, -200)
+	LayoutHelpers.SetWidth(GUI.kickobs, 100)
+    LayoutHelpers.SetHeight(GUI.kickobs, 45)
+	UIUtil.setVisible(GUI.kickobs, isHost)
+    GUI.kickobs.OnClick = function(self, event)
+	    HostUtils.KickObservers("GameLaunched")
+    end
+
     -- Patchnotes Button
     GUI.patchnotesButton = UIUtil.CreateButtonWithDropshadow(GUI.panel, '/Button/medium/', "<LOC _Patchnotes>Discord GAF")
     Tooltip.AddButtonTooltip(GUI.patchnotesButton, {text=LOC("Discord GAF"), body=LOC("Официальный дискорд GAPForever")})
@@ -4377,8 +4390,8 @@ function CreateUI(maxPlayers)
             local teams = {}
             local numTeams = 0
             for i, player in gameInfo.PlayerOptions:pairs() do
-                if not teams[player.Team] and player.Team != 1 then
-                    teams[player.Team] = 1
+                if not teams[player.Team] and player.Team ~= 1 then
+                    teams[player.Team] = true
                     numTeams = numTeams + 1
                 end
             end
