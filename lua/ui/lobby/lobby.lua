@@ -48,7 +48,19 @@ local aiTypes
 local AIKeys = {}
 local AIStrings = {}
 local AITooltips = {}
+local groupDevColors = {
+    ["Mod"] = "ff0000",
+    ["bal"] = "8000ff",
+    ["admin"] = "00ffff",
+    ["yt"] = "00ffbf",
 
+}
+local roleNames = {
+    ["Mod"] = "Moderator",
+    ["bal"] = "Balance Team",
+    ["admin"] = "Administrator",
+    ["yt"] = "YouTube",
+}
 
 
 function GetAITypes()
@@ -167,6 +179,7 @@ local function parseCommandlineArguments()
         ["/joincustom"] = true,
         ["/gpgnet"] = true,
 		["/foe"] = true,
+		["/group"] = true,
     }
 
     local function GetCommandLineArgOrDefault(argname, default)
@@ -189,6 +202,7 @@ local function parseCommandlineArguments()
         playerClan = tostring(GetCommandLineArgOrDefault("/clan", "")),
         playerDeviation = tonumber(GetCommandLineArgOrDefault("/deviation", 500)),
 		foe_list = tostring(GetCommandLineArgOrDefault("/foe", "")),
+		groupDev = tostring(GetCommandLineArgOrDefault("/group", "")),
     }
 end
 local argv = parseCommandlineArguments()
@@ -449,9 +463,10 @@ function GetLocalPlayerData()
             MEAN = argv.playerMean,
             DEV = argv.playerDeviation,
             Country = argv.PrefLanguage,
-            Avatar = argv.Urlava,
-            Tooltip = argv.Tlpava,
-            Version = version,
+			Avatar = argv.Urlava,
+			TooltipAvatar = argv.Tlpava,
+			GroupRole = argv.groupDev,
+			Version = version,
             GameType = gametype,
             Commit = commit,
         }
@@ -1113,14 +1128,16 @@ function SetSlotInfo(slotNum, playerInfo)
 
     -- These states are used to select the appropriate strings with GetSlotMenuTables.
     local slotState
-    if not playerInfo.Human then
-        slot.ratingText:Hide()
-        slotState = 'ai'
-    elseif not isLocallyOwned then
-        slotState = 'player'
-    else
-        slotState = nil
-    end
+     if not playerInfo.Human then
+		slot.ratingText:Hide()
+		slotState = 'ai'
+	elseif groupDevColors[playerInfo.GroupRole] then
+		slotState = 'groupdev'
+	elseif not isLocallyOwned then
+		slotState = 'player'
+	else
+		slotState = nil
+	end
 
     slot.name:ClearItems()
 
@@ -1158,23 +1175,33 @@ function SetSlotInfo(slotNum, playerInfo)
     slot.numGamesText:SetText(playerInfo.NG)
 
     slot.name:Show()
-    -- Change name colour according to the state of the slot.
-    if slotState == 'ai' then
-        slot.name:SetTitleTextColor("dbdbb9") -- Beige Color for AI
-        slot.name._text:SetFont('Arial Gras', 12)
-    elseif FindSlotForID(hostID) == slotNum then
-        slot.name:SetTitleTextColor("ffc726") -- Orange Color for Host
-        slot.name._text:SetFont('Arial Gras', 15)
-    elseif slotState == 'player' then
-        slot.name:SetTitleTextColor("64d264") -- Green Color for Players
-        slot.name._text:SetFont('Arial Gras', 15)
-    elseif isLocallyOwned then
-        slot.name:SetTitleTextColor("6363d2") -- Blue Color for You
-        slot.name._text:SetFont('Arial Gras', 15)
-    else
-        slot.name:SetTitleTextColor(UIUtil.fontColor) -- Normal Color for Other
-        slot.name._text:SetFont('Arial Gras', 12)
-    end
+
+
+	if FindSlotForID(hostID) == slotNum then
+		slot.name:SetTitleTextColor("ffc726") -- Orange Color for Host
+		slot.name._text:SetFont('Arial Gras', 15)
+	elseif slotState == 'groupdev' then
+	local groupDevColor = groupDevColors[playerInfo.GroupRole]
+	if groupDevColor then
+		slot.name:SetTitleTextColor(groupDevColor)
+		slot.name._text:SetFont('Arial Gras', 12)
+	else
+		slot.name:SetTitleTextColor(UIUtil.fontColor)
+		slot.name._text:SetFont('Arial Gras', 12)
+	end
+	elseif slotState == 'ai' then
+		slot.name:SetTitleTextColor("dbdbb9") -- Beige Color for AI
+		slot.name._text:SetFont('Arial Gras', 12)
+	elseif slotState == 'player' then
+		slot.name:SetTitleTextColor("64d264") -- Green Color for Players
+		slot.name._text:SetFont('Arial Gras', 15)
+	elseif isLocallyOwned then
+		slot.name:SetTitleTextColor("ff0000") -- Blue Color for You
+		slot.name._text:SetFont('Arial Gras', 15)
+	else
+		slot.name:SetTitleTextColor(UIUtil.fontColor) -- Normal Color for Other
+		slot.name._text:SetFont('Arial Gras', 12)
+	end
 
     local playerName = playerInfo.PlayerName
     if wasConnected(playerInfo.OwnerID) or isLocallyOwned or not playerInfo.Human then
@@ -4875,36 +4902,61 @@ function AddChatText(text, playerID, scrollToBottom)
 
     local chatPlayerColor = Prefs.GetFromCurrentProfile('ChatPlayerColor')
     if chatPlayerColor == nil then
-      chatPlayerColor = true
+        chatPlayerColor = true
     end
 
     local scrolledToBottom = GUI.chatPanel:IsScrolledToBottom() or scrollToBottom
-    local nameColor = "AAAAAA" -- Displaying text in grey by default if the player is observer
     local textColor = "AAAAAA"
     local nameFont = "Arial Gras"
+
+    local nameStyle = {
+        fontFamily = "Arial Gras",
+        fontColor = "AAAAAA",
+    }
+
+    local rolePrefix = ""
+
+    local name = FindNameForID(playerID)
+    local playerInfo = nil
+
     for id, player in gameInfo.PlayerOptions:pairs() do
         if player.OwnerID == playerID and player.Human then
-            textColor = nil
-            nameColor = gameColors.PlayerColors[player.PlayerColor]
-            if not chatPlayerColor then
-              nameFont = UIUtil.bodyFont
+            playerInfo = player
+			textColor = nil
+
+
+            if playerInfo.GroupRole and groupDevColors[playerInfo.GroupRole] then
+                nameStyle.fontColor = groupDevColors[playerInfo.GroupRole]
+				local roleName = roleNames[playerInfo.GroupRole] or playerInfo.GroupRole
+                rolePrefix = string.format("%s] [", roleName)
+
+            elseif not chatPlayerColor then
+                nameStyle.fontFamily = UIUtil.bodyFont
                 if Prefs.GetOption('faction_font_color') then
-                    nameColor = import("/lua/skins/skins.lua").skins[ FACTION_NAMES[GetLocalPlayerData():AsTable().Faction] ].fontColor
-                    textColor = nameColor
-                else
-                    nameColor = nil
+                    nameStyle.fontColor = import("/lua/skins/skins.lua").skins[FACTION_NAMES[GetLocalPlayerData():AsTable().Faction]].fontColor
                 end
+            else
+                nameStyle.fontColor = gameColors.PlayerColors[player.PlayerColor]
             end
             break
         end
     end
-    local name = FindNameForID(playerID)
 
-    GUI.chatDisplay:PostMessage(text, name, {fontColor = textColor}, {fontColor = nameColor, fontFamily = nameFont})
+
+    local formattedName = ""
+	if rolePrefix ~= "" then
+		formattedName = rolePrefix .. name
+	else
+		formattedName = name
+	end
+
+
+    GUI.chatDisplay:PostMessage(text, formattedName, {fontColor = textColor}, nameStyle)
+
     if scrolledToBottom then
-       GUI.chatPanel:ScrollToBottom()
+        GUI.chatPanel:ScrollToBottom()
     else
-       GUI.newMessageArrow:Enable()
+        GUI.newMessageArrow:Enable()
     end
 end
 
