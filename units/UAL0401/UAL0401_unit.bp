@@ -226,7 +226,7 @@ UnitBlueprint{
             CollideFriendly = false,
             ContinuousBeam = true,
             Damage = 250,
-            DamageRadius = 0.5,
+            DamageRadius = 1.0,
             DamageType = "Normal",
             DisplayName = "Phason Laser",
             FireTargetLayerCapsTable = {
@@ -236,7 +236,7 @@ UnitBlueprint{
             },
             FiringTolerance = 0,
             Label = "EyeWeapon",
-            MaxRadius = 40,
+            MaxRadius = 44,
             MinRadius = 2,
             MuzzleChargeDelay = 0,
             MuzzleSalvoDelay = 0,
@@ -274,7 +274,7 @@ UnitBlueprint{
             TurretBoneYaw = "Head",
             TurretDualManipulators = false,
             TurretPitch = -20,
-            TurretPitchRange = 70,
+            TurretPitchRange = 90,
             TurretPitchSpeed = 60,
             TurretYaw = 0,
             TurretYawRange = 70,
@@ -307,7 +307,7 @@ UnitBlueprint{
             HeadingArcCenter = -35,
             HeadingArcRange = 40,
             Label = "RightArmTractor",
-            MaxRadius = 41,
+            MaxRadius = 45,
             MinRadius = 2,
             MuzzleChargeDelay = 0,
             MuzzleSalvoDelay = 0,
@@ -329,7 +329,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_IndirectFire",
-            RateOfFire = 10/5, --10/integer interval in ticks
+            RateOfFire = 10/10, --10/integer interval in ticks
             TargetCheckInterval = 0.2,
             TargetPriorities = {
                 "TECH3 MOBILE",
@@ -382,7 +382,7 @@ UnitBlueprint{
             HeadingArcCenter = 35,
             HeadingArcRange = 40,
             Label = "LeftArmTractor",
-            MaxRadius = 41,
+            MaxRadius = 45,
             MinRadius = 2,
             MuzzleChargeDelay = 0,
             MuzzleSalvoDelay = 0,
@@ -404,7 +404,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_IndirectFire",
-            RateOfFire = 10/5, --10/integer interval in ticks
+            RateOfFire = 10/10, --10/integer interval in ticks
             TargetCheckInterval = 0.2,
             TargetPriorities = {
                 "TECH3 MOBILE",
