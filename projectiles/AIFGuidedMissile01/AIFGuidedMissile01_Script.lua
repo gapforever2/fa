@@ -59,7 +59,7 @@ AIFGuidedMissile = ClassProjectile(AGuidedMissileProjectile) {
         local xVec, yVec, zVec = 0, vy, 0
         local target = self:GetCurrentTargetPosition()
         local tx, ty, tz = target[1], target[2], target[3]
-        local radius = 5
+        local radius = 1
 
         -- Launch projectiles at semi-random angles away from split location
         for i = 0, (numProjectiles - 1) do
@@ -99,11 +99,11 @@ AIFGuidedMissile = ClassProjectile(AGuidedMissileProjectile) {
         CreateLightParticleIntel(self, -1, army, 9, 8, 'glow_02', 'ramp_flare_02')
 
         -- create the impact effects
-        CreateEmitterAtEntity(self, army, '/effects/emitters/_Mercy_Circle_1.bp')
-        CreateEmitterAtEntity(self, army, '/effects/emitters/_Mercy_distort.bp')
-        CreateEmitterAtEntity(self, army, '/effects/emitters/_Mercy_Circle_2.bp')
-        CreateEmitterAtEntity(self, army, '/effects/emitters/_Mercy_Fog.bp'):SetEmitterParam('LIFETIME', 100)
-        CreateEmitterAtEntity(self, army, '/effects/emitters/_Mercy_sparkle_2.bp'):SetEmitterParam('LIFETIME', 100)
+        CreateEmitterAtEntity(self, army, '/effects/emitters/_Mercy_Circle_1.bp'):ScaleEmitter(0.5) 
+        CreateEmitterAtEntity(self, army, '/effects/emitters/_Mercy_distort.bp'):ScaleEmitter(0.5) 
+        CreateEmitterAtEntity(self, army, '/effects/emitters/_Mercy_Circle_2.bp'):ScaleEmitter(0.5) 
+        CreateEmitterAtEntity(self, army, '/effects/emitters/_Mercy_Fog.bp'):SetEmitterParam('LIFETIME', 100):ScaleEmitter(0.5)
+        CreateEmitterAtEntity(self, army, '/effects/emitters/_Mercy_sparkle_2.bp'):SetEmitterParam('LIFETIME', 100):ScaleEmitter(0.5)
         self:Destroy()
     end
 }

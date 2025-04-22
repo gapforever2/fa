@@ -1318,7 +1318,7 @@ WorldView = ClassUI(moho.UIWorldView, Control, WorldViewShapeComponent, WorldVie
         -- called when strat icons are turned on/off
     end,
 }
---Name Ping
+
 local armiesDetails = GetArmiesTable().armiesTable
 
 local orgDisplayPing = WorldView.DisplayPing 

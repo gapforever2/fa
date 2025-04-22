@@ -5,7 +5,6 @@
 --*
 --* Copyright © 2005 Gas Powered Games, Inc. All rights reserved.
 --*****************************************************************************
-local GameVersion = import("/lua/version.lua").GetVersion
 local UIUtil = import("/lua/ui/uiutil.lua")
 local MenuCommon = import("/lua/ui/menus/menucommon.lua")
 local Prefs = import("/lua/user/prefs.lua")
@@ -48,20 +47,20 @@ local aiTypes
 local AIKeys = {}
 local AIStrings = {}
 local AITooltips = {}
+
+-- GAF player roles
 local groupDevColors = {
     ["Mod"] = "ff0000",
     ["bal"] = "8000ff",
     ["admin"] = "00ffff",
     ["yt"] = "00ffbf",
-
 }
 local roleNames = {
     ["Mod"] = "Moderator",
-    ["bal"] = "BalanceTeam",
+    ["bal"] = "Balance Team",
     ["admin"] = "Administrator",
     ["yt"] = "YouTube",
 }
-
 
 function GetAITypes()
     AIKeys = {}
@@ -307,6 +306,17 @@ local slotMenuData = {
         },
         client = {
             'pm',
+        },
+    },
+    groupdev = {
+        host = {
+            'pm',
+            'remove_to_observer',
+            'remove_to_kik',
+            'move'
+        },
+        client = {
+            'pm'
         },
     },
     ai = {
@@ -1127,19 +1137,17 @@ function SetSlotInfo(slotNum, playerInfo)
     end
 
     -- These states are used to select the appropriate strings with GetSlotMenuTables.
-    local slotState
-     if not playerInfo.Human then
+	local slotState
+	if not playerInfo.Human then
 		slot.ratingText:Hide()
 		slotState = 'ai'
 	elseif groupDevColors[playerInfo.GroupRole] then
 		slotState = 'groupdev'
-	elseif not isLocallyOwned then
-		slotState = 'player'
 	else
-		slotState = nil
+		slotState = 'player'
 	end
 
-    slot.name:ClearItems()
+	slot.name:ClearItems()
 
     if slotState then
         slot.name:Enable()
@@ -1196,7 +1204,7 @@ function SetSlotInfo(slotNum, playerInfo)
 		slot.name:SetTitleTextColor("64d264") -- Green Color for Players
 		slot.name._text:SetFont('Arial Gras', 15)
 	elseif isLocallyOwned then
-		slot.name:SetTitleTextColor("ff0000") -- Blue Color for You
+		slot.name:SetTitleTextColor("6363d2") -- Blue Color for You
 		slot.name._text:SetFont('Arial Gras', 15)
 	else
 		slot.name:SetTitleTextColor(UIUtil.fontColor) -- Normal Color for Other
@@ -1350,7 +1358,7 @@ function IsColorFree(colorIndex, currentSlotNumber)
     for id, player in gameInfo.PlayerOptions:pairs() do
         if player.PlayerColor == colorIndex then
             if currentSlotNumber then
-                if player.StartSpot != currentSlotNumber then
+                if player.StartSpot ~= currentSlotNumber then
                     return false
                 end
             else
@@ -1417,7 +1425,6 @@ local function FixFactionIndexes()
         for i,v in allAvailableFactionsList do
             if v == playerFaction then
                 player.Faction = i
-                continue
             end
         end
     end
@@ -1447,19 +1454,20 @@ local function autobalance_bestworst(players, teams_arg)
             local team = t['team']
             local slots = t['slots']
             local slot = table.remove(slots, 1)
-            if not slot then continue end
-            local player
+            if slot then
+                local player
 
-            if best then
-                player = table.remove(players, 1)
-            else
-                player = table.remove(players)
+                if best then
+                    player = table.remove(players, 1)
+                else
+                    player = table.remove(players)
+                end
+
+                if not player then break end
+
+                teams[i]['sum'] = teams[i]['sum'] + player['rating']
+                table.insert(result, {player=player['pos'], rating=player['rating'], team=team, slot=slot})
             end
-
-            if not player then break end
-
-            teams[i]['sum'] = teams[i]['sum'] + player['rating']
-            table.insert(result, {player=player['pos'], rating=player['rating'], team=team, slot=slot})
         end
 
         best = not best
@@ -1487,24 +1495,25 @@ local function autobalance_avg(players, teams_arg)
             local team = t['team']
             local slots = t['slots']
             local slot = table.remove(slots, 1)
-            if not slot then continue end
-            local player
-            local player_key
+            if slot then
+                local player
+                local player_key
 
-            for j, p in players do
-                player_key = j
-                if first_team or t['sum'] + p['rating'] <= max_sum then
-                    break
+                for j, p in players do
+                    player_key = j
+                    if first_team or t['sum'] + p['rating'] <= max_sum then
+                        break
+                    end
                 end
+
+                player = table.remove(players, player_key)
+                if not player then break end
+
+                teams[i]['sum'] = teams[i]['sum'] + player['rating']
+                max_sum = math.max(max_sum, teams[i]['sum'])
+                table.insert(result, {player=player['pos'], rating=player['rating'], team=team, slot=slot})
+                first_team = false
             end
-
-            player = table.remove(players, player_key)
-            if not player then break end
-
-            teams[i]['sum'] = teams[i]['sum'] + player['rating']
-            max_sum = math.max(max_sum, teams[i]['sum'])
-            table.insert(result, {player=player['pos'], rating=player['rating'], team=team, slot=slot})
-            first_team = false
         end
 
         table.sort(teams, team_sort_by_sum)
@@ -1528,12 +1537,13 @@ local function autobalance_rr(players, teams)
     while not table.empty(players) do
         for i, pick in team_picks do
             local slot = table.remove(teams[pick.team], 1)
-            if not slot then continue end
-            local player = table.remove(players, 1)
-            if not player then break end
-            pick.sum = pick.sum + i
+            if slot then
+                local player = table.remove(players, 1)
+                if not player then break end
+                pick.sum = pick.sum + i
 
-            table.insert(result, {player=player.pos, rating=player.rating, team=pick.team, slot=slot})
+                table.insert(result, {player=player.pos, rating=player.rating, team=pick.team, slot=slot})
+            end
         end
 
         table.sort(team_picks, function(a, b) return a.sum > b.sum end)
@@ -1557,12 +1567,13 @@ local function autobalance_random(players, teams_arg)
         for _, t in teams do
             local team = t['team']
             local slot = table.remove(t['slots'], 1)
-            if not slot then continue end
-            local player = table.remove(players, 1)
+            if slot then
+                local player = table.remove(players, 1)
 
-            if not player then break end
+                if not player then break end
 
-            table.insert(result, {player=player['pos'], rating=player['rating'], team=team, slot=slot})
+                table.insert(result, {player=player['pos'], rating=player['rating'], team=team, slot=slot})
+            end
         end
     end
 
@@ -1712,7 +1723,6 @@ local function AssignRandomStartSpots()
             gameInfo.PlayerOptions[r.slot] = playerOptions
 
             -- Send team data to the server
-            local playerInfo = gameInfo.PlayerOptions[r.slot]
             HostUtils.SendPlayerSettingsToServer(r.slot)
         end
     end
@@ -1901,10 +1911,10 @@ end
 local function AssignAINames()
     local aiNames = import("/lua/ui/lobby/ainames.lua").ainames
     local nameSlotsTaken = {}
-    for index, faction in FactionData.Factions do
+    for index, _ in FactionData.Factions do
         nameSlotsTaken[index] = {}
     end
-    for index, player in gameInfo.PlayerOptions do
+    for _, player in gameInfo.PlayerOptions do
         if not player.Human then
             local playerFaction = player.Faction
             local factionNames = aiNames[FactionData.Factions[playerFaction].Key]
@@ -2032,33 +2042,31 @@ function UpdateAvailableSlots(numAvailStartSpots, scenario)
                 break
             end
         end
-        if not diff then
-            continue
-        end
+        if diff then
+            GUI.slots[i].faction:ChangeBitmapArray(factionBmps)
+            Tooltip.AddComboTooltip(GUI.slots[i].faction, factionTooltips)
 
-        GUI.slots[i].faction:ChangeBitmapArray(factionBmps)
-        Tooltip.AddComboTooltip(GUI.slots[i].faction, factionTooltips)
-
-        if gameInfo.PlayerOptions[i] then
-            local playerFactionIndex = table.getn(factionList)
-            for index,key in factionList do
-                if key == oldAvailableFactions[gameInfo.PlayerOptions[i].Faction] then
-                    playerFactionIndex = index
-                    break
-                end
-            end
-            if FindSlotForID(localPlayerID) == i then
-                local fact = factionList[playerFactionIndex]
-                for index,value in allAvailableFactionsList do
-                    if fact == value then
-                        GUI.factionSelector:SetSelected(index)
+            if gameInfo.PlayerOptions[i] then
+                local playerFactionIndex = table.getn(factionList)
+                for index,key in factionList do
+                    if key == oldAvailableFactions[gameInfo.PlayerOptions[i].Faction] then
+                        playerFactionIndex = index
                         break
                     end
                 end
-                UpdateFactionSelector()
-            else
-                GUI.slots[i].faction:SetItem(playerFactionIndex)
-                gameInfo.PlayerOptions[i].Faction = playerFactionIndex
+                if FindSlotForID(localPlayerID) == i then
+                    local fact = factionList[playerFactionIndex]
+                    for index,value in allAvailableFactionsList do
+                        if fact == value then
+                            GUI.factionSelector:SetSelected(index)
+                            break
+                        end
+                    end
+                    UpdateFactionSelector()
+                else
+                    GUI.slots[i].faction:SetItem(playerFactionIndex)
+                    gameInfo.PlayerOptions[i].Faction = playerFactionIndex
+                end
             end
         end
     end
@@ -2631,10 +2639,10 @@ local OptionUtils = {
     -- Set all game options to their default values.
     SetDefaults = function()
         local options = {}
-        for index, option in teamOpts do
+        for _, option in teamOpts do
             options[option.key] = option.values[option.default].key or option.values[option.default]
         end
-        for index, option in globalOpts do
+        for _, option in globalOpts do
             -- Exception to make AllowObservers work because the engine requires
             -- the keys to be bool. Custom options should use 'True' or 'False'
             if option.key == 'AllowObservers' then
@@ -2708,14 +2716,14 @@ end
 function ClientsMissingMap()
     local ret = nil
 
-    for index, player in gameInfo.PlayerOptions:pairs() do
+    for _, player in gameInfo.PlayerOptions:pairs() do
         if player.BadMap then
             if not ret then ret = {} end
             table.insert(ret, player.PlayerName)
         end
     end
 
-    for index, observer in gameInfo.Observers:pairs() do
+    for _, observer in gameInfo.Observers:pairs() do
         if observer.BadMap then
             if not ret then ret = {} end
             table.insert(ret, observer.PlayerName)
@@ -2726,11 +2734,11 @@ function ClientsMissingMap()
 end
 
 function ClearBadMapFlags()
-    for index, player in gameInfo.PlayerOptions:pairs() do
+    for _, player in gameInfo.PlayerOptions:pairs() do
         player.BadMap = false
     end
 
-    for index, observer in gameInfo.Observers:pairs() do
+    for _, observer in gameInfo.Observers:pairs() do
         observer.BadMap = false
     end
 end
@@ -2805,7 +2813,7 @@ function CreateSlotsUI(makeLabel)
         labelGroup:AddChild(makeLabel(LOC("<LOC lobui_0218>Ready"), 14))
     end
 
-    for i= 1, LobbyComm.maxPlayerSlots do
+    for i = 1, LobbyComm.maxPlayerSlots do
         -- Capture the index in the current closure so it's accessible on callbacks
         local curRow = i
 
@@ -4197,13 +4205,13 @@ function CreateUI(maxPlayers)
             -- players on either team does not equal the team size.
             -- When teams are not set manually, they are not set properly if the number
             -- of slots on either team is less than the team size.
-            if (manualTeams and (numPlayersTeam1 != teamSize or numPlayersTeam2 != teamSize))
+            if (manualTeams and (numPlayersTeam1 ~= teamSize or numPlayersTeam2 ~= teamSize))
              or (not manualTeams and (table.getn(sortedTeam1Slots) < teamSize or table.getn(sortedTeam2Slots) < teamSize)) then
                 -- set AutoTeams to none (so, they can be set by slot by this function)
                 gameInfo.GameOptions.AutoTeams = 'none'
                 local counter = 0
-                for i, player in gameInfo.PlayerOptions:pairs() do
-                    for i2, slotTeam in sortedSlotTeams do
+                for _, player in gameInfo.PlayerOptions:pairs() do
+                    for _, slotTeam in sortedSlotTeams do
                         if player.StartSpot == slotTeam[1] then
                             counter = counter + 1
                             -- set the player's team
@@ -4416,7 +4424,7 @@ function CreateUI(maxPlayers)
             -- determine the number of teams (excluding the no team (-) option that equals 1 on the backend)
             local teams = {}
             local numTeams = 0
-            for i, player in gameInfo.PlayerOptions:pairs() do
+            for _, player in gameInfo.PlayerOptions:pairs() do
                 if not teams[player.Team] and player.Team ~= 1 then
                     teams[player.Team] = true
                     numTeams = numTeams + 1
@@ -4882,9 +4890,10 @@ function EveryoneHasEstablishedConnections(check_observers)
             for k2, other in important do
                 if id ~= other and not table.find(peer.establishedPeers, other) then
                     result = false
-                    AddChatText(LOCF("<LOC lobui_0299>%s doesn't have an established connection to %s",
-                                     peer.name,
-                                     lobbyComm:GetPeer(other).name
+                    AddChatText(LOCF(
+                        "<LOC lobui_0299>%s doesn't have an established connection to %s",
+                        peer.name,
+                        lobbyComm:GetPeer(other).name
                     ))
                 end
             end
@@ -7477,36 +7486,10 @@ function InitHostUtils()
         end,
 
         KickObservers = function(reason)
-    if not lobbyComm:IsHost() then
-        LOG("KickObservers: Not host, exiting.")
-        return
-    end
-
-    local localID = lobbyComm:GetLocalPlayerID()
-    local newObservers = WatchedValueArray(LobbyComm.maxPlayerSlots)
-
-    LOG("KickObservers: Starting observer kick process.")
-
-    for k, observer in gameInfo.Observers:pairs() do
-        LOG("KickObservers: Checking observer with OwnerID = " .. tostring(observer.OwnerID))
-
-        if observer.OwnerID == localID then
-            LOG("KickObservers: Found self (host), preserving in observer list.")
-            newObservers[k] = observer
-        else
-            LOG("KickObservers: Kicking observer with OwnerID = " .. tostring(observer.OwnerID))
-            lobbyComm:EjectPeer(observer.OwnerID, reason or "KickedByHost")
+            for k,observer in gameInfo.Observers:pairs() do
+                lobbyComm:EjectPeer(observer.OwnerID, reason or "KickedByHost")
+            end
+            gameInfo.Observers = WatchedValueArray(LobbyComm.maxPlayerSlots)
         end
-    end
-
-    gameInfo.Observers = newObservers
-    LOG("KickObservers: Observer list updated.")
-    LOG("KickObservers: Final observer list:")
-    for _, obs in newObservers:pairs() do
-        LOG(" - Observer ID: " .. tostring(obs.OwnerID))
-    end
-
-    refreshObserverList()
-end
     }
 end
