@@ -1433,7 +1433,7 @@ WorldView = ClassUI(moho.UIWorldView, Control) {
 
     --#endregion
 }
---Name Ping
+
 local armiesDetails = GetArmiesTable().armiesTable
 
 local orgDisplayPing = WorldView.DisplayPing 

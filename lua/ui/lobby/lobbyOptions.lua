@@ -380,7 +380,7 @@ globalOpts = {
         mponly = true,
         values = {
             {
-                text = "Tournament",
+                text = "Fast",
                 help = "The eject delay is set to 10 seconds and after 90 seconds the player is ejected automatically.",
                 key = '10',
             },
@@ -393,6 +393,21 @@ globalOpts = {
                 text = "Regular",
                 help = "The eject delay is set to 90 seconds and after 180 seconds the player is ejected automatically.",
                 key = '90',
+            },
+			{
+                text = "MiniKukold",
+                help = "The eject delay is set to 200 seconds and after 600 seconds the player is ejected automatically.",
+                key = '200',
+            },
+			{
+                text = "NormalKukold",
+                help = "The eject delay is set to 350 seconds and after 1050 seconds the player is ejected automatically.",
+                key = '350',
+            },
+			{
+                text = "HardKukold",
+                help = "The eject delay is set to 600 seconds and after 1800 seconds the player is ejected automatically.",
+                key = '600',
             },
         },
     },

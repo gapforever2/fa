@@ -60,7 +60,7 @@ local groupDevColors = {
 }
 local roleNames = {
     ["Mod"] = "Moderator",
-    ["bal"] = "BalanceTeam",
+    ["bal"] = "Balance Team",
     ["admin"] = "Administrator",
     ["yt"] = "YouTube",
 }
@@ -325,18 +325,18 @@ local slotMenuData = {
             'pm',
         },
     },
-	--groupdev = { cucoldius ne chelovek
-        --host = {
-            --'pm',
-            --'remove_to_observer',
-            --'remove_to_kik',
-            --'move'
-        --},
-       -- client = {
-         --'pm'
+	groupdev = {
+        host = {
+            'pm',
+            'remove_to_observer',
+            'remove_to_kik',
+            'move'
+        },
+        client = {
+         'pm'
             
-        --},
-    --},
+        },
+    },
     ai = {
         host = {
             'remove_to_kik',
@@ -1105,19 +1105,19 @@ function SetSlotInfo(slotNum, playerInfo)
     end
 
     -- These states are used to select the appropriate strings with GetSlotMenuTables.
-    local slotState
-     if not playerInfo.Human then
+	local slotState
+	if not playerInfo.Human then
 		slot.ratingText:Hide()
 		slotState = 'ai'
+	elseif isLocallyOwned then
+		slotState = nil
 	elseif groupDevColors[playerInfo.GroupRole] then 
 		slotState = 'groupdev'
-	elseif not isLocallyOwned then
-		slotState = 'player'
 	else
-		slotState = nil
+		slotState = 'player'
 	end
 
-    slot.name:ClearItems()
+	slot.name:ClearItems()
 
     if slotState then
         slot.name:Enable()
@@ -1174,7 +1174,7 @@ function SetSlotInfo(slotNum, playerInfo)
 		slot.name:SetTitleTextColor("64d264") -- Green Color for Players
 		slot.name._text:SetFont('Arial Gras', 15)
 	elseif isLocallyOwned then
-		slot.name:SetTitleTextColor("ff0000") -- Blue Color for You
+		slot.name:SetTitleTextColor("6363d2") -- Blue Color for You
 		slot.name._text:SetFont('Arial Gras', 15)
 	else
 		slot.name:SetTitleTextColor(UIUtil.fontColor) -- Normal Color for Other
@@ -7753,36 +7753,10 @@ function InitHostUtils()
         end,
 
         KickObservers = function(reason)
-    if not lobbyComm:IsHost() then
-        LOG("KickObservers: Not host, exiting.")
-        return
-    end
-
-    local localID = lobbyComm:GetLocalPlayerID()
-    local newObservers = WatchedValueArray(LobbyComm.maxPlayerSlots)
-
-    LOG("KickObservers: Starting observer kick process.")
-
-    for k, observer in gameInfo.Observers:pairs() do
-        LOG("KickObservers: Checking observer with OwnerID = " .. tostring(observer.OwnerID))
-
-        if observer.OwnerID == localID then
-            LOG("KickObservers: Found self (host), preserving in observer list.")
-            newObservers[k] = observer
-        else
-            LOG("KickObservers: Kicking observer with OwnerID = " .. tostring(observer.OwnerID))
-            lobbyComm:EjectPeer(observer.OwnerID, reason or "KickedByHost")
+            for k,observer in gameInfo.Observers:pairs() do
+                lobbyComm:EjectPeer(observer.OwnerID, reason or "KickedByHost")
+            end
+            gameInfo.Observers = WatchedValueArray(LobbyComm.maxPlayerSlots)
         end
-    end
-
-    gameInfo.Observers = newObservers
-    LOG("KickObservers: Observer list updated.")
-    LOG("KickObservers: Final observer list:")
-    for _, obs in newObservers:pairs() do
-        LOG(" - Observer ID: " .. tostring(obs.OwnerID))
-    end
-
-    refreshObserverList()
-end
     }
 end
