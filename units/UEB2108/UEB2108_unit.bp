@@ -163,7 +163,7 @@ UnitBlueprint{
             },
             RackFireTogether = false,
             RackRecoilDistance = 0,
-            RackReloadTimeout = 10,
+            RackReloadTimeout = 1,
             RackSalvoChargeTime = 0,
             RackSalvoReloadTime = 0,
             RackSalvoSize = 1,
@@ -183,7 +183,7 @@ UnitBlueprint{
             WeaponCategory = "Missile",
             WeaponRepackTimeout = 3,
             WeaponUnpackAnimation = "/units/ueb2108/ueb2108_aopen.sca",
-            WeaponUnpackAnimationRate = 2,
+            WeaponUnpackAnimationRate = 5,
             WeaponUnpacks = true,
         },
         {
