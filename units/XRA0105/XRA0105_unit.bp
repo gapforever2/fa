@@ -18,7 +18,7 @@ UnitBlueprint{
         KTurn = 0.8,
         KTurnDamping = 1.5,
         LiftFactor = 7,
-        MaxAirspeed = 10,
+        MaxAirspeed = 11.3,
         MinAirspeed = 3,
         StartTurnDistance = 5,
         Winged = false,
@@ -55,8 +55,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Light",
-        Health = 350,
-        MaxHealth = 350,
+        Health = 165,
+        MaxHealth = 165,
         SurfaceThreatLevel = 5,
     },
     Display = {
@@ -121,9 +121,9 @@ UnitBlueprint{
         UniformScale = 0.04,
     },
     Economy = {
-        BuildCostEnergy = 4250,
-        BuildCostMass = 170,
-        BuildTime = 850,
+        BuildCostEnergy = 1840,
+        BuildCostMass = 64,
+        BuildTime = 340,
     },
     Footprint = {
         MaxSlope = 0.25,
@@ -186,7 +186,7 @@ UnitBlueprint{
             AutoInitiateAttackCommand = true,
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
-            Damage = 15,
+            Damage = 6,
             DamageRadius = 0,
             DamageType = "Normal",
             DisplayName = "Heavy Laser Autogun",
@@ -200,7 +200,7 @@ UnitBlueprint{
             MaxRadius = 20,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 1,
-            MuzzleVelocity = 35,
+            MuzzleVelocity = 45,
             ProjectileId = "/projectiles/CDFLaserHeavy03/CDFLaserHeavy03_proj.bp",
             ProjectileLifetimeUsesMultiplier = 1.15,
             ProjectilesPerOnFire = 1,
@@ -218,7 +218,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_DirectFire",
-            RateOfFire = 10/3, --10/integer interval in ticks
+            RateOfFire = 10/2, --10/integer interval in ticks
             TargetPriorities = {
                 "ANTIAIR",
                 "GROUNDATTACK",

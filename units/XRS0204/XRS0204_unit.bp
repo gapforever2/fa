@@ -1,12 +1,6 @@
 UnitBlueprint{
     Description = "<LOC xrs0204_desc>Submarine Killer",
-    AI = {
-        GuardReturnRadius = 30,
-        TargetBones = {
-            "Flare_Muzzle01",
-            "XRS0204",
-        },
-    },
+    AI = { GuardReturnRadius = 30 },
     Audio = {
         AmbientMove    = Sound { Bank = 'XRS',        Cue = 'XRS0204_Move_Loop',     LodCutoff = 'UnitMove_LodCutoff' },
         AmbientMoveSub = Sound { Bank = 'XRS',        Cue = 'XRS0204_Move_Loop_UW',  LodCutoff = 'UnitMove_LodCutoff' },
@@ -202,9 +196,9 @@ UnitBlueprint{
     SelectionSizeX = 0.6,
     SelectionSizeZ = 1.8,
     SelectionThickness = 0.37,
-    CollisionOffsetY = -0.4,
+    CollisionOffsetY = -0.25,
     SizeX = 0.7,
-    SizeY = 0.85,
+    SizeY = 0.7,
     SizeZ = 3,
     StrategicIconName = "icon_sub2_antinavy",
     StrategicIconSortPriority = 165,
@@ -226,7 +220,7 @@ UnitBlueprint{
             DamageType = "Normal",
             DisplayName = "Nanite Torpedo",
             DoTPulses = 5,
-            DoTTime = 0.4,
+            DoTTime = 0.5,
             FireTargetLayerCapsTable = {
                 Sub = "Seabed|Sub|Water",
                 Water = "Seabed|Sub|Water",
@@ -284,8 +278,8 @@ UnitBlueprint{
             Damage = 2,
             DamageType = "Normal",
             DepthCharge = {
-                ProjectilesToDeflect = 3,
-                Radius = 5,
+                ProjectilesToDeflect = 2,
+                Radius = 10,
             },
             DisableWhileReloading = true,
             DisplayName = "Anti-Torpedo Flare",
@@ -295,10 +289,9 @@ UnitBlueprint{
             },
             FiringTolerance = 2,
             Label = "AntiTorpedo01",
-            MaxRadius = 25,
-            MinRadius = 5,
+            MaxRadius = 20,
             MuzzleSalvoDelay = 0,
-            MuzzleSalvoSize = 1,
+            MuzzleSalvoSize = 2,
             MuzzleVelocity = 5,
             ProjectileId = "/projectiles/CIMAntiTorpedo01/CIMAntiTorpedo01_proj.bp",
             ProjectileLifetime = 6,
@@ -319,7 +312,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_Countermeasure",
-            RateOfFire = 10/200, --10/integer interval in ticks
+            RateOfFire = 10/100, --10/integer interval in ticks
             TargetRestrictDisallow = "UNTARGETABLE",
             TargetRestrictOnlyAllow = "TORPEDO",
             TargetType = "RULEWTT_Projectile",

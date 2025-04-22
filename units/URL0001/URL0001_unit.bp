@@ -424,7 +424,7 @@ UnitBlueprint{
             ProductionPerSecondEnergy = 2700,
             ProductionPerSecondMass = 12,
             ShowBones = { "Back_Upgrade" },
-            Slot = "Back",
+            Slot = "RCH",
             UpgradeEffectBones = {
                 "Right_Arm_B01",
                 "Left_Arm_B01",
@@ -444,7 +444,7 @@ UnitBlueprint{
                 "ResourceAllocation",
                 "ResourceAllocationRemove",
             },
-            Slot = "Back",
+            Slot = "RCH",
         },
         Slots = {
             Back = {
@@ -959,8 +959,8 @@ UnitBlueprint{
             BeamLifetime = 0,
             CollideFriendly = false,
             ContinuousBeam = true,
-            Damage = 300,
-            DamageRadius = 0.5,
+            Damage = 400,
+            DamageRadius = 1,
             DamageType = "Normal",
             DisplayName = "Heavy Microwave Laser",
             EnabledByEnhancement = "MicrowaveLaserGenerator",
