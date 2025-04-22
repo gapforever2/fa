@@ -497,7 +497,20 @@ local function OnGuardIssued(command)
 			OnGuardIssued.lastCalled = GetSystemTimeSeconds()
 			ForkThread(function()
             WaitSeconds(0.1)
-            SimCallback({ Func = 'AbortNavigation', Args = {} }, true)
+			local unit = GetUnitById(command.Target.EntityId) ---@cast unit UserUnit
+            local guards = command.Units
+            if unit and guards then
+                for _, guard in ipairs(guards) do
+                    if guard then
+                        local distance = VDist3(unit:GetPosition(), guard:GetPosition())
+                        local engineerRange = 17 
+                        if distance <= engineerRange then
+                            SimCallback({ Func = 'AbortNavigation', Args = {} }, true)
+                            break 
+                        end
+                    end
+                end
+            end
 			end)
 		end	
 	end 

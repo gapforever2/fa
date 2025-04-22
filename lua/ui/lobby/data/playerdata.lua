@@ -54,7 +54,7 @@ local DEFAULT_MAPPING = {
     Avatar = false,
     TooltipAvatar = false,
     Country = false,
-    GroupRole = false,
+	GroupRole = false,
 }
 
 -- Represents player data using the magic of lazy variables.
