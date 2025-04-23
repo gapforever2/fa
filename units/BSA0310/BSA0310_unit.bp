@@ -113,7 +113,7 @@ UnitBlueprint {
         SubThreatLevel = 0,
         SurfaceThreatLevel = 23,
     },
-    Description = '<LOC BSA0310_desc>Torpedo Gunship',
+    Description = '<LOC bsa0310_desc>Torpedo Gunship',
     Display = {
     	Abilities = {
 			"<LOC ability_sonar>Sonar",
@@ -199,7 +199,7 @@ UnitBlueprint {
         FactionName = 'Seraphim',
         Icon = 'air',
         TechLevel = 'RULEUTL_Advanced',
-        UnitName = '<LOC BSA0310_name>Vulthatha-Ioz',
+        UnitName = '<LOC bsa0310_name>Qozihath',
         UnitWeight = 1,
     },
     Intel = {
@@ -208,7 +208,7 @@ UnitBlueprint {
 	   WaterVisionRadius = 37,
     },
     Interface = {
-        HelpText = '<LOC BSA0310_help>Missile Gunship',
+        HelpText = '<LOC bsa0310_help>Torpedo Gunship',
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.6,
