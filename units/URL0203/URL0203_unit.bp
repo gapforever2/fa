@@ -128,7 +128,7 @@ UnitBlueprint{
         RotateOnSpotThreshold = 0.1,
         TurnRadius = 0,
         TurnRate = 90,
-        WaterSpeedMultiplier = 0.9,
+        WaterSpeedMultiplier = 1.2,
     },
     SelectionSizeX = 0.55,
     SelectionSizeZ = 0.6,
@@ -155,7 +155,7 @@ UnitBlueprint{
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
             Damage = 200,
-            DamageRadius = 0,
+            DamageRadius = 1.4,
             DamageType = "Normal",
             DisplayName = "Meson Rocket",
             FireTargetLayerCapsTable = {
