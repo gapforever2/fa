@@ -920,7 +920,7 @@ options = {
                 title = "Имба ассист",
                 key = 'auto_abort_navigation',
                 type = 'toggle',
-                default = true,
+                default = false,
                 custom = {
                     states = {
                         { text = "<LOC _On>", key = true },
