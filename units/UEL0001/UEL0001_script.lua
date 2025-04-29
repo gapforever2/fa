@@ -364,6 +364,16 @@ UEL0001 = ClassUnit(ACUUnit) {
             self:SetMaintenanceConsumptionInactive()
             RemoveUnitEnhancement(self, 'ShieldRemove')
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
+        elseif enh == 'Regen' then
+            self:AddToggleCap('RULEUTC_ShieldToggle')
+            self:CreateShield(bp)
+            self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
+            self:SetMaintenanceConsumptionActive()
+        elseif enh == 'RegenRemove' then
+            self:DestroyShield()
+            self:SetMaintenanceConsumptionInactive()
+            RemoveUnitEnhancement(self, 'Shield1Remove')
+            self:RemoveToggleCap('RULEUTC_ShieldToggle')
         elseif enh == 'ShieldGeneratorField' then
             self:AddToggleCap('RULEUTC_ShieldToggle')
             self:DestroyShield()
@@ -493,6 +503,26 @@ UEL0001 = ClassUnit(ACUUnit) {
             wep:AddDamageMod(-bp.ZephyrDamageMod)
             local bpDisrupt = self:GetBlueprint().Weapon[1].MaxRadius
             wep:ChangeMaxRadius(bpDisrupt or 22)
+            local oc = self:GetWeaponByLabel('OverCharge')
+            oc:ChangeMaxRadius(bpDisrupt or 22)
+            local aoc = self:GetWeaponByLabel('AutoOverCharge')
+            aoc:ChangeMaxRadius(bpDisrupt or 22)
+        elseif enh == 'HeavyAntiMatterDeeKey' then
+            local wep = self:GetWeaponByLabel('RightZephyr')
+            wep:AddDamageRadiusMod(bp.NewDamageRadius or 1)
+            wep:AddDamageMod(bp.AdditionalDamage)
+            wep:ChangeRateOfFire(bp.NewRateOfFire or 1.5)
+        elseif enh == 'HeavyAntiMatterDeeKeyRemove' then
+            local bp = self:GetBlueprint().Enhancements['HeavyAntiMatterDeeKey']
+            if not bp then return end
+            local wep = self:GetWeaponByLabel('RightZephyr')
+            wep:AddDamageRadiusMod(-bp.NewDamageRadius or 1)
+            wep:ChangeRateOfFire(bp.RateOfFire or 1)
+            wep:AddDamageMod(-200)
+            local bpDisrupt = self:GetBlueprint().Weapon[1].MaxRadius
+            wep:ChangeMaxRadius(bpDisrupt or 22)
+            local bpDisruptRateOfFire = self:GetBlueprint().Weapon[1].RateOfFire
+            wep:ChangeRateOfFire(bpDisruptRateOfFire or 1)
             local oc = self:GetWeaponByLabel('OverCharge')
             oc:ChangeMaxRadius(bpDisrupt or 22)
             local aoc = self:GetWeaponByLabel('AutoOverCharge')
