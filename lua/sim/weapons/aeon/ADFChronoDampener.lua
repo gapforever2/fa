@@ -25,13 +25,14 @@ local DefaultProjectileWeapon = import("/lua/sim/defaultweapons.lua").DefaultPro
 
 local EffectTemplate = import("/lua/effecttemplates.lua")
 local utilities = import('/lua/utilities.lua')
+local Buff = import("/lua/sim/buff.lua")
 
 ---@class ADFChronoDampener : DefaultProjectileWeapon
 ADFChronoDampener = Class(DefaultProjectileWeapon) {
     FxMuzzleFlash = EffectTemplate.AChronoDampenerLarge,
     FxMuzzleFlashScale = 0.5,
-    FxUnitMoveMult = EffectTemplate.Aeon_HeavyDisruptorCannonMuzzleCharge,
-    FxUnitMoveMultFlash = EffectTemplate.Aeon_HeavyDisruptorCannonUnitHit,
+    FxUnitStun = EffectTemplate.Aeon_HeavyDisruptorCannonMuzzleCharge,
+    FxUnitStunFlash = EffectTemplate.Aeon_HeavyDisruptorCannonUnitHit,
 
     ---@param self ADFChronoDampener
     OnCreate = function(self)
@@ -40,7 +41,7 @@ ADFChronoDampener = Class(DefaultProjectileWeapon) {
         self.OriginalFxMuzzleFlashScale = self.FxMuzzleFlashScale
 
         local buff = self.Blueprint.Buffs[1]
-        self.CategoriesToMoveMult = ParseEntityCategory(buff.TargetAllow) - ParseEntityCategory(buff.TargetDisallow)
+        self.CategoriesToStun = ParseEntityCategory(buff.TargetAllow) - ParseEntityCategory(buff.TargetDisallow)
     end,
 
     ---@param self ADFChronoDampener
@@ -52,22 +53,22 @@ ADFChronoDampener = Class(DefaultProjectileWeapon) {
             self:PlaySound(bp.Audio.Fire)
         end
 
-        self.Trash:Add(ForkThread(self.ExpandingMoveMultThread, self))
+        self.Trash:Add(ForkThread(self.ExpandingStunThread, self))
     end,
 
     --- Thread to avoid waiting in the firing cycle and stalling the main cannon.
     ---@param self ADFChronoDampener
-    ExpandingMoveMultThread = function(self)
+    ExpandingStunThread = function(self)
         -- extract information from the buff blueprint
         local bp = self.Blueprint
         local reloadTimeTicks = MATH_IRound(10/bp.RateOfFire)
         local buff = bp.Buffs[1]
-        local MoveMultDuration = buff.Duration
+        local stunDuration = buff.Duration
         local radius = self:GetMaxRadius()
         local slices = 10
         local sliceSize = radius / slices
-        local sliceTime = MoveMultDuration * 10 / slices + 1
-        local initialMoveMultFxAppliedUnits = {}
+        local sliceTime = stunDuration * 10 / slices + 1
+        local initialStunFxAppliedUnits = {}
         local fireTick = GetGameTick()
 
         for i = 1, slices do
@@ -77,17 +78,17 @@ ADFChronoDampener = Class(DefaultProjectileWeapon) {
                 self,
                 self.unit:GetPosition(),
                 radius,
-                self.CategoriesToMoveMult
+                self.CategoriesToStun
             )
-            local fxUnitMoveMultFlashScale = (0.5 + (slices-i) / (slices-1) * 1.5)
+            local fxUnitStunFlashScale = (0.5 + (slices-i) / (slices-1) * 1.5)
             local currentTick = GetGameTick()
 
             for k, target in targets do
 
-                -- add MoveMult effect only on targets our Chrono Dampener MoveMultned
-                if initialMoveMultFxAppliedUnits[target] then
+                -- add stun effect only on targets our Chrono Dampener stunned
+                if initialStunFxAppliedUnits[target] then
                     local count = target:GetBoneCount()
-                    for k, effect in self.FxUnitMoveMult do
+                    for k, effect in self.FxUnitStun do
                         local emit = CreateEmitterAtBone(
                             target, Random(0, count - 1), target.Army, effect
                         )
@@ -103,29 +104,47 @@ ADFChronoDampener = Class(DefaultProjectileWeapon) {
                     end
                 end
 
-                -- prevent multiple Chrono Dampeners from MoveMultlocking units with desynchronized firings
+                -- prevent multiple Chrono Dampeners from stunlocking units with desynchronized firings
                 if target.chronoProtectionTick > currentTick then
                     continue
                 end
 
-                -- add MoveMult
+				if not Buffs['ChronoDampenerAura'] then
+					BuffBlueprint {
+						Name = 'ChronoDampenerAura',
+						DisplayName = 'ChronoDampenerAura',
+						BuffType = 'UniqueBuffType',
+						Stacks = 'REPLACE',
+						Duration = 3,
+						Affects = {
+							MoveMult = {
+								Mult = 0.4,
+							},
+							RateOfFire = {
+								Mult = 4,
+							},
+						},
+					}
+				end
+
+				
+
+                -- add stun
                 if not target:BeenDestroyed() then
-                    if buff.BuffType == 'MoveMult' then
-                        target:SetMoveMultned(MoveMultDuration * (slices - i + 1) / slices + 0.1)
-                        target.chronoProtectionTick = fireTick + reloadTimeTicks
-                    end
+                    Buff.ApplyBuff(target, 'ChronoDampenerAura')
+                    target.chronoProtectionTick = fireTick + reloadTimeTicks
                 end
 
                 -- add initial flash effect
-                for k, effect in self.FxUnitMoveMultFlash do
+                for k, effect in self.FxUnitStunFlash do
                     local emit = CreateEmitterOnEntity(target, target.Army, effect)
-                    emit:ScaleEmitter(fxUnitMoveMultFlashScale * math.max(target.Blueprint.SizeX, target.Blueprint.SizeZ))
+                    emit:ScaleEmitter(fxUnitStunFlashScale * math.max(target.Blueprint.SizeX, target.Blueprint.SizeZ))
                 end
-                initialMoveMultFxAppliedUnits[target] = true
+                initialStunFxAppliedUnits[target] = true
 
-                -- add initial MoveMult effect on target
+                -- add initial stun effect on target
                 local count = target:GetBoneCount()
-                for k, effect in self.FxUnitMoveMult do
+                for k, effect in self.FxUnitStun do
                     local emit = CreateEmitterAtBone(
                         target, Random(0, count - 1), target.Army, effect
                     )
