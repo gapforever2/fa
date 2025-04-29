@@ -26,6 +26,7 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "TANK",
+        "STEALTH",
         "TECH2",
         "VISIBLETORECON",
     },
@@ -39,6 +40,7 @@ UnitBlueprint{
     Display = {
         Abilities = {
             "<LOC ability_torpedo>Torpedoes",
+            "<LOC ability_personalsonarstealth>Personal Sonar Stealth",
             "<LOC ability_amphibious>Amphibious",
         },
         Mesh = {
@@ -108,7 +110,8 @@ UnitBlueprint{
         UnitName = "<LOC url0203_name>Wagner",
     },
     Intel = {
-        VisionRadius = 20,
+        SonarStealth = true,
+        VisionRadius = 22,
         WaterVisionRadius = 20,
     },
     LifeBarHeight = 0.075,
@@ -128,7 +131,7 @@ UnitBlueprint{
         RotateOnSpotThreshold = 0.1,
         TurnRadius = 0,
         TurnRate = 90,
-        WaterSpeedMultiplier = 1.2,
+        WaterSpeedMultiplier = 1.25,
     },
     SelectionSizeX = 0.55,
     SelectionSizeZ = 0.6,
