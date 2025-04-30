@@ -324,7 +324,7 @@ UnitBlueprint{
             Icon = "ecba",
             Name = "<LOC enhancements_0148_faf>Advanced Quantum Disruptor",
             NewMaxRadius = 35,
-			Prerequisite = "HeatSink",
+            Prerequisite = "HeatSink",
             ShowBones = { "Left_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {

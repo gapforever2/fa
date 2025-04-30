@@ -109,25 +109,23 @@ ADFChronoDampener = Class(DefaultProjectileWeapon) {
                     continue
                 end
 
-				if not Buffs['ChronoDampenerAura'] then
-					BuffBlueprint {
-						Name = 'ChronoDampenerAura',
-						DisplayName = 'ChronoDampenerAura',
-						BuffType = 'UniqueBuffType',
-						Stacks = 'REPLACE',
-						Duration = 3,
-						Affects = {
-							MoveMult = {
-								Mult = 0.4,
-							},
-							RateOfFire = {
-								Mult = 4,
-							},
-						},
-					}
-				end
-
-				
+                if not Buffs['ChronoDampenerAura'] then
+                    BuffBlueprint {
+                        Name = 'ChronoDampenerAura',
+                        DisplayName = 'ChronoDampenerAura',
+                        BuffType = 'UniqueBuffType',
+                        Stacks = 'REPLACE',
+                        Duration = 3,
+                        Affects = {
+                            MoveMult = {
+                                Mult = 0.4,
+                            },
+                            RateOfFire = {
+                                Mult = 4,
+                            },
+                        },
+                    }
+                end
 
                 -- add stun
                 if not target:BeenDestroyed() then
