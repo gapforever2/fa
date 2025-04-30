@@ -5,8 +5,8 @@ last_version = 7
 gamePatches = {
     {
         version = 7,
-        name = "GAF Balance",
-        hasPrettyGithubRelease = true,
+        name = "Aeonigma",
+        patchnoteUrl = "balances/7.html",
         description = {
             "# Баланс-патч 7 (30 апреля 2025)",
             "",

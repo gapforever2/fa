@@ -1,4 +1,4 @@
- --*****************************************************************************
+--*****************************************************************************
 --* File: lua/modules/ui/uiutil.lua
 --* Author: Chris Blackwell
 --* Summary: Various utility functions to make UI scripts easier and more consistent
@@ -31,39 +31,39 @@ local Layouter = LayoutHelpers.LayoutFor
 
 
 --* Handy global variables to assist skinning
-buttonFont = LazyVar.Create()            -- default font used for button faces
-factionFont = LazyVar.Create()      -- default font used for dialog button faces
-dialogButtonFont = LazyVar.Create()      -- default font used for dialog button faces
-bodyFont = LazyVar.Create()              -- font used for all other text
-fixedFont = LazyVar.Create()             -- font used for fixed width characters
-titleFont = LazyVar.Create()             -- font used for titles and labels
-fontColor = LazyVar.Create()             -- common font color
-fontOverColor = LazyVar.Create()             -- common font color
-fontDownColor = LazyVar.Create()             -- common font color
-tooltipTitleColor = LazyVar.Create()             -- common font color
-tooltipBorderColor = LazyVar.Create()             -- common font color
-bodyColor = LazyVar.Create()             -- common color for dialog body text
-dialogCaptionColor = LazyVar.Create()    -- common color for dialog titles
-dialogColumnColor = LazyVar.Create()     -- common color for column headers in a dialog
-dialogButtonColor = LazyVar.Create()     -- common color for buttons in a dialog
-highlightColor = LazyVar.Create()        -- text highlight color
-disabledColor = LazyVar.Create()         -- text disabled color
-panelColor = LazyVar.Create()            -- default color when drawing a panel
+buttonFont = LazyVar.Create() -- default font used for button faces
+factionFont = LazyVar.Create() -- default font used for dialog button faces
+dialogButtonFont = LazyVar.Create() -- default font used for dialog button faces
+bodyFont = LazyVar.Create() -- font used for all other text
+fixedFont = LazyVar.Create() -- font used for fixed width characters
+titleFont = LazyVar.Create() -- font used for titles and labels
+fontColor = LazyVar.Create() -- common font color
+fontOverColor = LazyVar.Create() -- common font color
+fontDownColor = LazyVar.Create() -- common font color
+tooltipTitleColor = LazyVar.Create() -- common font color
+tooltipBorderColor = LazyVar.Create() -- common font color
+bodyColor = LazyVar.Create() -- common color for dialog body text
+dialogCaptionColor = LazyVar.Create() -- common color for dialog titles
+dialogColumnColor = LazyVar.Create() -- common color for column headers in a dialog
+dialogButtonColor = LazyVar.Create() -- common color for buttons in a dialog
+highlightColor = LazyVar.Create() -- text highlight color
+disabledColor = LazyVar.Create() -- text disabled color
+panelColor = LazyVar.Create() -- default color when drawing a panel
 transparentPanelColor = LazyVar.Create() -- default color when drawing a transparent panel
-consoleBGColor = LazyVar.Create()        -- console background color
-consoleFGColor = LazyVar.Create()        -- console foreground color (text)
-consoleTextBGColor = LazyVar.Create()    -- console text background color
-menuFontSize = LazyVar.Create()          -- font size used on main in game escape menu
-factionTextColor = LazyVar.Create()      -- faction color for text foreground
-factionBackColor = LazyVar.Create()      -- faction color for text background
+consoleBGColor = LazyVar.Create() -- console background color
+consoleFGColor = LazyVar.Create() -- console foreground color (text)
+consoleTextBGColor = LazyVar.Create() -- console text background color
+menuFontSize = LazyVar.Create() -- font size used on main in game escape menu
+factionTextColor = LazyVar.Create() -- faction color for text foreground
+factionBackColor = LazyVar.Create() -- faction color for text background
 
 -- table of layouts supported by this skin, not a lazy var as we don't need updates
 layouts = nil
 
 --* other handy variables!
-consoleDepth = false  -- in order to get the console to always be on top, assign this number and never go over
+consoleDepth = false -- in order to get the console to always be on top, assign this number and never go over
 
-networkBool = LazyVar.Create()    -- boolean whether the game is local or networked
+networkBool = LazyVar.Create() -- boolean whether the game is local or networked
 
 -- Default scenario for skirmishes / MP Lobby
 defaultScenario = '/maps/scmp_039/scmp_039_scenario.lua'
@@ -72,13 +72,13 @@ requiredType = 'skirmish'
 --* These values MUST NOT CHANGE! They syncronize with values in UIManager.h and are used to
 --* specify a render pass
 -- render before the world is rendered
-UIRP_UnderWorld     = 1
+UIRP_UnderWorld = 1
 -- reserved for world views
-UIRP_World          = 2
+UIRP_World      = 2
 -- render with glow (note, won't render when world isn't visible)
-UIRP_Glow           = 4
+UIRP_Glow       = 4
 -- render without glow
-UIRP_PostGlow       = 8
+UIRP_PostGlow   = 8
 
 --* useful key codes, weirdly inconsistent, some are MSW vk codes, some are wxW codes :(
 VK_BACKSPACE = 8
@@ -95,7 +95,7 @@ VK_PAUSE = 310
 local currentSkin = LazyVar.Create()
 
 currentLayout = false
-changeLayoutFunction = false    -- set this function to get called with the new layout name when layout changes
+changeLayoutFunction = false -- set this function to get called with the new layout name when layout changes
 
 local UIFileCache = {}
 -- The files below are missing from the game and are used to leave UIFile early
@@ -245,7 +245,7 @@ function UpdateWorldBorderState(skin, isOn)
                         MapBorderAdd(skins[skin].imagerMeshDetails)
                     end
                 elseif mapHeight == mapWidth * 2 then
-                   -- TODO: Someone please make a mesh for this case.
+                    -- TODO: Someone please make a mesh for this case.
                 end
             end
         else
@@ -297,7 +297,8 @@ function SetCurrentSkin(skin, overrideTable)
     bodyColor:Set(skinTable.bodyColor)
     factionTextColor:Set(skinTable.factionTextColor)
     factionBackColor:Set(skinTable.factionBackColor)
-    if (overrideTable.faction_font_color == nil and Prefs.GetOption('faction_font_color')) or overrideTable.faction_font_color then
+    if (overrideTable.faction_font_color == nil and Prefs.GetOption('faction_font_color')) or
+        overrideTable.faction_font_color then
         fontColor:Set(skinTable.fontColor)
     else
         fontColor:Set(skins["default"].fontColor)
@@ -376,7 +377,7 @@ function RotateSkin(direction)
             local nextSkinIndex = index + dir
             if nextSkinIndex > numSkins then nextSkinIndex = 1 end
             if nextSkinIndex < 1 then nextSkinIndex = numSkins end
-            if skinNames[nextSkinIndex] == 'default' or skinNames[nextSkinIndex] == 'random'  then   -- skip default entry as it's not really a skin
+            if skinNames[nextSkinIndex] == 'default' or skinNames[nextSkinIndex] == 'random' then -- skip default entry as it's not really a skin
                 nextSkinIndex = nextSkinIndex + dir
                 if nextSkinIndex > numSkins then nextSkinIndex = 1 end
                 if nextSkinIndex < 1 then nextSkinIndex = numSkins end
@@ -439,7 +440,7 @@ function UIFile(filespec, checkMods)
         else
             while not found and useSkin do
                 found = currentPath .. filespec
-                
+
                 if not DiskGetFileInfo(found) then
                     -- Check mods
                     local inmod = false
@@ -451,7 +452,7 @@ function UIFile(filespec, checkMods)
                                     found = mod.location .. filespec
                                     inmod = true
                                     break
-                                -- ACU Enhancements
+                                    -- ACU Enhancements
                                 elseif DiskGetFileInfo(mod.location .. currentPath .. filespec) then
                                     found = mod.location .. currentPath .. filespec
                                     inmod = true
@@ -475,7 +476,7 @@ function UIFile(filespec, checkMods)
         if not found then
             -- don't print error message if "filespec" is a valid path
             if not DiskGetFileInfo(filespec) then
-                SPEW('[uiutil.lua, function UIFile()] - Unable to find file:'.. origPath .. filespec)
+                SPEW('[uiutil.lua, function UIFile()] - Unable to find file:' .. origPath .. filespec)
             end
             found = filespec
         end
@@ -597,7 +598,6 @@ function CreateSkinnableBitmapStd(parent, filename, border)
     return CreateSkinnableBitmap(parent, filename .. "_bmp.dds", border)
 end
 
-
 ---@param control Edit
 ---@param foreColor? LazyVarColor
 ---@param backColor? LazyVarColor
@@ -653,7 +653,8 @@ end
 ---@param rolloverCue? string default to `"UI_Menu_Rollover_Sml"`; use `"NO_SOUND"` to not have one
 ---@param dropshadow? boolean
 ---@return Button
-function CreateButton(parent, up, down, over, disabled, label, pointSize, textOffsetVert, textOffsetHorz, clickCue, rolloverCue, dropshadow)
+function CreateButton(parent, up, down, over, disabled, label, pointSize, textOffsetVert, textOffsetHorz, clickCue,
+                      rolloverCue, dropshadow)
     textOffsetVert = textOffsetVert or 0
     textOffsetHorz = textOffsetHorz or 0
     if clickCue == "NO_SOUND" then
@@ -711,7 +712,7 @@ function CreateButton(parent, up, down, over, disabled, label, pointSize, textOf
     return button
 end
 
---- Creates a button with standardized texture names. 
+--- Creates a button with standardized texture names.
 --- Given a path and button name prefix, generates the four button asset file names:
 ---   * *\<filename>* `_btn_up.dds`
 ---   * *\<filename>* `_btn_down.dds`
@@ -782,7 +783,7 @@ function CreateNinePatchStd(parent, texturePath)
         SkinnableFile(texturePath .. 'right.dds'),
         SkinnableFile(texturePath .. 'top.dds'),
         SkinnableFile(texturePath .. 'bottom.dds')
-)
+    )
 end
 
 --- Surrounds a control with a nine-patch border
@@ -915,7 +916,8 @@ end
 ---@param rolloverCue? string default to `"UI_Menu_Rollover_Sml"`; use `"NO_SOUND"` to not have one
 ---@return Button
 function CreateDialogButtonStd(parent, filename, label, pointSize, textOffsetVert, textOffsetHorz, clickCue, rolloverCue)
-    local button = CreateButtonStd(parent,filename,label,pointSize,textOffsetVert,textOffsetHorz, clickCue, rolloverCue)
+    local button = CreateButtonStd(parent, filename, label, pointSize, textOffsetVert, textOffsetHorz, clickCue,
+        rolloverCue)
     button.label:SetFont(dialogButtonFont, pointSize)
     button.label:SetColor(dialogButtonColor)
     return button
@@ -927,35 +929,41 @@ function CreateVertScrollbarFor(attachto, offset_right, filename, offset_bottom,
     offset_bottom = offset_bottom or 0
     offset_top = offset_top or 0
     local textureName = filename or '/small-vert_scroll/'
-    local scrollbg = textureName..'back_scr_mid.dds'
-    local scrollbarmid = textureName..'bar-mid_scr_over.dds'
-    local scrollbartop = textureName..'bar-top_scr_up.dds'
-    local scrollbarbot = textureName..'bar-bot_scr_up.dds'
+    local scrollbg = textureName .. 'back_scr_mid.dds'
+    local scrollbarmid = textureName .. 'bar-mid_scr_over.dds'
+    local scrollbartop = textureName .. 'bar-top_scr_up.dds'
+    local scrollbarbot = textureName .. 'bar-bot_scr_up.dds'
     if filename then
-        scrollbg = textureName..'back_scr_mid.dds'
-        scrollbarmid = textureName..'bar-mid_scr_up.dds'
-        scrollbartop = textureName..'bar-top_scr_up.dds'
-        scrollbarbot = textureName..'bar-bot_scr_up.dds'
+        scrollbg = textureName .. 'back_scr_mid.dds'
+        scrollbarmid = textureName .. 'bar-mid_scr_up.dds'
+        scrollbartop = textureName .. 'bar-top_scr_up.dds'
+        scrollbarbot = textureName .. 'bar-bot_scr_up.dds'
     end
     local scrollbar = Scrollbar(attachto, import("/lua/maui/scrollbar.lua").ScrollAxis.Vert)
-    scrollbar:SetTextures(   SkinnableFile(scrollbg)
-                            ,SkinnableFile(scrollbarmid)
-                            ,SkinnableFile(scrollbartop)
-                            ,SkinnableFile(scrollbarbot))
+    scrollbar:SetTextures(
+        SkinnableFile(scrollbg),
+        SkinnableFile(scrollbarmid),
+        SkinnableFile(scrollbartop),
+        SkinnableFile(scrollbarbot)
+    )
 
-    local scrollUpButton = Button(    scrollbar
-                                    , SkinnableFile(textureName..'arrow-up_scr_up.dds')
-                                    , SkinnableFile(textureName..'arrow-up_scr_down.dds')
-                                    , SkinnableFile(textureName..'arrow-up_scr_over.dds')
-                                    , SkinnableFile(textureName..'arrow-up_scr_dis.dds')
-                                    , "UI_Arrow_Click")
+    local scrollUpButton = Button(
+        scrollbar,
+        SkinnableFile(textureName .. 'arrow-up_scr_up.dds'),
+        SkinnableFile(textureName .. 'arrow-up_scr_down.dds'),
+        SkinnableFile(textureName .. 'arrow-up_scr_over.dds'),
+        SkinnableFile(textureName .. 'arrow-up_scr_dis.dds'),
+        "UI_Arrow_Click"
+    )
 
-    local scrollDownButton = Button(  scrollbar
-                                    , SkinnableFile(textureName..'arrow-down_scr_up.dds')
-                                    , SkinnableFile(textureName..'arrow-down_scr_down.dds')
-                                    , SkinnableFile(textureName..'arrow-down_scr_over.dds')
-                                    , SkinnableFile(textureName..'arrow-down_scr_dis.dds')
-                                    , "UI_Arrow_Click")
+    local scrollDownButton = Button(
+        scrollbar,
+        SkinnableFile(textureName .. 'arrow-down_scr_up.dds'),
+        SkinnableFile(textureName .. 'arrow-down_scr_down.dds'),
+        SkinnableFile(textureName .. 'arrow-down_scr_over.dds'),
+        SkinnableFile(textureName .. 'arrow-down_scr_dis.dds'),
+        "UI_Arrow_Click"
+    )
 
     LayoutHelpers.AnchorToRight(scrollbar, attachto, offset_right)
     scrollbar.Top:Set(scrollUpButton.Bottom)
@@ -1033,7 +1041,8 @@ end
 ---@param destroyOnCallback? boolean if true, the popup is closed when a button with a callback is pressed (if false, you must destroy); defaults to `true` when all three callback functions are supplied and `false` otherwise
 ---@param modalInfo ModalityInfo Sets up modality info for dialog
 ---@return Popup
-function QuickDialog(parent, dialogText, button1Text, button1Callback, button2Text, button2Callback, button3Text, button3Callback, destroyOnCallback, modalInfo)
+function QuickDialog(parent, dialogText, button1Text, button1Callback, button2Text, button2Callback, button3Text,
+                     button3Callback, destroyOnCallback, modalInfo)
     -- if there is a callback and destroy not specified, assume destroy
     if destroyOnCallback == nil and (button1Callback or button2Callback or button3Callback) then
         destroyOnCallback = true
@@ -1134,6 +1143,8 @@ function QuickDialog(parent, dialogText, button1Text, button1Callback, button2Te
         end)
     elseif numButtons == 1 then
         LayoutHelpers.AtHorizontalCenterIn(button1, dialog)
+        LayoutHelpers.SetWidth(button1, 180)
+        LayoutHelpers.SetHeight(button1, 45)
     end
 
     if modalInfo and not modalInfo.OnlyWorldCover then
@@ -1192,6 +1203,7 @@ function CreateWorldCover(parent, colorOverride)
             end
         end
     end
+
     local function OnDestroy(self)
         for id, cover in worldCovers do
             if cover and id ~= self.ID then
@@ -1199,6 +1211,7 @@ function CreateWorldCover(parent, colorOverride)
             end
         end
     end
+
     local function OnFrame(self, delta)
         local targetAlpha = self:GetAlpha() + (delta * 1.5)
         if targetAlpha < 0.8 then
@@ -1240,7 +1253,8 @@ end
 ---@param destroyOnCallback? boolean
 ---@return Popup
 function ShowInfoDialog(parent, dialogText, buttonText, buttonCallback, destroyOnCallback)
-    return QuickDialog(parent, dialogText, buttonText, buttonCallback, nil, nil, nil, nil, destroyOnCallback, {worldCover = false, enterButton = 1, escapeButton = 1})
+    return QuickDialog(parent, dialogText, buttonText, buttonCallback, nil, nil, nil, nil, destroyOnCallback,
+        { worldCover = false, enterButton = 1, escapeButton = 1 })
 end
 
 ---@param factionIndex number
@@ -1322,7 +1336,8 @@ end
 function GetReplayId()
     local id = nil
 
-    if HasCommandLineArg("/syncreplay") and HasCommandLineArg("/gpgnet") and GetFrontEndData('syncreplayid') ~= nil and GetFrontEndData('syncreplayid') ~= 0 then
+    if HasCommandLineArg("/syncreplay") and HasCommandLineArg("/gpgnet") and GetFrontEndData('syncreplayid') ~= nil and
+        GetFrontEndData('syncreplayid') ~= 0 then
         id = GetFrontEndData('syncreplayid')
     elseif HasCommandLineArg("/savereplay") then
         -- /savereplay format is gpgnet://local_ip:port/replay_id/USERNAME.SCFAreplay
@@ -1332,7 +1347,7 @@ function GetReplayId()
         local lastpos = string.find(url, "/", fistpos) - 1
         id = string.sub(url, fistpos, lastpos)
     elseif HasCommandLineArg("/replayid") then
-        id =  GetCommandLineArg("/replayid", 1)[1]
+        id = GetCommandLineArg("/replayid", 1)[1]
     end
 
     return id
@@ -1352,13 +1367,12 @@ function CreateInputDialog(parent, title, listener, fallbackBox, str)
     return dialog
 end
 
-
 ---@param parent Control
 ---@return ItemList
 function CreateTextBox(parent)
     local box = ItemList(parent)
     box:SetFont(bodyFont, 14)
-    box:SetColors(bodyColor, "black",  highlightColor, "white")
+    box:SetColors(bodyColor, "black", highlightColor, "white")
     CreateVertScrollbarFor(box)
     return box
 end
@@ -1367,7 +1381,8 @@ end
 ---@param text UnlocalizedString
 function SetTextBoxText(textBox, text)
     textBox:DeleteAllItems()
-    local wrapped = import("/lua/maui/text.lua").WrapText(LOC(text), textBox.Width(), function(curText) return textBox:GetStringAdvance(curText) end)
+    local wrapped = import("/lua/maui/text.lua").WrapText(LOC(text), textBox.Width(),
+        function(curText) return textBox:GetStringAdvance(curText) end)
     for i, line in wrapped do
         textBox:AddItem(line)
     end
@@ -1379,7 +1394,7 @@ local windowTextures = {
     tr = UIFile('/game/mini-map-brd/mini-map_brd_ur.dds'),
     tm = UIFile('/game/mini-map-brd/mini-map_brd_horz_um.dds'),
     ml = UIFile('/game/mini-map-brd/mini-map_brd_vert_l.dds'),
-    m =  UIFile('/game/mini-map-brd/mini-map_brd_m.dds'),
+    m = UIFile('/game/mini-map-brd/mini-map_brd_m.dds'),
     mr = UIFile('/game/mini-map-brd/mini-map_brd_vert_r.dds'),
     bl = UIFile('/game/mini-map-brd/mini-map_brd_ll.dds'),
     bm = UIFile('/game/mini-map-brd/mini-map_brd_lm.dds'),
@@ -1390,7 +1405,7 @@ local windowTextures = {
 --- Constructs a default window.
 ---@param parent? Control Parent of the window, defaults to GetFrame(0)
 ---@param title? UnlocalizedString Title of the window
----@param icon? FileName Path to the icon to use for the window, defaults to false (in other words: no icon) 
+---@param icon? FileName Path to the icon to use for the window, defaults to false (in other words: no icon)
 ---@param pin? boolean Toggle for the pin button, override window.OnPinCheck(self, checked) to set the behavior
 ---@param config? boolean Toggle for configuration button, override window.OnConfigClick(self) to set the behavior
 ---@param lockSize? boolean Toggle to allow the user to adjust the size of the window.
@@ -1401,7 +1416,8 @@ local windowTextures = {
 ---@param defaultBottom? Lazy<number> The default bottom boundary of the window, defaults to 600
 ---@param defaultRight? Lazy<number> The default right boundary of the window, defaults to 210
 ---@return Window
-function CreateWindowStd(parent, title, icon, pin, config, lockSize, lockPosition, preferenceID, defaultLeft, defaultTop, defaultBottom, defaultRight)
+function CreateWindowStd(parent, title, icon, pin, config, lockSize, lockPosition, preferenceID, defaultLeft, defaultTop
+                         , defaultBottom, defaultRight)
     parent = parent or GetFrame(0)
     defaultLeft = defaultLeft or 10
     defaultTop = defaultTop or 300
@@ -1422,7 +1438,7 @@ end
 
 ---@param primary UnlocalizedString
 ---@param secondary UnlocalizedString
----@param control? Control defaults to dummy control at center of screen 
+---@param control? Control defaults to dummy control at center of screen
 function CreateAnnouncementStd(primary, secondary, control)
     if not secondary then
         return import("/lua/ui/game/announcement.lua").CreateAnnouncement(primary, control)
@@ -1430,7 +1446,6 @@ function CreateAnnouncementStd(primary, secondary, control)
         return import("/lua/ui/game/announcement.lua").CreateTitleTextAnnouncement(primary, secondary, control)
     end
 end
-
 
 ---@param parent Control
 ---@param filename FileName
@@ -1461,7 +1476,6 @@ function CreateVertFillGroup(parent, filename)
     group._bottom = bottom
     return group
 end
-
 
 ---@param parent Control
 ---@param filename FileName

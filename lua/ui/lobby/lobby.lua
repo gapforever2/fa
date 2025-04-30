@@ -167,8 +167,8 @@ local function parseCommandlineArguments()
     -- having as value the name of the next key. This set lets us interpret that case using the
     -- default option.
     local CMDLINE_ARGUMENT_KEYS = {
-	    ["/avatarurl"] = true,
-		["/avatartlp"] = true,
+        ["/avatarurl"] = true,
+        ["/avatartlp"] = true,
         ["/init"] = true,
         ["/country"] = true,
         ["/numgames"] = true,
@@ -177,8 +177,8 @@ local function parseCommandlineArguments()
         ["/deviation"] = true,
         ["/joincustom"] = true,
         ["/gpgnet"] = true,
-		["/foe"] = true,
-		["/group"] = true,
+        ["/foe"] = true,
+        ["/group"] = true,
     }
 
     local function GetCommandLineArgOrDefault(argname, default)
@@ -194,14 +194,14 @@ local function parseCommandlineArguments()
         PrefLanguage = tostring(string.lower(GetCommandLineArgOrDefault("/country", "world"))),
         isRehost = HasCommandLineArg("/rehost"),
         initName = GetCommandLineArgOrDefault("/init", ""),
-		Urlava = tostring(string.lower(GetCommandLineArgOrDefault("/avatarurl", ""))),
-	    Tlpava = tostring(string.lower(GetCommandLineArgOrDefault("/avatartlp", ""))),
+        Urlava = tostring(string.lower(GetCommandLineArgOrDefault("/avatarurl", ""))),
+        Tlpava = tostring(string.lower(GetCommandLineArgOrDefault("/avatartlp", ""))),
         numGames = tonumber(GetCommandLineArgOrDefault("/numgames", 0)),
         playerMean = tonumber(GetCommandLineArgOrDefault("/mean", 1500)),
         playerClan = tostring(GetCommandLineArgOrDefault("/clan", "")),
         playerDeviation = tonumber(GetCommandLineArgOrDefault("/deviation", 500)),
-		foe_list = tostring(GetCommandLineArgOrDefault("/foe", "")),
-		groupDev = tostring(GetCommandLineArgOrDefault("/group", "")),
+        foe_list = tostring(GetCommandLineArgOrDefault("/foe", "")),
+        groupDev = tostring(GetCommandLineArgOrDefault("/group", "")),
     }
 end
 local argv = parseCommandlineArguments()
@@ -397,7 +397,7 @@ local function GetSlotMenuTables(stateKey, hostKey, slotNum)
         end
     end
 
-    for index, key in GetSlotMenuData()[stateKey][hostKey] do
+    for _, key in GetSlotMenuData()[stateKey][hostKey] do
         if key == 'ailist' then
             if slotNum then
                 for i = 1, numOpenSlots, 1 do
@@ -473,10 +473,10 @@ function GetLocalPlayerData()
             MEAN = argv.playerMean,
             DEV = argv.playerDeviation,
             Country = argv.PrefLanguage,
-			Avatar = argv.Urlava,
-			TooltipAvatar = argv.Tlpava,
-			GroupRole = argv.groupDev,
-			Version = version,
+            Avatar = argv.Urlava,
+            TooltipAvatar = argv.Tlpava,
+            GroupRole = argv.groupDev,
+            Version = version,
             GameType = gametype,
             Commit = commit,
         }
@@ -704,24 +704,28 @@ function ReallyCreateLobby(protocol, localPort, desiredPlayerName, localPlayerUI
         GUI.chatEdit:AbandonFocus()
         local quitDialog = UIUtil.QuickDialog(GUI,
             "<LOC lobby_0000>Exit game lobby?",
-            "<LOC _Yes>", function()
+            "<LOC _Yes>",
+            function()
                 EscapeHandler.PopEscapeHandler()
                 if HasCommandLineArg("/gpgnet") then
-                    -- Quit to desktop
-                    EscapeHandler.SafeQuit()
+                    EscapeHandler.SafeQuit() -- Quit to desktop
                 else
-                    -- Back to main menu
-                    ReturnToMenu(false)
+                    ReturnToMenu(false) -- Back to main menu
                 end
             end,
-
             -- Fight to keep our focus on the chat input box, to prevent keybinding madness.
-            "<LOC _Cancel>", function()
+            "<LOC _Cancel>",
+            function()
                 GUI.chatEdit:AcquireFocus()
             end,
-            nil, nil,
+            nil,
+            nil,
             true,
-            {escapeButton = 2, enterButton = 1, worldCover = true}
+            {
+                escapeButton = 2,
+                enterButton = 1,
+                worldCover = true,
+            }
         )
     end
     EscapeHandler.PushEscapeHandler(GUI.exitLobbyEscapeHandler)
@@ -873,7 +877,7 @@ function FindSlotForID(id)
 end
 
 function FindRehostSlotForID(id)
-    for index, player in ipairs(rehostPlayerOptions) do
+    for _, player in ipairs(rehostPlayerOptions) do
         if player.OwnerID == id and player.Human then
             return player.StartSpot
         end
@@ -886,7 +890,7 @@ function FindNameForID(id)
         return (FindObserverNameForID(id))
     end
 
-    for k, player in gameInfo.PlayerOptions:pairs() do
+    for _, player in gameInfo.PlayerOptions:pairs() do
         if player.OwnerID == id and player.Human then
             return player.PlayerName
         end
@@ -895,7 +899,7 @@ function FindNameForID(id)
 end
 
 function FindIDForName(name)
-    for k, player in gameInfo.PlayerOptions:pairs() do
+    for _, player in gameInfo.PlayerOptions:pairs() do
         if player.PlayerName == name and player.Human then
             return player.OwnerID
         end
@@ -904,9 +908,9 @@ function FindIDForName(name)
 end
 
 function FindObserverSlotForID(id)
-    for k, observer in gameInfo.Observers:pairs() do
+    for slot, observer in gameInfo.Observers:pairs() do
         if observer.OwnerID == id then
-            return k
+            return slot
         end
     end
 
@@ -914,7 +918,7 @@ function FindObserverSlotForID(id)
 end
 
 function FindObserverNameForID(id)
-    for k, observer in gameInfo.Observers:pairs() do
+    for _, observer in gameInfo.Observers:pairs() do
         if observer.OwnerID == id then
             return observer.PlayerName
         end
@@ -948,11 +952,10 @@ end
 
 function GetPlayerDisplayName(playerInfo)
     local playerName = playerInfo.PlayerName
-    local displayName = ""
     if playerInfo.PlayerClan ~= "" then
-        return string.format("[%s] %s", playerInfo.PlayerClan, playerInfo.PlayerName)
+        return string.format("[%s] %s", playerInfo.PlayerClan, playerName)
     else
-        return playerInfo.PlayerName
+        return playerName
     end
 end
 
@@ -967,7 +970,7 @@ local function refreshObserverList()
     if gameInfo.GameOptions['TeamSpawn'] == 'fixed' then
 
         -- cycle through each player
-        for i, player in gameInfo.PlayerOptions:pairs() do
+        for _, player in gameInfo.PlayerOptions:pairs() do
 
             -- get the team number (which is 1 higher on the backend)
             local team = player.Team - 1
@@ -983,7 +986,7 @@ local function refreshObserverList()
             end
         end
 
-        for i, team in teamRatings do
+        for _ in teamRatings do
             numTeams = numTeams + 1
         end
 
@@ -992,10 +995,14 @@ local function refreshObserverList()
             if not lobbyComm:IsHost() then
                 GUI.observerList:AddItem(LOC('<LOC lobui_0702>Team Ratings:'))
             end
-            for i, rating in teamRatings do
-                GUI.observerList:AddItem(
-                    LOCF('<LOC lobui_0703>Team %d: %d (%d+/-%d)', i, math.round(rating[1] - rating[2] * 3), math.round(rating[1]), math.round(rating[2] * 3))
-                )
+            for index, rating in teamRatings do
+                GUI.observerList:AddItem(LOCF(
+                    '<LOC lobui_0703>Team %d: %d (%d+/-%d)',
+                    index,
+                    math.round(rating[1] - rating[2] * 3),
+                    math.round(rating[1]),
+                    math.round(rating[2] * 3)
+                ))
             end
             if not lobbyComm:IsHost() then
                 GUI.observerList:AddItem('')
@@ -1137,17 +1144,17 @@ function SetSlotInfo(slotNum, playerInfo)
     end
 
     -- These states are used to select the appropriate strings with GetSlotMenuTables.
-	local slotState
-	if not playerInfo.Human then
-		slot.ratingText:Hide()
-		slotState = 'ai'
-	elseif groupDevColors[playerInfo.GroupRole] then
-		slotState = 'groupdev'
-	else
-		slotState = 'player'
-	end
+    local slotState
+    if not playerInfo.Human then
+        slot.ratingText:Hide()
+        slotState = 'ai'
+    elseif groupDevColors[playerInfo.GroupRole] then
+        slotState = 'groupdev'
+    else
+        slotState = 'player'
+    end
 
-	slot.name:ClearItems()
+    slot.name:ClearItems()
 
     if slotState then
         slot.name:Enable()
@@ -1183,33 +1190,31 @@ function SetSlotInfo(slotNum, playerInfo)
     slot.numGamesText:SetText(playerInfo.NG)
 
     slot.name:Show()
-
-
-	if FindSlotForID(hostID) == slotNum then
-		slot.name:SetTitleTextColor("ffc726") -- Orange Color for Host
-		slot.name._text:SetFont('Arial Gras', 15)
-	elseif slotState == 'groupdev' then
-	local groupDevColor = groupDevColors[playerInfo.GroupRole]
-	if groupDevColor then
-		slot.name:SetTitleTextColor(groupDevColor)
-		slot.name._text:SetFont('Arial Gras', 12)
-	else
-		slot.name:SetTitleTextColor(UIUtil.fontColor)
-		slot.name._text:SetFont('Arial Gras', 12)
-	end
-	elseif slotState == 'ai' then
-		slot.name:SetTitleTextColor("dbdbb9") -- Beige Color for AI
-		slot.name._text:SetFont('Arial Gras', 12)
-	elseif slotState == 'player' then
-		slot.name:SetTitleTextColor("64d264") -- Green Color for Players
-		slot.name._text:SetFont('Arial Gras', 15)
-	elseif isLocallyOwned then
-		slot.name:SetTitleTextColor("6363d2") -- Blue Color for You
-		slot.name._text:SetFont('Arial Gras', 15)
-	else
-		slot.name:SetTitleTextColor(UIUtil.fontColor) -- Normal Color for Other
-		slot.name._text:SetFont('Arial Gras', 12)
-	end
+    if FindSlotForID(hostID) == slotNum then
+        slot.name:SetTitleTextColor("ffc726") -- Orange Color for Host
+        slot.name._text:SetFont('Arial Gras', 15)
+    elseif slotState == 'groupdev' then
+    local groupDevColor = groupDevColors[playerInfo.GroupRole]
+    if groupDevColor then
+        slot.name:SetTitleTextColor(groupDevColor)
+        slot.name._text:SetFont('Arial Gras', 12)
+    else
+        slot.name:SetTitleTextColor(UIUtil.fontColor)
+        slot.name._text:SetFont('Arial Gras', 12)
+    end
+    elseif slotState == 'ai' then
+        slot.name:SetTitleTextColor("dbdbb9") -- Beige Color for AI
+        slot.name._text:SetFont('Arial Gras', 12)
+    elseif slotState == 'player' then
+        slot.name:SetTitleTextColor("64d264") -- Green Color for Players
+        slot.name._text:SetFont('Arial Gras', 15)
+    elseif isLocallyOwned then
+        slot.name:SetTitleTextColor("6363d2") -- Blue Color for You
+        slot.name._text:SetFont('Arial Gras', 15)
+    else
+        slot.name:SetTitleTextColor(UIUtil.fontColor) -- Normal Color for Other
+        slot.name._text:SetFont('Arial Gras', 12)
+    end
 
     local playerName = playerInfo.PlayerName
     if wasConnected(playerInfo.OwnerID) or isLocallyOwned or not playerInfo.Human then
@@ -1273,12 +1278,12 @@ function SetSlotInfo(slotNum, playerInfo)
 
     UpdateSlotBackground(slotNum)
 
-	if not playerInfo.Avatar then
-	slot.KinderAvatar:Hide()
-	else
-	    slot.KinderAvatar:Show()
-		slot.KinderAvatar:SetTexture(UIUtil.UIFile('C:\\ProgramData\\GapForever\\cache\\avatars\\'..playerInfo.Avatar..''))
-	    Tooltip.AddControlTooltip(slot.KinderAvatar, {text=LOC("Avatar"), body=LOC(playerInfo.TooltipAvatar)})
+    if not playerInfo.Avatar then
+    slot.KinderAvatar:Hide()
+    else
+        slot.KinderAvatar:Show()
+        slot.KinderAvatar:SetTexture(UIUtil.UIFile('C:\\ProgramData\\GapForever\\cache\\avatars\\'..playerInfo.Avatar..''))
+        Tooltip.AddControlTooltip(slot.KinderAvatar, {text=LOC("<LOC avatar_gaf>Avatar"), body=LOC(playerInfo.TooltipAvatar)})
     end
 
     UpdateSlotBackground(slotNum)
@@ -1486,7 +1491,7 @@ local function autobalance_avg(players, teams_arg)
     local max_sum = 0
 
     for t, slots in teams_arg do
-        table.insert(teams, {team=t, slots=table.deepcopy(slots), sum=0})
+        table.insert(teams, { team = t, slots = table.deepcopy(slots), sum = 0 })
     end
 
     while not table.empty(players) do
@@ -1950,7 +1955,7 @@ function ReturnToMenu(reconnect)
 end
 
 function PrintSystemMessage(id, parameters)
-    AddChatText(LOCF("<LOC "..id..">Unknown system message. Check localisation file", unpack(parameters)))
+    AddChatText(LOCF("<LOC " .. id .. ">Unknown system message. Check localisation file", unpack(parameters)))
 end
 
 function SendSystemMessage(id, ...)
@@ -1998,7 +2003,7 @@ function PrivateChat(targetID,text)
     end
     local targetName = FindNameForID(targetID)
     if targetName then
-        AddChatText("<<"..LOCF("<LOC lobui_0443>To %s", targetName)..">> " .. text)
+        AddChatText("<<" .. LOCF("<LOC lobui_0443>To %s", targetName) .. ">> " .. text)
     end
 end
 
@@ -2568,7 +2573,7 @@ local function UpdateGame()
     RefreshLargeMap()
 
     SetRuleTitleText(gameInfo.GameOptions.GameRules or "")
-    SetGameTitleText(gameInfo.GameOptions.Title or LOC("GAF Game Lobby"))
+    SetGameTitleText(gameInfo.GameOptions.Title or LOC("<LOC lobui_0427>GAF Game Lobby"))
 
     if isHost and GUI.autoTeams then
         GUI.autoTeams:SetState(gameInfo.GameOptions.AutoTeams,true)
@@ -2794,7 +2799,7 @@ function CreateSlotsUI(makeLabel)
     local nameLabel = makeLabel(LOC("<LOC NICKNAME>Nickname"), 14)
     labelGroup:AddChild(nameLabel)
 
-	local avatarLabel = makeLabel(("Avatar"), 14)
+    local avatarLabel = makeLabel(("Avatar"), 14)
     labelGroup:AddChild(avatarLabel)
 
     local colorLabel = makeLabel(("<LOC lobui_0214>Color"), 14)
@@ -2925,7 +2930,7 @@ function CreateSlotsUI(makeLabel)
         end
 
         -- Avatar
-		local avatar = Bitmap(newSlot)
+        local avatar = Bitmap(newSlot)
         newSlot.KinderAvatar = avatar
         LayoutHelpers.SetWidth(avatar, COLUMN_WIDTHS[6])
         newSlot:AddChild(avatar)
@@ -3060,7 +3065,7 @@ function CreateSlotsUI(makeLabel)
 
         newSlot.HideControls = function()
             -- hide these to clear slot of visible data
-			avatar:Hide()
+            avatar:Hide()
             flag:Hide()
             ratingText:Hide()
             numGamesText:Hide()
@@ -3127,7 +3132,7 @@ function CreateUI(maxPlayers)
     LayoutHelpers.AtRightTopIn(GUI.GameQualityLabel, GUI.panel, 5, 64)
 
     -- Title Label
-    GUI.titleText = makeLabel(LOC("GAF Game Lobby"), 17)
+    GUI.titleText = makeLabel(LOC("<LOC lobui_0427>GAF Game Lobby"), 17)
     LayoutHelpers.AtLeftTopIn(GUI.titleText, GUI.panel, 5, 20)
 
     if isHost then
@@ -3194,15 +3199,15 @@ function CreateUI(maxPlayers)
     LayoutHelpers.AtLeftTopIn(GUI.logo, GUI, 1, 1)
 
     -- Version texts
-    local version, gametype, commit = import("/lua/version.lua").GetVersionData()
-    GUI.gameVersionText = UIUtil.CreateText(GUI.panel, LOC('<LOC lobui_0466>Game version ') .. version, 9, UIUtil.bodyFont)
+    local version, server = import("/lua/version.lua").GetVersionData()
+    GUI.gameVersionText = UIUtil.CreateText(GUI.panel, LOC("<LOC lobui_0001_gaf>Balance patch") .. " " .. version, 9, UIUtil.bodyFont)
     GUI.gameVersionText:SetColor('677983')
     GUI.gameVersionText:SetDropShadow(true)
-
-    Tooltip.AddControlTooltipManual(GUI.gameVersionText, '<LOC lobui_0467>Version control', string.format(
-        LOC('<LOC lobui_0468>Game version: %s\nGame type: %s\nCommit hash: %s'), version, gametype, commit:sub(1, 8)
-    ))
-
+    Tooltip.AddControlTooltipManual(
+        GUI.gameVersionText,
+        LOC('<LOC lobui_0006_gaf>Balance information'),
+        LOCF('<LOC lobui_0007_gaf>Balance patch version: %s\nServer: %s', version, server)
+    )
     LayoutHelpers.AtLeftTopIn(GUI.gameVersionText, GUI.panel, 70, 3)
 
     -- Player Slots
@@ -3375,27 +3380,29 @@ function CreateUI(maxPlayers)
         GUI.OptionContainer:ScrollSetTop('Vert', 0)
         Prefs.SetToCurrentProfile('LobbyHideDefaultOptions', tostring(checked))
     end
-    GUI.patchnotesButton = UIUtil.CreateButtonWithDropshadow(GUI.panel, '/Button/medium/', "<LOC _Patchnotes>Актуальный баланс")
-    Tooltip.AddButtonTooltip(GUI.patchnotesButton, {text=LOC("Актуальный баланс GAF"), body=LOC("Кликни что-бы узнать про величайший баланс")})
+
+    -- Patchnotes Button
+    GUI.patchnotesButton = UIUtil.CreateButtonWithDropshadow(GUI.panel, '/Button/medium/', "<LOC _Patchnotes>Patchnotes")
+    Tooltip.AddButtonTooltip(GUI.patchnotesButton, {text=LOC("<LOC _Patchnotes>Patchnotes"), body=LOC("<LOC lobui_0004_gaf>Click here to get more information about the current balance patch")})
     LayoutHelpers.AtBottomIn(GUI.patchnotesButton, GUI.optionsPanel, 630)
     LayoutHelpers.AtHorizontalCenterIn(GUI.patchnotesButton, GUI.optionsPanel, -640)
-	LayoutHelpers.SetWidth(GUI.patchnotesButton, 300)
+    LayoutHelpers.SetWidth(GUI.patchnotesButton, 240)
     LayoutHelpers.SetHeight(GUI.patchnotesButton, 45)
     GUI.patchnotesButton.OnClick = function(self, event)
 	    OpenURL('http://gapforever2.github.io/patchnotes')
         Changelog.Changelog(GUI)
     end
 
-	-- KickObs
-	GUI.kickobs = UIUtil.CreateButtonWithDropshadow(GUI.panel, '/Button/medium/', "<LOC _Patchnotes>KickObs")
-    Tooltip.AddButtonTooltip(GUI.kickobs, {text=LOC("KickObs"), body=LOC("Кикнуть всех обсов")})
-    LayoutHelpers.AtBottomIn(GUI.kickobs, GUI.optionsPanel, -95)
-    LayoutHelpers.AtHorizontalCenterIn(GUI.kickobs, GUI.optionsPanel, -200)
-	LayoutHelpers.SetWidth(GUI.kickobs, 100)
-    LayoutHelpers.SetHeight(GUI.kickobs, 45)
-	UIUtil.setVisible(GUI.kickobs, isHost)
+    -- KickObs
+    GUI.kickobs = UIUtil.CreateButtonWithDropshadow(GUI.panel, '/Button/medium/', "<LOC _KickObs>Kick observers")
+    Tooltip.AddButtonTooltip(GUI.kickobs, {text=LOC("<LOC _KickObs>Kick observers"), body=LOC("<LOC lobui_0002_gaf>Kick all observers from lobby")})
+    LayoutHelpers.AtBottomIn(GUI.kickobs, GUI.optionsPanel, -90)
+    LayoutHelpers.AtHorizontalCenterIn(GUI.kickobs, GUI.optionsPanel, -190)
+    LayoutHelpers.SetWidth(GUI.kickobs, 180)
+    LayoutHelpers.SetHeight(GUI.kickobs, 40)
+    UIUtil.setVisible(GUI.kickobs, isHost)
     GUI.kickobs.OnClick = function(self, event)
-	    HostUtils.KickObservers("GameLaunched")
+        HostUtils.KickObservers("GameLaunched")
     end
 
     -- Patchnotes Button
@@ -3872,7 +3879,6 @@ function CreateUI(maxPlayers)
                     lobbyComm:BroadcastData({ Type = "SetAllPlayerNotReady" })
                     UpdateGame()
                 end,
-
                 "<LOC _Cancel>", nil,
                 nil, nil,
                 true
@@ -4434,7 +4440,6 @@ function CreateUI(maxPlayers)
             -- adjust index by 1 because 0-based (ItemList rows) vs 1-based (Lua array) indexing
             local obsIndex = row + 1
             local maxObsIndex = self:GetItemCount()
-
             -- adjust index by the number of rows taken up by team ratings.
             ---@see refreshObserverList
             if gameInfo.GameOptions['TeamSpawn'] == 'fixed' then
@@ -4916,7 +4921,6 @@ function AddChatText(text, playerID, scrollToBottom)
 
     local scrolledToBottom = GUI.chatPanel:IsScrolledToBottom() or scrollToBottom
     local textColor = "AAAAAA"
-    local nameFont = "Arial Gras"
 
     local nameStyle = {
         fontFamily = "Arial Gras",
@@ -4928,11 +4932,10 @@ function AddChatText(text, playerID, scrollToBottom)
     local name = FindNameForID(playerID)
     local playerInfo = nil
 
-    for id, player in gameInfo.PlayerOptions:pairs() do
+    for _, player in gameInfo.PlayerOptions:pairs() do
         if player.OwnerID == playerID and player.Human then
             playerInfo = player
-			textColor = nil
-
+            textColor = nil
 
             if playerInfo.GroupRole and groupDevColors[playerInfo.GroupRole] then
                 nameStyle.fontColor = groupDevColors[playerInfo.GroupRole]
@@ -4953,11 +4956,11 @@ function AddChatText(text, playerID, scrollToBottom)
 
 
     local formattedName = ""
-	if rolePrefix ~= "" then
-		formattedName = rolePrefix .. name
-	else
-		formattedName = name
-	end
+    if rolePrefix ~= "" then
+        formattedName = rolePrefix .. name
+    else
+        formattedName = name
+    end
 
 
     GUI.chatDisplay:PostMessage(text, formattedName, {fontColor = textColor}, nameStyle)
@@ -5253,9 +5256,7 @@ local MessageHandlers = {
         end,
         Handle = function(data)
             for _, mutedPlayerName in foe_list_ do
-                if mutedPlayerName == data.SenderName then
-                    return
-                end
+                if mutedPlayerName == data.SenderName then return end
             end
             AddChatText(data.Text, data.SenderID)
         end,
@@ -5267,11 +5268,9 @@ local MessageHandlers = {
         end,
         Handle = function(data)
             for _, mutedPlayerName in foe_list_ do
-                if mutedPlayerName == data.SenderName then
-                    return
-                end
+                if mutedPlayerName == data.SenderName then return end
             end
-            AddChatText("<<"..LOCF("<LOC lobui_0442>From %s", data.SenderName)..">> "..data.Text)
+            AddChatText("<<" .. LOCF("<LOC lobui_0442>From %s", data.SenderName) .. ">> " .. data.Text)
         end
     },
 
@@ -5337,6 +5336,7 @@ local MessageHandlers = {
     },
 
     AddPlayer = {
+
         ---@class LobbyAddPlayerData
         ---@field PlayerOptions PlayerData
         ---@field SenderId number
@@ -5394,12 +5394,20 @@ local MessageHandlers = {
             local playerVersion, playerGameType, playerCommit = tostring(data.PlayerOptions.Version), tostring(data.PlayerOptions.GameType), tostring(data.PlayerOptions.Commit)
             if hostVersion ~= playerVersion or hostGametype ~= playerGameType or hostCommit ~= playerCommit then
                 local playerName = data.PlayerOptions.PlayerName
-                AddChatText(LOCF("<LOC lobui_666>Game version missmatch detected with %s. \r\n - host: %s (@%s)\r\n - %s: %s (@%s). \r\n\r\nTo prevent desyncs, %s is ejected automatically. It is possible that a new game version is released. If this keeps happening then it is better to rehost.", playerName, hostVersion, hostCommit:sub(1, 8), playerName, playerVersion, playerCommit:sub(1, 8), playerName))
+                AddChatText(LOCF(
+                    "<LOC lobui_666>Game version missmatch detected with %s. \r\n - host: %s (@%s)\r\n - %s: %s (@%s). \r\n\r\nTo prevent desyncs, %s is ejected automatically. It is possible that a new game version is released. If this keeps happening then it is better to rehost.",
+                    playerName,
+                    hostVersion,
+                    hostCommit:sub(1, 8),
+                    playerName,
+                    playerVersion,
+                    playerCommit:sub(1, 8),
+                    playerName
+                ))
                 return false
             end
-
             return lobbyComm:IsHost()
-        end,
+		end,
         Reject = function(data)
             lobbyComm:EjectPeer(data.SenderID, "Game version missmatch or invalid player data.")
         end,
@@ -6437,7 +6445,7 @@ end
 function SetGameTitleText(title)
     GUI.titleText:SetColor("B9BFB9")
     if title == '' then
-        title = LOC("GAF Game Lobby")
+        title = LOC("<LOC lobui_0427>GAF Game Lobby")
     end
     GUI.titleText:SetText(title)
 end
@@ -6452,7 +6460,7 @@ function ShowTitleDialog()
             SetGameOption("Title", text, true)
             SetGameTitleText(text)
         end, gameInfo.GameOptions.Title
-)
+    )
 end
 
 -- Rule title
