@@ -869,7 +869,7 @@ options = {
                 },
             },
 			{
-                title = "Имба ассист",
+                title = "<LOC OPTIONS_0226_gaf>Imba assist",
                 key = 'auto_abort_navigation',
                 type = 'toggle',
                 default = false,
