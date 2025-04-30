@@ -261,7 +261,7 @@ Changelog = ClassUI(Group) {
             end
 
             self.ContentPatchesList:SetSelection(index)
-            self.HeaderSubtitle:SetText(patch.name)
+            self.HeaderSubtitle:SetText("«" .. patch.name .. "»")
             self.ContentNotesList:DeleteAllItems()
 
             local altDescription = LOC("<LOC ChangelogDescriptionIdentifier>")
