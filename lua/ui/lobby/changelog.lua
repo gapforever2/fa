@@ -28,9 +28,8 @@ isOpen = false
 
 ---@class PatchNotes
 ---@field version number | string       # Patch version
----@field hasPrettyGithubRelease boolean  # URL to the release on Github
+---@field patchnoteUrl string           # URL to the relese in Patchnotes
 ---@field name PatchNotesType           # Patch type
----@field hasPrettyPatchnotes boolean   # Refers to patchnotes.faforever.com, defaults to false
 ---@field descriptionFR string[]        # French translation
 ---@field descriptionRU string[]        # Russian translation
 ---@field description string[]          # Default changelog in English
@@ -48,9 +47,9 @@ isOpen = false
 ---@field HeaderSubtitle Text
 ---@field Footer Group
 ---@field FooterDebug Bitmap
----@field FooterGithubButton Button
----@field FooterPatchNotesButton Button
----@field FooterDiscordButton Button
+---@field FooterPatchnotesButton Button
+---@field FooterWebsiteButton Button
+---@field FooterReportBugButton Button
 ---@field Content Group
 ---@field ContentDebug Bitmap
 ---@field ContentNotes Group
@@ -60,6 +59,9 @@ isOpen = false
 ---@field ContentDivider Bitmap
 ---@field ContentPatchesList ItemList
 Changelog = ClassUI(Group) {
+    patchnotesUrl = "http://gapforever2.github.io/patchnotes/",
+    websiteUrl = "http://gapforever.com/",
+    discordUrl = "http://discord.com/invite/3wvXGZHHFp",
 
     ---@param self UIChangelog
     ---@param parent Control
@@ -116,8 +118,7 @@ Changelog = ClassUI(Group) {
         self.HeaderDebug:SetSolidColor("ffff0000")
         LayoutHelpers.FillParent(self.HeaderDebug, self.Header)
 
-        self.HeaderTitle = UIUtil.CreateText(self.CommonUI,
-            LOC("Changelog of Supreme Commander: Forged Alliance GapForever.com"), 17, 'Arial Gras', true)
+        self.HeaderTitle = UIUtil.CreateText(self.CommonUI, LOC("<LOC lobui_0012_gaf>Changelog of Supreme Commander: Forged Alliance GapForever.com"), 17, 'Arial Gras', true)
         LayoutHelpers.AtVerticalCenterIn(self.HeaderTitle, self.Header)
         self.HeaderTitle.Left:Set(function() return self.Header.Left() + LayoutHelpers.ScaleNumber(10) end)
 
@@ -145,29 +146,31 @@ Changelog = ClassUI(Group) {
         self.FooterDebug:SetSolidColor("ff00ff00")
         LayoutHelpers.FillParent(self.FooterDebug, self.Footer)
 
-        self.FooterGithubButton = UIUtil.CreateButtonWithDropshadow(self.Footer, '/BUTTON/medium/', "Patchnotes")
-        LayoutHelpers.AtVerticalCenterIn(self.FooterGithubButton, self.Footer)
-        LayoutHelpers.DepthOverParent(self.FooterGithubButton, self.Footer, 5)
-        self.FooterGithubButton.Left:Set(function() return self.Footer.Left() - LayoutHelpers.ScaleNumber(10) end)
-        self.FooterGithubButton.OnClick = function()
-            OpenURL('http://gapforever2.github.io/patchnotes')
+        self.FooterPatchnotesButton = UIUtil.CreateButtonWithDropshadow(self.Footer, '/BUTTON/medium/', "<LOC lobui_0008_gaf>Patch info")
+        LayoutHelpers.AtVerticalCenterIn(self.FooterPatchnotesButton, self.Footer)
+        LayoutHelpers.DepthOverParent(self.FooterPatchnotesButton, self.Footer, 5)
+        LayoutHelpers.SetWidth(self.FooterPatchnotesButton, 150)
+        self.FooterPatchnotesButton.Left:Set(function() return self.Footer.Left() - LayoutHelpers.ScaleNumber(10) end)
+        self.FooterPatchnotesButton.OnClick = function()
+            OpenURL(self.patchnotesUrl)
         end
 
-        self.FooterPatchNotesButton = UIUtil.CreateButtonWithDropshadow(self.Footer, '/BUTTON/medium/', "Patchnotes")
-        LayoutHelpers.AtVerticalCenterIn(self.FooterPatchNotesButton, self.Footer, 2)
-        LayoutHelpers.DepthOverParent(self.FooterPatchNotesButton, self.Footer, 5)
-        self.FooterPatchNotesButton.Right:Set(function() return self.Footer.Right() - LayoutHelpers.ScaleNumber(220) end)
-        self.FooterPatchNotesButton:Disable()
-        self.FooterPatchNotesButton.OnClick = function()
-            OpenURL('http://gapforever2.github.io/patchnotes')
+        self.FooterWebsiteButton = UIUtil.CreateButtonWithDropshadow(self.Footer, '/BUTTON/medium/', LOC("<LOC lobui_0011_gaf>GapForever.com"))
+        LayoutHelpers.AtVerticalCenterIn(self.FooterWebsiteButton, self.Footer, 2)
+        LayoutHelpers.DepthOverParent(self.FooterWebsiteButton, self.Footer, 5)
+        LayoutHelpers.SetWidth(self.FooterWebsiteButton, 160)
+        self.FooterWebsiteButton.Right:Set(function() return self.Footer.Right() - LayoutHelpers.ScaleNumber(220) end)
+        self.FooterWebsiteButton.OnClick = function()
+            OpenURL(self.websiteUrl)
         end
 
-        self.FooterDiscordButton = UIUtil.CreateButtonWithDropshadow(self.Footer, '/BUTTON/medium/', "Report a bug")
-        LayoutHelpers.AtVerticalCenterIn(self.FooterDiscordButton, self.Footer)
-        LayoutHelpers.DepthOverParent(self.FooterDiscordButton, self.Footer, 5)
-        self.FooterDiscordButton.Left:Set(function() return self.Footer.Right() - LayoutHelpers.ScaleNumber(170) end)
-        self.FooterDiscordButton.OnClick = function()
-            OpenURL('http://discord.com/invite/3wvXGZHHFp')
+        self.FooterReportBugButton = UIUtil.CreateButtonWithDropshadow(self.Footer, '/BUTTON/medium/', LOC("<LOC lobui_0010_gaf>Report a bug"))
+        LayoutHelpers.AtVerticalCenterIn(self.FooterReportBugButton, self.Footer)
+        LayoutHelpers.DepthOverParent(self.FooterReportBugButton, self.Footer, 5)
+        LayoutHelpers.SetWidth(self.FooterReportBugButton, 150)
+        self.FooterReportBugButton.Left:Set(function() return self.Footer.Right() - LayoutHelpers.ScaleNumber(170) end)
+        self.FooterReportBugButton.OnClick = function()
+            OpenURL(self.discordUrl)
         end
 
         -- content
@@ -251,23 +254,10 @@ Changelog = ClassUI(Group) {
         local patch = data.gamePatches[index + 1]
 
         if patch then
-
-            if patch.hasPrettyGithubRelease then
-                self.FooterGithubButton:Enable()
-                self.FooterGithubButton.OnClick = function()
-                    OpenURL('http://gapforever2.github.io/patchnotes')
+            if patch.patchnoteUrl then
+                self.FooterPatchnotesButton.OnClick = function()
+                    OpenURL(self.patchnotesUrl .. patch.patchnoteUrl)
                 end
-            else
-                self.FooterGithubButton:Disable()
-            end
-
-            if patch.hasPrettyPatchnotes then
-                self.FooterPatchNotesButton:Enable()
-                self.FooterPatchNotesButton.OnClick = function()
-                    OpenURL('http://gapforever2.github.io/patchnotes')
-                end
-            else
-                self.FooterPatchNotesButton:Disable()
             end
 
             self.ContentPatchesList:SetSelection(index)
@@ -279,8 +269,8 @@ Changelog = ClassUI(Group) {
                 self.ContentNotesList:AddItem(line)
             end
         else
-            self.FooterGithubButton:Disable()
-            self.FooterPatchNotesButton:Disable()
+            self.FooterPatchnotesButton:Disable()
+            self.FooterWebsiteButton:Disable()
         end
     end,
 
@@ -289,7 +279,7 @@ Changelog = ClassUI(Group) {
     PopulatePatchList = function(self)
         self.ContentPatchesList:DeleteAllItems()
         for k, patch in data.gamePatches do
-            self.ContentPatchesList:AddItem(patch.version .. " - " .. patch.name)
+            self.ContentPatchesList:AddItem(patch.version .. LOC("<LOC lobui_0009_gaf> - GAF Balance"))
         end
     end,
 
