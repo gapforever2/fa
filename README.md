@@ -1,4 +1,4 @@
-в
+
 # About GAP Forever
 
 
