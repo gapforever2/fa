@@ -1,10 +1,9 @@
 local GameType = "GAF"
-
 local Commit = "GAF Balance"
+local Version = "7"
 
-local Version = "6"
----@alias PATCH "6"
----@alias VERSION "6"
+---@alias PATCH "7"
+---@alias VERSION "7"
 ---@return PATCH
 function GetVersion()
     LOG(string.format('Supreme Commander: Forged Alliance Lua version %s at %s (%s)', Version, GameType, Commit))
