@@ -28,6 +28,8 @@ defaultMessages = {
         RightPod = "Right Drone",
         Shield = "Shield",
         ShieldGeneratorField = "Shield Field",
+        Regen = "Shield Regen",
+        HeavyAntiMatterDeeKey = "Gun (Damage&Speed&Splash)",
     },
     cybran = {
         ResourceAllocation = "RAS",
