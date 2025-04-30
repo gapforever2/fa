@@ -23,8 +23,8 @@ Description = {
     ['uel0001-psg'] = "<LOC Unit_Description_0013> Creates a protective shield around the ACU. Requires Energy to run.",
     ['uel0001-led'] = "<LOC Unit_Description_0014> Engineering Drone acts as a secondary Engineer. Assists the ACU where applicable.",
     ['uel0001-red'] = "<LOC Unit_Description_0015> Adds a second Engineering Drone. Requires an initial Engineering Drone.",
-    ['uel0001-dse'] = "<LOC Unit_Description_0991> Adds to Personal Shield regeneration. Regeneration starts immediately after receiving damage.",
-    ['uel0001-hamc2'] = "<LOC Unit_Description_00088> +100 Main cannon damage, and increases its rate of fire and splash.",
+    ['uel0001-dse'] = "<LOC Unit_Description_a001> Adds to Personal Shield regeneration. Regeneration starts immediately after receiving damage.",
+    ['uel0001-hamc2'] = "<LOC Unit_Description_a002> +100 Main cannon damage, and increases its rate of fire and splash.",
 
     -- UEF -- Support Commander Units/Upgrades
     ['uel0301'] = "<LOC Unit_Description_0016> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer. ",
