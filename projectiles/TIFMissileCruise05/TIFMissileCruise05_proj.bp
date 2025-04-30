@@ -9,7 +9,7 @@ ProjectileBlueprint{
         "MISSILE",
         "NOSPLASHDAMAGE",
         "PROJECTILE",
-		"TACTICAL",
+        "TACTICAL",
         "UEF",
     },
     Defense = {
