@@ -170,7 +170,7 @@ UnitBlueprint{
             BallisticArc = "RULEUBA_LowArc",
             CollideFriendly = false,
             Damage = 360,
-            DamageRadius = 2,
+            DamageRadius = 1.3,
             DamageType = "Normal",
             DisplayName = "Quantum Cannon",
             FireTargetLayerCapsTable = {

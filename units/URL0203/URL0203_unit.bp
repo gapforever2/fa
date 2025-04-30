@@ -26,6 +26,7 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "TANK",
+        "STEALTH",
         "TECH2",
         "VISIBLETORECON",
     },
@@ -39,6 +40,7 @@ UnitBlueprint{
     Display = {
         Abilities = {
             "<LOC ability_torpedo>Torpedoes",
+            "<LOC ability_personalsonarstealth>Personal Sonar Stealth",
             "<LOC ability_amphibious>Amphibious",
         },
         Mesh = {
@@ -108,6 +110,7 @@ UnitBlueprint{
         UnitName = "<LOC url0203_name>Wagner",
     },
     Intel = {
+        SonarStealth = true,
         VisionRadius = 22,
         WaterVisionRadius = 20,
     },
@@ -128,7 +131,7 @@ UnitBlueprint{
         RotateOnSpotThreshold = 0.1,
         TurnRadius = 0,
         TurnRate = 90,
-        WaterSpeedMultiplier = 0.9,
+        WaterSpeedMultiplier = 1.25,
     },
     SelectionSizeX = 0.55,
     SelectionSizeZ = 0.6,
@@ -155,7 +158,7 @@ UnitBlueprint{
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
             Damage = 200,
-            DamageRadius = 0,
+            DamageRadius = 1.4,
             DamageType = "Normal",
             DisplayName = "Meson Rocket",
             FireTargetLayerCapsTable = {

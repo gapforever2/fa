@@ -258,10 +258,27 @@ UAL0001 = ClassUnit(ACUUnit) {
         elseif enh == 'HeatSink' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
             wep:ChangeRateOfFire(bp.NewRateOfFire or 2)
+            local wep = self:GetWeaponByLabel('RightDisruptor')
+            wep:ChangeMaxRadius(bp.NewMaxRadius or 30)
+            local oc = self:GetWeaponByLabel('OverCharge')
+            oc:ChangeMaxRadius(bp.NewMaxRadius or 30)
+            local aoc = self:GetWeaponByLabel('AutoOverCharge')
+            aoc:ChangeMaxRadius(bp.NewMaxRadius or 30)
+            local cd = self:GetWeaponByLabel('ChronoDampener')
+            cd:ChangeMaxRadius(bp.NewMaxRadius or 30)
         elseif enh == 'HeatSinkRemove' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
             local bpDisrupt = self:GetBlueprint().Weapon[1].RateOfFire
             wep:ChangeRateOfFire(bpDisrupt or 1)
+            local wep = self:GetWeaponByLabel('RightDisruptor')
+            local bpDisrupt = self:GetBlueprint().Weapon[1].MaxRadius
+            wep:ChangeMaxRadius(bpDisrupt or 22)
+            local oc = self:GetWeaponByLabel('OverCharge')
+            oc:ChangeMaxRadius(bpDisrupt or 22)
+            local aoc = self:GetWeaponByLabel('AutoOverCharge')
+            aoc:ChangeMaxRadius(bpDisrupt or 22)
+            local cd = self:GetWeaponByLabel('ChronoDampener')
+            cd:ChangeMaxRadius(bpDisrupt or 22)
         -- Enhanced Sensor Systems
         elseif enh == 'EnhancedSensors' then
             self:SetIntelRadius('Vision', bp.NewVisionRadius or 104)

@@ -17,8 +17,8 @@ UnitBlueprint{
         KTurn = 3,
         KTurnDamping = 3,
         LiftFactor = 7,
-        MaxAirspeed = 4,
-        MinAirspeed = 3,
+        MaxAirspeed = 7,
+        MinAirspeed = 4,
         StartTurnDistance = 5,
     },
     Audio = {
@@ -51,8 +51,8 @@ UnitBlueprint{
     Defense = {
         ArmorType = "Light",
         EconomyThreatLevel = 6,
-        Health = 50,
-        MaxHealth = 50,
+        Health = 75,
+        MaxHealth = 75,
     },
     Display = {
         Abilities = { "<LOC ability_engineeringsuite>Engineering Suite" },
@@ -69,10 +69,10 @@ UnitBlueprint{
     },
     Economy = {
         BuildCostEnergy = 1600,
-        BuildCostMass = 160,
+        BuildCostMass = 300,
         BuildRadius = 8,
-        BuildRate = 5,
-        BuildTime = 400,
+        BuildRate = 10,
+        BuildTime = 350,
         BuildableCategory = { "BUILTBYCOMMANDER UEF" },
         NaturalProducer = true,
     },

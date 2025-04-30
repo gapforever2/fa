@@ -9,7 +9,7 @@ defaultMessages = {
         Teleporter = "Teleporter",
         CrysalisBeam = "Gun (Range)",
         FAF_CrysalisBeamAdvanced = "Gun (Advanced Range)",
-        HeatSink = "Gun (Speed)",
+        HeatSink = "Gun (Speed&Range)",
         EnhancedSensors = "Sensors",
         Shield = "Shield",
         ShieldHeavy = "Shield Heavy",
@@ -28,6 +28,8 @@ defaultMessages = {
         RightPod = "Right Drone",
         Shield = "Shield",
         ShieldGeneratorField = "Shield Field",
+        Regen = "Shield Regen",
+        HeavyAntiMatterDeeKey = "Gun (Damage&Speed&Splash)",
     },
     cybran = {
         ResourceAllocation = "RAS",

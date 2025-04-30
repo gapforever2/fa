@@ -872,7 +872,7 @@ options = {
                 title = "<LOC OPTIONS_0226_gaf>Imba assist",
                 key = 'auto_abort_navigation',
                 type = 'toggle',
-                default = true,
+                default = false,
                 custom = {
                     states = {
                         { text = "<LOC _On>", key = true },
