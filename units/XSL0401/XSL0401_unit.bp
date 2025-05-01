@@ -207,7 +207,7 @@ UnitBlueprint{
         SkirtSizeZ = 6,
         StandUpright = true,
         TurnRadius = 3,
-        TurnRate = 40,
+        TurnRate = 60,
     },
     SelectionSizeX = 2.2,
     SelectionSizeZ = 1.6,
