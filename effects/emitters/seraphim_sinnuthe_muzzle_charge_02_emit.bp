@@ -1,8 +1,8 @@
 -- used by SDFSinnutheWeaponChargeMuzzleFlash, which is used by xsl0401
 EmitterBlueprint {
 	BlueprintId = 'seraphim_sinnuthe_muzzle_charge_02',
-	Lifetime = 25.00,
-	Repeattime = 25.00,
+	Lifetime = 10.00,
+	Repeattime = 10.00,
 	TextureFramecount = 1.00,
 	Blendmode = 1.00,
 	LocalVelocity = true,

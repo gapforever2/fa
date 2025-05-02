@@ -1,8 +1,8 @@
 -- used by SDFExperimentalPhasonProj01, xsl0401
 EmitterBlueprint {
 	BlueprintId = 'seraphim_experimental_phasonproj_muzzle_charge_01',
-	Lifetime = 5.00,
-	Repeattime = 5.00,
+	Lifetime = 1.00,
+	Repeattime = 1.00,
 	TextureFramecount = 1.00,
 	Blendmode = 3.00,
 	LocalVelocity = true,
