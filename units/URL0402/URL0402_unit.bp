@@ -290,7 +290,7 @@ UnitBlueprint{
             Label = "MainGun",
             LeadTarget = false,
             MaxRadius = 30,
-            MaximumBeamLength = 28,
+            MaximumBeamLength = 26,
             MinRadius = 4,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 1,
