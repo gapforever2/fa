@@ -1,7 +1,7 @@
 EmitterBlueprint {
 	BlueprintId = 'seraphim_experimental_phasonproj_muzzle_charge_03',
-	Lifetime = 22.00,
-	Repeattime = 22.00,
+	Lifetime = 3.00,
+	Repeattime = 3.00,
 	TextureFramecount = 1.00,
 	Blendmode = 1.00,
 	LocalVelocity = true,
