@@ -12,7 +12,7 @@ UnitBlueprint{
         KTurn = 1,
         KTurnDamping = 10,
         LiftFactor = 10,
-        MaxAirspeed = 9,
+        MaxAirspeed = 12,
         StartTurnDistance = 50,
     },
     Audio = {
