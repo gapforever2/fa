@@ -54,12 +54,15 @@ local groupDevColors = {
     ["bal"] = "8000ff",
     ["admin"] = "00ffff",
     ["yt"] = "00ffbf",
+	["bs"] = "ff4000",
 }
+
 local roleNames = {
-    ["Mod"] = "Moderator",
-    ["bal"] = "Balance Team",
-    ["admin"] = "Administrator",
+    ["Mod"] = "Moder",
+    ["bal"] = "BTeam",
+    ["admin"] = "Admin",
     ["yt"] = "YouTube",
+	["bs"] = "Boosty",
 }
 
 function GetAITypes()
@@ -2935,26 +2938,44 @@ function CreateSlotsUI(makeLabel)
         LayoutHelpers.SetWidth(avatar, COLUMN_WIDTHS[6])
         newSlot:AddChild(avatar)
 
-        -- Color
-        local colorSelector = BitmapCombo(newSlot, gameColors.PlayerColors, 1, true, nil, "UI_Tab_Rollover_01", "UI_Tab_Click_01")
+    -- Color
+        local colorSelector = BitmapCombo(
+            newSlot,
+            gameColors.PlayerColors,
+            1, true, nil,
+            "UI_Tab_Rollover_01", "UI_Tab_Click_01"
+        )
         newSlot.color = colorSelector
         newSlot:AddChild(colorSelector)
         LayoutHelpers.SetWidth(colorSelector, COLUMN_WIDTHS[7])
+
         colorSelector.OnClick = function(self, index)
+            local playerInfo = gameInfo.PlayerOptions[curRow]
+            local isHuman = playerInfo.Human
+            local isDev   = isHuman and groupDevColors[playerInfo.GroupRole] ~= nil
+
+            if isHuman and not isDev and index > 19 then
+                self:SetItem(playerInfo.PlayerColor)
+                AddChatText(LOC("<LOC lobui_0013_gaf>Color #" .. index .. " available only for Boosty subscribers and Staff."))
+
+                return
+            end
+
             if not lobbyComm:IsHost() then
                 lobbyComm:SendData(hostID, { Type = 'RequestColor', Color = index })
-                SetPlayerColor(gameInfo.PlayerOptions[curRow], index)
+                SetPlayerColor(playerInfo, index)
                 UpdateGame()
             else
                 if IsColorFree(index) then
                     lobbyComm:BroadcastData({ Type = 'SetColor', Color = index, Slot = curRow })
-                    SetPlayerColor(gameInfo.PlayerOptions[curRow], index)
+                    SetPlayerColor(playerInfo, index)
                     UpdateGame()
                 else
-                    self:SetItem(gameInfo.PlayerOptions[curRow].PlayerColor)
+                    self:SetItem(playerInfo.PlayerColor)
                 end
             end
         end
+
         colorSelector.OnEvent = defaultHandler
         Tooltip.AddControlTooltip(colorSelector, 'lob_color')
 
@@ -7494,10 +7515,36 @@ function InitHostUtils()
         end,
 
         KickObservers = function(reason)
-            for k,observer in gameInfo.Observers:pairs() do
-                lobbyComm:EjectPeer(observer.OwnerID, reason or "KickedByHost")
+            if not lobbyComm:IsHost() then
+                LOG("KickObservers: Not host, exiting.")
+                return
             end
-            gameInfo.Observers = WatchedValueArray(LobbyComm.maxPlayerSlots)
+
+            local localID = lobbyComm:GetLocalPlayerID()
+            local newObservers = WatchedValueArray(LobbyComm.maxPlayerSlots)
+
+            LOG("KickObservers: Starting observer kick process.")
+
+            for k, observer in gameInfo.Observers:pairs() do
+                LOG("KickObservers: Checking observer with OwnerID = " .. tostring(observer.OwnerID))
+
+                if observer.OwnerID == localID then
+                    LOG("KickObservers: Found self (host), preserving in observer list.")
+                    newObservers[k] = observer
+                else
+                    LOG("KickObservers: Kicking observer with OwnerID = " .. tostring(observer.OwnerID))
+                    lobbyComm:EjectPeer(observer.OwnerID, reason or "KickedByHost")
+                end
+            end
+
+            gameInfo.Observers = newObservers
+            LOG("KickObservers: Observer list updated.")
+            LOG("KickObservers: Final observer list:")
+            for _, obs in newObservers:pairs() do
+                LOG(" - Observer ID: " .. tostring(obs.OwnerID))
+            end
+
+            refreshObserverList()
         end
     }
 end

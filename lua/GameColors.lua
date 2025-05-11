@@ -69,7 +69,7 @@ GameColors = {
 
     -- Default color order used for lobbies/TMM if not otherwise specified. Tightly coupled
     -- with the ArmyColors and the PlayerColors tables.
-    LobbyColorOrder = { 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 }, -- rainbow-like color for Fearghal
+    LobbyColorOrder = { 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 }, -- rainbow-like color for Fearghal
 
     -- If you end up working with this file, suggestion to install the Color Highlight extension:
     -- - https://marketplace.visualstudio.com/items?itemName=naumovs.color-highlight
@@ -96,6 +96,13 @@ GameColors = {
         "ff616d7e", -- (17) grey
         "ffff88ff", -- (18) pink
         "ffff32ff", -- (19) new fuschia
+        "800080", -- (20) Purple
+        "FFD700", -- (21) Gold
+        "00BFFF", -- (22) Deep sky blue
+        "32CD32", -- (23) Lime green
+        "FF69B4", -- (24) Hot pink
+        "40E0D0", -- (25) Turquoise
+        "C0C0C0", -- (26) Silver
     },
 
     PlayerColors = {
@@ -118,6 +125,13 @@ GameColors = {
         "ff616d7e", -- (17) grey
         "ffff88ff", -- (18) pink
         "ffff32ff", -- (19) new fuschia
+		"800080", -- (20) Purple
+        "FFD700", -- (21) Gold
+        "00BFFF", -- (22) Deep sky blue
+        "32CD32", -- (23) Lime green
+        "FF69B4", -- (24) Hot pink
+        "40E0D0", -- (25) Turquoise
+        "C0C0C0", -- (26) Silver
     },
 
     TeamColorMode = {
