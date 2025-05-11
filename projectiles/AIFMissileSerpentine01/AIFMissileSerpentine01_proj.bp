@@ -39,14 +39,14 @@ ProjectileBlueprint{
     Physics = {
         Acceleration = 6,
         DestroyOnWater = true,
-        InitialSpeed = 2,
-        MaxSpeed = 12,
-        MaxZigZag = 4,
+        InitialSpeed = 8,
+        MaxSpeed = 24,
+        MaxZigZag = 10,
         TrackTarget = true,
         TrackTargetGround = true,
         TrackTargetGroundFuzziness = 0.5,
         TurnRate = 0,
         VelocityAlign = true,
-        ZigZagFrequency = 0.4,
+        ZigZagFrequency = 0.6,
     },
 }
