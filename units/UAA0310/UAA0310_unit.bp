@@ -90,9 +90,8 @@ UnitBlueprint{
         RegenRate = 15,
         Shield = {
             ImpactEffects = "AeonShieldHit01",
-            ImpactMesh = "/effects/entities/CzarShieldSection/CzarShieldSection_mesh",
-            ImpactMeshBig = "/effects/entities/CzarShieldSection/CzarShieldSectionBig_mesh",
-            Mesh = "/effects/entities/CzarShield/CzarShield_mesh",
+            OwnerShieldMesh = "/units/uaa0310/UAA0310_personalshield_mesh",
+            PersonalShield = true,
             RegenAssistMult = 60,
             ShieldEnergyDrainRechargeTime = 5,
             ShieldMaxHealth = 30000,
@@ -107,6 +106,7 @@ UnitBlueprint{
     },
     Display = {
         Abilities = {
+            "<LOC ability_personalshield>Personal Shield",
             "<LOC ability_aa>Anti-Air",
             "<LOC ability_carrier>Carrier",
             "<LOC ability_depthcharge>Depth Charges",
@@ -122,7 +122,7 @@ UnitBlueprint{
                     LODCutoff = 500,
                     Scrolling = true,
                     SecondaryName = "/units/uaa0310/uaa0310_secondary.dds",
-                    ShaderName = "AeonCZAR",
+                    ShaderName = "AeonPhaseShield",
                 },
                 {
                     LODCutoff = 1500,

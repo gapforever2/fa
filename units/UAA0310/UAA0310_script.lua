@@ -11,7 +11,7 @@ local AAAZealotMissileWeapon = aWeapons.AAAZealotMissileWeapon
 local AANDepthChargeBombWeapon = aWeapons.AANDepthChargeBombWeapon
 local AAATemporalFizzWeapon = aWeapons.AAATemporalFizzWeapon
 local explosion = import("/lua/defaultexplosions.lua")
-local CzarShield = import("/lua/shield.lua").CzarShield
+local CzarShield = import("/lua/shield.lua").PersonalShield
 
 local CreateAeonCZARBuildingEffects = import("/lua/effectutilities.lua").CreateAeonCZARBuildingEffects
 
