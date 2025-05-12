@@ -105,8 +105,8 @@ UnitBlueprint{
         UniformScale = 0.15,
     },
     Economy = {
-        BuildCostEnergy = 6000,
-        BuildCostMass = 300,
+        BuildCostEnergy = 5700,
+        BuildCostMass = 280,
         BuildTime = 2000,
     },
     Footprint = {
@@ -170,7 +170,7 @@ UnitBlueprint{
             DamageType = "Normal",
             DisplayName = "Kamikaze",
             DoTPulses = 6,
-            DoTTime = 2.9,
+            DoTTime = 3.7,
             EffectiveRadius = 0,
             FireTargetLayerCapsTable = {
                 Air = "Land|Seabed|Water",
