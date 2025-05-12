@@ -73,7 +73,7 @@ UnitBlueprint{
     Economy = {
         BuildCostEnergy = 6210000,
         BuildCostMass = 232875,
-        BuildTime = 115000,
+        BuildTime = 105000,
         RebuildBonusIds = { "xab2307" },
     },
     Footprint = {
