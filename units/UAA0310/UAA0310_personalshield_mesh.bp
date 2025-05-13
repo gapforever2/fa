@@ -2,7 +2,7 @@ MeshBlueprint{
     IconFadeInZoom = 130,
     LODs = {
         {
-            LODCutoff = 195,
+            LODCutoff = 1500,
             LookupName = "/effects/entities/PhaseShield/PhaseShieldLookup.dds",
             Scrolling = true,
             ShaderName = "AeonPhaseShield",
