@@ -59,7 +59,7 @@ local groupDevColors = {
 
 local roleNames = {
     ["Mod"] = "Moder",
-    ["bal"] = "BTeam",
+    ["bal"] = "Balance™",
     ["admin"] = "Admin",
     ["yt"] = "YouTube",
 	["bs"] = "Boosty",
