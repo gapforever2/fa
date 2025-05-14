@@ -78,7 +78,7 @@ GameColors = {
     -- Faction colours
     ArmyColors = {
         "FFe80a0a", -- (01) Cybran red
-        "ff901427", -- (02) dark red
+        "ff901427", -- (02) dark red,
         "FFFF873E", -- (03) Nomads orange
         "ffb76518", -- (04) new brown
         "ffa79602", -- (05) Sera golden
@@ -96,13 +96,14 @@ GameColors = {
         "ff616d7e", -- (17) grey
         "ffff88ff", -- (18) pink
         "ffff32ff", -- (19) new fuschia
-        "800080", -- (20) Purple
-        "FFD700", -- (21) Gold
+        "845494", -- (20) VIOLET
+        "FFBF00", -- (21) Gold
         "00BFFF", -- (22) Deep sky blue
-        "32CD32", -- (23) Lime green
+        "39FF14", -- (23) Neon Green
         "FF69B4", -- (24) Hot pink
-        "40E0D0", -- (25) Turquoise
-        "C0C0C0", -- (26) Silver
+        "B1DA1536", -- (25) Raspberry
+        "052D55", -- (26) Dark blue
+        "C54D0D77", -- (27) the great
     },
 
     PlayerColors = {
@@ -125,13 +126,14 @@ GameColors = {
         "ff616d7e", -- (17) grey
         "ffff88ff", -- (18) pink
         "ffff32ff", -- (19) new fuschia
-		"800080", -- (20) Purple
-        "FFD700", -- (21) Gold
+        "845494", -- (20) VIOLET
+        "FFBF00", -- (21) Gold
         "00BFFF", -- (22) Deep sky blue
-        "32CD32", -- (23) Lime green
+        "39FF14", -- (23) Neon green
         "FF69B4", -- (24) Hot pink
-        "40E0D0", -- (25) Turquoise
-        "C0C0C0", -- (26) Silver
+        "B1DA1536", -- (25) Raspberry
+        "052D55", -- (26) Dark blue
+        "C54D0D77", -- (27) the great
     },
 
     TeamColorMode = {
