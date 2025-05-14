@@ -32,7 +32,7 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Structure",
-        EconomyThreatLevel = 500,
+        EconomyThreatLevel = 581,
         Health = 13500,
         MaxHealth = 13500,
     },
@@ -149,7 +149,7 @@ UnitBlueprint{
             CameraShakeMin = 0,
             CameraShakeRadius = 50,
             CollideFriendly = false,
-            Damage = 5000,
+            Damage = 8600,
             DamageFriendly = true,
             DamageRadius = 7,
             DamageType = "Normal",
@@ -160,7 +160,7 @@ UnitBlueprint{
                 Land = "Land|Water|Seabed",
                 Water = "Land|Water|Seabed",
             },
-            FiringRandomness = 0.535,
+            FiringRandomness = 0.480,
             FiringTolerance = 2,
             Label = "MainGun",
             MaxRadius = 825,
@@ -188,7 +188,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_IndirectFire",
-            RateOfFire = 10/100, --10/integer interval in ticks
+            RateOfFire = 10/148, --10/integer interval in ticks
             RenderFireClock = true,
             TargetPriorities = {
                 "EXPERIMENTAL MASSFABRICATION",
