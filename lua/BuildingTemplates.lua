@@ -468,11 +468,11 @@ BuildingTemplates =
         -- -Shield Defense
         {
             'T2ShieldDefense',
-            'uab4202',
+            'uab42022',
         },
         {
             'T3ShieldDefense',
-            'uab4301',
+            'uab43012',
         },
         -- -Missile Defense
         {

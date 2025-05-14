@@ -13,11 +13,6 @@ UnitBlueprint{
     AverageDensity = 150,
     BuildIconSortPriority = 160,
     Categories = {
-        "AEON",
-        "BUILTBYTIER2COMMANDER",
-        "BUILTBYTIER2ENGINEER",
-        "BUILTBYTIER3COMMANDER",
-        "BUILTBYTIER3ENGINEER",
         "DEFENSE",
         "DRAGBUILD",
         "OVERLAYDEFENSE",

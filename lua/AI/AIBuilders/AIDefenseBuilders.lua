@@ -1003,6 +1003,19 @@ BuilderGroup {
         },
         BuilderType = 'Any',
     },
+    Builder {
+        BuilderName = 'SA ShildUpgrade',
+        PlatoonTemplate = 'T2ShildUpgrade',
+        Priority = 200,
+        BuilderConditions = {
+            { UCBC, 'HaveGreaterThanUnitsWithCategory', { 0, categories.SHIELD * categories.DEFENSE * categories.TECH2 } },
+            { UCBC, 'HaveLessThanUnitsInCategoryBeingBuilt', { 1, categories.SHIELD * categories.DEFENSE * categories.TECH3 } },
+            { EBC, 'GreaterThanEconIncome', { 2.6, 60 } },
+            { EBC, 'GreaterThanEconTrend', { 0.0, 0.0 } },
+        },
+        FormRadius = 10000,
+        BuilderType = 'Any',
+    },
 }
 
 BuilderGroup {

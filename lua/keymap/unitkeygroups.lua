@@ -621,7 +621,7 @@ unitkeygroups = {
         "xsb4202",
         "urb4202",
         "ueb4202",
-        "uab4202",
+        "uab42022",
     },
     ["Stealth_Field_Generator"] = {
         "xsb4203",
@@ -633,7 +633,7 @@ unitkeygroups = {
         "xsb4301",
         "urb4206",
         "ueb4301",
-        "uab4301",
+        "uab43012",
     },
     ["Strategic_Missile_Defense"] = {
         "xsb4302",

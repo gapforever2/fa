@@ -378,7 +378,7 @@ buildingTab = {
 "xsb4202",
 "urb4202",
 "ueb4202",
-"uab4202",},
+"uab42022",},
 ["Stealth_Field_Generator"] = {
 "xsb4203",
 "urb4203",
@@ -387,7 +387,7 @@ buildingTab = {
 ["Heavy_Shield_Generator"] = {
 "xsb4301",
 "ueb4301",
-"uab4301",},
+"uab43012",},
 ["Strategic_Missile_Defense"] = {
 "xsb4302",
 "urb4302",

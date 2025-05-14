@@ -11417,7 +11417,7 @@ Scenario = {
                                                 Orientation = { 0.000000, 0.000000, 0.000000 },
                                             },
                                             ['UNIT_765'] = {
-                                                type = 'uab4202',
+                                                type = 'uab42022',
                                                 orders = '',
                                                 platoon = '',
                                                 Position = { 511.500000, 18.210938, 149.500000 },
