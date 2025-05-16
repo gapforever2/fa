@@ -4179,7 +4179,7 @@ float4 SeraphimPhaseShieldPS( VERTEXNORMAL_VERTEX vertex ) : COLOR
     float4 lookup3 = tex2D( secondarySampler, tc3);
 
     float electricity =  lookup.r * lookup2.b * 14;
-    float4 baseshellcolor = float4( 0.2, 0.8, 0.8, 1);
+    float4 baseshellcolor = float4( 0.425, 0.76274 ,1.0, 1);
     float4 glowpulse = float4(lookup3.ggg, min(lookup3.g, 3) + electricity );
 
     return (baseshellcolor  + electricity) * glowpulse;
