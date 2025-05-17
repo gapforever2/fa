@@ -509,6 +509,7 @@ UEL0001 = ClassUnit(ACUUnit) {
             aoc:ChangeMaxRadius(bpDisrupt or 22)
         elseif enh == 'HeavyAntiMatterDeeKey' then
             local wep = self:GetWeaponByLabel('RightZephyr')
+            wep:ChangeProjectileBlueprint(bp.NewProjectileId)
             wep:AddDamageRadiusMod(bp.NewDamageRadius or 1)
             wep:AddDamageMod(bp.AdditionalDamage)
             wep:ChangeRateOfFire(bp.NewRateOfFire or 1.5)
@@ -516,9 +517,10 @@ UEL0001 = ClassUnit(ACUUnit) {
             local bp = self:GetBlueprint().Enhancements['HeavyAntiMatterDeeKey']
             if not bp then return end
             local wep = self:GetWeaponByLabel('RightZephyr')
+            wep:ChangeProjectileBlueprint(bp.ProjectileId)
             wep:AddDamageRadiusMod(-bp.NewDamageRadius or 1)
             wep:ChangeRateOfFire(bp.RateOfFire or 1)
-            wep:AddDamageMod(-200)
+            wep:AddDamageMod(-bp.AllDamageModAdd)
             local bpDisrupt = self:GetBlueprint().Weapon[1].MaxRadius
             wep:ChangeMaxRadius(bpDisrupt or 22)
             local bpDisruptRateOfFire = self:GetBlueprint().Weapon[1].RateOfFire

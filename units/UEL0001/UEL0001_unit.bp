@@ -342,6 +342,7 @@ UnitBlueprint{
         },
         HeavyAntiMatterDeeKey = {
             AdditionalDamage = 100,
+            AllDamageModAdd = 200,
             BuildCostEnergy = 120000,
             BuildCostMass = 2100,
             BuildTime = 3500,
@@ -350,7 +351,9 @@ UnitBlueprint{
             Prerequisite = "HeavyAntiMatterCannon",
             NewMaxRadius = 30,
             NewRateOfFire = 1.5,
-            NewDamageRadius = 1,
+            NewDamageRadius = 1.5,
+            ProjectileId = "/projectiles/LaserBotTerran01/LaserBotTerran01_proj.bp",
+            NewProjectileId = "/projectiles/IonizedPlasmaCanon01/IonizedPlasmaCanon01_proj.bp",
             ShowBones = { "Right_Upgrade" },
             Slot = "RCH",
             UpgradeEffectBones = {
