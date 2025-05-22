@@ -69,7 +69,7 @@ GameColors = {
 
     -- Default color order used for lobbies/TMM if not otherwise specified. Tightly coupled
     -- with the ArmyColors and the PlayerColors tables.
-    LobbyColorOrder = { 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26 }, -- rainbow-like color for Fearghal
+    LobbyColorOrder = { 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 }, -- rainbow-like color for Fearghal
 
     -- If you end up working with this file, suggestion to install the Color Highlight extension:
     -- - https://marketplace.visualstudio.com/items?itemName=naumovs.color-highlight
@@ -77,63 +77,67 @@ GameColors = {
 
     -- Faction colours
     ArmyColors = {
-        "FFe80a0a", -- (01) Cybran red
-        "ff901427", -- (02) dark red,
+       "FFe80a0a", -- (01) Cybran red
+        "7c0000", -- (02) dark red
         "FFFF873E", -- (03) Nomads orange
-        "ffb76518", -- (04) new brown
+        "914805", -- (04) new brown
         "ffa79602", -- (05) Sera golden
         "fffafa00", -- (06) new yellow
-        "ff9fd802", -- (07) Order Green
+        "adff77", -- (07) Order Green
         "ff40bf40", -- (08) mid green
-        "ff2e8b57", -- (09) new green
+        "257100", -- (09) new green
         "FF2F4F4F", -- (10) olive (dark green)
-        "ff436eee", -- (11) new blue1
-        "FF2929e1", -- (12) UEF blue
-        "FF5F01A7", -- (13) dark purple
+        "3D66E2", -- (11) new blue1
+        "3544C9", -- (12) UEF blue
+        "9E18D3", -- (13) dark purple
         "ff9161ff", -- (14) purple
         "ff66ffcc", -- (15) aqua
         "ffffffff", -- (16) white
         "ff616d7e", -- (17) grey
         "ffff88ff", -- (18) pink
-        "ffff32ff", -- (19) new fuschia
-        "845494", -- (20) VIOLET
+        "EC0BEC", -- (19) new fuschia
+        "26018B", -- (20) VIOLET
         "FFBF00", -- (21) Gold
         "00BFFF", -- (22) Deep sky blue
-        "39FF14", -- (23) Neon Green
-        "FF69B4", -- (24) Hot pink
-        "B1DA1536", -- (25) Raspberry
-        "052D55", -- (26) Dark blue
-        "C54D0D77", -- (27) the great
+        "26FF00", -- (23) Neon green
+        "FF5E00", -- (24) Hot pink
+        "EAFF004C", -- (25) Raspberry
+        "09498A", -- (26) dark blue
+        "FF009D", -- (27) pinkpink
+        "660066", -- (28) The Great
+        "00FFAA", -- (29) new turquoise
     },
 
     PlayerColors = {
         "FFe80a0a", -- (01) Cybran red
-        "ff901427", -- (02) dark red
+        "7c0000", -- (02) dark red
         "FFFF873E", -- (03) Nomads orange
-        "ffb76518", -- (04) new brown
+        "914805", -- (04) new brown
         "ffa79602", -- (05) Sera golden
         "fffafa00", -- (06) new yellow
-        "ff9fd802", -- (07) Order Green
+        "adff77", -- (07) Order Green
         "ff40bf40", -- (08) mid green
-        "ff2e8b57", -- (09) new green
+        "257100", -- (09) new green
         "FF2F4F4F", -- (10) olive (dark green)
-        "ff436eee", -- (11) new blue1
-        "FF2929e1", -- (12) UEF blue
-        "FF5F01A7", -- (13) dark purple
+        "3D66E2", -- (11) new blue1
+        "3544C9", -- (12) UEF blue
+        "9E18D3", -- (13) dark purple
         "ff9161ff", -- (14) purple
         "ff66ffcc", -- (15) aqua
         "ffffffff", -- (16) white
         "ff616d7e", -- (17) grey
         "ffff88ff", -- (18) pink
-        "ffff32ff", -- (19) new fuschia
-        "845494", -- (20) VIOLET
+        "EC0BEC", -- (19) new fuschia
+		"26018B", -- (20) VIOLET
         "FFBF00", -- (21) Gold
         "00BFFF", -- (22) Deep sky blue
-        "39FF14", -- (23) Neon green
-        "FF69B4", -- (24) Hot pink
-        "B1DA1536", -- (25) Raspberry
-        "052D55", -- (26) Dark blue
-        "C54D0D77", -- (27) the great
+        "26FF00", -- (23) Neon green
+        "FF5E00", -- (24) Hot pink
+        "EAFF004C", -- (25) Raspberry
+        "09498A", -- (26) dark blue
+        "FF009D", -- (27) pinkpink
+        "660066", -- (28) The Great
+        "00FFAA", -- (29) new turquoise
     },
 
     TeamColorMode = {
