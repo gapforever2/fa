@@ -47,8 +47,8 @@ UnitBlueprint{
         AirThreatLevel = 1,
         ArmorType = "Normal",
         EconomyThreatLevel = 46,
-        Health = 9000,
-        MaxHealth = 9000,
+        Health = 8500,
+        MaxHealth = 8500,
         SubThreatLevel = 3,
         SurfaceThreatLevel = 23,
     },
@@ -232,7 +232,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = true,
             RangeCategory = "UWRC_DirectFire",
-            RateOfFire = 10/36, --10/integer interval in ticks
+            RateOfFire = 10/38, --10/integer interval in ticks
             SlavedToBody = true,
             SlavedToBodyArcRange = 135,
             TargetPriorities = {
@@ -299,7 +299,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = true,
             RangeCategory = "UWRC_DirectFire",
-            RateOfFire = 10/36, --10/integer interval in ticks
+            RateOfFire = 10/38, --10/integer interval in ticks
             SlavedToBody = true,
             SlavedToBodyArcRange = 135,
             TargetPriorities = {
