@@ -616,7 +616,7 @@ UnitBlueprint{
         },
         {
             AboveWaterTargetsOnly = true,
-            Damage = 5000,
+            Damage = 6000,
             DamageFriendly = true,
             DamageRadius = 8,
             DamageType = "Normal",
