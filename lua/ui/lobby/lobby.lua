@@ -43,7 +43,7 @@ local JSON = import("/lua/system/dkson.lua").json
 local Changelog = import("/lua/ui/lobby/changelog.lua")
 local UTF =  import("/lua/utf.lua")
 -- Uveso - aitypes inside aitypes.lua are now also available as a function.
-local aiTypes
+local aitypes
 local AIKeys = {}
 local AIStrings = {}
 local AITooltips = {}
@@ -66,8 +66,8 @@ function GetAITypes()
     AIKeys = {}
     AIStrings = {}
     AITooltips = {}
-    aiTypes = import("/lua/ui/lobby/aitypes.lua").GetAItypes()
-    for _, aiData in aiTypes do
+    aitypes = import("/lua/ui/lobby/aitypes.lua").GetAItypes()
+    for _, aiData in aitypes do
         table.insert(AIKeys, aiData.key)
         table.insert(AIStrings, aiData.name)
         table.insert(AITooltips, 'aitype_'..aiData.key)

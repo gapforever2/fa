@@ -161,6 +161,7 @@ local function PostProcessUnit(unit)
     local isDummy = unit.CategoriesHash['DUMMYUNIT']
     local isLand = unit.CategoriesHash['LAND']
     local isAir = unit.CategoriesHash['AIR']
+    local isNaval = unit.CategoriesHash['NAVAL']
     local isBomber = unit.CategoriesHash['BOMBER']
     local isGunship = unit.CategoriesHash['GROUNDATTACK'] and isAir and (not isBomber)
     local isTransport = unit.CategoriesHash['TRANSPORTATION']
@@ -170,6 +171,8 @@ local function PostProcessUnit(unit)
     local isTech2 = unit.CategoriesHash['TECH2']
     local isTech3 = unit.CategoriesHash['TECH3']
     local isExperimental = unit.CategoriesHash['EXPERIMENTAL']
+    local isACU = unit.CategoriesHash['COMMAND']
+    local isSACU = unit.CategoriesHash['SUBCOMMANDER']
 
     -- do not touch guard scan radius values of engineer-like units, as it is the reason we have
     -- the factory-reclaim-bug that we're keen in keeping that at this point
@@ -624,7 +627,7 @@ end
 --- the drones do not need to go to the shore anymore, they now look for
 --- a 'free build location' near the naval factory on water
 --- See also:
---- 
+---
 --- - https://github.com/FAForever/fa/pull/5372
 --- - https://github.com/FAForever/FA-Binary-Patches/pull/20
 ---@param unit UnitBlueprint
@@ -805,7 +808,7 @@ end
 
 --- Feature: Unit weight based on the maximum health of a unit
 ---
---- Affects the behavior of units when they bump into each other. Units 
+--- Affects the behavior of units when they bump into each other. Units
 --- with more weight push units with less weight. As a result units with
 --- more health will receive less to no pushback from units with less health.
 ---@param unit UnitBlueprint
