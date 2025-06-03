@@ -153,7 +153,7 @@ UnitBlueprint{
             FiringRandomness = 0.2,
             FiringTolerance = 1,
             Label = "AAGun",
-            MaxRadius = 23,
+            MaxRadius = 25,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 1,
             MuzzleVelocity = 45,
@@ -175,7 +175,7 @@ UnitBlueprint{
             RackSalvoReloadTime = 0,
             RackSalvoSize = 2,
             RackSlavedToTurret = true,
-            RangeCategory = "UWRC_AntiAir",
+            RangeCategory = "UWRC_DirectFire",
             RateOfFire = 10/10, --10/integer interval in ticks
             TargetPriorities = {
                 "TECH1 MOBILE",

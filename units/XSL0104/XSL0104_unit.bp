@@ -267,7 +267,7 @@ UnitBlueprint{
             FiringRandomness = 0,
             FiringTolerance = 0.5,
             Label = "AAGun",
-            MaxRadius = 23,
+            MaxRadius = 25,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 2,
             MuzzleVelocity = 45,
@@ -292,7 +292,7 @@ UnitBlueprint{
             RackSalvoReloadTime = 0,
             RackSalvoSize = 1,
             RackSlavedToTurret = true,
-            RangeCategory = "UWRC_AntiAir",
+            RangeCategory = "UWRC_DirectFire",
             RateOfFire = 10/5, --10/integer interval in ticks
             TargetPriorities = {
                 "AIR MOBILE TECH3 BOMBER",
