@@ -12,7 +12,7 @@ UnitBlueprint{
         KTurn = 1,
         KTurnDamping = 10,
         LiftFactor = 10,
-        MaxAirspeed = 12,
+        MaxAirspeed = 10.5,
         StartTurnDistance = 50,
     },
     Audio = {
@@ -73,7 +73,7 @@ UnitBlueprint{
     Economy = {
         BuildCostEnergy = 144000 ,
         BuildCostMass = 9000,
-        BuildTime = 27000,
+        BuildTime = 30000,
     },
     Footprint = {
         MaxSlope = 0.25,
@@ -94,7 +94,7 @@ UnitBlueprint{
         Icon = "air",
     },
     Intel = {
-        OmniRadius = 60,
+        OmniRadius = 50,
         RadarRadius = 200,
         VisionRadius = 50,
     },
@@ -147,7 +147,7 @@ UnitBlueprint{
             BeamCollisionDelay = 0,
             BeamLifetime = 8,
             CollideFriendly = false,
-            Damage = 55,
+            Damage = 65,
             DamageFriendly = true,
             DamageRadius = 1,
             DamageType = "Normal",
