@@ -16,6 +16,9 @@ UEL0104 = ClassUnit(TLandUnit) {
         AAGun = ClassWeapon(TAALinkedRailgun) {
             FxMuzzleFlashScale = 0.25,
         },
+        GroundGun = ClassWeapon(TAALinkedRailgun) {
+            FxMuzzleFlashScale = 0.25,
+        },
     },
 
 }

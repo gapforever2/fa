@@ -16,6 +16,7 @@ UAL0104 = ClassUnit(AHoverLandUnit) {
 
     Weapons = {
         AAGun = ClassWeapon(AAASonicPulseBatteryWeapon) {},
+        GroundGun = ClassWeapon(AAASonicPulseBatteryWeapon) {},
     },
 }
 

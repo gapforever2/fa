@@ -14,6 +14,7 @@ local SAAShleoCannonWeapon = import("/lua/seraphimweapons.lua").SAAShleoCannonWe
 XSL0104 = ClassUnit(SWalkingLandUnit) {
     Weapons = {
         AAGun = ClassWeapon(SAAShleoCannonWeapon) {},
+        GroundGun = ClassWeapon(SAAShleoCannonWeapon) {},
     },
 }
 TypeClass = XSL0104
