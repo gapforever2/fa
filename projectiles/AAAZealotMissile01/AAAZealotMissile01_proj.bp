@@ -30,7 +30,7 @@ ProjectileBlueprint{
     Interface = { HelpText = 0 },
     Physics = {
         Acceleration = 6,
-        DestroyOnWater = true,
+        DestroyOnWater = false,
         InitialSpeed = 30,
         LeadTarget = false,
         Lifetime = 4,
