@@ -14,6 +14,7 @@ UnitBlueprint{
         "ARTILLERY",
         "BUILTBYTIER3FACTORY",
         "INDIRECTFIRE",
+        "HOVER",
         "LAND",
         "MOBILE",
         "OVERLAYINDIRECTFIRE",
@@ -33,6 +34,18 @@ UnitBlueprint{
         SurfaceThreatLevel = 3,
     },
     Display = {
+        Abilities = { "<LOC ability_hover>Hover" },
+        IdleEffects = {
+            Land = {
+                Effects = {
+                    {
+                        Bones = { "0" },
+                        Offset = { 0, -0.05, 0 },
+                        Type = "AeonGroundFX01",
+                    },
+                },
+            },
+        },
         Mesh = {
             IconFadeInZoom = 130,
             LODs = {
@@ -56,17 +69,19 @@ UnitBlueprint{
                         Bones = { 0 },
                         Type = "GroundKickup01",
                     },
+                    {
+                        Bones = { 0 },
+                        Offset = { 0, -0.05, 0 },
+                        Type = "AeonGroundFX01",
+                    },
                 },
-                Treads = {
-                    ScrollTreads = false,
-                    TreadMarks = {
-                        {
-                            BoneName = 0,
-                            TreadMarks = "tank_treads002_albedo",
-                            TreadMarksInterval = 0.1,
-                            TreadMarksSizeX = 0.9,
-                            TreadMarksSizeZ = 0.6,
-                        },
+            },
+            Water = {
+                Effects = {
+                    {
+                        Bones = { 0 },
+                        Scale = 0.5,
+                        Type = "BackWake",
                     },
                 },
             },
@@ -92,7 +107,7 @@ UnitBlueprint{
             RULEUCC_Stop = true,
         },
         FactionName = "Aeon",
-        Icon = "land",
+        Icon = "amph",
         UnitName = "<LOC ual0304_name>Serenity",
     },
     Intel = { VisionRadius = 26 },
@@ -102,6 +117,7 @@ UnitBlueprint{
     Physics = {
         BackUpDistance = 10,
         DragCoefficient = 0.2,
+        Elevation = 0.3,
         MaxAcceleration = 2.3,
         MaxBrake = 2.3,
         MaxSpeed = 2.3,
@@ -110,11 +126,13 @@ UnitBlueprint{
         MeshExtentsX = 1.5,
         MeshExtentsY = 0.75,
         MeshExtentsZ = 2.25,
-        MotionType = "RULEUMT_Land",
+        MotionType = "RULEUMT_Hover",
+        RotateBodyWhileMoving = true,
         RotateOnSpot = false,
-        RotateOnSpotThreshold = 0.1,
-        TurnRadius = 0,
-        TurnRate = 75,
+        TurnFacingRate = 75,
+        TurnRadius = 2,
+        TurnRate = 90,
+        WaterSpeedMultiplier = 0.9,
     },
     SelectionCenterOffsetZ = -0.2,
     SelectionSizeX = 0.85,

@@ -8,11 +8,11 @@
 --**  Copyright © 2005 Gas Powered Games, Inc.  All rights reserved.
 --****************************************************************************
 
-local ALandUnit = import("/lua/aeonunits.lua").ALandUnit
+local AHoverLandUnit = import("/lua/aeonunits.lua").AHoverLandUnit
 local AIFArtillerySonanceShellWeapon = import("/lua/aeonweapons.lua").AIFArtillerySonanceShellWeapon
 
----@class UAL0304 : ALandUnit
-UAL0304 = ClassUnit(ALandUnit) {
+---@class UAL0304 : AHoverLandUnit
+UAL0304 = ClassUnit(AHoverLandUnit) {
     Weapons = {
         MainGun = ClassWeapon(AIFArtillerySonanceShellWeapon) {
             FxMuzzleFlash = { 
