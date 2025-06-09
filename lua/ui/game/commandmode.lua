@@ -640,7 +640,7 @@ end
 local function OnAttackIssued(command)
     -- Area attack dragger, command mode only
     if command.Target.Type == 'Position' and modeData.name == "RULEUCC_Attack" then
-        import("/lua/ui/game/hotkeys/area-attack-order.lua").AreaAttackOrder(command)
+        --import("/lua/ui/game/hotkeys/area-attack-order.lua").AreaAttackOrder(command)
     end
 end
 
