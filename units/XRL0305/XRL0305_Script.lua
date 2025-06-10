@@ -10,6 +10,7 @@
 local CWalkingLandUnit = import("/lua/cybranunits.lua").CWalkingLandUnit
 local CWeapons = import("/lua/cybranweapons.lua")
 local CDFHeavyDisintegratorWeapon = CWeapons.CDFHeavyDisintegratorWeapon
+local TargetingLaser = import("/lua/kirvesweapons.lua").TargetingLaser
 local CANNaniteTorpedoWeapon = import("/lua/cybranweapons.lua").CANNaniteTorpedoWeapon
 local CIFSmartCharge = import("/lua/cybranweapons.lua").CIFSmartCharge
 
@@ -17,7 +18,12 @@ local CIFSmartCharge = import("/lua/cybranweapons.lua").CIFSmartCharge
 XRL0305 = ClassUnit(CWalkingLandUnit)
 {
     Weapons = {
-        Disintigrator = ClassWeapon(CDFHeavyDisintegratorWeapon) {},
+        TargetPainter = ClassWeapon(TargetingLaser) {
+            FxMuzzleFlash = {'/effects/emitters/particle_cannon_muzzle_02_emit.bp'},
+        },
+        Disintigrator = ClassWeapon(CDFHeavyDisintegratorWeapon) {
+            DisabledFiringBones = { 'Torso' },
+        },
         Torpedo = ClassWeapon(CANNaniteTorpedoWeapon) {},
         AntiTorpedo = ClassWeapon(CIFSmartCharge) {},
     },
