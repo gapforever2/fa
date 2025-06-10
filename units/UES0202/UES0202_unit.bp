@@ -208,8 +208,8 @@ UnitBlueprint{
             Label = "CruiseMissile",
             MaxRadius = 150,
             MinRadius = 20,
-            MuzzleSalvoDelay = 1.5,
-            MuzzleSalvoSize = 4,
+            MuzzleSalvoDelay = 0.8,
+            MuzzleSalvoSize = 8,
             MuzzleVelocity = 3,
             NotExclusive = true,
             ProjectileId = "/projectiles/TIFMissileCruise04/TIFMissileCruise04_proj.bp",
@@ -256,7 +256,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_IndirectFire",
-            RateOfFire = 10/100, --10/integer interval in ticks
+            RateOfFire = 10/160, --10/integer interval in ticks
             RenderFireClock = true,
             TargetPriorities = {
                 "NAVAL MOBILE",

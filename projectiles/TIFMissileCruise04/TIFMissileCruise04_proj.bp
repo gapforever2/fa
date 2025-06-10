@@ -13,8 +13,8 @@ ProjectileBlueprint{
         "UEF",
     },
     Defense = {
-        Health = 2,
-        MaxHealth = 2,
+        Health = 1,
+        MaxHealth = 1,
     },
     DesiredShooterCap = 2,
     Display = {
