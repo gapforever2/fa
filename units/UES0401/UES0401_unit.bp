@@ -319,7 +319,7 @@ UnitBlueprint{
             MaxRadius = 80,
             MuzzleSalvoDelay = 0.1,
             MuzzleSalvoSize = 12,
-            MuzzleVelocity = 10,
+            MuzzleVelocity = 8,
             ProjectileId = "/projectiles/TANAnglerTorpedo02/TANAnglerTorpedo02_proj.bp",
             ProjectileLifetime = 9,
 			ProjectilesPerOnFire = 2,
