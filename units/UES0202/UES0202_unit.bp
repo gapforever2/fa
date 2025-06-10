@@ -198,7 +198,7 @@ UnitBlueprint{
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
             CountedProjectile = false,
-            Damage = 300,
+            Damage = 350,
             DamageFriendly = true,
             DamageRadius = 2,
             DamageType = "Normal",
@@ -208,9 +208,9 @@ UnitBlueprint{
             Label = "CruiseMissile",
             MaxRadius = 150,
             MinRadius = 20,
-            MuzzleSalvoDelay = 1.5,
+            MuzzleSalvoDelay = 0.001,
             MuzzleSalvoSize = 4,
-            MuzzleVelocity = 3,
+            MuzzleVelocity = 4,
             NotExclusive = true,
             ProjectileId = "/projectiles/TIFMissileCruise04/TIFMissileCruise04_proj.bp",
             ProjectileLifetime = 20,
@@ -256,7 +256,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_IndirectFire",
-            RateOfFire = 10/100, --10/integer interval in ticks
+            RateOfFire = 10/85, --10/integer interval in ticks
             RenderFireClock = true,
             TargetPriorities = {
                 "NAVAL MOBILE",

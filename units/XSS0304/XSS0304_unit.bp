@@ -175,7 +175,7 @@ UnitBlueprint{
         MaxBrake = 4.6,
         MaxSpeed = 4.6,
         MaxSpeedReverse = 4.6,
-        MaxSteerForce = 4.5,
+        MaxSteerForce = 4.6,
         MeshExtentsX = 0.6,
         MeshExtentsY = 0.65,
         MeshExtentsZ = 2.5,
@@ -208,7 +208,7 @@ UnitBlueprint{
             },
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
-            Damage = 280,
+            Damage = 290,
             DamageType = "Normal",
             DisplayName = "Uall Cavitation Torpedo",
             FireTargetLayerCapsTable = {
@@ -220,7 +220,7 @@ UnitBlueprint{
             MaxRadius = 65,
             MuzzleSalvoDelay = 0.8,
             MuzzleSalvoSize = 3,
-            MuzzleVelocity = 8.1,
+            MuzzleVelocity = 8.2,
             ProjectileId = "/projectiles/SANUallCavitationTorpedo04/SANUallCavitationTorpedo04_proj.bp",
             ProjectileLifetime = 7,
             RackBones = {
