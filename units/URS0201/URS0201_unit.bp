@@ -249,7 +249,7 @@ UnitBlueprint{
     LifeBarSize = 1.5,
     Physics = {
         AltMotionType = "RULEUMT_Water",
-        BackUpDistance = 10,
+        BackUpDistance = 35,
         CatchUpAcc = 10,
         DragCoefficient = 0.2,
         LandSpeedMultiplier = 0.5,
@@ -258,7 +258,7 @@ UnitBlueprint{
         MaxAcceleration = 5,
         MaxBrake = 5,
         MaxSpeed = 5,
-        MaxSpeedReverse = 5,
+        MaxSpeedReverse = 4.4,
         MaxSteerForce = 5,
         MotionType = "RULEUMT_AmphibiousFloating",
         TurnRadius = 15,
