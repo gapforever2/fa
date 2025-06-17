@@ -24,16 +24,20 @@ local Buff = import("/lua/sim/buff.lua")
 local CAAMissileNaniteWeapon = CWeapons.CAAMissileNaniteWeapon
 local CDFLaserDisintegratorWeapon = CWeapons.CDFLaserDisintegratorWeapon02
 local SCUDeathWeapon = import("/lua/sim/defaultweapons.lua").SCUDeathWeapon
+local CStructureUnit = import('/lua/cybranunits.lua').CStructureUnit
+local CDFParticleCannonWeapon = import('/lua/cybranweapons.lua').CDFParticleCannonWeapon
+
 
 ---@class URL0301 : CCommandUnit
----@field HasStealthEnh? boolean
----@field HasCloakEnh? boolean
 URL0301 = ClassUnit(CCommandUnit) {
     LeftFoot = 'Left_Foot02',
     RightFoot = 'Right_Foot02',
 
     Weapons = {
         DeathWeapon = ClassWeapon(SCUDeathWeapon) {},
+        Laser = Class(CDFParticleCannonWeapon) {
+            FxMuzzleFlash = {'/effects/emitters/particle_cannon_muzzle_02_emit.bp'},
+        },
         RightDisintegrator = ClassWeapon(CDFLaserDisintegratorWeapon) {
             OnCreate = function(self)
                 CDFLaserDisintegratorWeapon.OnCreate(self)
@@ -43,7 +47,7 @@ URL0301 = ClassUnit(CCommandUnit) {
         NMissile = ClassWeapon(CAAMissileNaniteWeapon) {},
     },
 
-    ---@param self URL0301
+    -- Creation
     OnCreate = function(self)
         CCommandUnit.OnCreate(self)
         self:SetCapturable(false)
@@ -58,16 +62,13 @@ URL0301 = ClassUnit(CCommandUnit) {
         end
     end,
 
-    ---@param self URL0301
     __init = function(self)
         CCommandUnit.__init(self, 'RightDisintegrator')
     end,
 
-    ---@param self URL0301
-    ---@param builder Unit
-    ---@param layer Layer
     OnStopBeingBuilt = function(self, builder, layer)
         CCommandUnit.OnStopBeingBuilt(self, builder, layer)
+        self:SetWeaponEnabledByLabel('Laser', false)
         self:BuildManipulatorSetEnabled(false)
         self:SetMaintenanceConsumptionInactive()
         self:DisableUnitIntel('Enhancement', 'RadarStealth')
@@ -77,216 +78,157 @@ URL0301 = ClassUnit(CCommandUnit) {
         self.RightArmUpgrade = 'Disintegrator'
     end,
 
-
-    -- =====================================================================================================================4
-    -- ENHANCEMENTS
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementCloakingGenerator = function (self, bp)
-        self:RemoveToggleCap('RULEUTC_StealthToggle')
-        self:AddToggleCap('RULEUTC_CloakToggle')
-        self.HasStealthEnh = false
-        self.HasCloakEnh = true
-        self:EnableUnitIntel('Enhancement', 'Cloak')
-        if not Buffs['CybranSCUCloakBonus'] then
-            BuffBlueprint {
-                Name = 'CybranSCUCloakBonus',
-                DisplayName = 'CybranSCUCloakBonus',
-                BuffType = 'SCUCLOAKBONUS',
-                Stacks = 'ALWAYS',
-                Duration = -1,
-                Affects = {
-                    MaxHealth = {
-                        Add = bp.NewHealth,
-                        Mult = 1.0,
-                    },
-                },
-            }
-        end
-        if Buff.HasBuff(self, 'CybranSCUCloakBonus') then
-            Buff.RemoveBuff(self, 'CybranSCUCloakBonus')
-        end
-        Buff.ApplyBuff(self, 'CybranSCUCloakBonus')
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementCloakingGeneratorRemove = function (self, bp)
-        -- remove prerequisites
-        self:RemoveToggleCap('RULEUTC_StealthToggle')
-        self:DisableUnitIntel('Enhancement', 'RadarStealth')
-        self:DisableUnitIntel('Enhancement', 'SonarStealth')
-
-        -- remove cloak
-        self:DisableUnitIntel('Enhancement', 'Cloak')
-        self.HasCloakEnh = false
-        self:RemoveToggleCap('RULEUTC_CloakToggle')
-        if Buff.HasBuff(self, 'CybranSCUCloakBonus') then
-            Buff.RemoveBuff(self, 'CybranSCUCloakBonus')
-        end
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementStealthGenerator = function (self, bp)
-        self:AddToggleCap('RULEUTC_StealthToggle')
-        if self.IntelEffectsBag then
-            EffectUtil.CleanupEffectBag(self, 'IntelEffectsBag')
-            self.IntelEffectsBag = nil
-        end
-        self.HasStealthEnh = true
-        self:EnableUnitIntel('Enhancement', 'RadarStealth')
-        self:EnableUnitIntel('Enhancement', 'SonarStealth')
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementStealthGeneratorRemove = function (self, bp)
-        self:RemoveToggleCap('RULEUTC_StealthToggle')
-        self:DisableUnitIntel('Enhancement', 'RadarStealth')
-        self:DisableUnitIntel('Enhancement', 'SonarStealth')
-        self.HasStealthEnh = false
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementNaniteMissileSystem = function(self, bp)
-        self:ShowBone('AA_Gun', true)
-        self:SetWeaponEnabledByLabel('NMissile', true)
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementNaniteMissileSystemRemove = function(self, bp)
-        self:HideBone('AA_Gun', true)
-        self:SetWeaponEnabledByLabel('NMissile', false)
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementSelfRepairSystem = function(self, bp)
-        local bpRegenRate = self.Blueprint.Enhancements.SelfRepairSystem.NewRegenRate or 0
-        if not Buffs['CybranSCURegenerateBonus'] then
-            BuffBlueprint {
-                Name = 'CybranSCURegenerateBonus',
-                DisplayName = 'CybranSCURegenerateBonus',
-                BuffType = 'SCUREGENERATEBONUS',
-                Stacks = 'ALWAYS',
-                Duration = -1,
-                Affects = {
-                    Regen = {
-                        Add = bpRegenRate,
-                        Mult = 1.0,
-                    },
-                },
-            }
-        end
-        if Buff.HasBuff(self, 'CybranSCURegenerateBonus') then
-            Buff.RemoveBuff(self, 'CybranSCURegenerateBonus')
-        end
-        Buff.ApplyBuff(self, 'CybranSCURegenerateBonus')
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementSelfRepairSystemRemove = function(self, bp)
-        if Buff.HasBuff(self, 'CybranSCURegenerateBonus') then
-            Buff.RemoveBuff(self, 'CybranSCURegenerateBonus')
-        end
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementResourceAllocation = function(self, bp)
-        local bpEcon = self.Blueprint.Economy
-        self:SetProductionPerSecondEnergy((bp.ProductionPerSecondEnergy + bpEcon.ProductionPerSecondEnergy) or 0)
-        self:SetProductionPerSecondMass((bp.ProductionPerSecondMass + bpEcon.ProductionPerSecondMass) or 0)
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementResourceAllocationRemove = function(self, bp)
-        local bpEcon = self.Blueprint.Economy
-        self:SetProductionPerSecondEnergy(bpEcon.ProductionPerSecondEnergy or 0)
-        self:SetProductionPerSecondMass(bpEcon.ProductionPerSecondMass or 0)
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementSwitchback = function(self, bp)
-        self.BuildBotTotal = 4
-        if not Buffs['CybranSCUBuildRate'] then
-            BuffBlueprint {
-                Name = 'CybranSCUBuildRate',
-                DisplayName = 'CybranSCUBuildRate',
-                BuffType = 'SCUBUILDRATE',
-                Stacks = 'REPLACE',
-                Duration = -1,
-                Affects = {
-                    BuildRate = {
-                        Add = bp.NewBuildRate - self.Blueprint.Economy.BuildRate,
-                        Mult = 1,
-                    },
-                },
-            }
-        end
-        Buff.ApplyBuff(self, 'CybranSCUBuildRate')
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementSwitchbackRemove = function(self, bp)
-        self.BuildBotTotal = 3
-        if Buff.HasBuff(self, 'CybranSCUBuildRate') then
-            Buff.RemoveBuff(self, 'CybranSCUBuildRate')
-        end
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementFocusConvertor = function(self, bp)
-        local wep = self:GetWeaponByLabel('RightDisintegrator')
-        wep:AddDamageMod(bp.NewDamageMod or 0)
-        wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementFocusConvertorRemove = function(self, bp)
-        local wep = self:GetWeaponByLabel('RightDisintegrator')
-        wep:AddDamageMod(-self.Blueprint.Enhancements['FocusConvertor'].NewDamageMod)
-        wep:ChangeMaxRadius(self.Blueprint.Weapon[1].MaxRadius or 25)
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementEMPCharge = function(self, bp)
-        local wep = self:GetWeaponByLabel('RightDisintegrator')
-        wep:ReEnableBuff('STUN')
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementEMPChargeRemove = function(self, bp)
-        local wep = self:GetWeaponByLabel('RightDisintegrator')
-        wep:DisableBuff('STUN')
-    end,
-
-    ---@param self URL0301
-    ---@param enh Enhancement
+    -- Enhancements
     CreateEnhancement = function(self, enh)
         CCommandUnit.CreateEnhancement(self, enh)
         local bp = self.Blueprint.Enhancements[enh]
         if not bp then return end
+        if enh == 'CloakingGenerator' then
+            self:RemoveToggleCap('RULEUTC_StealthToggle')
+            self:AddToggleCap('RULEUTC_CloakToggle')
+            self.StealthEnh = false
+            self.CloakEnh = true
+            self:EnableUnitIntel('Enhancement', 'Cloak')
+            if not Buffs['CybranSCUCloakBonus'] then
+                BuffBlueprint {
+                    Name = 'CybranSCUCloakBonus',
+                    DisplayName = 'CybranSCUCloakBonus',
+                    BuffType = 'SCUCLOAKBONUS',
+                    Stacks = 'ALWAYS',
+                    Duration = -1,
+                    Affects = {
+                        MaxHealth = {
+                            Add = bp.NewHealth,
+                            Mult = 1.0,
+                        },
+                    },
+                }
+            end
+            if Buff.HasBuff(self, 'CybranSCUCloakBonus') then
+                Buff.RemoveBuff(self, 'CybranSCUCloakBonus')
+            end
+            Buff.ApplyBuff(self, 'CybranSCUCloakBonus')
+        elseif enh == 'CloakingGeneratorRemove' then
+            -- remove prerequisites
+            self:RemoveToggleCap('RULEUTC_StealthToggle')
+            self:DisableUnitIntel('Enhancement', 'RadarStealth')
+            self:DisableUnitIntel('Enhancement', 'SonarStealth')
 
-        local ref = 'ProcessEnhancement' .. enh
-        local handler = self[ref]
-
-        if handler then
-            handler(self, bp)
-        else
-            WARN("Missing enhancement: ", enh, " for unit: ", self:GetUnitId(), " note that the function name should be called: ", ref)
+            -- remove cloak
+            self:DisableUnitIntel('Enhancement', 'Cloak')
+            self.CloakEnh = false
+            self:RemoveToggleCap('RULEUTC_CloakToggle')
+            if Buff.HasBuff(self, 'CybranSCUCloakBonus') then
+                Buff.RemoveBuff(self, 'CybranSCUCloakBonus')
+            end
+        elseif enh == 'StealthGenerator' then
+            self:AddToggleCap('RULEUTC_StealthToggle')
+            if self.IntelEffectsBag then
+                EffectUtil.CleanupEffectBag(self, 'IntelEffectsBag')
+                self.IntelEffectsBag = nil
+            end
+            self.StealthEnh = true
+            self:EnableUnitIntel('Enhancement', 'RadarStealth')
+            self:EnableUnitIntel('Enhancement', 'SonarStealth')
+        elseif enh == 'StealthGeneratorRemove' then
+            self:RemoveToggleCap('RULEUTC_StealthToggle')
+            self:DisableUnitIntel('Enhancement', 'RadarStealth')
+            self:DisableUnitIntel('Enhancement', 'SonarStealth')
+            self.StealthEnh = false
+        elseif enh == 'NaniteMissileSystem' then
+            self:ShowBone('AA_Gun', true)
+            self:SetWeaponEnabledByLabel('NMissile', true)
+        elseif enh == 'NaniteMissileSystemRemove' then
+            self:HideBone('AA_Gun', true)
+            self:SetWeaponEnabledByLabel('NMissile', false)
+        elseif enh == 'SelfRepairSystem' then
+            CCommandUnit.CreateEnhancement(self, enh)
+            local bpRegenRate = self.Blueprint.Enhancements.SelfRepairSystem.NewRegenRate or 0
+            if not Buffs['CybranSCURegenerateBonus'] then
+                BuffBlueprint {
+                    Name = 'CybranSCURegenerateBonus',
+                    DisplayName = 'CybranSCURegenerateBonus',
+                    BuffType = 'SCUREGENERATEBONUS',
+                    Stacks = 'ALWAYS',
+                    Duration = -1,
+                    Affects = {
+                        MaxHealth = {
+                            Add = bp.NewHealth,
+                            Mult = 1.0,
+                        },
+                        Regen = {
+                            Add = bpRegenRate,
+                            Mult = 1.0,
+                        },
+                    },
+                }
+            end
+            if Buff.HasBuff(self, 'CybranSCURegenerateBonus') then
+                Buff.RemoveBuff(self, 'CybranSCURegenerateBonus')
+            end
+            Buff.ApplyBuff(self, 'CybranSCURegenerateBonus')
+        elseif enh == 'SelfRepairSystemRemove' then
+            CCommandUnit.CreateEnhancement(self, enh)
+            if Buff.HasBuff(self, 'CybranSCURegenerateBonus') then
+                Buff.RemoveBuff(self, 'CybranSCURegenerateBonus')
+            end
+        elseif enh == 'ResourceAllocation' then
+            local bpEcon = self.Blueprint.Economy
+            self:SetProductionPerSecondEnergy((bp.ProductionPerSecondEnergy + bpEcon.ProductionPerSecondEnergy) or 0)
+            self:SetProductionPerSecondMass((bp.ProductionPerSecondMass + bpEcon.ProductionPerSecondMass) or 0)
+        elseif enh == 'ResourceAllocationRemove' then
+            local bpEcon = self.Blueprint.Economy
+            self:SetProductionPerSecondEnergy(bpEcon.ProductionPerSecondEnergy or 0)
+            self:SetProductionPerSecondMass(bpEcon.ProductionPerSecondMass or 0)
+        elseif enh == 'Switchback' then
+            self.BuildBotTotal = 4
+            if not Buffs['CybranSCUBuildRate'] then
+                BuffBlueprint {
+                    Name = 'CybranSCUBuildRate',
+                    DisplayName = 'CybranSCUBuildRate',
+                    BuffType = 'SCUBUILDRATE',
+                    Stacks = 'REPLACE',
+                    Duration = -1,
+                    Affects = {
+                        BuildRate = {
+                            Add = bp.NewBuildRate - self.Blueprint.Economy.BuildRate,
+                            Mult = 1,
+                        },
+                    },
+                }
+            end
+            Buff.ApplyBuff(self, 'CybranSCUBuildRate')
+        elseif enh == 'SwitchbackRemove' then
+            self.BuildBotTotal = 3
+            if Buff.HasBuff(self, 'CybranSCUBuildRate') then
+                Buff.RemoveBuff(self, 'CybranSCUBuildRate')
+            end
+        elseif enh == 'FocusConvertor' then
+            local wep = self:GetWeaponByLabel('RightDisintegrator')
+            wep:AddDamageMod(bp.NewDamageMod or 0)
+            wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
+            local wep = self:GetWeaponByLabel('Laser')
+            wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
+        elseif enh == 'FocusConvertorRemove' then
+            local wep = self:GetWeaponByLabel('RightDisintegrator')
+            wep:AddDamageMod(-self.Blueprint.Enhancements['FocusConvertor'].NewDamageMod)
+            wep:ChangeMaxRadius(self.Blueprint.Weapon[1].MaxRadius or 25)
+            local wep = self:GetWeaponByLabel('Laser')
+            wep:ChangeMaxRadius(self.Blueprint.Weapon[1].MaxRadius or 25)
+            -- Laser
+        elseif enh == 'LaserGun' then
+            local wep = self:GetWeaponByLabel('Laser')
+            self:SetWeaponEnabledByLabel('Laser', true)
+        elseif enh == 'LaserGunRemove' then
+            local wep = self:GetWeaponByLabel('Laser')
+            self:SetWeaponEnabledByLabel('Laser', false)
+            -- Laser
+        elseif enh == 'EMPCharge' then
+            local wep = self:GetWeaponByLabel('RightDisintegrator')
+            wep:ReEnableBuff('STUN')
+        elseif enh == 'EMPChargeRemove' then
+            local wep = self:GetWeaponByLabel('RightDisintegrator')
+            wep:DisableBuff('STUN')
         end
     end,
 
@@ -335,11 +277,9 @@ URL0301 = ClassUnit(CCommandUnit) {
         },
     },
 
-    ---@param self URL0301
-    ---@param intel IntelType
     OnIntelEnabled = function(self, intel)
         CCommandUnit.OnIntelEnabled(self, intel)
-        if self.HasCloakEnh and self:IsIntelEnabled('Cloak') then
+        if self.CloakEnh and self:IsIntelEnabled('Cloak') then
             self:SetEnergyMaintenanceConsumptionOverride(self.Blueprint.Enhancements['CloakingGenerator'].MaintenanceConsumptionPerSecondEnergy
                 or 0)
             self:SetMaintenanceConsumptionActive()
@@ -347,7 +287,7 @@ URL0301 = ClassUnit(CCommandUnit) {
                 self.IntelEffectsBag = {}
                 self:CreateTerrainTypeEffects(self.IntelEffects.Cloak, 'FXIdle', self.Layer, nil, self.IntelEffectsBag)
             end
-        elseif self.HasStealthEnh and self:IsIntelEnabled('RadarStealth') and self:IsIntelEnabled('SonarStealth') then
+        elseif self.StealthEnh and self:IsIntelEnabled('RadarStealth') and self:IsIntelEnabled('SonarStealth') then
             self:SetEnergyMaintenanceConsumptionOverride(self.Blueprint.Enhancements['StealthGenerator'].MaintenanceConsumptionPerSecondEnergy
                 or 0)
             self:SetMaintenanceConsumptionActive()
@@ -358,17 +298,15 @@ URL0301 = ClassUnit(CCommandUnit) {
         end
     end,
 
-    ---@param self URL0301
-    ---@param intel IntelType
     OnIntelDisabled = function(self, intel)
         CCommandUnit.OnIntelDisabled(self, intel)
         if self.IntelEffectsBag then
             EffectUtil.CleanupEffectBag(self, 'IntelEffectsBag')
             self.IntelEffectsBag = nil
         end
-        if self.HasCloakEnh and not self:IsIntelEnabled('Cloak') then
+        if self.CloakEnh and not self:IsIntelEnabled('Cloak') then
             self:SetMaintenanceConsumptionInactive()
-        elseif self.HasStealthEnh and not self:IsIntelEnabled('RadarStealth') and not self:IsIntelEnabled('SonarStealth') then
+        elseif self.StealthEnh and not self:IsIntelEnabled('RadarStealth') and not self:IsIntelEnabled('SonarStealth') then
             self:SetMaintenanceConsumptionInactive()
         end
     end,
