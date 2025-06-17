@@ -32,6 +32,7 @@ UEL0301 = ClassUnit(CommandUnit) {
 
     Weapons = {
         RightHeavyPlasmaCannon = ClassWeapon(TDFHeavyPlasmaCannonWeapon) {},
+        LeftHeavyPlasmaCannon = ClassWeapon(TDFHeavyPlasmaCannonWeapon) {},
         DeathWeapon = ClassWeapon(SCUDeathWeapon) {},
     },
 
@@ -39,6 +40,8 @@ UEL0301 = ClassUnit(CommandUnit) {
     OnCreate = function(self)
         CommandUnit.OnCreate(self)
         self:SetCapturable(false)
+        self:ShowBone('Arm_Right_B03', true)
+        self:HideBone('Arm_Right_Barrel01', true)
         self:HideBone('Jetpack', true)
         self:HideBone('SAM', true)
         self:SetupBuildBones()
@@ -54,6 +57,7 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param layer Layer
     OnStopBeingBuilt = function(self, builder, layer)
         CommandUnit.OnStopBeingBuilt(self, builder, layer)
+        self:SetWeaponEnabledByLabel('LeftHeavyPlasmaCannon', false)
         -- Block Jammer until Enhancement is built
         self:DisableUnitIntel('Enhancement', 'Jammer')
     end,
@@ -317,9 +321,29 @@ UEL0301 = ClassUnit(CommandUnit) {
 
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement
+    ProcessEnhancementDableGun = function(self, bp)
+            local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
+            self:SetWeaponEnabledByLabel('LeftHeavyPlasmaCannon', true)
+            local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
+            self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', false)
+    end,
+
+    ---@param self UEL0301
+    ---@param bp UnitBlueprintEnhancement unused
+    ProcessEnhancementDableGunRemove = function(self, bp)
+            local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
+            self:SetWeaponEnabledByLabel('LeftHeavyPlasmaCannon', false)
+            local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
+            self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', true)
+    end,
+
+    ---@param self UEL0301
+    ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementAdvancedCoolingUpgrade = function(self, bp)
         local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
         wep:ChangeRateOfFire(bp.NewRateOfFire)
+        local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
+        wep:ChangeRateOfFire(bp.NewRateOfFireDubleGun)
     end,
 
     ---@param self UEL0301
@@ -327,12 +351,17 @@ UEL0301 = ClassUnit(CommandUnit) {
     ProcessEnhancementAdvancedCoolingUpgradeRemove = function(self, bp)
         local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
         wep:ChangeRateOfFire(self.Blueprint.Weapon[1].RateOfFire or 1)
+        local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
+        wep:ChangeRateOfFire(self.Blueprint.Weapon[2].RateOfFire or 1)
     end,
 
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementHighExplosiveOrdnance = function(self, bp)
         local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
+        wep:AddDamageRadiusMod(bp.NewDamageRadius)
+        wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
+        local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
         wep:AddDamageRadiusMod(bp.NewDamageRadius)
         wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
     end,
@@ -343,6 +372,11 @@ UEL0301 = ClassUnit(CommandUnit) {
         local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
         wep:AddDamageRadiusMod(bp.NewDamageRadius)
         wep:ChangeMaxRadius(bp.NewMaxRadius or 25)
+        wep:ChangeRateOfFire(self.Blueprint.Weapon[1].RateOfFire or 1)
+        local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
+        wep:AddDamageRadiusMod(bp.NewDamageRadius)
+        wep:ChangeMaxRadius(bp.NewMaxRadius or 25)
+        wep:ChangeRateOfFire(self.Blueprint.Weapon[1].RateOfFire or 1)
     end,
 
     ---@param self UEL0301
@@ -361,7 +395,7 @@ UEL0301 = ClassUnit(CommandUnit) {
         end
     end,
 
-        ---@param self UEL0301
+    ---@param self UEL0301
     ---@param intel IntelType
     OnIntelEnabled = function(self, intel)
         CommandUnit.OnIntelEnabled(self, intel)
