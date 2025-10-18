@@ -12,7 +12,7 @@ UnitBlueprint{
         DoneBeingBuilt = Sound { Bank = 'URB',        Cue = 'URB2205_Activate',  LodCutoff = 'UnitMove_LodCutoff' },
         UISelection    = Sound { Bank = 'Interface',  Cue = 'Cybran_Select_Gun', LodCutoff = 'UnitMove_LodCutoff' },
     },
-    AverageDensity = 5800,
+    AverageDensity = 11600,
     BuildIconSortPriority = 130,
     Categories = {
         "ANTINAVY",
@@ -39,8 +39,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Structure",
-        Health = 5800,
-        MaxHealth = 5800,
+        Health = 11600,
+        MaxHealth = 11600,
         SubThreatLevel = 23,
     },
     Display = {
@@ -86,7 +86,7 @@ UnitBlueprint{
     Economy = {
         BuildCostEnergy = 9000,
         BuildCostMass = 1080,
-        BuildTime = 1446,
+        BuildTime = 1400,
         RebuildBonusIds = { "urb2205" },
     },
     Footprint = {

@@ -1,7 +1,7 @@
-ProjectileBlueprint{
+ProjectileBlueprint {
     Audio = {
-        Impact        = Sound { Bank = 'Impacts', Cue = 'UEF_Expl_Med_Impact',     LodCutoff = 'Weapon_LodCutoff' },
-        ImpactTerrain = Sound { Bank = 'Impacts', Cue = 'Impact_Land_Gen_UEF',     LodCutoff = 'Weapon_LodCutoff' },
+        Impact        = Sound { Bank = 'Impacts', Cue = 'UEF_Expl_Med_Impact', LodCutoff = 'Weapon_LodCutoff' },
+        ImpactTerrain = Sound { Bank = 'Impacts', Cue = 'Impact_Land_Gen_UEF', LodCutoff = 'Weapon_LodCutoff' },
         ImpactWater   = Sound { Bank = 'Impacts', Cue = 'Impact_Water_Splash_UEF', LodCutoff = 'Weapon_LodCutoff' },
     },
     Categories = {
@@ -16,7 +16,7 @@ ProjectileBlueprint{
         Health = 1,
         MaxHealth = 1,
     },
-    DesiredShooterCap = 1,
+    DesiredShooterCap = 2,
     Display = {
         CameraFollowTimeout = 2,
         CameraFollowsProjectile = true,
@@ -43,8 +43,9 @@ ProjectileBlueprint{
         Acceleration = 5,
         DestroyOnWater = true,
         InitialSpeed = 3,
-        MaxSpeed = 20,
-        MaxZigZag = 1,
+        LifeTime = 30,
+        MaxSpeed = 16,
+        MaxZigZag = 10,
         RotationalVelocity = 0,
         RotationalVelocityRange = 0,
         TrackTarget = true,
@@ -52,6 +53,6 @@ ProjectileBlueprint{
         TurnRate = 0,
         UseGravity = false,
         VelocityAlign = true,
-        ZigZagFrequency = 1,
+        ZigZagFrequency = 8,
     },
 }

@@ -18,11 +18,6 @@ XEL0306 = ClassUnit(TLandUnit) {
         {
             FxMuzzleFlash = {'/effects/emitters/terran_mobile_missile_launch_01_emit.bp'},
             RackSalvoFiringState = State(TIFCruiseMissileUnpackingLauncher.RackSalvoFiringState) {
-            OnLostTarget = function(self)
-                if not self:WeaponHasTarget() then
-                    self.HaltFireOrdered = true
-                end
-            end,
             },
         },
     },

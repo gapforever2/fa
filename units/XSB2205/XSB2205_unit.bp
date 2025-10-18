@@ -12,7 +12,7 @@ UnitBlueprint{
         Killed         = Sound { Bank = 'XSL_Destroy',    Cue = 'XSB_Destroy_Lrg_PreDestroy', LodCutoff = 'UnitMove_LodCutoff' },
         UISelection    = Sound { Bank = 'SeraphimSelect', Cue = 'Seraphim_Select_gun',        LodCutoff = 'UnitMove_LodCutoff' },
     },
-    AverageDensity = 4800,
+    AverageDensity = 9600,
     BuildIconSortPriority = 130,
     Categories = {
         "ANTINAVY",
@@ -41,8 +41,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Structure",
-        Health = 4800,
-        MaxHealth = 4800,
+        Health = 9600,
+        MaxHealth = 9600,
         SubThreatLevel = 18,
     },
     Display = {
@@ -91,7 +91,7 @@ UnitBlueprint{
     Economy = {
         BuildCostEnergy = 9000,
         BuildCostMass = 1080,
-        BuildTime = 1446,
+        BuildTime = 1400,
         RebuildBonusIds = { "xsb2205" },
     },
     Footprint = {

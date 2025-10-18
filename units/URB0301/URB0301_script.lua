@@ -10,6 +10,6 @@
 local CLandFactoryUnit = import("/lua/cybranunits.lua").CLandFactoryUnit
 
 ---@class URB0301 : CLandFactoryUnit
-URB0301 = ClassUnit(CLandFactoryUnit) {}
+URB0301 = Class(CLandFactoryUnit) {}
 
 TypeClass = URB0301

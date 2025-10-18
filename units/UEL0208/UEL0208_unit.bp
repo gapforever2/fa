@@ -1,11 +1,6 @@
 UnitBlueprint{
     Description = "<LOC uel0208_desc>Engineer",
-    AI = {
-        GuardScanRadius = 26,
-        TargetBones = {
-            "AttachPoint",
-        },
-    },
+    AI = { GuardScanRadius = 26 },
     Audio = {
         AmbientMove        = Sound { Bank = 'UEL',        Cue = 'UEL0208_Move_Loop',       LodCutoff = 'UnitMove_LodCutoff' },
         CaptureLoop        = Sound { Bank = 'UEL',        Cue = 'UEL0208_Capture_Loop',    LodCutoff = 'UnitMove_LodCutoff' },
@@ -136,7 +131,7 @@ UnitBlueprint{
         BuildRate = 13,
         BuildTime = 650,
         BuildableCategory = { "BUILTBYTIER2ENGINEER UEF" },
-        MaxBuildDistance = 6,
+        MaxBuildDistance = 7,
         StorageEnergy = 0,
         StorageMass = 20,
         TeleportEnergyMod = 0.15,
@@ -192,10 +187,10 @@ UnitBlueprint{
     SelectionSizeX = 0.5,
     SelectionSizeZ = 0.5,
     SelectionThickness = 0.8,
-    CollisionOffsetY = -0.4,
+    CollisionOffsetY = -0.25,
     CollisionOffsetZ = -0.05,
     SizeX = 0.7,
-    SizeY = 1.05,
+    SizeY = 0.9,
     SizeZ = 0.6,
     StrategicIconName = "icon_land2_engineer",
     StrategicIconSortPriority = 95,
