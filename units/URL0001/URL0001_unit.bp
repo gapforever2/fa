@@ -64,11 +64,12 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Commander",
+        EconomyThreatLevel = 626,
         Health = 10000,
         MaxHealth = 10000,
         RegenRate = 18,
         SkipDynamicThreatCalculations = true,
-        SurfaceThreatLevel = 45,
+        SurfaceThreatLevel = 765,
     },
     Display = {
         Abilities = {
@@ -323,7 +324,7 @@ UnitBlueprint{
             Icon = "srs",
             Name = "<LOC enhancements_0150_faf>Nano-Repair System",
             NewHealth = 1500,
-            NewRegenRate = 50,
+            NewRegenRate = 60,
             Prerequisite = "StealthGenerator",
             ShowBones = { "Back_Upgrade" },
             Slot = "Back",
@@ -423,7 +424,7 @@ UnitBlueprint{
             ProductionPerSecondEnergy = 2700,
             ProductionPerSecondMass = 12,
             ShowBones = { "Back_Upgrade" },
-            Slot = "Back",
+            Slot = "RCH",
             UpgradeEffectBones = {
                 "Right_Arm_B01",
                 "Left_Arm_B01",
@@ -443,7 +444,7 @@ UnitBlueprint{
                 "ResourceAllocation",
                 "ResourceAllocationRemove",
             },
-            Slot = "Back",
+            Slot = "RCH",
         },
         Slots = {
             Back = {
@@ -958,7 +959,7 @@ UnitBlueprint{
             BeamLifetime = 0,
             CollideFriendly = false,
             ContinuousBeam = true,
-            Damage = 300,
+            Damage = 400,
             DamageRadius = 0.5,
             DamageType = "Normal",
             DisplayName = "Heavy Microwave Laser",
@@ -1025,7 +1026,7 @@ UnitBlueprint{
             BallisticArc = "RULEUBA_None",
             BelowWaterFireOnly = true,
             CollideFriendly = false,
-            Damage = 45,
+            Damage = 60,
             DamageType = "Normal",
             DisplayName = "Nanite Torpedo",
             DoTPulses = 5,
@@ -1037,7 +1038,7 @@ UnitBlueprint{
             Label = "Torpedo",
             MaxRadius = 60,
             MuzzleSalvoDelay = 0.8,
-            MuzzleSalvoSize = 4,
+            MuzzleSalvoSize = 3,
             MuzzleVelocity = 5,
             ProjectileId = "/projectiles/CANTorpedoNanite01/CANTorpedoNanite01_proj.bp",
             ProjectileLifetime = 7,
