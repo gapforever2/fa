@@ -12,7 +12,7 @@ UnitBlueprint{
         DoneBeingBuilt = Sound { Bank = 'UEB',        Cue = 'UEB2205_Activate',     LodCutoff = 'UnitMove_LodCutoff' },
         UISelection    = Sound { Bank = 'Interface',  Cue = 'UEF_Select_Gun',       LodCutoff = 'UnitMove_LodCutoff' },
     },
-    AverageDensity = 6400,
+    AverageDensity = 12800,
     BuildIconSortPriority = 130,
     Categories = {
         "ANTINAVY",
@@ -39,8 +39,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Structure",
-        Health = 6400,
-        MaxHealth = 6400,
+        Health = 12800,
+        MaxHealth = 12800,
         SubThreatLevel = 18,
     },
     Display = {
@@ -91,7 +91,7 @@ UnitBlueprint{
     Economy = {
         BuildCostEnergy = 9000,
         BuildCostMass = 1080,
-        BuildTime = 1446,
+        BuildTime = 1400,
         RebuildBonusIds = { "ueb2205" },
     },
     Footprint = {
