@@ -4102,8 +4102,8 @@ float4 PhaseShieldPS( VERTEXNORMAL_VERTEX vertex ) : COLOR
     float4 lookup3 = tex2D( lookupSampler, tc3);
 
     float electricity =  lookup.r * lookup2.b;
-    float4 baseshellcolor = float4( 0.5, 0.5, 1, 1);
-    float4 glowpulse = float4(lookup3.ggg, min(lookup3.g, 0.65) + electricity );
+    float4 baseshellcolor = float4( 0.2, 0.5, 1, 0.9);
+    float4 glowpulse = float4(lookup3.ggg, min(lookup3.g, 0.75) + electricity );
 
     return (baseshellcolor  + electricity) * glowpulse;
 }
@@ -4126,9 +4126,9 @@ float4 AeonPhaseShieldPS( VERTEXNORMAL_VERTEX vertex ) : COLOR
     tc3.x -= 0.001 * vertex.material.x;
     float4 lookup3 = tex2D( lookupSampler, tc3);
 
-    float electricity = lookup.r * lookup2.b * 0.75;
-    float4 baseshellcolor = float4( 0.4, 1, 0.6, 0.8);
-    float4 glowpulse = float4(lookup3.ggg, min(lookup3.g, 0.65) + electricity );
+    float electricity = * lookup.r * lookup2.b * 0.75;
+    float4 baseshellcolor = float4( 0.3, 0.99, 0.45, 0.9);
+    float4 glowpulse = float4(lookup3.ggg, min(lookup3.g, 0.95) + electricity );
 
     return (baseshellcolor + electricity) * glowpulse;
 }
@@ -4179,7 +4179,7 @@ float4 SeraphimPhaseShieldPS( VERTEXNORMAL_VERTEX vertex ) : COLOR
     float4 lookup3 = tex2D( secondarySampler, tc3);
 
     float electricity =  lookup.r * lookup2.b * 14;
-    float4 baseshellcolor = float4( 0.425, 0.76274 ,1.0, 1);
+    float4 baseshellcolor = float4( 0.8, 0.7, 0.2, 0.9);
     float4 glowpulse = float4(lookup3.ggg, min(lookup3.g, 3) + electricity );
 
     return (baseshellcolor  + electricity) * glowpulse;
