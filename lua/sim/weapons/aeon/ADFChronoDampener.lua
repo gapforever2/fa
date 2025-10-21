@@ -25,7 +25,6 @@ local DefaultProjectileWeapon = import("/lua/sim/defaultweapons.lua").DefaultPro
 
 local EffectTemplate = import("/lua/effecttemplates.lua")
 local utilities = import('/lua/utilities.lua')
-local Buff = import("/lua/sim/buff.lua")
 
 ---@class ADFChronoDampener : DefaultProjectileWeapon
 ADFChronoDampener = Class(DefaultProjectileWeapon) {
@@ -109,28 +108,12 @@ ADFChronoDampener = Class(DefaultProjectileWeapon) {
                     continue
                 end
 
-                if not Buffs['ChronoDampenerAura'] then
-                    BuffBlueprint {
-                        Name = 'ChronoDampenerAura',
-                        DisplayName = 'ChronoDampenerAura',
-                        BuffType = 'UniqueBuffType',
-                        Stacks = 'REPLACE',
-                        Duration = 3,
-                        Affects = {
-                            MoveMult = {
-                                Mult = 0.4,
-                            },
-                            RateOfFire = {
-                                Mult = 4,
-                            },
-                        },
-                    }
-                end
-
                 -- add stun
                 if not target:BeenDestroyed() then
-                    Buff.ApplyBuff(target, 'ChronoDampenerAura')
-                    target.chronoProtectionTick = fireTick + reloadTimeTicks
+                    if buff.BuffType == 'STUN' then
+                        target:SetStunned(stunDuration * (slices - i + 1) / slices + 0.1)
+                        target.chronoProtectionTick = fireTick + reloadTimeTicks
+                    end
                 end
 
                 -- add initial flash effect
