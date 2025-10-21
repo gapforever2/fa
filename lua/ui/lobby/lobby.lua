@@ -5,7 +5,6 @@
 --*
 --* Copyright © 2005 Gas Powered Games, Inc. All rights reserved.
 --*****************************************************************************
-local GameVersion = import("/lua/version.lua").GetVersion
 local UIUtil = import("/lua/ui/uiutil.lua")
 local MenuCommon = import("/lua/ui/menus/menucommon.lua")
 local Prefs = import("/lua/user/prefs.lua")
@@ -49,24 +48,32 @@ local AIKeys = {}
 local AIStrings = {}
 local AITooltips = {}
 
--- TODO: remove these console commands before release
--- The following is enabled on non-production branches to assist with debugging for ICE/WebRTC issues
-local versionNumber, versionType, versionCommit = import("/lua/version.lua").GetVersionData()
-if versionType != "FAF" then
-    WARN("Enabling network debug console commands")
-    ConExecute("net_LogPackets")
-    ConExecute("net_DebugLevel 10")
-end
+-- GAF player roles
+local groupDevColors = {
+    ["Mod"] = "ff0000",
+    ["bal"] = "8000ff",
+    ["admin"] = "00ffff",
+    ["yt"] = "00ffbf",
+	["bs"] = "ff4000",
+}
+
+local roleNames = {
+    ["Mod"] = "Moder",
+    ["bal"] = "Balance™",
+    ["admin"] = "Admin",
+    ["yt"] = "YouTube",
+	["bs"] = "Boosty",
+}
 
 function GetAITypes()
     AIKeys = {}
     AIStrings = {}
     AITooltips = {}
     aitypes = import("/lua/ui/lobby/aitypes.lua").GetAItypes()
-    for _, aidata in aitypes do
-        table.insert(AIKeys, aidata.key)
-        table.insert(AIStrings, aidata.name)
-        table.insert(AITooltips, 'aitype_'..aidata.key)
+    for _, aiData in aitypes do
+        table.insert(AIKeys, aiData.key)
+        table.insert(AIStrings, aiData.name)
+        table.insert(AITooltips, 'aitype_'..aiData.key)
     end
 end
 GetAITypes()
@@ -163,6 +170,8 @@ local function parseCommandlineArguments()
     -- having as value the name of the next key. This set lets us interpret that case using the
     -- default option.
     local CMDLINE_ARGUMENT_KEYS = {
+        ["/avatarurl"] = true,
+        ["/avatartlp"] = true,
         ["/init"] = true,
         ["/country"] = true,
         ["/numgames"] = true,
@@ -171,6 +180,8 @@ local function parseCommandlineArguments()
         ["/deviation"] = true,
         ["/joincustom"] = true,
         ["/gpgnet"] = true,
+        ["/foe"] = true,
+        ["/group"] = true,
     }
 
     local function GetCommandLineArgOrDefault(argname, default)
@@ -186,13 +197,23 @@ local function parseCommandlineArguments()
         PrefLanguage = tostring(string.lower(GetCommandLineArgOrDefault("/country", "world"))),
         isRehost = HasCommandLineArg("/rehost"),
         initName = GetCommandLineArgOrDefault("/init", ""),
+        Urlava = tostring(string.lower(GetCommandLineArgOrDefault("/avatarurl", ""))),
+        Tlpava = tostring(string.lower(GetCommandLineArgOrDefault("/avatartlp", ""))),
         numGames = tonumber(GetCommandLineArgOrDefault("/numgames", 0)),
         playerMean = tonumber(GetCommandLineArgOrDefault("/mean", 1500)),
         playerClan = tostring(GetCommandLineArgOrDefault("/clan", "")),
         playerDeviation = tonumber(GetCommandLineArgOrDefault("/deviation", 500)),
+        foe_list = tostring(GetCommandLineArgOrDefault("/foe", "")),
+        groupDev = tostring(GetCommandLineArgOrDefault("/group", "")),
     }
 end
 local argv = parseCommandlineArguments()
+local foe_list_ = {}
+local foe_it1212 = 1
+for it1212 in string.gmatch(argv.foe_list, "[^,]+") do
+   foe_list_[foe_it1212] = it1212
+   foe_it1212 = foe_it1212 + 1
+end
 
 local playerRating = math.floor(Trueskill.round2((argv.playerMean - 3 * argv.playerDeviation) / 100.0) * 100)
 
@@ -200,9 +221,9 @@ local function ParseWhisper(params)
     local delimStart = string.find(params, " ")
     if delimStart then
         local name = string.sub(params, 1, delimStart-1)
-        local targID = FindIDForName(name)
-        if targID then
-            PrivateChat(targID, string.sub(params, delimStart+1))
+        local targetID = FindIDForName(name)
+        if targetID then
+            PrivateChat(targetID, string.sub(params, delimStart+1))
         else
             AddChatText(LOC("<LOC lobby_0007>Invalid whisper target."))
         end
@@ -223,6 +244,8 @@ local lobbyComm = false
 local localPlayerName = ""
 local gameName = ""
 local hostID = false
+local ALLOWED_AUTOHOST_UIDS = { [406005] = true }
+local ALLOWED_AUTOHOST_NAMES = { ['rediska'] = true, ['mandarinka'] = true, ['rediska_123-'] = true }
 local singlePlayer = false
 ---@type Group
 local GUI = false
@@ -231,11 +254,11 @@ local localPlayerID = false
 local gameInfo = false
 local lastKickMessage = UTF.UnescapeString(Prefs.GetFromCurrentProfile('lastKickMessage') or "")
 
-local defaultMode =(HasCommandLineArg("/windowed") and "windowed") or Prefs.GetFromCurrentProfile('options').primary_adapter
+local defaultMode = (HasCommandLineArg("/windowed") and "windowed") or Prefs.GetFromCurrentProfile('options').primary_adapter
 local windowedMode = defaultMode == "windowed" or (HasCommandLineArg("/windowed"))
 
 function SetWindowedLobby(windowed)
-    -- Dont change resolution if user already using windowed mode
+    -- Don't change resolution if user already using windowed mode
     if windowed == windowedMode or defaultMode == 'windowed' then
         return
     end
@@ -288,6 +311,17 @@ local slotMenuData = {
         },
         client = {
             'pm',
+        },
+    },
+    groupdev = {
+        host = {
+            'pm',
+            'remove_to_observer',
+            'remove_to_kik',
+            'move'
+        },
+        client = {
+            'pm'
         },
     },
     ai = {
@@ -351,12 +385,12 @@ local function GetSlotMenuTables(stateKey, hostKey, slotNum)
     local tooltips = {}
 
     if not GetSlotMenuData()[stateKey] then
-        WARN("Invalid slot menu state selected: " .. tostring(stateKey))
+        WARN("Invalid slot menu state selected: " .. stateKey)
         return nil
     end
 
     if not GetSlotMenuData()[stateKey][hostKey] then
-        WARN("Invalid slot menu host key selected: " .. tostring(hostKey))
+        WARN("Invalid slot menu host key selected: " .. hostKey)
         return nil
     end
 
@@ -368,7 +402,7 @@ local function GetSlotMenuTables(stateKey, hostKey, slotNum)
         end
     end
 
-    for index, key in GetSlotMenuData()[stateKey][hostKey] do
+    for _, key in GetSlotMenuData()[stateKey][hostKey] do
         if key == 'ailist' then
             if slotNum then
                 for i = 1, numOpenSlots, 1 do
@@ -430,9 +464,7 @@ end
 
 --- Get a PlayerData object for the local player, configured using data from their profile.
 function GetLocalPlayerData()
-
     local version, gametype, commit = import("/lua/version.lua").GetVersionData()
-
     return PlayerData(
         {
             PlayerName = localPlayerName,
@@ -446,11 +478,12 @@ function GetLocalPlayerData()
             MEAN = argv.playerMean,
             DEV = argv.playerDeviation,
             Country = argv.PrefLanguage,
-
+            Avatar = argv.Urlava,
+            TooltipAvatar = argv.Tlpava,
+            GroupRole = argv.groupDev,
             Version = version,
             GameType = gametype,
             Commit = commit,
-
         }
 )
 end
@@ -524,7 +557,7 @@ function GetAIPlayerData(name, AIPersonality, slot)
     -- retrieve properties from AI table
     ---@type AILobbyProperties | nil
     local aiLobbyProperties = nil
-    for k, entry in aitypes do 
+    for _, entry in aitypes do
         if entry.key == AIPersonality then
             aiLobbyProperties = entry
         end
@@ -661,7 +694,7 @@ function ReallyCreateLobby(protocol, localPort, desiredPlayerName, localPlayerUI
 
     -- Make sure we have a profile
     if not GetPreference("profile.current") then
-        Prefs.CreateProfile("FAF_"..desiredPlayerName)
+        Prefs.CreateProfile("GAF_"..desiredPlayerName)
     end
 
     GUI = UIUtil.CreateScreenGroup(over, "CreateLobby ScreenGroup")
@@ -676,24 +709,28 @@ function ReallyCreateLobby(protocol, localPort, desiredPlayerName, localPlayerUI
         GUI.chatEdit:AbandonFocus()
         local quitDialog = UIUtil.QuickDialog(GUI,
             "<LOC lobby_0000>Exit game lobby?",
-            "<LOC _Yes>", function()
+            "<LOC _Yes>",
+            function()
                 EscapeHandler.PopEscapeHandler()
                 if HasCommandLineArg("/gpgnet") then
-                    -- Quit to desktop
-                    EscapeHandler.SafeQuit()
+                    EscapeHandler.SafeQuit() -- Quit to desktop
                 else
-                    -- Back to main menu
-                    ReturnToMenu(false)
+                    ReturnToMenu(false) -- Back to main menu
                 end
             end,
-
             -- Fight to keep our focus on the chat input box, to prevent keybinding madness.
-            "<LOC _Cancel>", function()
+            "<LOC _Cancel>",
+            function()
                 GUI.chatEdit:AcquireFocus()
             end,
-            nil, nil,
+            nil,
+            nil,
             true,
-            {escapeButton = 2, enterButton = 1, worldCover = true}
+            {
+                escapeButton = 2,
+                enterButton = 1,
+                worldCover = true,
+            }
         )
     end
     EscapeHandler.PushEscapeHandler(GUI.exitLobbyEscapeHandler)
@@ -749,7 +786,6 @@ function StartSyncReplaySession(replayID)
     dl:Destroy()
     UIUtil.QuickDialog(GetFrame(0), "You dont have this map.", "Exit", function() ExitApplication() end)
 end
-
 --- Create a new unconnected lobby/Entry point for processing messages sent from the FAF lobby.
 --
 -- This function is called exactly once by the game when a new lobby should be created.
@@ -845,7 +881,7 @@ function FindSlotForID(id)
 end
 
 function FindRehostSlotForID(id)
-    for index, player in ipairs(rehostPlayerOptions) do
+    for _, player in ipairs(rehostPlayerOptions) do
         if player.OwnerID == id and player.Human then
             return player.StartSpot
         end
@@ -858,7 +894,7 @@ function FindNameForID(id)
         return (FindObserverNameForID(id))
     end
 
-    for k, player in gameInfo.PlayerOptions:pairs() do
+    for _, player in gameInfo.PlayerOptions:pairs() do
         if player.OwnerID == id and player.Human then
             return player.PlayerName
         end
@@ -867,7 +903,7 @@ function FindNameForID(id)
 end
 
 function FindIDForName(name)
-    for k, player in gameInfo.PlayerOptions:pairs() do
+    for _, player in gameInfo.PlayerOptions:pairs() do
         if player.PlayerName == name and player.Human then
             return player.OwnerID
         end
@@ -876,9 +912,9 @@ function FindIDForName(name)
 end
 
 function FindObserverSlotForID(id)
-    for k, observer in gameInfo.Observers:pairs() do
+    for slot, observer in gameInfo.Observers:pairs() do
         if observer.OwnerID == id then
-            return k
+            return slot
         end
     end
 
@@ -886,7 +922,7 @@ function FindObserverSlotForID(id)
 end
 
 function FindObserverNameForID(id)
-    for k, observer in gameInfo.Observers:pairs() do
+    for _, observer in gameInfo.Observers:pairs() do
         if observer.OwnerID == id then
             return observer.PlayerName
         end
@@ -920,11 +956,10 @@ end
 
 function GetPlayerDisplayName(playerInfo)
     local playerName = playerInfo.PlayerName
-    local displayName = ""
     if playerInfo.PlayerClan ~= "" then
-        return string.format("[%s] %s", playerInfo.PlayerClan, playerInfo.PlayerName)
+        return string.format("[%s] %s", playerInfo.PlayerClan, playerName)
     else
-        return playerInfo.PlayerName
+        return playerName
     end
 end
 
@@ -939,7 +974,7 @@ local function refreshObserverList()
     if gameInfo.GameOptions['TeamSpawn'] == 'fixed' then
 
         -- cycle through each player
-        for i, player in gameInfo.PlayerOptions:pairs() do
+        for _, player in gameInfo.PlayerOptions:pairs() do
 
             -- get the team number (which is 1 higher on the backend)
             local team = player.Team - 1
@@ -955,7 +990,7 @@ local function refreshObserverList()
             end
         end
 
-        for i, team in teamRatings do
+        for _ in teamRatings do
             numTeams = numTeams + 1
         end
 
@@ -964,10 +999,14 @@ local function refreshObserverList()
             if not lobbyComm:IsHost() then
                 GUI.observerList:AddItem(LOC('<LOC lobui_0702>Team Ratings:'))
             end
-            for i, rating in teamRatings do
-                GUI.observerList:AddItem(
-                    LOCF('<LOC lobui_0703>Team %d: %d (%d+/-%d)', i, math.round(rating[1] - rating[2] * 3), math.round(rating[1]), math.round(rating[2] * 3))
-                )
+            for index, rating in teamRatings do
+                GUI.observerList:AddItem(LOCF(
+                    '<LOC lobui_0703>Team %d: %d (%d+/-%d)',
+                    index,
+                    math.round(rating[1] - rating[2] * 3),
+                    math.round(rating[1]),
+                    math.round(rating[2] * 3)
+                ))
             end
             if not lobbyComm:IsHost() then
                 GUI.observerList:AddItem('')
@@ -1113,10 +1152,12 @@ function SetSlotInfo(slotNum, playerInfo)
     if not playerInfo.Human then
         slot.ratingText:Hide()
         slotState = 'ai'
-    elseif not isLocallyOwned then
-        slotState = 'player'
-    else
+    elseif isLocallyOwned then
         slotState = nil
+    elseif groupDevColors[playerInfo.GroupRole] then
+        slotState = 'groupdev'
+    else
+        slotState = 'player'
     end
 
     slot.name:ClearItems()
@@ -1155,13 +1196,21 @@ function SetSlotInfo(slotNum, playerInfo)
     slot.numGamesText:SetText(playerInfo.NG)
 
     slot.name:Show()
-    -- Change name colour according to the state of the slot.
-    if slotState == 'ai' then
-        slot.name:SetTitleTextColor("dbdbb9") -- Beige Color for AI
-        slot.name._text:SetFont('Arial Gras', 12)
-    elseif FindSlotForID(hostID) == slotNum then
+    if FindSlotForID(hostID) == slotNum then
         slot.name:SetTitleTextColor("ffc726") -- Orange Color for Host
         slot.name._text:SetFont('Arial Gras', 15)
+    elseif slotState == 'groupdev' then
+    local groupDevColor = groupDevColors[playerInfo.GroupRole]
+    if groupDevColor then
+        slot.name:SetTitleTextColor(groupDevColor)
+        slot.name._text:SetFont('Arial Gras', 12)
+    else
+        slot.name:SetTitleTextColor(UIUtil.fontColor)
+        slot.name._text:SetFont('Arial Gras', 12)
+    end
+    elseif slotState == 'ai' then
+        slot.name:SetTitleTextColor("dbdbb9") -- Beige Color for AI
+        slot.name._text:SetFont('Arial Gras', 12)
     elseif slotState == 'player' then
         slot.name:SetTitleTextColor("64d264") -- Green Color for Players
         slot.name._text:SetFont('Arial Gras', 15)
@@ -1231,6 +1280,16 @@ function SetSlotInfo(slotNum, playerInfo)
         slot.KinderCountry:SetTexture(UIUtil.UIFile('/countries/'..playerInfo.Country..'.dds'))
 
         Tooltip.AddControlTooltip(slot.KinderCountry, {text=LOC("<LOC lobui_0413>Country"), body=LOC(CountryTooltips[playerInfo.Country])})
+    end
+
+    UpdateSlotBackground(slotNum)
+
+    if not playerInfo.Avatar then
+    slot.KinderAvatar:Hide()
+    else
+        slot.KinderAvatar:Show()
+        slot.KinderAvatar:SetTexture(UIUtil.UIFile('C:\\ProgramData\\GapForever\\cache\\avatars\\'..playerInfo.Avatar..''))
+        Tooltip.AddControlTooltip(slot.KinderAvatar, {text=LOC("<LOC avatar_gaf>Avatar"), body=LOC(playerInfo.TooltipAvatar)})
     end
 
     UpdateSlotBackground(slotNum)
@@ -1310,7 +1369,7 @@ function IsColorFree(colorIndex, currentSlotNumber)
     for id, player in gameInfo.PlayerOptions:pairs() do
         if player.PlayerColor == colorIndex then
             if currentSlotNumber then
-                if player.StartSpot != currentSlotNumber then
+                if player.StartSpot ~= currentSlotNumber then
                     return false
                 end
             else
@@ -1377,7 +1436,6 @@ local function FixFactionIndexes()
         for i,v in allAvailableFactionsList do
             if v == playerFaction then
                 player.Faction = i
-                continue
             end
         end
     end
@@ -1407,19 +1465,20 @@ local function autobalance_bestworst(players, teams_arg)
             local team = t['team']
             local slots = t['slots']
             local slot = table.remove(slots, 1)
-            if not slot then continue end
-            local player
+            if slot then
+                local player
 
-            if best then
-                player = table.remove(players, 1)
-            else
-                player = table.remove(players)
+                if best then
+                    player = table.remove(players, 1)
+                else
+                    player = table.remove(players)
+                end
+
+                if not player then break end
+
+                teams[i]['sum'] = teams[i]['sum'] + player['rating']
+                table.insert(result, {player=player['pos'], rating=player['rating'], team=team, slot=slot})
             end
-
-            if not player then break end
-
-            teams[i]['sum'] = teams[i]['sum'] + player['rating']
-            table.insert(result, {player=player['pos'], rating=player['rating'], team=team, slot=slot})
         end
 
         best = not best
@@ -1438,7 +1497,7 @@ local function autobalance_avg(players, teams_arg)
     local max_sum = 0
 
     for t, slots in teams_arg do
-        table.insert(teams, {team=t, slots=table.deepcopy(slots), sum=0})
+        table.insert(teams, { team = t, slots = table.deepcopy(slots), sum = 0 })
     end
 
     while not table.empty(players) do
@@ -1447,24 +1506,25 @@ local function autobalance_avg(players, teams_arg)
             local team = t['team']
             local slots = t['slots']
             local slot = table.remove(slots, 1)
-            if not slot then continue end
-            local player
-            local player_key
+            if slot then
+                local player
+                local player_key
 
-            for j, p in players do
-                player_key = j
-                if first_team or t['sum'] + p['rating'] <= max_sum then
-                    break
+                for j, p in players do
+                    player_key = j
+                    if first_team or t['sum'] + p['rating'] <= max_sum then
+                        break
+                    end
                 end
+
+                player = table.remove(players, player_key)
+                if not player then break end
+
+                teams[i]['sum'] = teams[i]['sum'] + player['rating']
+                max_sum = math.max(max_sum, teams[i]['sum'])
+                table.insert(result, {player=player['pos'], rating=player['rating'], team=team, slot=slot})
+                first_team = false
             end
-
-            player = table.remove(players, player_key)
-            if not player then break end
-
-            teams[i]['sum'] = teams[i]['sum'] + player['rating']
-            max_sum = math.max(max_sum, teams[i]['sum'])
-            table.insert(result, {player=player['pos'], rating=player['rating'], team=team, slot=slot})
-            first_team = false
         end
 
         table.sort(teams, team_sort_by_sum)
@@ -1488,12 +1548,13 @@ local function autobalance_rr(players, teams)
     while not table.empty(players) do
         for i, pick in team_picks do
             local slot = table.remove(teams[pick.team], 1)
-            if not slot then continue end
-            local player = table.remove(players, 1)
-            if not player then break end
-            pick.sum = pick.sum + i
+            if slot then
+                local player = table.remove(players, 1)
+                if not player then break end
+                pick.sum = pick.sum + i
 
-            table.insert(result, {player=player.pos, rating=player.rating, team=pick.team, slot=slot})
+                table.insert(result, {player=player.pos, rating=player.rating, team=pick.team, slot=slot})
+            end
         end
 
         table.sort(team_picks, function(a, b) return a.sum > b.sum end)
@@ -1501,7 +1562,6 @@ local function autobalance_rr(players, teams)
 
     return result
 end
-
 local function autobalance_random(players, teams_arg)
     local players = table.deepcopy(players)
     local result = {}
@@ -1517,18 +1577,18 @@ local function autobalance_random(players, teams_arg)
         for _, t in teams do
             local team = t['team']
             local slot = table.remove(t['slots'], 1)
-            if not slot then continue end
-            local player = table.remove(players, 1)
+            if slot then
+                local player = table.remove(players, 1)
 
-            if not player then break end
+                if not player then break end
 
-            table.insert(result, {player=player['pos'], rating=player['rating'], team=team, slot=slot})
+                table.insert(result, {player=player['pos'], rating=player['rating'], team=team, slot=slot})
+            end
         end
     end
 
     return result
 end
-
 function autobalance_quality(players)
     local teams = nil
     local quality = 0
@@ -1672,7 +1732,6 @@ local function AssignRandomStartSpots()
             gameInfo.PlayerOptions[r.slot] = playerOptions
 
             -- Send team data to the server
-            local playerInfo = gameInfo.PlayerOptions[r.slot]
             HostUtils.SendPlayerSettingsToServer(r.slot)
         end
     end
@@ -1861,10 +1920,10 @@ end
 local function AssignAINames()
     local aiNames = import("/lua/ui/lobby/ainames.lua").ainames
     local nameSlotsTaken = {}
-    for index, faction in FactionData.Factions do
+    for index, _ in FactionData.Factions do
         nameSlotsTaken[index] = {}
     end
-    for index, player in gameInfo.PlayerOptions do
+    for _, player in gameInfo.PlayerOptions do
         if not player.Human then
             local playerFaction = player.Faction
             local factionNames = aiNames[FactionData.Factions[playerFaction].Key]
@@ -1900,7 +1959,7 @@ function ReturnToMenu(reconnect)
 end
 
 function PrintSystemMessage(id, parameters)
-    AddChatText(LOCF("<LOC "..id..">Unknown system message. Check localisation file", unpack(parameters)))
+    AddChatText(LOCF("<LOC " .. id .. ">Unknown system message. Check localisation file", unpack(parameters)))
 end
 
 function SendSystemMessage(id, ...)
@@ -1948,7 +2007,7 @@ function PrivateChat(targetID,text)
     end
     local targetName = FindNameForID(targetID)
     if targetName then
-        AddChatText("<<"..LOCF("<LOC lobui_0443>To %s", targetName)..">> " .. text)
+        AddChatText("<<" .. LOCF("<LOC lobui_0443>To %s", targetName) .. ">> " .. text)
     end
 end
 
@@ -1992,33 +2051,31 @@ function UpdateAvailableSlots(numAvailStartSpots, scenario)
                 break
             end
         end
-        if not diff then
-            continue
-        end
+        if diff then
+            GUI.slots[i].faction:ChangeBitmapArray(factionBmps)
+            Tooltip.AddComboTooltip(GUI.slots[i].faction, factionTooltips)
 
-        GUI.slots[i].faction:ChangeBitmapArray(factionBmps)
-        Tooltip.AddComboTooltip(GUI.slots[i].faction, factionTooltips)
-
-        if gameInfo.PlayerOptions[i] then
-            local playerFactionIndex = table.getn(factionList)
-            for index,key in factionList do
-                if key == oldAvailableFactions[gameInfo.PlayerOptions[i].Faction] then
-                    playerFactionIndex = index
-                    break
-                end
-            end
-            if FindSlotForID(localPlayerID) == i then
-                local fact = factionList[playerFactionIndex]
-                for index,value in allAvailableFactionsList do
-                    if fact == value then
-                        GUI.factionSelector:SetSelected(index)
+            if gameInfo.PlayerOptions[i] then
+                local playerFactionIndex = table.getn(factionList)
+                for index,key in factionList do
+                    if key == oldAvailableFactions[gameInfo.PlayerOptions[i].Faction] then
+                        playerFactionIndex = index
                         break
                     end
                 end
-                UpdateFactionSelector()
-            else
-                GUI.slots[i].faction:SetItem(playerFactionIndex)
-                gameInfo.PlayerOptions[i].Faction = playerFactionIndex
+                if FindSlotForID(localPlayerID) == i then
+                    local fact = factionList[playerFactionIndex]
+                    for index,value in allAvailableFactionsList do
+                        if fact == value then
+                            GUI.factionSelector:SetSelected(index)
+                            break
+                        end
+                    end
+                    UpdateFactionSelector()
+                else
+                    GUI.slots[i].faction:SetItem(playerFactionIndex)
+                    gameInfo.PlayerOptions[i].Faction = playerFactionIndex
+                end
             end
         end
     end
@@ -2083,8 +2140,8 @@ local function TryLaunch(skipNoObserversCheck)
     if not singlePlayer then
         local notReady = GetPlayersNotReady()
         if notReady then
-            for k,v in notReady do
-                AddChatText(LOCF("<LOC lobui_0203>%s isn't ready.",v))
+            for _, v in notReady do
+                AddChatText(LOCF("<LOC lobui_0203>%s isn't ready.", v))
             end
             return
         end
@@ -2097,7 +2154,7 @@ local function TryLaunch(skipNoObserversCheck)
     local numPlayers = 0
     local numHumanPlayers = 0
     local numTeams = 0
-    for slot, player in gameInfo.PlayerOptions:pairs() do
+    for _, player in gameInfo.PlayerOptions:pairs() do
         if player then
             numPlayers = numPlayers + 1
 
@@ -2127,9 +2184,9 @@ local function TryLaunch(skipNoObserversCheck)
     end
 
     if not gameInfo.GameOptions.AllowObservers then
-        
+
         -- if observers are not allowed, and team spawn is set to penguin_autobalance, and there are
-        -- an odd number of players, then make the last player an observer now if human 
+        -- an odd number of players, then make the last player an observer now if human
         -- (before the check(s)/prompt(s) for having observer(s) when they're not allowed)
         if gameInfo.GameOptions.TeamSpawn == 'penguin_autobalance' then
             if math.mod(numPlayers, 2) == 1 then
@@ -2210,7 +2267,7 @@ local function TryLaunch(skipNoObserversCheck)
         local allRatings = {}
         local clanTags = {}
         for k, player in gameInfo.PlayerOptions do
-            if player.PL then
+            if player.Human and player.PL then
                 allRatings[player.PlayerName] = player.PL
                 clanTags[player.PlayerName] = player.PlayerClan
 
@@ -2287,7 +2344,7 @@ local function TryLaunch(skipNoObserversCheck)
         -- launch the game
         lobbyComm:LaunchGame(gameInfo)
 
-        
+
     end
 
     LaunchGame()
@@ -2300,7 +2357,6 @@ local function AlertHostMapMissing()
         lobbyComm:SendData(hostID, {Type = 'MissingMap'})
     end
 end
-
 local function UpdateGame()
     -- This allows us to assume the existence of UI elements throughout.
     if not GUI.uiCreated then
@@ -2399,7 +2455,7 @@ local function UpdateGame()
                         table.insert(iconReplacements, info)
                     -- tell us (and then spam the author, not the dev) if it failed
                     else
-                        WARN("Unable to load icons from mod '" .. tostring(mod.name) .. "' with uid '" .. tostring(uid) .. "'. Please inform the author: " .. tostring(mod.author))
+                        WARN("Unable to load icons from mod '" .. mod.name .. "' with uid '" .. uid .. "'. Please inform the author: " .. mod.author)
                         WARN(msg)
                     end
                 end
@@ -2426,8 +2482,8 @@ local function UpdateGame()
             -- hence we can not rely on mod and / or lobby option
             -- changes to be present.
 
-            -- local mods = Mods.GetGameMods(gameInfo.GameMods)
-            -- PrefetchSession(scenarioInfo.map, mods, true)
+            local mods = Mods.GetGameMods(gameInfo.GameMods)
+            PrefetchSession(scenarioInfo.map, mods, true)
 
         else
             AlertHostMapMissing()
@@ -2459,8 +2515,6 @@ local function UpdateGame()
     end
 
     gameInfo.AdaptiveMap = scenarioInfo.AdaptiveMap
-
-    local numPlayers = GetPlayerCount()
 
     local numAvailStartSpots = LobbyComm.maxPlayerSlots
     if scenarioInfo then
@@ -2522,7 +2576,7 @@ local function UpdateGame()
     RefreshLargeMap()
 
     SetRuleTitleText(gameInfo.GameOptions.GameRules or "")
-    SetGameTitleText(gameInfo.GameOptions.Title or LOC("<LOC lobui_0427>FAF Game Lobby"))
+    SetGameTitleText(gameInfo.GameOptions.Title or LOC("<LOC lobui_0427>GAF Game Lobby"))
 
     if isHost and GUI.autoTeams then
         GUI.autoTeams:SetState(gameInfo.GameOptions.AutoTeams,true)
@@ -2562,7 +2616,7 @@ function ShowGameQuality()
         local playerOptions = gameInfo.PlayerOptions[i]
         if playerOptions then
             -- Can't do it for AI, either, not sensibly.
-            if not playerOptions.Human and (playerOptions.MEAN or 0) == 0 then
+            if not playerOptions.Human then
                 return
             end
 
@@ -2593,10 +2647,10 @@ local OptionUtils = {
     -- Set all game options to their default values.
     SetDefaults = function()
         local options = {}
-        for index, option in teamOpts do
+        for _, option in teamOpts do
             options[option.key] = option.values[option.default].key or option.values[option.default]
         end
-        for index, option in globalOpts do
+        for _, option in globalOpts do
             -- Exception to make AllowObservers work because the engine requires
             -- the keys to be bool. Custom options should use 'True' or 'False'
             if option.key == 'AllowObservers' then
@@ -2670,14 +2724,14 @@ end
 function ClientsMissingMap()
     local ret = nil
 
-    for index, player in gameInfo.PlayerOptions:pairs() do
+    for _, player in gameInfo.PlayerOptions:pairs() do
         if player.BadMap then
             if not ret then ret = {} end
             table.insert(ret, player.PlayerName)
         end
     end
 
-    for index, observer in gameInfo.Observers:pairs() do
+    for _, observer in gameInfo.Observers:pairs() do
         if observer.BadMap then
             if not ret then ret = {} end
             table.insert(ret, observer.PlayerName)
@@ -2688,11 +2742,11 @@ function ClientsMissingMap()
 end
 
 function ClearBadMapFlags()
-    for index, player in gameInfo.PlayerOptions:pairs() do
+    for _, player in gameInfo.PlayerOptions:pairs() do
         player.BadMap = false
     end
 
-    for index, observer in gameInfo.Observers:pairs() do
+    for _, observer in gameInfo.Observers:pairs() do
         observer.BadMap = false
     end
 end
@@ -2724,8 +2778,8 @@ function CreateSlotsUI(makeLabel)
     local ColumnLayout = import("/lua/ui/controls/columnlayout.lua").ColumnLayout
 
     -- The dimensions of the columns used for slot UI controls.
-    local COLUMN_POSITIONS = {1, 21, 47, 91, 133, 395, 465, 535, 605, 677, 749}
-    local COLUMN_WIDTHS = {20, 20, 45, 45, 257, 59, 59, 59, 62, 62, 51}
+     local COLUMN_POSITIONS = {1, 21, 47, 91, 133, 380, 425, 495, 565, 637, 709, 749}
+    local COLUMN_WIDTHS = {20, 20, 45, 45, 241, 40, 62, 59, 59, 62, 62, 51}
 
     local labelGroup = ColumnLayout(GUI.playerPanel, COLUMN_POSITIONS, COLUMN_WIDTHS)
 
@@ -2748,7 +2802,10 @@ function CreateSlotsUI(makeLabel)
     local nameLabel = makeLabel(LOC("<LOC NICKNAME>Nickname"), 14)
     labelGroup:AddChild(nameLabel)
 
-    local colorLabel = makeLabel(LOC("<LOC lobui_0214>Color"), 14)
+    local avatarLabel = makeLabel(("Avatar"), 14)
+    labelGroup:AddChild(avatarLabel)
+
+    local colorLabel = makeLabel(("<LOC lobui_0214>Color"), 14)
     labelGroup:AddChild(colorLabel)
 
     local factionLabel = makeLabel(LOC("<LOC lobui_0215>Faction"), 14)
@@ -2764,7 +2821,7 @@ function CreateSlotsUI(makeLabel)
         labelGroup:AddChild(makeLabel(LOC("<LOC lobui_0218>Ready"), 14))
     end
 
-    for i= 1, LobbyComm.maxPlayerSlots do
+    for i = 1, LobbyComm.maxPlayerSlots do
         -- Capture the index in the current closure so it's accessible on callbacks
         local curRow = i
 
@@ -2875,27 +2932,50 @@ function CreateSlotsUI(makeLabel)
             end
         end
 
-        -- Color
-        local colorSelector = BitmapCombo(newSlot, gameColors.PlayerColors, 1, true, nil, "UI_Tab_Rollover_01", "UI_Tab_Click_01")
-        newSlot.color = colorSelector
+        -- Avatar
+        local avatar = Bitmap(newSlot)
+        newSlot.KinderAvatar = avatar
+        LayoutHelpers.SetWidth(avatar, COLUMN_WIDTHS[6])
+        newSlot:AddChild(avatar)
 
+    -- Color
+        local colorSelector = BitmapCombo(
+            newSlot,
+            gameColors.PlayerColors,
+            1, true, nil,
+            "UI_Tab_Rollover_01", "UI_Tab_Click_01"
+        )
+        newSlot.color = colorSelector
         newSlot:AddChild(colorSelector)
-        LayoutHelpers.SetWidth(colorSelector, COLUMN_WIDTHS[6])
+        LayoutHelpers.SetWidth(colorSelector, COLUMN_WIDTHS[7])
+
         colorSelector.OnClick = function(self, index)
+            local playerInfo = gameInfo.PlayerOptions[curRow]
+            local isHuman = playerInfo.Human
+            local isDev   = isHuman and groupDevColors[playerInfo.GroupRole] ~= nil
+
+            if isHuman and not isDev and index > 19 then
+                self:SetItem(playerInfo.PlayerColor)
+                AddChatText(LOC("<LOC lobui_0013_gaf>Color #" .. index .. " available only for Boosty subscribers and Staff."))
+
+                return
+            end
+
             if not lobbyComm:IsHost() then
                 lobbyComm:SendData(hostID, { Type = 'RequestColor', Color = index })
-                SetPlayerColor(gameInfo.PlayerOptions[curRow], index)
+                SetPlayerColor(playerInfo, index)
                 UpdateGame()
             else
                 if IsColorFree(index) then
                     lobbyComm:BroadcastData({ Type = 'SetColor', Color = index, Slot = curRow })
-                    SetPlayerColor(gameInfo.PlayerOptions[curRow], index)
+                    SetPlayerColor(playerInfo, index)
                     UpdateGame()
                 else
-                    self:SetItem(gameInfo.PlayerOptions[curRow].PlayerColor)
+                    self:SetItem(playerInfo.PlayerColor)
                 end
             end
         end
+
         colorSelector.OnEvent = defaultHandler
         Tooltip.AddControlTooltip(colorSelector, 'lob_color')
 
@@ -2918,7 +2998,7 @@ function CreateSlotsUI(makeLabel)
         newSlot.faction = factionSelector
         newSlot.AvailableFactions = factionList
         newSlot:AddChild(factionSelector)
-        LayoutHelpers.SetWidth(factionSelector, COLUMN_WIDTHS[7])
+        LayoutHelpers.SetWidth(factionSelector, COLUMN_WIDTHS[8])
         factionSelector.OnClick = function(self, index)
             SetPlayerOption(curRow, 'Faction', index)
             if curRow == FindSlotForID(FindIDForName(localPlayerName)) then
@@ -2944,7 +3024,7 @@ function CreateSlotsUI(makeLabel)
         teamSelector._titleColor = 'White'
         newSlot.team = teamSelector
         newSlot:AddChild(teamSelector)
-        LayoutHelpers.SetWidth(teamSelector, COLUMN_WIDTHS[8])
+        LayoutHelpers.SetWidth(teamSelector, COLUMN_WIDTHS[9])
         teamSelector.OnClick = function(self, index, text)
             Tooltip.DestroyMouseoverDisplay()
             SetPlayerOption(curRow, 'Team', index)
@@ -2957,7 +3037,7 @@ function CreateSlotsUI(makeLabel)
         local barMin = 0
         local CPUGroup = Group(newSlot)
         newSlot.CPUGroup = CPUGroup
-        LayoutHelpers.SetWidth(CPUGroup, COLUMN_WIDTHS[9])
+        LayoutHelpers.SetWidth(CPUGroup, COLUMN_WIDTHS[10])
         CPUGroup.Height:Set(newSlot.Height)
         newSlot:AddChild(CPUGroup)
         local CPUSpeedBar = StatusBar(CPUGroup, barMin, barMax, false, false,
@@ -2977,7 +3057,7 @@ function CreateSlotsUI(makeLabel)
         barMin = 0
         local pingGroup = Group(newSlot)
         newSlot.pingGroup = pingGroup
-        LayoutHelpers.SetWidth(pingGroup, COLUMN_WIDTHS[10])
+        LayoutHelpers.SetWidth(pingGroup, COLUMN_WIDTHS[11])
         pingGroup.Height:Set(newSlot.Height)
         newSlot:AddChild(pingGroup)
         local pingStatus = StatusBar(pingGroup, barMin, barMax, false, false,
@@ -3006,6 +3086,7 @@ function CreateSlotsUI(makeLabel)
 
         newSlot.HideControls = function()
             -- hide these to clear slot of visible data
+            avatar:Hide()
             flag:Hide()
             ratingText:Hide()
             numGamesText:Hide()
@@ -3033,7 +3114,6 @@ function CreateSlotsUI(makeLabel)
         GUI.slots[i] = newSlot
     end
 end
-
 -- create UI won't typically be called directly by another module
 function CreateUI(maxPlayers)
     local ResourceMapPreview = import("/lua/ui/controls/resmappreview.lua").ResourceMapPreview
@@ -3072,7 +3152,7 @@ function CreateUI(maxPlayers)
     LayoutHelpers.AtRightTopIn(GUI.GameQualityLabel, GUI.panel, 5, 64)
 
     -- Title Label
-    GUI.titleText = makeLabel(LOC("<LOC lobui_0427>FAF Game Lobby"), 17)
+    GUI.titleText = makeLabel(LOC("<LOC lobui_0427>GAF Game Lobby"), 17)
     LayoutHelpers.AtLeftTopIn(GUI.titleText, GUI.panel, 5, 20)
 
     if isHost then
@@ -3138,15 +3218,16 @@ function CreateUI(maxPlayers)
     GUI.logo = Bitmap(GUI, '/textures/ui/common/scx_menu/lan-game-lobby/logo.dds')
     LayoutHelpers.AtLeftTopIn(GUI.logo, GUI, 1, 1)
 
-    local version, gametype, commit = import("/lua/version.lua").GetVersionData()
-    GUI.gameVersionText = UIUtil.CreateText(GUI.panel, LOC('<LOC lobui_0466>Game version ') .. version, 9, UIUtil.bodyFont)
+    -- Version texts
+    local version, server = import("/lua/version.lua").GetVersionData()
+    GUI.gameVersionText = UIUtil.CreateText(GUI.panel, LOC("<LOC lobui_0001_gaf>Balance patch") .. " " .. version, 9, UIUtil.bodyFont)
     GUI.gameVersionText:SetColor('677983')
     GUI.gameVersionText:SetDropShadow(true)
-
-    Tooltip.AddControlTooltipManual(GUI.gameVersionText, '<LOC lobui_0467>Version control', string.format(
-        LOC('<LOC lobui_0468>Game version: %s\nGame type: %s\nCommit hash: %s'), version, gametype, commit:sub(1, 8)
-    ))
-
+    Tooltip.AddControlTooltipManual(
+        GUI.gameVersionText,
+        LOC('<LOC lobui_0006_gaf>Balance information'),
+        LOCF('<LOC lobui_0007_gaf>Balance patch version: %s\nServer: %s', version, server)
+    )
     LayoutHelpers.AtLeftTopIn(GUI.gameVersionText, GUI.panel, 70, 3)
 
     -- Player Slots
@@ -3322,11 +3403,35 @@ function CreateUI(maxPlayers)
 
     -- Patchnotes Button
     GUI.patchnotesButton = UIUtil.CreateButtonWithDropshadow(GUI.panel, '/Button/medium/', "<LOC _Patchnotes>Patchnotes")
-    Tooltip.AddButtonTooltip(GUI.patchnotesButton, 'Lobby_patchnotes')
+    Tooltip.AddButtonTooltip(GUI.patchnotesButton, {text=LOC("<LOC _Patchnotes>Patchnotes"), body=LOC("<LOC lobui_0004_gaf>Click here to get more information about the current balance patch")})
+    LayoutHelpers.AtBottomIn(GUI.patchnotesButton, GUI.optionsPanel, 630)
+    LayoutHelpers.AtHorizontalCenterIn(GUI.patchnotesButton, GUI.optionsPanel, -640)
+    LayoutHelpers.SetWidth(GUI.patchnotesButton, 240)
+    LayoutHelpers.SetHeight(GUI.patchnotesButton, 45)
+    GUI.patchnotesButton.OnClick = function(self, event)
+	    OpenURL('http://gapforever2.github.io/patchnotes')
+        Changelog.Changelog(GUI)
+    end
+
+    -- KickObs
+    GUI.kickobs = UIUtil.CreateButtonWithDropshadow(GUI.panel, '/Button/medium/', "<LOC _KickObs>Kick observers")
+    Tooltip.AddButtonTooltip(GUI.kickobs, {text=LOC("<LOC _KickObs>Kick observers"), body=LOC("<LOC lobui_0002_gaf>Kick all observers from lobby")})
+    LayoutHelpers.AtBottomIn(GUI.kickobs, GUI.optionsPanel, -90)
+    LayoutHelpers.AtHorizontalCenterIn(GUI.kickobs, GUI.optionsPanel, -190)
+    LayoutHelpers.SetWidth(GUI.kickobs, 180)
+    LayoutHelpers.SetHeight(GUI.kickobs, 40)
+    UIUtil.setVisible(GUI.kickobs, isHost)
+    GUI.kickobs.OnClick = function(self, event)
+        HostUtils.KickObservers("GameLaunched")
+    end
+
+    -- Discord GAF
+    GUI.patchnotesButton = UIUtil.CreateButtonWithDropshadow(GUI.panel, '/Button/medium/', "<LOC _DiscordGaf>Discord GAF")
+    Tooltip.AddButtonTooltip(GUI.patchnotesButton, {text=LOC("Discord GAF"), body=LOC("Официальный дискорд GAPForever")})
     LayoutHelpers.AtBottomIn(GUI.patchnotesButton, GUI.optionsPanel, -51)
     LayoutHelpers.AtHorizontalCenterIn(GUI.patchnotesButton, GUI.optionsPanel, -55)
     GUI.patchnotesButton.OnClick = function(self, event)
-        Changelog.Changelog(GUI)
+        OpenURL('http://discord.com/invite/3wvXGZHHFp')
     end
 
     -- Create mission briefing button
@@ -3522,7 +3627,7 @@ function CreateUI(maxPlayers)
     LayoutHelpers.AtLeftIn(chatBG, GUI.chatDisplay, -2)
     chatBG.Width:Set(GUI.chatPanel.Width)
     LayoutHelpers.SetHeight(chatBG, 24)
-    
+
     -- Set up the chat edit buttons and functions
     setupChatEdit(GUI.chatPanel)
     -- finally create chat lines
@@ -3794,7 +3899,6 @@ function CreateUI(maxPlayers)
                     lobbyComm:BroadcastData({ Type = "SetAllPlayerNotReady" })
                     UpdateGame()
                 end,
-
                 "<LOC _Cancel>", nil,
                 nil, nil,
                 true
@@ -3962,7 +4066,7 @@ function CreateUI(maxPlayers)
         -- If there is an odd number of players in that case, the last player will be made an
         -- observer if human or removed if AI.
 
-        -- How it balances: this function checks every possible balance combination for making 
+        -- How it balances: this function checks every possible balance combination for making
         -- the two teams (while keeping their player counts equal to half the number of occupied
         -- slots, rounded down, and not using the last player if there is an odd number of players).
         -- To do this, the function sums up all the relevant players' ratings (keeping mean and
@@ -4079,7 +4183,7 @@ function CreateUI(maxPlayers)
             local team2OrderNum = 0
 
             local manualTeams
-                
+
             if gameInfo.GameOptions.AutoTeams == 'pvsi' then -- odd vs even
                 for i = 1, 16 do
                     if not gameInfo.ClosedSlots[i] then
@@ -4123,17 +4227,17 @@ function CreateUI(maxPlayers)
             end
 
             -- If the teams were not set properly, set them properly.
-            -- When teams are set manually, they are not set properly if the number of 
-            -- players on either team does not equal the team size.  
+            -- When teams are set manually, they are not set properly if the number of
+            -- players on either team does not equal the team size.
             -- When teams are not set manually, they are not set properly if the number
             -- of slots on either team is less than the team size.
-            if (manualTeams and (numPlayersTeam1 != teamSize or numPlayersTeam2 != teamSize))
+            if (manualTeams and (numPlayersTeam1 ~= teamSize or numPlayersTeam2 ~= teamSize))
              or (not manualTeams and (table.getn(sortedTeam1Slots) < teamSize or table.getn(sortedTeam2Slots) < teamSize)) then
                 -- set AutoTeams to none (so, they can be set by slot by this function)
                 gameInfo.GameOptions.AutoTeams = 'none'
                 local counter = 0
-                for i, player in gameInfo.PlayerOptions:pairs() do
-                    for i2, slotTeam in sortedSlotTeams do
+                for _, player in gameInfo.PlayerOptions:pairs() do
+                    for _, slotTeam in sortedSlotTeams do
                         if player.StartSpot == slotTeam[1] then
                             counter = counter + 1
                             -- set the player's team
@@ -4161,7 +4265,7 @@ function CreateUI(maxPlayers)
             if gameInfo.GameOptions.AutoTeams == 'none' then
                 sortedTeam1Slots = {}
                 sortedTeam2Slots = {}
-                for i, slotTeam in sortedSlotTeams do 
+                for i, slotTeam in sortedSlotTeams do
                     team1OrderNum = 0
                     team2OrderNum = 0
                     for i2, slotTeam2 in sortedSlotTeams do
@@ -4346,7 +4450,7 @@ function CreateUI(maxPlayers)
             -- determine the number of teams (excluding the no team (-) option that equals 1 on the backend)
             local teams = {}
             local numTeams = 0
-            for i, player in gameInfo.PlayerOptions:pairs() do
+            for _, player in gameInfo.PlayerOptions:pairs() do
                 if not teams[player.Team] and player.Team ~= 1 then
                     teams[player.Team] = true
                     numTeams = numTeams + 1
@@ -4356,8 +4460,7 @@ function CreateUI(maxPlayers)
             -- adjust index by 1 because 0-based (ItemList rows) vs 1-based (Lua array) indexing
             local obsIndex = row + 1
             local maxObsIndex = self:GetItemCount()
-
-            -- adjust index by the number of rows taken up by team ratings. 
+            -- adjust index by the number of rows taken up by team ratings.
             ---@see refreshObserverList
             if gameInfo.GameOptions['TeamSpawn'] == 'fixed' then
                 if numTeams < 3 then
@@ -4367,20 +4470,29 @@ function CreateUI(maxPlayers)
                     maxObsIndex = maxObsIndex - numTeams
                 end
             end
-            
+
             -- the host can get the kick dialog brought up for observer list rows that are players (aka, they have
             -- a positive observer index and thereby aren't team ratings) and that aren't the local player (the host)
             -- and that aren't the rows with team ratings when there are 3 or more teams
-            if obsIndex > 0 and gameInfo.Observers[obsIndex].OwnerID ~= localPlayerID and obsIndex <= maxObsIndex then
-                UIUtil.QuickDialog(GUI, "<LOC lobui_0166>Are you sure?",
-                                        "<LOC lobui_0167>Kick Player", function()
-                                            SendSystemMessage("lobui_0756", gameInfo.Observers[obsIndex].PlayerName)
-                                            lobbyComm:EjectPeer(gameInfo.Observers[obsIndex].OwnerID, "KickedByHost")
-                                        end,
-                                        "<LOC _Cancel>", nil,
-                                        nil, nil,
-                                        true,
-                                        {worldCover = false, enterButton = 1, escapeButton = 2}
+            if obsIndex > 0 and gameInfo.Observers[obsIndex].OwnerID != localPlayerID then
+                UIUtil.QuickDialog(
+                    GUI,
+                    "<LOC lobui_0166>Are you sure?",
+                    "<LOC lobui_0167>Kick Player",
+                    function()
+                        SendSystemMessage("lobui_0756", gameInfo.Observers[obsIndex].PlayerName)
+                        lobbyComm:EjectPeer(gameInfo.Observers[obsIndex].OwnerID, "KickedByHost")
+                    end,
+                    "<LOC _Cancel>",
+                    nil,
+                    nil,
+                    nil,
+                    true,
+                    {
+                        worldCover = false,
+                        enterButton = 1,
+                        escapeButton = 2
+                    }
                 )
             end
         end
@@ -4437,6 +4549,211 @@ function CreateUI(maxPlayers)
         import("/lua/ui/events/snowflake.lua"). CreateSnowFlakes(GUI)
     end
 end
+function LobbyChatAutocompleteTab(self)
+    local text = self:GetText() or ""
+    local tlow = string.lower(text)
+    LOG('[CHAT_TAB] OnTab text=' .. repr(text))
+    -- выключает автокомплит в обычных лобби 
+    local hostAllowed = false
+    if hostID and ALLOWED_AUTOHOST_UIDS and ALLOWED_AUTOHOST_UIDS[hostID] then hostAllowed = true end
+    if not hostAllowed then
+        local hostName = FindNameForID(hostID)
+        if hostName then
+            local lname = string.lower(hostName)
+            -- strip color tags or brackets if any (safety)
+            lname = string.gsub(lname, "[%[%]]", "")
+            lname = string.gsub(lname, "^%s+|%s+$", "")
+            if ALLOWED_AUTOHOST_NAMES then
+                if ALLOWED_AUTOHOST_NAMES[lname] then
+                    hostAllowed = true
+                else
+                    for k, _ in pairs(ALLOWED_AUTOHOST_NAMES) do
+                        if string.find(lname, k, 1, true) == 1 then
+                            hostAllowed = true
+                            break
+                        end
+                    end
+                end
+            end
+        end
+    end
+    if not hostAllowed then
+        return
+    end
+    -- автокомплит для '!map '
+    local _, mapEnd = string.find(tlow, "^!map%s+")
+    if mapEnd then
+        local prefix = string.sub(text, 1, mapEnd)
+        local rawQuery = string.sub(text, mapEnd + 1)
+        local queryTrim = string.match(rawQuery or '', '^%s*(.-)%s*$') or ''
+        -- Use the first token as the seed to keep cycling for e.g. '!map Astro'
+        local seed = string.match(queryTrim, "([^%s]+)") or queryTrim
+
+        local mapDialog = import('/lua/ui/dialogs/mapselect.lua')
+        local scenarios = mapDialog.LoadScenarios()
+        local names = {}
+        for _, scen in scenarios do
+            local nm = scen.name or scen.file
+            if nm then table.insert(names, nm) end
+        end
+        if table.getn(names) == 0 then return end
+
+        local qlow = string.lower(seed or "")
+        local matches = {}
+
+        for _, name in ipairs(names) do
+            local nlow = string.lower(name)
+            if string.find(nlow, qlow, 1, true) == 1 then
+                table.insert(matches, name)
+            end
+        end
+        if table.getn(matches) == 0 and qlow ~= '' then
+            for _, name in ipairs(names) do
+                local nlow = string.lower(name)
+                if string.find(nlow, qlow, 1, true) ~= nil then
+                    table.insert(matches, name)
+                end
+            end
+        end
+        if table.getn(matches) == 0 then return end
+
+        local nextIndex = 1
+        for i, name in ipairs(matches) do
+            if string.lower(name) == string.lower(queryTrim) then
+                nextIndex = i + 1
+                break
+            end
+        end
+        if nextIndex > table.getn(matches) then
+            nextIndex = 1
+        end
+        local result = prefix .. matches[nextIndex]
+        LOG('[CHAT_TAB] map choose=' .. repr(matches[nextIndex]) .. ' result=' .. repr(result))
+        self:SetText(result)
+        return
+    end
+
+    local _, vkEnd = string.find(tlow, "^!votekick%s+")
+    local _, kEnd = string.find(tlow, "^!kick%s+")
+    local cmdEnd = vkEnd or kEnd
+    local prefix
+    local query
+    if cmdEnd then
+        prefix = string.sub(text, 1, cmdEnd)
+        query = string.sub(text, cmdEnd + 1)
+    else
+        --Автокомплит для комманд
+        if string.find(tlow, "^!") then
+            local bang = string.sub(text, 1, 1)
+            local body = string.sub(text, 2)
+            local bodylow = string.lower(body)
+            local commandsList = { '!votekick', '!kick', '!yes', '!help', '!map', '!maplist', '!close', '!regaf', '!kickinfo' }
+            -- Добавил '!ping' только для хоста который автохост редиска в будущем может больше
+            local hostAllowed = false
+            if hostID and ALLOWED_AUTOHOST_UIDS and ALLOWED_AUTOHOST_UIDS[hostID] then hostAllowed = true end
+            if not hostAllowed then
+                local hostName = FindNameForID(hostID)
+                if hostName and ALLOWED_AUTOHOST_NAMES and ALLOWED_AUTOHOST_NAMES[string.lower(hostName)] then hostAllowed = true end
+            end
+            if hostAllowed then
+                table.insert(commandsList, '!ping')
+            end
+            
+            local matches = {}
+            for _, cmd in ipairs(commandsList) do
+                local cbody = string.sub(cmd, 2) -- without '!'
+                if string.find(cbody, bodylow, 1, true) == 1 then
+                    table.insert(matches, cmd)
+                end
+            end
+            if table.getn(matches) == 0 and bodylow ~= '' then
+                for _, cmd in ipairs(commandsList) do
+                    local cbody = string.sub(cmd, 2)
+                    if string.find(cbody, bodylow, 1, true) ~= nil then
+                        table.insert(matches, cmd)
+                    end
+                end
+            end
+            if table.getn(matches) == 0 then return end
+
+            -- Если набрали точное название команды то автокомплит для неё
+            for _, cmd in ipairs(matches) do
+                if string.lower(cmd) == '!' .. bodylow then
+                    local result = cmd
+                    if result == '!votekick' or result == '!kick' or result == '!map' or result == '!close' then
+                        result = result .. ' '
+                    end
+                    self:SetText(result)
+                    return
+                end
+            end
+
+            local nextIndex = 1
+            if bodylow ~= '' then
+                for i, cmd in ipairs(matches) do
+                    if string.find(string.lower(cmd), bodylow, 1, true) ~= nil then
+                        nextIndex = i
+                        break
+                    end
+                end
+            end
+
+            local result = matches[nextIndex]
+            -- Добавил пробел если команда завершена и имеет аргументы на всякий случай
+            if result == '!votekick' or result == '!kick' or result == '!map' or result == '!close' then
+                result = result .. ' '
+            end
+            self:SetText(result)
+            return
+        end
+        -- Если нет комманды то возращаем ретурн
+        return
+    end
+
+    local gi = gameInfo
+    if not gi or not gi.PlayerOptions then LOG('[CHAT_TAB] gameInfo missing'); return end
+
+    local names = {}
+    for _, p in gi.PlayerOptions:pairs() do
+        if p.Human and p.PlayerName then
+            table.insert(names, p.PlayerName)
+        end
+    end
+    if table.getn(names) == 0 then LOG('[CHAT_TAB] no human names'); return end
+
+    local qlow = string.lower(query or "")
+    local matches = {}
+    for _, name in ipairs(names) do
+        local nlow = string.lower(name)
+        if string.find(nlow, qlow, 1, true) == 1 then
+            table.insert(matches, name)
+        end
+    end
+    if table.getn(matches) == 0 and qlow ~= "" then
+        for _, name in ipairs(names) do
+            local nlow = string.lower(name)
+            if string.find(nlow, qlow, 1, true) ~= nil then
+                table.insert(matches, name)
+            end
+        end
+    end
+    if table.getn(matches) == 0 then return end
+    LOG('[CHAT_TAB] matches=' .. tostring(table.getn(matches)) .. ' q=' .. repr(query))
+
+    local nextIndex = 1
+    for i, name in ipairs(matches) do
+        if string.lower(name) == string.lower(query) then
+            nextIndex = i + 1
+            break
+        end
+    end
+    if nextIndex > table.getn(matches) then
+        nextIndex = 1
+    end
+    local result = prefix .. matches[nextIndex]
+    LOG('[CHAT_TAB] choose=' .. repr(matches[nextIndex]) .. ' result=' .. repr(result))
+    self:SetText(result)
+end
 
 function setupChatEdit(chatPanel)
     GUI.chatEdit = Edit(chatPanel)
@@ -4454,6 +4771,7 @@ function setupChatEdit(chatPanel)
     GUI.chatEdit:SetMaxChars(200)
     GUI.chatEdit.OnCharPressed = function(self, charcode)
         if charcode == UIUtil.VK_TAB then
+		    LobbyChatAutocompleteTab(self)
             return true
         end
 
@@ -4474,7 +4792,7 @@ function setupChatEdit(chatPanel)
     local commandQueueIndex = 0
     local commandQueue = {}
     GUI.chatEdit.OnEnterPressed = function(self, text)
-        if text:gsub("%s+", "") == '' then  -- If the text, trimmed of all space, is equal to ''
+        if text:gsub("%s+", "") == '' then  -- Если текст без пробелов равен ''
             return
         end
         GpgNetSend('Chat', text)
@@ -4510,8 +4828,14 @@ function setupChatEdit(chatPanel)
         return true
     end
 
-    --- Handle up/down arrow presses for the chat box.
+    --autocomplete
     GUI.chatEdit.OnNonTextKeyPressed = function(self, keyCode)
+        
+        if keyCode == UIUtil.VK_TAB or keyCode == 9 then
+            LOG('[CHAT_TAB] NonTextKey Tab keyCode=' .. tostring(keyCode))
+            LobbyChatAutocompleteTab(self)
+            return true
+        end
         if AddUnicodeCharToEditText(self, keyCode) then
             return
         end
@@ -4734,7 +5058,7 @@ end
 -- @param peer, native table as returned by lobbyComm:GetPeer()
 -- @return A value describing the connectivity to given peer.
 -- 1 means no connectivity, 2 means they haven't reported that they can talk to us, 3 means
---
+
 -- @todo: This function has side effects despite the naming suggesting that it shouldn't.
 --        These need to go away.
 function CalcConnectionStatus(peer)
@@ -4803,9 +5127,10 @@ function EveryoneHasEstablishedConnections(check_observers)
             for k2, other in important do
                 if id ~= other and not table.find(peer.establishedPeers, other) then
                     result = false
-                    AddChatText(LOCF("<LOC lobui_0299>%s doesn't have an established connection to %s",
-                                     peer.name,
-                                     lobbyComm:GetPeer(other).name
+                    AddChatText(LOCF(
+                        "<LOC lobui_0299>%s doesn't have an established connection to %s",
+                        peer.name,
+                        lobbyComm:GetPeer(other).name
                     ))
                 end
             end
@@ -4823,36 +5148,59 @@ function AddChatText(text, playerID, scrollToBottom)
 
     local chatPlayerColor = Prefs.GetFromCurrentProfile('ChatPlayerColor')
     if chatPlayerColor == nil then
-      chatPlayerColor = true
+        chatPlayerColor = true
     end
 
     local scrolledToBottom = GUI.chatPanel:IsScrolledToBottom() or scrollToBottom
-    local nameColor = "AAAAAA" -- Displaying text in grey by default if the player is observer
     local textColor = "AAAAAA"
-    local nameFont = "Arial Gras"
-    for id, player in gameInfo.PlayerOptions:pairs() do
+
+    local nameStyle = {
+        fontFamily = "Arial Gras",
+        fontColor = "AAAAAA",
+    }
+
+    local rolePrefix = ""
+
+    local name = FindNameForID(playerID)
+    local playerInfo = nil
+
+    for _, player in gameInfo.PlayerOptions:pairs() do
         if player.OwnerID == playerID and player.Human then
+            playerInfo = player
             textColor = nil
-            nameColor = gameColors.PlayerColors[player.PlayerColor]
-            if not chatPlayerColor then
-              nameFont = UIUtil.bodyFont
+
+            if playerInfo.GroupRole and groupDevColors[playerInfo.GroupRole] then
+                nameStyle.fontColor = groupDevColors[playerInfo.GroupRole]
+				local roleName = roleNames[playerInfo.GroupRole] or playerInfo.GroupRole
+                rolePrefix = string.format("%s] [", roleName)
+
+            elseif not chatPlayerColor then
+                nameStyle.fontFamily = UIUtil.bodyFont
                 if Prefs.GetOption('faction_font_color') then
-                    nameColor = import("/lua/skins/skins.lua").skins[ FACTION_NAMES[GetLocalPlayerData():AsTable().Faction] ].fontColor
-                    textColor = nameColor
-                else
-                    nameColor = nil
+                    nameStyle.fontColor = import("/lua/skins/skins.lua").skins[FACTION_NAMES[GetLocalPlayerData():AsTable().Faction]].fontColor
                 end
+            else
+                nameStyle.fontColor = gameColors.PlayerColors[player.PlayerColor]
             end
             break
         end
     end
-    local name = FindNameForID(playerID)
 
-    GUI.chatDisplay:PostMessage(text, name, {fontColor = textColor}, {fontColor = nameColor, fontFamily = nameFont})
-    if scrolledToBottom then
-       GUI.chatPanel:ScrollToBottom()
+
+    local formattedName = ""
+    if rolePrefix ~= "" then
+        formattedName = rolePrefix .. name
     else
-       GUI.newMessageArrow:Enable()
+        formattedName = name
+    end
+
+
+    GUI.chatDisplay:PostMessage(text, formattedName, {fontColor = textColor}, nameStyle)
+
+    if scrolledToBottom then
+        GUI.chatPanel:ScrollToBottom()
+    else
+        GUI.newMessageArrow:Enable()
     end
 end
 
@@ -4933,7 +5281,6 @@ function ShowMapPositions(mapCtrl, scenario)
         RefreshMapPosition(mapCtrl, inSlot)
     end
 end
-
 function ConfigureMapListeners(mapCtrl, scenario)
     local playerArmyArray = MapUtil.GetArmies(scenario)
 
@@ -5105,6 +5452,7 @@ local MessageHandlers = {
 
             return true
         end,
+        ---@param data LobbyPlayerOptionsData
         Handle = function(data)
             local options = data.Options
 
@@ -5128,7 +5476,7 @@ local MessageHandlers = {
             end
 
             SetSlotInfo(data.Slot, gameInfo.PlayerOptions[data.Slot])
-        end
+        end,
     },
 
     -- SenderName here is inserted by lobbyComm, so validating it is just a gratuitious effort to
@@ -5138,8 +5486,11 @@ local MessageHandlers = {
             return data.SenderName == FindNameForID(data.SenderID)
         end,
         Handle = function(data)
+            for _, mutedPlayerName in foe_list_ do
+                if mutedPlayerName == data.SenderName then return end
+            end
             AddChatText(data.Text, data.SenderID)
-        end
+        end,
     },
 
     PrivateChat = {
@@ -5147,7 +5498,10 @@ local MessageHandlers = {
             return data.SenderName == FindNameForID(data.SenderID)
         end,
         Handle = function(data)
-            AddChatText("<<"..LOCF("<LOC lobui_0442>From %s", data.SenderName)..">> "..data.Text)
+            for _, mutedPlayerName in foe_list_ do
+                if mutedPlayerName == data.SenderName then return end
+            end
+            AddChatText("<<" .. LOCF("<LOC lobui_0442>From %s", data.SenderName) .. ">> " .. data.Text)
         end
     },
 
@@ -5193,7 +5547,7 @@ local MessageHandlers = {
 
             -- allow the user to become an observer again
             GUI.becomeObserver:Enable()
-                
+
             -- update player options
             SetPlayerOption(data.Slot, 'Ready', false)
 
@@ -5219,7 +5573,6 @@ local MessageHandlers = {
         ---@field SenderId number
         ---@field SenderName string
         ---@field Type string
-
         ---@param data LobbyAddPlayerData
         Accept = function(data)
             -- we need to do quite a bit of checks to prevent malicious values
@@ -5272,12 +5625,20 @@ local MessageHandlers = {
             local playerVersion, playerGameType, playerCommit = tostring(data.PlayerOptions.Version), tostring(data.PlayerOptions.GameType), tostring(data.PlayerOptions.Commit)
             if hostVersion ~= playerVersion or hostGametype ~= playerGameType or hostCommit ~= playerCommit then
                 local playerName = data.PlayerOptions.PlayerName
-                AddChatText(LOCF("<LOC lobui_666>Game version missmatch detected with %s. \r\n - host: %s (@%s)\r\n - %s: %s (@%s). \r\n\r\nTo prevent desyncs, %s is ejected automatically. It is possible that a new game version is released. If this keeps happening then it is better to rehost.", playerName, hostVersion, hostCommit:sub(1, 8), playerName, playerVersion, playerCommit:sub(1, 8), playerName))
+                AddChatText(LOCF(
+                    "<LOC lobui_666>Game version missmatch detected with %s. \r\n - host: %s (@%s)\r\n - %s: %s (@%s). \r\n\r\nTo prevent desyncs, %s is ejected automatically. It is possible that a new game version is released. If this keeps happening then it is better to rehost.",
+                    playerName,
+                    hostVersion,
+                    hostCommit:sub(1, 8),
+                    playerName,
+                    playerVersion,
+                    playerCommit:sub(1, 8),
+                    playerName
+                ))
                 return false
             end
-
             return lobbyComm:IsHost()
-        end,
+		end,
         Reject = function(data)
             lobbyComm:EjectPeer(data.SenderID, "Game version missmatch or invalid player data.")
         end,
@@ -5383,6 +5744,17 @@ local MessageHandlers = {
     SystemMessage = {
         Handle = function(data)
             PrintSystemMessage(data.Id, data.Args)
+        end
+    },
+	--Лобби пинг для оповещение сраных афкашеров
+	LobbyPing = {
+        Accept = IsFromHost,
+        Handle = function(data)
+            if HasCommandLineArg('/gpgnet') then
+                PlayVoice(Sound{Bank = 'XGG', Cue = 'XGG_Computer__04716'}, true)
+            else
+                PlaySound(Sound{Cue = 'UI_Menu_Confirm_01', Bank = 'Interface'})
+            end
         end
     },
 
@@ -5560,8 +5932,6 @@ local MessageHandlers = {
         end
     },
 }
-
-
 -- LobbyComm Callbacks
 function InitLobbyComm(protocol, localPort, desiredPlayerName, localPlayerUID, natTraversalProvider)
     lobbyComm = LobbyComm.CreateLobbyComm(protocol, localPort, desiredPlayerName, localPlayerUID, natTraversalProvider)
@@ -5642,19 +6012,12 @@ function InitLobbyComm(protocol, localPort, desiredPlayerName, localPlayerUID, n
         CreateUI(LobbyComm.maxPlayerSlots)
     end
 
-    --- Called by the engine when we receive data from other players. There is no checking to see if the data is legitimate, these need to be done in Lua.
-    ---
-    --- Data can be sent via `BroadcastData` and/or `SendData`.
-    ---@param self UILobbyCommunication
-    ---@param data UILobbyReceivedMessage
     lobbyComm.DataReceived = function(self, data)
-        -- make it more convenient to debug malicious traffic
-        SPEW(string.format("Received data of type %s from %s (%s)", tostring(data.Type), tostring(data.SenderID), tostring(data.SenderName)))
 
         -- Decide if we should just drop the packet. Violations here are usually people using a
         -- modified lobby.lua to try to do stupid shit.
         if not MessageHandlers[data.Type] then
-            WARN("Unknown message type: " .. tostring(data.Type))
+            WARN("Unknown message type: " .. data.Type)
             return
         end
 
@@ -5664,7 +6027,7 @@ function InitLobbyComm(protocol, localPort, desiredPlayerName, localPlayerUID, n
         elseif MessageHandlers[data.Type].Reject then
             MessageHandlers[data.Type].Reject(data)
         else
-            WARN("Rejected message of type " .. tostring(data.Type) .. " from " .. tostring(FindNameForID(data.SenderID)))
+            WARN("Rejected message of type " .. data.Type .. " from " .. FindNameForID(data.SenderID))
         end
     end
 
@@ -5674,7 +6037,7 @@ function InitLobbyComm(protocol, localPort, desiredPlayerName, localPlayerUID, n
 
     lobbyComm.GameLaunched = function(self)
         local player = lobbyComm:GetLocalPlayerID()
-        for i, v in gameInfo.PlayerOptions do
+        for _, v in gameInfo.PlayerOptions do
             if v.Human and v.OwnerID == player then
                 Prefs.SetToCurrentProfile('LoadingFaction', v.Faction)
                 break
@@ -5710,7 +6073,7 @@ function InitLobbyComm(protocol, localPort, desiredPlayerName, localPlayerUID, n
 
         --- Returns true if the given option has the given key as a valid setting.
         local function keyIsValidForOption(option, key)
-            for k, v in option.values do
+            for _, v in option.values do
                 if v.key == key or v == key then
                     return true
                 end
@@ -5745,15 +6108,15 @@ function InitLobbyComm(protocol, localPort, desiredPlayerName, localPlayerUID, n
         gameInfo.PlayerOptions[1] = myPlayerData
 
         -- set default lobby values
-        for index, option in globalOpts do
+        for _, option in globalOpts do
             setOptionsFromPref(option)
         end
 
-        for index, option in teamOpts do
+        for _, option in teamOpts do
             setOptionsFromPref(option)
         end
 
-        for index, option in AIOpts do
+        for _, option in AIOpts do
             setOptionsFromPref(option)
         end
 
@@ -5818,7 +6181,7 @@ function InitLobbyComm(protocol, localPort, desiredPlayerName, localPlayerUID, n
                 HostUtils.MovePlayerToEmptySlot(1, rehostSlot)
             end
 
-            for index, playerInfo in ipairs(rehostPlayerOptions) do
+            for _, playerInfo in ipairs(rehostPlayerOptions) do
                 if not playerInfo.Human then
                     HostUtils.AddAI(playerInfo.PlayerName, playerInfo.AIPersonality, playerInfo.StartSpot)
                 end
@@ -5856,14 +6219,12 @@ function InitLobbyComm(protocol, localPort, desiredPlayerName, localPlayerUID, n
                 if HasCommandLineArg('/gpgnet') then
                     PlayVoice(Sound{Bank = 'XGG',Cue = 'XGG_Computer__04717'}, true)
                 end
-                lobbyComm:BroadcastData(
-                {
+                lobbyComm:BroadcastData({
                     Type = 'Peer_Really_Disconnected',
                     Options =  gameInfo.PlayerOptions[slot]:AsTable(),
                     Slot = slot,
                     Observ = false,
-                }
-                )
+                })
                 ClearSlotInfo(slot)
                 gameInfo.PlayerOptions[slot] = nil
                 UpdateGame()
@@ -5871,14 +6232,12 @@ function InitLobbyComm(protocol, localPort, desiredPlayerName, localPlayerUID, n
         elseif IsObserver(peerID) then
             local slot2 = FindObserverSlotForID(peerID)
             if slot2 and lobbyComm:IsHost() then
-                lobbyComm:BroadcastData(
-                {
+                lobbyComm:BroadcastData({
                     Type = 'Peer_Really_Disconnected',
                     Options =  gameInfo.Observers[slot2]:AsTable(),
                     Slot = slot2,
                     Observ = true,
-                }
-                )
+                })
                 gameInfo.Observers[slot2] = nil
                 UpdateGame()
             end
@@ -6326,7 +6685,7 @@ end
 function SetGameTitleText(title)
     GUI.titleText:SetColor("B9BFB9")
     if title == '' then
-        title = LOC("<LOC lobui_0427>FAF Game Lobby")
+        title = LOC("<LOC lobui_0427>GAF Game Lobby")
     end
     GUI.titleText:SetText(title)
 end
@@ -6341,7 +6700,7 @@ function ShowTitleDialog()
             SetGameOption("Title", text, true)
             SetGameTitleText(text)
         end, gameInfo.GameOptions.Title
-)
+    )
 end
 
 -- Rule title
@@ -6368,7 +6727,6 @@ function ShowRuleDialog()
         end, gameInfo.GameOptions.GameRules
 )
 end
-
 -- Faction selector
 function CreateUI_Faction_Selector(lastFaction)
     -- Build a list of button objects from the list of defined factions. Each faction will use the
@@ -6753,7 +7111,7 @@ end
 
 function WarnIncompatibleMods()
     UIUtil.QuickDialog(GUI,
-        "<LOC uimod_0031>Some of your enabled mods are known to cause malfunctions with FAF, so have been disabled. See the mod manager for details - some mods may have newer versions which work.",
+        "<LOC uimod_0031>Some of your enabled mods are known to cause malfunctions with GAF, so have been disabled. See the mod manager for details - some mods may have newer versions which work.",
         "<LOC _Ok>")
 end
 
@@ -6764,7 +7122,7 @@ function DoSlotSwap(slot1, slot2)
     local player2 = gameInfo.PlayerOptions[slot2]
 
     -- unready players in the player options
-    player1.Ready = false 
+    player1.Ready = false
     player2.Ready = false
 
     -- swap teams
@@ -6809,7 +7167,6 @@ local function SendPlayerOption(playerInfo, key, value)
         GpgNetSend('AIOption', playerInfo.PlayerName, key, value)
     end
 end
-
 --- Create the HostUtils object, containing host-only functions. By not assigning this for non-host
 -- players, we ensure a hard crash should a non-host somehow end up trying to call them, simplifying
 -- debugging somewhat (as well as reducing the number of toplevel definitions a fair bit).
@@ -7375,10 +7732,36 @@ function InitHostUtils()
         end,
 
         KickObservers = function(reason)
-            for k,observer in gameInfo.Observers:pairs() do
-                lobbyComm:EjectPeer(observer.OwnerID, reason or "KickedByHost")
+            if not lobbyComm:IsHost() then
+                LOG("KickObservers: Not host, exiting.")
+                return
             end
-            gameInfo.Observers = WatchedValueArray(LobbyComm.maxPlayerSlots)
+
+            local localID = lobbyComm:GetLocalPlayerID()
+            local newObservers = WatchedValueArray(LobbyComm.maxPlayerSlots)
+
+            LOG("KickObservers: Starting observer kick process.")
+
+            for k, observer in gameInfo.Observers:pairs() do
+                LOG("KickObservers: Checking observer with OwnerID = " .. tostring(observer.OwnerID))
+
+                if observer.OwnerID == localID then
+                    LOG("KickObservers: Found self (host), preserving in observer list.")
+                    newObservers[k] = observer
+                else
+                    LOG("KickObservers: Kicking observer with OwnerID = " .. tostring(observer.OwnerID))
+                    lobbyComm:EjectPeer(observer.OwnerID, reason or "KickedByHost")
+                end
+            end
+
+            gameInfo.Observers = newObservers
+            LOG("KickObservers: Observer list updated.")
+            LOG("KickObservers: Final observer list:")
+            for _, obs in newObservers:pairs() do
+                LOG(" - Observer ID: " .. tostring(obs.OwnerID))
+            end
+
+            refreshObserverList()
         end
     }
 end
