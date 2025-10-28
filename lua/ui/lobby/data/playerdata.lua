@@ -51,7 +51,10 @@ local DEFAULT_MAPPING = {
     PL = 0,  -- Rating
     NG = 0,  -- Number of games.
 
+    Avatar = false,
+    TooltipAvatar = false,
     Country = false,
+    GroupRole = false,
 }
 
 -- Represents player data using the magic of lazy variables.

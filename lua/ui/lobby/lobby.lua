@@ -4792,6 +4792,10 @@ function setupChatEdit(chatPanel)
     local commandQueueIndex = 0
     local commandQueue = {}
     GUI.chatEdit.OnEnterPressed = function(self, text)
+	    if HasCommandLineArg('/mute') then
+            WARN("You are muted from lobby")
+            return
+        end
         if text:gsub("%s+", "") == '' then  -- Если текст без пробелов равен ''
             return
         end

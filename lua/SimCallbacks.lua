@@ -740,9 +740,9 @@ do
     ---@param data { Origin: number, Destination: Vector}
     ---@param selection Unit[]
     Callbacks.ExtendReclaimOrder = function(data, selection)
-        do -- feature: area commands
-            return
-        end
+        --do -- feature: area commands
+            --return
+        --end
 
         -- verify selection
         selection = SecureUnits(selection)

@@ -571,3 +571,60 @@ do
         return OldIncreaseBuildCountInQueue(index, count)
     end
 end
+
+do
+    local maxPingsAllowed = 20
+    local maxMarkersAllowed = 0
+    local type = type
+    local _SimCallback = SimCallback
+
+    local HasCommandLineArg = HasCommandLineArg
+    ---@param callback SimCallback
+    ---@param addUnitSelection? boolean
+    _G.SimCallback = function(callback, addUnitSelection)
+        if callback and callback.Func == "SpawnPing" then
+            if HasCommandLineArg('/mute') and not callback.Args.Marker then
+                if maxPingsAllowed == 0 then
+                    WARN("You are muted from spawning a ping")
+                    return
+                end
+                maxPingsAllowed = maxPingsAllowed - 1
+                print(("Pings left %i"):format(maxPingsAllowed))
+            elseif HasCommandLineArg('/mute') and callback.Args.Marker then
+                if maxMarkersAllowed == 0 then
+                    WARN("You are muted from spawning a marker")
+                    return
+                end
+                maxMarkersAllowed = maxMarkersAllowed - 1
+                print(("Pings left %i"):format(maxMarkersAllowed))
+            end
+        end
+
+        return _SimCallback(callback, addUnitSelection)
+    end
+
+    local function CanSendChat(message)
+        return not
+            (HasCommandLineArg('/mute') and message and type(message) == "table" and (message.Chat or message.Taunt)
+            )
+    end
+
+    local _SessionSendChatMessage = SessionSendChatMessage
+    ---@param client? number | number[] client or clients
+    ---@param message table | number | string
+    _G.SessionSendChatMessage = function(client, message)
+        if not message then
+            message = client
+            if not CanSendChat(message) then
+                WARN("You are muted from chatting")
+                return
+            end
+            return _SessionSendChatMessage(message)
+        end
+        if not CanSendChat(message) then
+            WARN("You are muted from chatting")
+            return
+        end
+        return _SessionSendChatMessage(client, message)
+    end
+end
