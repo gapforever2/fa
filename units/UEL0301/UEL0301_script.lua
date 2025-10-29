@@ -9,7 +9,7 @@ local DefaultWep = import("/lua/sim/defaultweapons.lua")
 local DefaultUnit = import("/lua/defaultunits.lua")
 local EffectUtil = import("/lua/effectutilities.lua")
 local TWeapons = import("/lua/terranweapons.lua")
-
+local Buff = import("/lua/sim/buff.lua")
 local TargetingLaser = import("/lua/kirvesweapons.lua").TargetingLaser
 
 local CommandUnit = DefaultUnit.CommandUnit
@@ -333,15 +333,12 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementDoubleGun = function(self, bp)
+        local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', false)
         self:ShowBone('Arm_Right_Barrel01', true)
         self:HideBone('Arm_Right_B03', true)
         local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
         self:SetWeaponEnabledByLabel('LeftHeavyPlasmaCannon', true)
-        local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
-        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', false)
-        self:RemoveCommandCap('RULEUCC_Repair')
-        self:RemoveCommandCap('RULEUCC_Capture')
-        self:RemoveCommandCap('RULEUCC_Reclaim')
         if not Buffs['ZeroBP'] then
             BuffBlueprint {
                 Name = 'ZeroBP',
@@ -357,6 +354,9 @@ UEL0301 = ClassUnit(CommandUnit) {
             }
         end
         Buff.ApplyBuff(self, 'ZeroBP')
+        self:RemoveCommandCap('RULEUCC_Repair')
+        self:RemoveCommandCap('RULEUCC_Capture')
+        self:RemoveCommandCap('RULEUCC_Reclaim')
         self:AddBuildRestriction(categories.ALLUNITS)
         self:RequestRefreshUI()
     end,
@@ -364,18 +364,18 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement unused
     ProcessEnhancementDoubleGunRemove = function(self, bp)
+        local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', true)
         self:ShowBone('Arm_Right_B03', true) 
         self:HideBone('Arm_Right_Barrel01', true)  
         local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
         self:SetWeaponEnabledByLabel('LeftHeavyPlasmaCannon', false)
-        local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
-        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', true)
-        self:AddCommandCap('RULEUCC_Repair')
-        self:AddCommandCap('RULEUCC_Capture')
-        self:AddCommandCap('RULEUCC_Reclaim')
         if Buff.HasBuff(self, 'ZeroBP') then
             Buff.RemoveBuff(self, 'ZeroBP')
         end
+        self:AddCommandCap('RULEUCC_Repair')
+        self:AddCommandCap('RULEUCC_Capture')
+        self:AddCommandCap('RULEUCC_Reclaim')
         self:RestoreBuildRestrictions()
         self:RequestRefreshUI()
     end,

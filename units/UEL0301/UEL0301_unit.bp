@@ -683,7 +683,7 @@ UnitBlueprint{
             TurretPitchSpeed = 0,
             TurretYaw = 0,
             TurretYawRange = 0,
-            TurretYawSpeed = 0,
+            TurretYawSpeed = 30,
             Turreted = true,
             UseFiringSolutionInsteadOfAimBone = true,
             WeaponCategory = "Direct Fire",

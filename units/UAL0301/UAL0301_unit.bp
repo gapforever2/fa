@@ -217,6 +217,7 @@ UnitBlueprint{
             Enhancements = {
                 "StabilitySuppressant",
                 "SystemIntegrityCompensator",
+                "Redeemer",
             },
             HelpText = "<LOC ual0301_NanoCombat_help>Support Armored Command Unit. Enhanced during construction with the reacton refractor and nano-repair system enhancements.",
             SelectionPriority = 1,
