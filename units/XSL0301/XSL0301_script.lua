@@ -23,10 +23,15 @@ local SDFLightChronotronCannonWeapon = SWeapons.SDFLightChronotronCannonWeapon
 local SDFOverChargeWeapon = SWeapons.SDFLightChronotronCannonOverchargeWeapon
 local SIFLaanseTacticalMissileLauncher = SWeapons.SIFLaanseTacticalMissileLauncher
 
+local SWalkingLandUnit = import("/lua/seraphimunits.lua").SWalkingLandUnit 
+local WeaponsFile = import("/lua/seraphimweapons.lua")
+local SDFAireauWeapon = WeaponsFile.SDFAireauWeapon
+
 ---@class XSL0301 : CommandUnit
 XSL0301 = ClassUnit(CommandUnit) {
     Weapons = {
         LightChronatronCannon = ClassWeapon(SDFLightChronotronCannonWeapon) {},
+        MedusaGun = ClassWeapon(SDFAireauWeapon) {},
         DeathWeapon = ClassWeapon(SCUDeathWeapon) {},
         OverCharge = ClassWeapon(SDFOverChargeWeapon) {},
         AutoOverCharge = ClassWeapon(SDFOverChargeWeapon) {},
@@ -44,10 +49,19 @@ XSL0301 = ClassUnit(CommandUnit) {
     end,
 
     ---@param self XSL0301
+    ---@param builder Unit
+    ---@param layer Layer
+    OnStopBeingBuilt = function(self, builder, layer)
+        CommandUnit.OnStopBeingBuilt(self, builder, layer)
+        self:SetWeaponEnabledByLabel('MedusaGun', false)
+        self:SetWeaponEnabledByLabel('SniperGun', false)
+    end,
+
     OnCreate = function(self)
         CommandUnit.OnCreate(self)
         self:SetCapturable(false)
         self:HideBone('Back_Upgrade', true)
+        self:HideBone('Turret', true)
         self:SetupBuildBones()
         self:GetWeaponByLabel('OverCharge').NeedsUpgrade = true
         self:GetWeaponByLabel('AutoOverCharge').NeedsUpgrade = true
@@ -103,6 +117,7 @@ XSL0301 = ClassUnit(CommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementShield = function(self, bp)
         self:AddToggleCap('RULEUTC_ShieldToggle')
+        self:RemoveCommandCap('RULEUCC_CallTransport')
         self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
         self:SetMaintenanceConsumptionActive()
         self:CreateShield(bp)
@@ -114,6 +129,7 @@ XSL0301 = ClassUnit(CommandUnit) {
         self:DestroyShield()
         self:SetMaintenanceConsumptionInactive()
         self:RemoveToggleCap('RULEUTC_ShieldToggle')
+        self:AddCommandCap('RULEUCC_CallTransport')
     end,
 
     ---@param self XSL0301
@@ -122,6 +138,28 @@ XSL0301 = ClassUnit(CommandUnit) {
         self:AddCommandCap('RULEUCC_Overcharge')
         self:GetWeaponByLabel('OverCharge').NeedsUpgrade = false
         self:GetWeaponByLabel('AutoOverCharge').NeedsUpgrade = false
+        local wep = self:GetWeaponByLabel('OverCharge')
+        self:SetWeaponEnabledByLabel('OverCharge', true)
+        self:RemoveCommandCap('RULEUCC_Repair')
+        self:RemoveCommandCap('RULEUCC_Capture')
+        self:RemoveCommandCap('RULEUCC_Reclaim')
+        if not Buffs['ZeroBP'] then
+            BuffBlueprint {
+                Name = 'ZeroBP',
+                DisplayName = 'ZeroBP',
+                BuffType = 'SCUBUILDRATE',
+                Stacks = 'REPLACE',
+                Duration = -1,
+                Affects = {
+                    BuildRate = {
+                        Mult = 0.01,
+                    },
+                },
+            }
+        end
+        Buff.ApplyBuff(self, 'ZeroBP')
+        self:AddBuildRestriction(categories.ALLUNITS)
+        self:RequestRefreshUI()
     end,
 
     ---@param self XSL0301
@@ -132,6 +170,16 @@ XSL0301 = ClassUnit(CommandUnit) {
         self:SetWeaponEnabledByLabel('AutoOverCharge', false)
         self:GetWeaponByLabel('OverCharge').NeedsUpgrade = true
         self:GetWeaponByLabel('AutoOverCharge').NeedsUpgrade = true
+        local wep = self:GetWeaponByLabel('OverCharge')
+        self:SetWeaponEnabledByLabel('OverCharge', false)
+        self:AddCommandCap('RULEUCC_Repair')
+        self:AddCommandCap('RULEUCC_Capture')
+        self:AddCommandCap('RULEUCC_Reclaim')
+        if Buff.HasBuff(self, 'ZeroBP') then
+            Buff.RemoveBuff(self, 'ZeroBP')
+        end
+        self:RestoreBuildRestrictions()
+        self:RequestRefreshUI()
     end,
 
     ---@param self XSL0301
@@ -166,6 +214,8 @@ XSL0301 = ClassUnit(CommandUnit) {
     ---@param self XSL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementDamageStabilization = function (self, bp)
+        self:RemoveCommandCap('RULEUCC_CallTransport')
+        self:SetTransportClass(99)
         if not Buffs['SeraphimSCUDamageStabilization'] then
             BuffBlueprint {
                 Name = 'SeraphimSCUDamageStabilization',
@@ -197,6 +247,8 @@ XSL0301 = ClassUnit(CommandUnit) {
         if Buff.HasBuff(self, 'SeraphimSCUDamageStabilization') then
             Buff.RemoveBuff(self, 'SeraphimSCUDamageStabilization')
         end
+        self:AddCommandCap('RULEUCC_CallTransport')
+        self:SetTransportClass(self.Blueprint.Transport.TransportClass)
     end,
 
     ---@param self XSL0301
@@ -210,6 +262,8 @@ XSL0301 = ClassUnit(CommandUnit) {
         wep:ChangeMaxRadius(35)
         local aoc = self:GetWeaponByLabel('AutoOverCharge')
         aoc:ChangeMaxRadius(35)
+        local wep = self:GetWeaponByLabel('MedusaGun')
+        wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
     end,
 
     ---@param self XSL0301
@@ -224,6 +278,54 @@ XSL0301 = ClassUnit(CommandUnit) {
         wep:ChangeMaxRadius(bp.NewMaxRadius or 25)
         local aoc = self:GetWeaponByLabel('AutoOverCharge')
         aoc:ChangeMaxRadius(bp.NewMaxRadius or 25)
+        local wep = self:GetWeaponByLabel('MedusaGun')
+        wep:ChangeMaxRadius(bp.NewMaxRadius or 25)
+    end,
+
+    ---@param self XSL0301
+    ---@param bp UnitBlueprintEnhancement 
+    ProcessEnhancementMedusa = function(self, bp)
+        self:ShowBone('Turret', true)
+        self:HideBone('Left_Arm', true)
+        local wep = self:GetWeaponByLabel('MedusaGun')
+        self:SetWeaponEnabledByLabel('MedusaGun', true)
+        self:RemoveCommandCap('RULEUCC_Repair')
+        self:RemoveCommandCap('RULEUCC_Capture')
+        self:RemoveCommandCap('RULEUCC_Reclaim')
+        if not Buffs['ZeroBP'] then
+            BuffBlueprint {
+                Name = 'ZeroBP',
+                DisplayName = 'ZeroBP',
+                BuffType = 'SCUBUILDRATE',
+                Stacks = 'REPLACE',
+                Duration = -1,
+                Affects = {
+                    BuildRate = {
+                        Mult = 0.01,
+                    },
+                },
+            }
+        end
+        Buff.ApplyBuff(self, 'ZeroBP')
+        self:AddBuildRestriction(categories.ALLUNITS)
+        self:RequestRefreshUI()
+    end,
+
+    ---@param self XSL0301
+    ---@param bp UnitBlueprintEnhancement 
+    ProcessEnhancementMedusaRemove = function(self, bp)
+        self:ShowBone('Left_Arm', true)
+        self:HideBone('Turret', true)
+        local wep = self:GetWeaponByLabel('MedusaGun')
+        self:SetWeaponEnabledByLabel('MedusaGun', false)
+        self:AddCommandCap('RULEUCC_Repair')
+        self:AddCommandCap('RULEUCC_Capture')
+        self:AddCommandCap('RULEUCC_Reclaim')
+        if Buff.HasBuff(self, 'ZeroBP') then
+            Buff.RemoveBuff(self, 'ZeroBP')
+        end
+        self:RestoreBuildRestrictions()
+        self:RequestRefreshUI()
     end,
 
     ---@param self XSL0301

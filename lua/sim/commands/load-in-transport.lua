@@ -57,12 +57,14 @@ end
 ---@return number?  # medium slots
 ---@return number?  # large slots
 function GetTransportSlotRequirements(unit)
-    local class = unit.Blueprint.Transport.TransportClass
+    local class = unit:GetTransportClass()
     if class then
         if class == 1 then
             return 1, 0, 0
         elseif class == 2 then
             return 2, 1, 0
+        elseif class == 99 then
+            return 99, 99, 99
         else
             return 4, 2, 1
         end

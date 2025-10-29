@@ -4581,7 +4581,11 @@ Unit = ClassUnit(moho.unit_methods, IntelComponent, VeterancyComponent, DebugUni
     ---@param self Unit
     ---@return integer
     GetTransportClass = function(self)
-        return self.Blueprint.Transport.TransportClass or 1
+        return self.transportClass or self.Blueprint.Transport.TransportClass or 1
+     end,
+
+    SetTransportClass = function(self, newtransportclass)
+        self.transportClass = newtransportclass or 1
     end,
 
     ---@param self Unit

@@ -18,12 +18,14 @@ local ADFReactonCannon = AWeapons.ADFReactonCannon
 local SCUDeathWeapon = import("/lua/sim/defaultweapons.lua").SCUDeathWeapon
 local EffectUtil = import("/lua/effectutilities.lua")
 local Buff = import("/lua/sim/buff.lua")
+local ADFCannonQuantumWeapon = AWeapons.ADFCannonQuantumWeapon
 
 ---@class UAL0301 : CommandUnit
 UAL0301 = ClassUnit(CommandUnit) {
     Weapons = {
         RightReactonCannon = ClassWeapon(ADFReactonCannon) {},
         DeathWeapon = ClassWeapon(SCUDeathWeapon) {},
+        RedeemerGun = ClassWeapon(ADFCannonQuantumWeapon) {},
     },
 
     ---@param self UAL0301
@@ -42,6 +44,14 @@ UAL0301 = ClassUnit(CommandUnit) {
         self.UnitBeingBuilt = nil
         self.UnitBuildOrder = nil
         self.BuildingUnit = false
+    end,
+
+    ---@param self UAL0301
+    ---@param builder Unit
+    ---@param layer Layer
+    OnStopBeingBuilt = function(self, builder, layer)
+        CommandUnit.OnStopBeingBuilt(self, builder, layer)
+        self:SetWeaponEnabledByLabel('RedeemerGun', false)
     end,
 
     ---@psaram self UAL0301
@@ -78,6 +88,8 @@ UAL0301 = ClassUnit(CommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementShield = function(self, bp)
         self:AddToggleCap('RULEUTC_ShieldToggle')
+        self:RemoveCommandCap('RULEUCC_CallTransport')
+        self:SetTransportClass(99)
         self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
         self:SetMaintenanceConsumptionActive()
         self:CreateShield(bp)
@@ -89,11 +101,15 @@ UAL0301 = ClassUnit(CommandUnit) {
         self:DestroyShield()
         self:SetMaintenanceConsumptionInactive()
         self:RemoveToggleCap('RULEUTC_ShieldToggle')
+        self:AddCommandCap('RULEUCC_CallTransport')
+        self:SetTransportClass(self.Blueprint.Transport.TransportClass)
     end,
 
     ---@param self UAL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementShieldHeavy = function(self, bp)
+        self:RemoveCommandCap('RULEUCC_CallTransport')
+        self:SetTransportClass(99)
         WaitTicks(1)
         self:CreateShield(bp)
         self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
@@ -106,6 +122,8 @@ UAL0301 = ClassUnit(CommandUnit) {
         self:DestroyShield()
         self:SetMaintenanceConsumptionInactive()
         self:RemoveToggleCap('RULEUTC_ShieldToggle')
+        self:AddCommandCap('RULEUCC_CallTransport')
+        self:SetTransportClass(self.Blueprint.Transport.TransportClass)
     end,
 
     ---@param self UAL0301
@@ -164,6 +182,10 @@ UAL0301 = ClassUnit(CommandUnit) {
                 Stacks = 'REPLACE',
                 Duration = -1,
                 Affects = {
+                    MaxHealth = {
+                        Add = bp.NewHealth,
+                        Mult = 1.0,
+                    },
                     Regen = {
                         Add = bp.NewRegenRate - self.Blueprint.Defense.RegenRate,
                         Mult = 1,
@@ -198,8 +220,10 @@ UAL0301 = ClassUnit(CommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementStabilitySuppressant = function(self, bp)
         local wep = self:GetWeaponByLabel('RightReactonCannon')
-        wep:AddDamageMod(bp.NewDamageMod or 0)
-        wep:AddDamageRadiusMod(bp.NewDamageRadiusMod or 0)
+        wep:AddDamageRadiusMod(bp.NewDamageRadiusMod or 2)
+        wep:ChangeRateOfFire(bp.NewRateOfFire or 1.5)
+        wep:ChangeMaxRadius(bp.NewMaxRadius or 40)
+        local wep = self:GetWeaponByLabel('RedeemerGun')
         wep:ChangeMaxRadius(bp.NewMaxRadius or 40)
     end,
 
@@ -207,9 +231,53 @@ UAL0301 = ClassUnit(CommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementStabilitySuppressantRemove = function(self, bp)
         local wep = self:GetWeaponByLabel('RightReactonCannon')
-        wep:AddDamageMod(-self.Blueprint.Enhancements['RightReactonCannon'].NewDamageMod)
         wep:AddDamageRadiusMod(bp.NewDamageRadiusMod or 0)
+        wep:ChangeRateOfFire(bp.RateOfFire or 1)
         wep:ChangeMaxRadius(bp.NewMaxRadius or 30)
+        local wep = self:GetWeaponByLabel('RedeemerGun')
+        wep:ChangeMaxRadius(bp.NewMaxRadius or 30)
+    end,
+
+    ---@param self UAL0301
+    ---@param bp UnitBlueprintEnhancement
+    ProcessEnhancementRedeemer = function(self, bp)
+        local wep = self:GetWeaponByLabel('RedeemerGun')
+        self:SetWeaponEnabledByLabel('RedeemerGun', true)
+        self:RemoveCommandCap('RULEUCC_Repair')
+        self:RemoveCommandCap('RULEUCC_Capture')
+        self:RemoveCommandCap('RULEUCC_Reclaim')
+        if not Buffs['ZeroBP'] then
+            BuffBlueprint {
+                Name = 'ZeroBP',
+                DisplayName = 'ZeroBP',
+                BuffType = 'SCUBUILDRATE',
+                Stacks = 'REPLACE',
+                Duration = -1,
+                Affects = {
+                    BuildRate = {
+                        Mult = 0.01,
+                    },
+                },
+            }
+        end
+        Buff.ApplyBuff(self, 'ZeroBP')
+        self:AddBuildRestriction(categories.ALLUNITS)
+        self:RequestRefreshUI()
+    end,
+
+    ---@param self UAL0301
+    ---@param bp UnitBlueprintEnhancement
+    ProcessEnhancementRedeemerRemove = function(self, bp)
+        local wep = self:GetWeaponByLabel('RedeemerGun')
+        self:SetWeaponEnabledByLabel('RedeemerGun', false)
+        self:AddCommandCap('RULEUCC_Repair')
+        self:AddCommandCap('RULEUCC_Capture')
+        self:AddCommandCap('RULEUCC_Reclaim')
+        if Buff.HasBuff(self, 'ZeroBP') then
+            Buff.RemoveBuff(self, 'ZeroBP')
+        end
+        self:RestoreBuildRestrictions()
+        self:RequestRefreshUI()
     end,
 
     ---@param self UAL0301

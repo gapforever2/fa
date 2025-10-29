@@ -83,6 +83,13 @@ AirTransport = ClassUnit(AirUnit, BaseTransport) {
         local totalweight = 0
         for _, unit in self:GetCargo() do
             local reduction = unit.Blueprint.Physics.TransportSpeedReduction
+            
+            if  unit:GetTransportClass() > 10 then
+                reduction = unit:GetTransportClass() * 5
+                self:SetSpeedMult(0.01)
+                return
+            end
+            
             if not reduction then continue end
             totalweight = totalweight + reduction
 
