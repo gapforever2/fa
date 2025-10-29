@@ -75,12 +75,11 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Commander",
-        EconomyThreatLevel = 716,
         Health = 11500,
         MaxHealth = 11500,
         RegenRate = 10,
         SkipDynamicThreatCalculations = true,
-        SurfaceThreatLevel = 765,
+        SurfaceThreatLevel = 45,
     },
     Display = {
         Abilities = {
@@ -208,7 +207,6 @@ UnitBlueprint{
                 "Right_Upgrade",
                 "Left_Upgrade",
             },
-            PhaseShieldMesh = "/units/xsl0001/XSL0001_PhaseShield_mesh",
         },
     },
     Economy = {
