@@ -187,8 +187,8 @@ UnitBlueprint{
             ProjectilesPerOnFire = 1,
             RackBones = {
                 {
-                    MuzzleBones = { "Projectile03" },
-                    RackBone = "Turret",
+                    MuzzleBones = { "Lazor" },
+                    RackBone = "Lazor",
                 },
             },
             RackFireTogether = false,
@@ -209,8 +209,8 @@ UnitBlueprint{
                 "ALLUNITS",
             },
             TargetRestrictDisallow = "UNTARGETABLE",
-            TurretBoneMuzzle = "Projectile03",
-            TurretBonePitch = "Projectile03",
+            TurretBoneMuzzle = "Lazor",
+            TurretBonePitch = "Lazor",
             TurretBoneYaw = "Turret",
             TurretDualManipulators = false,
             TurretPitch = 0,
