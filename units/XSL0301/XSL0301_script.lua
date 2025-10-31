@@ -117,7 +117,6 @@ XSL0301 = ClassUnit(CommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementShield = function(self, bp)
         self:AddToggleCap('RULEUTC_ShieldToggle')
-        self:RemoveCommandCap('RULEUCC_CallTransport')
         self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
         self:SetMaintenanceConsumptionActive()
         self:CreateShield(bp)
@@ -129,7 +128,6 @@ XSL0301 = ClassUnit(CommandUnit) {
         self:DestroyShield()
         self:SetMaintenanceConsumptionInactive()
         self:RemoveToggleCap('RULEUTC_ShieldToggle')
-        self:AddCommandCap('RULEUCC_CallTransport')
     end,
 
     ---@param self XSL0301
