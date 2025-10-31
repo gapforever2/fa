@@ -28,8 +28,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Normal",
-        Health = 155,
-        MaxHealth = 155,
+        Health = 255,
+        MaxHealth = 255,
         SurfaceThreatLevel = 2,
     },
     Display = {
@@ -127,7 +127,7 @@ UnitBlueprint{
         MotionType = "RULEUMT_Hover",
         RotateBodyWhileMoving = true,
         RotateOnSpot = false,
-        TurnFacingRate = 120,
+        TurnFacingRate = 90,
         TurnRadius = 1.2,
         TurnRate = 310,
         WobbleFactor = 0.1,
@@ -164,11 +164,11 @@ UnitBlueprint{
                 Land = "Land|Water|Seabed",
                 Water = "Land|Water|Seabed",
             },
-            FiringRandomnessWhileMoving = 0.1,
-            FiringTolerance = 2,
+            FiringRandomness = 0.05,
+            FiringTolerance = 5,
             Label = "MainGun",
-            MaxRadius = 26,
-            MuzzleChargeDelay = 0.1,
+            MaxRadius = 20,
+            MuzzleChargeDelay = 0.25,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 1,
             MuzzleVelocity = 25,
@@ -189,7 +189,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_DirectFire",
-            RateOfFire = 10/17, --10/integer interval in ticks
+            RateOfFire = 10/16.5, --10/integer interval in ticks
             SlavedToBody = true,
             SlavedToBodyArcRange = 10,
             TargetPriorities = {
@@ -209,7 +209,7 @@ UnitBlueprint{
             TurretPitchSpeed = 60,
             TurretYaw = 0,
             TurretYawRange = 10,
-            TurretYawSpeed = 60,
+            TurretYawSpeed = 120,
             Turreted = true,
             UseFiringSolutionInsteadOfAimBone = true,
             WeaponCategory = "Direct Fire",
