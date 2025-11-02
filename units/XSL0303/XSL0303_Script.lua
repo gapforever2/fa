@@ -10,7 +10,7 @@
 
 local SLandUnit = import("/lua/seraphimunits.lua").SLandUnit
 local WeaponsFile = import("/lua/seraphimweapons.lua")
-local SDFThauCannon = WeaponsFile.SDFThauCannon
+local SDFUltraChromaticBeamGenerator = import("/lua/seraphimweapons.lua").SDFUltraChromaticBeamGenerator
 local SDFAireauBolter = WeaponsFile.SDFAireauBolterWeapon
 local SANUallCavitationTorpedo = WeaponsFile.SANUallCavitationTorpedo
 local EffectUtil = import("/lua/effectutilities.lua")
@@ -18,7 +18,7 @@ local EffectUtil = import("/lua/effectutilities.lua")
 ---@class XSL0303 : SLandUnit
 XSL0303 = ClassUnit(SLandUnit) {
     Weapons = {
-        MainTurret = ClassWeapon(SDFThauCannon) {},
+        MainTurret = ClassWeapon(SDFUltraChromaticBeamGenerator) {},
         Torpedo01 = ClassWeapon(SANUallCavitationTorpedo) {},
         LeftTurret = ClassWeapon(SDFAireauBolter) {},
         RightTurret = ClassWeapon(SDFAireauBolter) {},
