@@ -4767,7 +4767,7 @@ lobui_0406="Factions"
 lobui_0407="Concept Art"
 lobui_0408="Screenshot"
 lobui_0409="Map"
-lobui_0410="None"
+lobui_0410="Movie"
 
 --Lobby changelog panel
 lobui_0412="What's new to FAF?"

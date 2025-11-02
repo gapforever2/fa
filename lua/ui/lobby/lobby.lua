@@ -6862,8 +6862,27 @@ function RefreshLobbyBackground(faction)
                 end
             end
         end
-    elseif LobbyBackground == 5 then -- None
-        return
+    elseif LobbyBackground == 5 then -- Movie
+        local sound =  Sound{Bank = 'background',Cue = 'lobbyback'}
+        GUI.background = import("/lua/maui/movie.lua").Movie(GUI)
+        local backgroundOnDestroy =   GUI.background.OnDestroy
+        GUI.background:Loop(true)
+        GUI.background:Set("/movies/FMV_menu.sfd", sound)
+        GUI.background.OnLoaded = GUI.background.Play
+        local duration =  GUI.background:GetLength()
+        local handler
+        GUI.background.OnFrame = function (self, delta)
+            self.delta = (self.delta or 0) + delta
+            if self.delta > duration then
+                StopSound(handler)
+                handler = PlaySound(sound)
+                self.delta = 0
+            end
+        end
+        GUI.background.OnDestroy = function (self)
+            StopSound(handler)
+            backgroundOnDestroy(self)
+        end
     end
 
     local LobbyBackgroundStretch = Prefs.GetFromCurrentProfile('LobbyBackgroundStretch') or 'true'
