@@ -41,8 +41,8 @@ ProjectileBlueprint{
     Physics = {
         Acceleration = 0,
         DestroyOnWater = true,
-        InitialSpeed = 35,
-        MaxSpeed = 35,
+        InitialSpeed = 30,
+        MaxSpeed = 30,
         MaxZigZag = 0,
         OnLostTargetLifetime = 0.7,
         TrackTarget = false,
