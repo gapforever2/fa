@@ -46,7 +46,6 @@ UnitBlueprint{
     Display = {
         Abilities = {
             "<LOC ability_sonar>Sonar",
-            "<LOC ability_personalstealth>Personal Stealth",
             "<LOC ability_torpedo>Torpedoes",
         },
         DamageEffects = {
@@ -105,9 +104,7 @@ UnitBlueprint{
         UnitName = "<LOC uab2205_name>Wave Break",
     },
     Intel = {
-        RadarStealth = true,
         SonarRadius = 36,
-        SonarStealth = true,
         VisionRadius = 20,
         WaterVisionRadius = 44,
     },
