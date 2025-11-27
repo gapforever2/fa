@@ -226,7 +226,7 @@ UnitBlueprint{
         UseVariableTeleportCosts = true,
     },
     Enhancements = {
-        AdvancedEngineering = {
+        EngineeringT2Cybran = {
             BuildCostEnergy = 21000,
             BuildCostMass = 800,
             BuildTime = 1000,
@@ -245,21 +245,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "URL0001" },
         },
-        AdvancedEngineeringRemove = {
+        EngineeringT2CybranRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "aes",
             Name = "<LOC enhancements_0078>Remove Engineering Suite",
-            Prerequisite = "AdvancedEngineering",
+            Prerequisite = "EngineeringT2Cybran",
             RemoveEnhancements = {
-                "AdvancedEngineering",
-                "AdvancedEngineeringRemove",
+                "EngineeringT2Cybran",
+                "EngineeringT2CybranRemove",
             },
             Slot = "LCH",
         },
-        CloakingGenerator = {
+        CloakingGeneratorCybran = {
             BuildCostEnergy = 750000,
             BuildCostMass = 6000,
             BuildTime = 4200,
@@ -267,26 +267,26 @@ UnitBlueprint{
             MaintenanceConsumptionPerSecondEnergy = 3000,
             Name = "<LOC enhancements_0079>Personal Cloaking Generator",
             NewHealth = 12000,
-            Prerequisite = "FAF_SelfRepairSystem",
+            Prerequisite = "GAP_SelfRepairSystemCybran",
             Slot = "Back",
             UpgradeUnitAmbientBones = { "URL0001" },
         },
-        CloakingGeneratorRemove = {
+        CloakingGeneratorCybranRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 1,
             Icon = "pcg",
             Name = "<LOC enhancements_0080>Remove Personal Cloaking Generator",
-            Prerequisite = "CloakingGenerator",
+            Prerequisite = "CloakingGeneratorCybran",
             RemoveEnhancements = {
-                "StealthGenerator",
-                "FAF_SelfRepairSystem",
-                "CloakingGenerator",
-                "CloakingGeneratorRemove",
+                "StealthGeneratorCybran",
+                "GAP_SelfRepairSystemCybran",
+                "CloakingGeneratorCybran",
+                "CloakingGeneratorCybranRemove",
             },
             Slot = "Back",
         },
-        CoolingUpgrade = {
+        CoolingUpgradeCybran = {
             BuildCostEnergy = 24000,
             BuildCostMass = 800,
             BuildTime = 800,
@@ -303,21 +303,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "URL0001" },
         },
-        CoolingUpgradeRemove = {
+        CoolingUpgradeCybranRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "acu",
             Name = "<LOC enhancements_0082>Remove Microwave Accelerator",
-            Prerequisite = "CoolingUpgrade",
+            Prerequisite = "CoolingUpgradeCybran",
             RemoveEnhancements = {
-                "CoolingUpgrade",
-                "CoolingUpgradeRemove",
+                "CoolingUpgradeCybran",
+                "CoolingUpgradeCybranRemove",
             },
             Slot = "LCH",
         },
-        FAF_SelfRepairSystem = {
+        GAP_SelfRepairSystemCybran = {
             BuildCostEnergy = 45000,
             BuildCostMass = 1500,
             BuildTime = 1500,
@@ -325,27 +325,27 @@ UnitBlueprint{
             Name = "<LOC enhancements_0150_faf>Nano-Repair System",
             NewHealth = 1500,
             NewRegenRate = 60,
-            Prerequisite = "StealthGenerator",
+            Prerequisite = "StealthGeneratorCybran",
             ShowBones = { "Back_Upgrade" },
             Slot = "Back",
             UpgradeEffectBones = { "Back_Upgrade" },
         },
-        FAF_SelfRepairSystemRemove = {
+        GAP_SelfRepairSystemCybranRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "srs",
             Name = "<LOC enhancements_0151_faf>Remove Nano-Repair System",
-            Prerequisite = "FAF_SelfRepairSystem",
+            Prerequisite = "GAP_SelfRepairSystemCybran",
             RemoveEnhancements = {
-                "StealthGenerator",
-                "FAF_SelfRepairSystem",
-                "FAF_SelfRepairSystemRemove",
+                "StealthGeneratorCybran",
+                "GAP_SelfRepairSystemCybran",
+                "GAP_SelfRepairSystemCybranRemove",
             },
             Slot = "Back",
         },
-        MicrowaveLaserGenerator = {
+        MicrowaveLaserGeneratorCybran = {
             BuildCostEnergy = 500000,
             BuildCostMass = 4000,
             BuildTime = 2800,
@@ -362,17 +362,17 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "URL0001" },
         },
-        MicrowaveLaserGeneratorRemove = {
+        MicrowaveLaserGeneratorCybranRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 10,
             HideBones = { "Back_Upgrade" },
             Icon = "mlg",
             Name = "<LOC enhancements_0084>Remove Microwave Laser Generator",
-            Prerequisite = "MicrowaveLaserGenerator",
+            Prerequisite = "MicrowaveLaserGeneratorCybran",
             RemoveEnhancements = {
-                "MicrowaveLaserGenerator",
-                "MicrowaveLaserGeneratorRemove",
+                "MicrowaveLaserGeneratorCybran",
+                "MicrowaveLaserGeneratorCybranRemove",
             },
             ShowBones = {
                 "Chest_Right",
@@ -380,7 +380,7 @@ UnitBlueprint{
             },
             Slot = "RCH",
         },
-        NaniteTorpedoTube = {
+        NaniteTorpedoTubeCybran = {
             BuildCostEnergy = 37500,
             BuildCostMass = 1500,
             BuildTime = 1500,
@@ -398,16 +398,16 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "URL0001" },
         },
-        NaniteTorpedoTubeRemove = {
+        NaniteTorpedoTubeCybranRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 10,
             Icon = "ntt",
             Name = "<LOC enhancements_0086>Remove Nanite Torpedo Launcher",
-            Prerequisite = "NaniteTorpedoTube",
+            Prerequisite = "NaniteTorpedoTubeCybran",
             RemoveEnhancements = {
-                "NaniteTorpedoTube",
-                "NaniteTorpedoTubeRemove",
+                "NaniteTorpedoTubeCybran",
+                "NaniteTorpedoTubeCybranRemove",
             },
             ShowBones = {
                 "Chest_Right",
@@ -415,7 +415,7 @@ UnitBlueprint{
             },
             Slot = "RCH",
         },
-        ResourceAllocation = {
+        ResourceAllocationCybran = {
             BuildCostEnergy = 175000,
             BuildCostMass = 5000,
             BuildTime = 2800,
@@ -432,17 +432,17 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "URL0001" },
         },
-        ResourceAllocationRemove = {
+        ResourceAllocationCybranRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "ras",
             Name = "<LOC enhancements_0088>Remove Resource Allocation System",
-            Prerequisite = "ResourceAllocation",
+            Prerequisite = "ResourceAllocationCybran",
             RemoveEnhancements = {
-                "ResourceAllocation",
-                "ResourceAllocationRemove",
+                "ResourceAllocationCybran",
+                "ResourceAllocationCybranRemove",
             },
             Slot = "RCH",
         },
@@ -463,7 +463,7 @@ UnitBlueprint{
                 y = 0,
             },
         },
-        StealthGenerator = {
+        StealthGeneratorCybran = {
             BuildCostEnergy = 14000,
             BuildCostMass = 650,
             BuildTime = 800,
@@ -479,21 +479,21 @@ UnitBlueprint{
                 "Back_Upgrade",
             },
         },
-        StealthGeneratorRemove = {
+        StealthGeneratorCybranRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 10,
             HideBones = { "Back_Upgrade" },
             Icon = "psg",
             Name = "<LOC enhancements_0102>Remove Personal Stealth Generator",
-            Prerequisite = "StealthGenerator",
+            Prerequisite = "StealthGeneratorCybran",
             RemoveEnhancements = {
-                "StealthGenerator",
-                "StealthGeneratorRemove",
+                "StealthGeneratorCybran",
+                "StealthGeneratorCybranRemove",
             },
             Slot = "Back",
         },
-        T3Engineering = {
+        T3EngineeringCybran = {
             BuildCostEnergy = 50000,
             BuildCostMass = 2400,
             BuildTime = 8400,
@@ -503,7 +503,7 @@ UnitBlueprint{
             NewBuildRate = 100,
             NewHealth = 3500,
             NewRegenRate = 20,
-            Prerequisite = "AdvancedEngineering",
+            Prerequisite = "EngineeringT2Cybran",
             Slot = "LCH",
             UpgradeEffectBones = {
                 "Right_Upgrade",
@@ -512,21 +512,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "URL0001" },
         },
-        T3EngineeringRemove = {
+        T3EngineeringCybranRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             Icon = "ees",
             Name = "<LOC enhancements_0104>Remove Tech 3 Engineering Suite",
-            Prerequisite = "T3Engineering",
+            Prerequisite = "T3EngineeringCybran",
             RemoveEnhancements = {
-                "AdvancedEngineering",
-                "T3Engineering",
-                "T3EngineeringRemove",
+                "EngineeringT2Cybran",
+                "T3EngineeringCybran",
+                "T3EngineeringCybranRemove",
             },
             Slot = "LCH",
         },
-        Teleporter = {
+        TeleporterCybran = {
             BuildCostEnergy = 1500000,
             BuildCostMass = 15000,
             BuildTime = 4200,
@@ -541,17 +541,17 @@ UnitBlueprint{
                 "Back_Upgrade",
             },
         },
-        TeleporterRemove = {
+        TeleporterCybranRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "pqt",
             Name = "<LOC enhancements_0106>Remove Personal Teleporter",
-            Prerequisite = "Teleporter",
+            Prerequisite = "TeleporterCybran",
             RemoveEnhancements = {
-                "Teleporter",
-                "TeleporterRemove",
+                "TeleporterCybran",
+                "TeleporterCybranRemove",
             },
             Slot = "Back",
         },

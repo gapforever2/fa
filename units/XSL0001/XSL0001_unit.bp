@@ -231,7 +231,7 @@ UnitBlueprint{
         UseVariableTeleportCosts = true,
     },
     Enhancements = {
-        AdvancedEngineering = {
+        EngineeringT2Seraphim = {
             BuildCostEnergy = 21000,
             BuildCostMass = 800,
             BuildTime = 1000,
@@ -249,21 +249,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "Body" },
         },
-        AdvancedEngineeringRemove = {
+        EngineeringT2SeraphimRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "aes",
             Name = "<LOC enhancements_0001>Remove Advanced Engineering Suite",
-            Prerequisite = "AdvancedEngineering",
+            Prerequisite = "EngineeringT2Seraphim",
             RemoveEnhancements = {
-                "AdvancedEngineering",
-                "AdvancedEngineeringRemove",
+                "EngineeringT2Seraphim",
+                "EngineeringT2SeraphimRemove",
             },
             Slot = "LCH",
         },
-        AdvancedRegenAura = {
+        AdvancedRegenAuraSeraphim = {
             ACUAddHealth = 1500,
             BuildCostEnergy = 42000,
             BuildCostMass = 1800,
@@ -272,7 +272,7 @@ UnitBlueprint{
             MaxHealthFactor = 1.2,
             Name = "<LOC enhancements_0127>Rapid Restoration Field",
             NewRegenRate = 20,
-            Prerequisite = "RegenAura",
+            Prerequisite = "RegenAuraSeraphim",
             Radius = 35,
             RegenCeilingSCU = 140,
             RegenCeilingT1 = 20,
@@ -289,20 +289,20 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "Body" },
         },
-        AdvancedRegenAuraRemove = {
+        AdvancedRegenAuraSeraphimRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             Icon = "anrf",
             Name = "<LOC enhancements_0128>Remove Rapid Restoration Field",
-            Prerequisite = "AdvancedRegenAura",
+            Prerequisite = "AdvancedRegenAuraSeraphim",
             RemoveEnhancements = {
-                "AdvancedRegenAura",
-                "AdvancedRegenAuraRemove",
+                "AdvancedRegenSeraphimAura",
+                "AdvancedRegenAuraSeraphimRemove",
             },
             Slot = "LCH",
         },
-        BlastAttack = {
+        BlastAttackSeraphim = {
             AdditionalDamage = 620,
             BuildCostEnergy = 270000,
             BuildCostMass = 5400,
@@ -318,21 +318,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "Body" },
         },
-        BlastAttackRemove = {
+        BlastAttackSeraphimRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "cba",
             Name = "<LOC enhancements_0130>Remove Refracting Chronotron Amplifier",
-            Prerequisite = "BlastAttack",
+            Prerequisite = "BlastAttackSeraphim",
             RemoveEnhancements = {
-                "BlastAttack",
-                "BlastAttackRemove",
+                "BlastAttackSeraphim",
+                "BlastAttackSeraphimRemove",
             },
             Slot = "LCH",
         },
-        DamageStabilization = {
+        DamageStabilizationSeraphim = {
             BuildCostEnergy = 56000,
             BuildCostMass = 1800,
             BuildTime = 1800,
@@ -349,7 +349,7 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "Body" },
         },
-        DamageStabilizationAdvanced = {
+        DamageStabilizationAdvancedSeraphim = {
             BuildCostEnergy = 450000,
             BuildCostMass = 5800,
             BuildTime = 4600,
@@ -357,7 +357,7 @@ UnitBlueprint{
             Name = "<LOC enhancements_0133>Enhanced Nano-Repair System",
             NewHealth = 20000,
             NewRegenRate = 150,
-            Prerequisite = "DamageStabilization",
+            Prerequisite = "DamageStabilizationSeraphim",
             ShowBones = { "Back_Upgrade" },
             Slot = "Back",
             UpgradeEffectBones = {
@@ -367,35 +367,35 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "Body" },
         },
-        DamageStabilizationAdvancedRemove = {
+        DamageStabilizationAdvancedSeraphimRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "adss",
             Name = "<LOC enhancements_0134>Remove Enhanced Nano-Repair System",
-            Prerequisite = "DamageStabilizationAdvanced",
+            Prerequisite = "DamageStabilizationAdvancedSeraphim",
             RemoveEnhancements = {
-                "DamageStabilizationAdvanced",
-                "DamageStabilizationAdvancedRemove",
+                "DamageStabilizationAdvancedSeraphim",
+                "DamageStabilizationAdvancedSeraphimRemove",
             },
             Slot = "Back",
         },
-        DamageStabilizationRemove = {
+        DamageStabilizationSeraphimRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "dss",
             Name = "<LOC enhancements_0132>Remove Nano-Repair System",
-            Prerequisite = "DamageStabilization",
+            Prerequisite = "DamageStabilizationSeraphim",
             RemoveEnhancements = {
-                "DamageStabilization",
-                "DamageStabilizationRemove",
+                "DamageStabilizationSeraphim",
+                "DamageStabilizationSeraphimRemove",
             },
             Slot = "Back",
         },
-        Missile = {
+        MissileSeraphim = {
             BuildCostEnergy = 50000,
             BuildCostMass = 1500,
             BuildTime = 1400,
@@ -405,21 +405,21 @@ UnitBlueprint{
             Slot = "Back",
             UpgradeUnitAmbientBones = { "Body" },
         },
-        MissileRemove = {
+        MissileSeraphimRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "tml",
             Name = "<LOC enhancements_0136>Remove Tactical Missile Launcher",
-            Prerequisite = "Missile",
+            Prerequisite = "MissileSeraphim",
             RemoveEnhancements = {
-                "Missile",
-                "MissileRemove",
+                "MissileSeraphim",
+                "MissileSeraphimRemove",
             },
             Slot = "Back",
         },
-        RateOfFire = {
+        RateOfFireSeraphim = {
             BuildCostEnergy = 24000,
             BuildCostMass = 800,
             BuildTime = 800,
@@ -434,22 +434,22 @@ UnitBlueprint{
                 "Right_Turret_Muzzle",
             },
             UpgradeUnitAmbientBones = { "Body" },
-        }, --10/integer interval in ticks
-        RateOfFireRemove = {
+        },
+        RateOfFireSeraphimRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "hsa",
             Name = "<LOC enhancements_0138>Remove Chronotron Accelerator",
-            Prerequisite = "RateOfFire",
+            Prerequisite = "RateOfFireSeraphim",
             RemoveEnhancements = {
-                "RateOfFire",
-                "RateOfFireRemove",
+                "RateOfFireSeraphim",
+                "RateOfFireSeraphimRemove",
             },
             Slot = "RCH",
         },
-        RegenAura = {
+        RegenAuraSeraphim = {
             ACUAddHealth = 500,
             BuildCostEnergy = 18000,
             BuildCostMass = 700,
@@ -475,21 +475,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "Body" },
         },
-        RegenAuraRemove = {
+        RegenAuraSeraphimRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "nrf",
             Name = "<LOC enhancements_0126>Remove Restoration Field",
-            Prerequisite = "RegenAura",
+            Prerequisite = "RegenAuraSeraphim",
             RemoveEnhancements = {
-                "RegenAura",
-                "RegenAuraRemove",
+                "RegenAuraSeraphim",
+                "RegenAuraSeraphimRemove",
             },
             Slot = "LCH",
         },
-        ResourceAllocation = {
+        ResourceAllocationSeraphim = {
             BuildCostEnergy = 175000,
             BuildCostMass = 5000,
             BuildTime = 2800,
@@ -505,13 +505,13 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "Body" },
         },
-        ResourceAllocationAdvanced = {
+        ResourceAllocationAdvancedSeraphim = {
             BuildCostEnergy = 175000,
             BuildCostMass = 5000,
             BuildTime = 2800,
             Icon = "eras",
             Name = "<LOC enhancements_0011>Advanced Resource Allocation System",
-            Prerequisite = "ResourceAllocation",
+            Prerequisite = "ResourceAllocationSeraphim",
             ProductionPerSecondEnergy = 4000,
             ProductionPerSecondMass = 32,
             ShowBones = { "Right_Upgrade" },
@@ -522,32 +522,32 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "Body" },
         },
-        ResourceAllocationAdvancedRemove = {
+        ResourceAllocationAdvancedSeraphimRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "eras",
             Name = "<LOC enhancements_0012>Remove Advanced Allocation System",
-            Prerequisite = "ResourceAllocationAdvanced",
+            Prerequisite = "ResourceAllocationAdvancedSeraphim",
             RemoveEnhancements = {
-                "ResourceAllocation",
-                "ResourceAllocationAdvanced",
-                "ResourceAllocationAdvancedRemove",
+                "ResourceAllocationSeraphim",
+                "ResourceAllocationAdvancedSeraphim",
+                "ResourceAllocationAdvancedSeraphimRemove",
             },
             Slot = "RCH",
         },
-        ResourceAllocationRemove = {
+        ResourceAllocationSeraphimRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "ras",
             Name = "<LOC enhancements_0013>Remove Resource Allocation System",
-            Prerequisite = "ResourceAllocation",
+            Prerequisite = "ResourceAllocationSeraphim",
             RemoveEnhancements = {
-                "ResourceAllocation",
-                "ResourceAllocationRemove",
+                "ResourceAllocationSeraphim",
+                "ResourceAllocationSeraphimRemove",
             },
             Slot = "RCH",
         },
@@ -568,7 +568,7 @@ UnitBlueprint{
                 y = -10,
             },
         },
-        T3Engineering = {
+        T3EngineeringSeraphim = {
             BuildCostEnergy = 50000,
             BuildCostMass = 2400,
             BuildTime = 8400,
@@ -578,7 +578,7 @@ UnitBlueprint{
             NewBuildRate = 100,
             NewHealth = 3500,
             NewRegenRate = 20,
-            Prerequisite = "AdvancedEngineering",
+            Prerequisite = "EngineeringT2Seraphim",
             ShowBones = { "Left_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -587,22 +587,22 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "Body" },
         },
-        T3EngineeringRemove = {
+        T3EngineeringSeraphimRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "ees",
             Name = "<LOC enhancements_0019>Remove Engineering Suites",
-            Prerequisite = "T3Engineering",
+            Prerequisite = "T3EngineeringSeraphim",
             RemoveEnhancements = {
-                "AdvancedEngineering",
-                "T3Engineering",
-                "T3EngineeringRemove",
+                "EngineeringT2Seraphim",
+                "T3EngineeringSeraphim",
+                "T3EngineeringSeraphimRemove",
             },
             Slot = "LCH",
         },
-        Teleporter = {
+        TeleporterSeraphim = {
             BuildCostEnergy = 1500000,
             BuildCostMass = 15000,
             BuildTime = 4200,
@@ -613,17 +613,17 @@ UnitBlueprint{
             Slot = "Back",
             UpgradeUnitAmbientBones = { "Body" },
         },
-        TeleporterRemove = {
+        TeleporterSeraphimRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "pqt",
             Name = "<LOC enhancements_0021>Remove Personal Teleporter",
-            Prerequisite = "Teleporter",
+            Prerequisite = "TeleporterSeraphim",
             RemoveEnhancements = {
-                "Teleporter",
-                "TeleporterRemove",
+                "TeleporterSeraphim",
+                "TeleporterSeraphimRemove",
             },
             Slot = "Back",
         },
