@@ -256,11 +256,11 @@ UEL0001 = ClassUnit(ACUUnit) {
     ---@param rebuildDrone boolean
     NotifyOfPodDeath = function(self, pod, rebuildDrone)
         if rebuildDrone == true then
-            if pod == 'LeftPodUEF' then
+            if pod == 'LeftPod' then
                 if self.HasLeftPod == true then
                     self.RebuildThread = self:ForkThread(self.RebuildPod, 1)
                 end
-            elseif pod == 'RightPodUEF' then
+            elseif pod == 'RightPod' then
                 if self.HasRightPod == true then
                     self.RebuildThread2 = self:ForkThread(self.RebuildPod, 2)
                 end
@@ -309,7 +309,7 @@ UEL0001 = ClassUnit(ACUUnit) {
 
         local bp = self:GetBlueprint().Enhancements[enh]
         if not bp then return end
-        if enh == 'LeftPodUEF' then
+        if enh == 'LeftPod' then
             local location = self:GetPosition('AttachSpecial02')
             local pod = CreateUnitHPR('UEA0001', self.Army, location[1], location[2], location[3], 0, 0, 0)
             pod:SetParent(self, 'LeftPod')
@@ -317,7 +317,7 @@ UEL0001 = ClassUnit(ACUUnit) {
             self.Trash:Add(pod)
             self.HasLeftPod = true
             self.LeftPod = pod
-        elseif enh == 'RightPodUEF' then
+        elseif enh == 'RightPod' then
             local location = self:GetPosition('AttachSpecial01')
             local pod = CreateUnitHPR('UEA0001', self.Army, location[1], location[2], location[3], 0, 0, 0)
             pod:SetParent(self, 'RightPod')
@@ -325,7 +325,7 @@ UEL0001 = ClassUnit(ACUUnit) {
             self.Trash:Add(pod)
             self.HasRightPod = true
             self.RightPod = pod
-        elseif enh == 'LeftPodUEFRemove' or enh == 'RightPodUEFRemove' then
+        elseif enh == 'LeftPodRemove' or enh == 'RightPodRemove' then
             if self.HasLeftPod == true then
                 self.HasLeftPod = false
                 if self.LeftPod and not self.LeftPod.Dead then
@@ -350,31 +350,31 @@ UEL0001 = ClassUnit(ACUUnit) {
             end
             KillThread(self.RebuildThread)
             KillThread(self.RebuildThread2)
-        elseif enh == 'TeleporterUEF' then
+        elseif enh == 'Teleporter' then
             self:AddCommandCap('RULEUCC_Teleport')
-        elseif enh == 'TeleporterUEFRemove' then
+        elseif enh == 'TeleporterRemove' then
             self:RemoveCommandCap('RULEUCC_Teleport')
-        elseif enh == 'ShieldUEF' then
+        elseif enh == 'Shield' then
             self:AddToggleCap('RULEUTC_ShieldToggle')
             self:CreateShield(bp)
             self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
             self:SetMaintenanceConsumptionActive()
-        elseif enh == 'ShieldUEFRemove' then
+        elseif enh == 'ShieldRemove' then
             self:DestroyShield()
             self:SetMaintenanceConsumptionInactive()
             RemoveUnitEnhancement(self, 'ShieldRemove')
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
-        elseif enh == 'RegenUEF' then
+        elseif enh == 'Regen' then
             self:AddToggleCap('RULEUTC_ShieldToggle')
             self:CreateShield(bp)
             self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
             self:SetMaintenanceConsumptionActive()
-        elseif enh == 'RegenUEFRemove' then
+        elseif enh == 'RegenRemove' then
             self:DestroyShield()
             self:SetMaintenanceConsumptionInactive()
             RemoveUnitEnhancement(self, 'Shield1Remove')
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
-        elseif enh == 'ShieldGeneratorFieldUEF' then
+        elseif enh == 'ShieldGeneratorField' then
             self:AddToggleCap('RULEUTC_ShieldToggle')
             self:DestroyShield()
             self:ForkThread(
@@ -385,11 +385,11 @@ UEL0001 = ClassUnit(ACUUnit) {
                     self:SetMaintenanceConsumptionActive()
                 end
             )
-        elseif enh == 'ShieldGeneratorFieldUEFRemove' then
+        elseif enh == 'ShieldGeneratorFieldRemove' then
             self:DestroyShield()
             self:SetMaintenanceConsumptionInactive()
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
-        elseif enh == 'EngineeringT2UEF' then
+        elseif enh == 'AdvancedEngineering' then
             local cat = ParseEntityCategory(bp.BuildableCategoryAdds)
             self:RemoveBuildRestriction(cat)
             if not Buffs['UEFACUT2BuildRate'] then
@@ -416,7 +416,7 @@ UEL0001 = ClassUnit(ACUUnit) {
                 }
             end
             Buff.ApplyBuff(self, 'UEFACUT2BuildRate')
-        elseif enh == 'EngineeringT2UEFRemove' then
+        elseif enh == 'AdvancedEngineeringRemove' then
             local bp = self:GetBlueprint().Economy.BuildRate
             if not bp then return end
             self:RestoreBuildRestrictions()
@@ -427,7 +427,7 @@ UEL0001 = ClassUnit(ACUUnit) {
             if Buff.HasBuff(self, 'UEFACUT2BuildRate') then
                 Buff.RemoveBuff(self, 'UEFACUT2BuildRate')
             end
-        elseif enh == 'T3EngineeringUEF' then
+        elseif enh == 'T3Engineering' then
             local cat = ParseEntityCategory(bp.BuildableCategoryAdds)
             self:RemoveBuildRestriction(cat)
             if not Buffs['UEFACUT3BuildRate'] then
@@ -454,7 +454,7 @@ UEL0001 = ClassUnit(ACUUnit) {
                 }
             end
             Buff.ApplyBuff(self, 'UEFACUT3BuildRate')
-        elseif enh == 'T3EngineeringUEFRemove' then
+        elseif enh == 'T3EngineeringRemove' then
             local bp = self:GetBlueprint().Economy.BuildRate
             if not bp then return end
             self:RestoreBuildRestrictions()
@@ -463,7 +463,7 @@ UEL0001 = ClassUnit(ACUUnit) {
             end
             self:AddBuildRestriction(categories.UEF *
                 (categories.BUILTBYTIER2COMMANDER + categories.BUILTBYTIER3COMMANDER))
-        elseif enh == 'DamageStabilizationUEF' then
+        elseif enh == 'DamageStabilization' then
             if not Buffs['UEFACUDamageStabilization'] then
                 BuffBlueprint {
                     Name = 'UEFACUDamageStabilization',
@@ -484,11 +484,11 @@ UEL0001 = ClassUnit(ACUUnit) {
                 }
             end
             Buff.ApplyBuff(self, 'UEFACUDamageStabilization')
-        elseif enh == 'DamageStabilizationUEFRemove' then
+        elseif enh == 'DamageStabilizationRemove' then
             if Buff.HasBuff(self, 'UEFACUDamageStabilization') then
                 Buff.RemoveBuff(self, 'UEFACUDamageStabilization')
             end
-        elseif enh == 'HeavyAntiMatterCannonUEF' then
+        elseif enh == 'HeavyAntiMatterCannon' then
             local wep = self:GetWeaponByLabel('RightZephyr')
             wep:AddDamageMod(bp.ZephyrDamageMod)
             wep:ChangeMaxRadius(bp.NewMaxRadius or 44)
@@ -496,8 +496,8 @@ UEL0001 = ClassUnit(ACUUnit) {
             oc:ChangeMaxRadius(bp.NewMaxRadius or 44)
             local aoc = self:GetWeaponByLabel('AutoOverCharge')
             aoc:ChangeMaxRadius(bp.NewMaxRadius or 44)
-        elseif enh == 'HeavyAntiMatterCannonUEFRemove' then
-            local bp = self:GetBlueprint().Enhancements['HeavyAntiMatterCannonUEF']
+        elseif enh == 'HeavyAntiMatterCannonRemove' then
+            local bp = self:GetBlueprint().Enhancements['HeavyAntiMatterCannon']
             if not bp then return end
             local wep = self:GetWeaponByLabel('RightZephyr')
             wep:AddDamageMod(-bp.ZephyrDamageMod)
@@ -507,14 +507,14 @@ UEL0001 = ClassUnit(ACUUnit) {
             oc:ChangeMaxRadius(bpDisrupt or 22)
             local aoc = self:GetWeaponByLabel('AutoOverCharge')
             aoc:ChangeMaxRadius(bpDisrupt or 22)
-        elseif enh == 'HeavyAntiMatterDeeKeyUEF' then
+        elseif enh == 'HeavyAntiMatterDeeKey' then
             local wep = self:GetWeaponByLabel('RightZephyr')
             wep:ChangeProjectileBlueprint(bp.NewProjectileId)
             wep:AddDamageRadiusMod(bp.NewDamageRadius or 1)
             wep:AddDamageMod(bp.AdditionalDamage)
             wep:ChangeRateOfFire(bp.NewRateOfFire or 1.5)
-        elseif enh == 'HeavyAntiMatterDeeKeyUEFRemove' then
-            local bp = self:GetBlueprint().Enhancements['HeavyAntiMatterDeeKeyUEF']
+        elseif enh == 'HeavyAntiMatterDeeKeyRemove' then
+            local bp = self:GetBlueprint().Enhancements['HeavyAntiMatterDeeKey']
             if not bp then return end
             local wep = self:GetWeaponByLabel('RightZephyr')
             wep:ChangeProjectileBlueprint(bp.ProjectileId)
@@ -529,21 +529,21 @@ UEL0001 = ClassUnit(ACUUnit) {
             oc:ChangeMaxRadius(bpDisrupt or 22)
             local aoc = self:GetWeaponByLabel('AutoOverCharge')
             aoc:ChangeMaxRadius(bpDisrupt or 22)
-        elseif enh == 'ResourceAllocationUEF' then
+        elseif enh == 'ResourceAllocation' then
             local bp = self:GetBlueprint().Enhancements[enh]
             local bpEcon = self:GetBlueprint().Economy
             if not bp then return end
             self:SetProductionPerSecondEnergy((bp.ProductionPerSecondEnergy + bpEcon.ProductionPerSecondEnergy) or 0)
             self:SetProductionPerSecondMass((bp.ProductionPerSecondMass + bpEcon.ProductionPerSecondMass) or 0)
-        elseif enh == 'ResourceAllocationUEFRemove' then
+        elseif enh == 'ResourceAllocationRemove' then
             local bpEcon = self:GetBlueprint().Economy
             self:SetProductionPerSecondEnergy(bpEcon.ProductionPerSecondEnergy or 0)
             self:SetProductionPerSecondMass(bpEcon.ProductionPerSecondMass or 0)
-        elseif enh == 'TacticalMissileUEF' then
+        elseif enh == 'TacticalMissile' then
             self:AddCommandCap('RULEUCC_Tactical')
             self:AddCommandCap('RULEUCC_SiloBuildTactical')
             self:SetWeaponEnabledByLabel('TacMissile', true)
-        elseif enh == 'TacticalNukeMissileUEF' then
+        elseif enh == 'TacticalNukeMissile' then
             self:RemoveCommandCap('RULEUCC_Tactical')
             self:RemoveCommandCap('RULEUCC_SiloBuildTactical')
             self:AddCommandCap('RULEUCC_Nuke')
@@ -553,7 +553,7 @@ UEL0001 = ClassUnit(ACUUnit) {
             local amt = self:GetTacticalSiloAmmoCount()
             self:RemoveTacticalSiloAmmo(amt or 0)
             self:StopSiloBuild()
-        elseif enh == 'TacticalMissileUEFRemove' or enh == 'TacticalNukeMissileUEFRemove' then
+        elseif enh == 'TacticalMissileRemove' or enh == 'TacticalNukeMissileRemove' then
             self:RemoveCommandCap('RULEUCC_Nuke')
             self:RemoveCommandCap('RULEUCC_SiloBuildNuke')
             self:RemoveCommandCap('RULEUCC_Tactical')

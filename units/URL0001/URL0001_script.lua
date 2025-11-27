@@ -129,21 +129,21 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementTeleporterCybran = function(self, bp)
+    ProcessEnhancementTeleporter = function(self, bp)
         self:AddCommandCap('RULEUCC_Teleport')
     end,
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementTeleporterCybranRemove = function(self, bp)
-        RemoveUnitEnhancement(self, 'TeleporterCybran')
-        RemoveUnitEnhancement(self, 'TeleporterCybranRemove')
+    ProcessEnhancementTeleporterRemove = function(self, bp)
+        RemoveUnitEnhancement(self, 'Teleporter')
+        RemoveUnitEnhancement(self, 'TeleporterRemove')
         self:RemoveCommandCap('RULEUCC_Teleport')
     end,
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementStealthGeneratorCybran = function(self, bp)
+    ProcessEnhancementStealthGenerator = function(self, bp)
         self:AddToggleCap('RULEUTC_StealthToggle')
         self.HasStealthEnh = true
         self:EnableUnitIntel('Enhancement', 'RadarStealth')
@@ -174,7 +174,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementStealthGeneratorCybranRemove = function(self, bp)
+    ProcessEnhancementStealthGeneratorRemove = function(self, bp)
         self:RemoveToggleCap('RULEUTC_StealthToggle')
         self:DisableUnitIntel('Enhancement', 'RadarStealth')
         self:DisableUnitIntel('Enhancement', 'SonarStealth')
@@ -186,7 +186,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementGAP_SelfRepairSystemCybran = function(self, bp)
+    ProcessEnhancementFAF_SelfRepairSystem = function(self, bp)
         if not Buffs['CybranACURegenerateBonus'] then
             BuffBlueprint {
                 Name = 'CybranACURegenerateBonus',
@@ -213,7 +213,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementGAP_SelfRepairSystemCybranRemove = function(self, bp)
+    ProcessEnhancementFAF_SelfRepairSystemRemove = function(self, bp)
         -- remove prerequisites
         self:RemoveToggleCap('RULEUTC_StealthToggle')
         self:DisableUnitIntel('Enhancement', 'RadarStealth')
@@ -231,7 +231,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementCloakingGeneratorCybran = function(self, bp)
+    ProcessEnhancementCloakingGenerator = function(self, bp)
         self:RemoveToggleCap('RULEUTC_StealthToggle')
         self:AddToggleCap('RULEUTC_CloakToggle')
         self.HasStealthEnh = nil
@@ -259,7 +259,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementCloakingGeneratorCybranRemove = function(self, bp)
+    ProcessEnhancementCloakingGeneratorRemove = function(self, bp)
         -- remove prerequisites
         self:RemoveToggleCap('RULEUTC_CloakToggle')
         self:DisableUnitIntel('Enhancement', 'RadarStealth')
@@ -283,7 +283,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementResourceAllocationCybran = function(self, bp)
+    ProcessEnhancementResourceAllocation = function(self, bp)
         local bpEcon = self.Blueprint.Economy
         self:SetProductionPerSecondEnergy((bp.ProductionPerSecondEnergy + bpEcon.ProductionPerSecondEnergy) or 0)
         self:SetProductionPerSecondMass((bp.ProductionPerSecondMass + bpEcon.ProductionPerSecondMass) or 0)
@@ -291,7 +291,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementResourceAllocationCybranRemove = function(self, bp)
+    ProcessEnhancementResourceAllocationRemove = function(self, bp)
         local bpEcon = self.Blueprint.Economy
         self:SetProductionPerSecondEnergy(bpEcon.ProductionPerSecondEnergy or 0)
         self:SetProductionPerSecondMass(bpEcon.ProductionPerSecondMass or 0)
@@ -299,7 +299,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementEngineeringT2Cybran = function(self, bp)
+    ProcessEnhancementAdvancedEngineering = function(self, bp)
         self.BuildBotTotal = 3
         local cat = ParseEntityCategory(bp.BuildableCategoryAdds)
         self:RemoveBuildRestriction(cat)
@@ -331,7 +331,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementEngineeringT2CybranRemove = function(self, bp)
+    ProcessEnhancementAdvancedEngineeringRemove = function(self, bp)
         self.BuildBotTotal = 2
         local buildRate = self.Blueprint.Economy.BuildRate
         if not buildRate then return end
@@ -345,7 +345,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementT3EngineeringCybran = function(self, bp)
+    ProcessEnhancementT3Engineering = function(self, bp)
         self.BuildBotTotal = 4
         local cat = ParseEntityCategory(bp.BuildableCategoryAdds)
         self:RemoveBuildRestriction(cat)
@@ -377,7 +377,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementT3EngineeringCybranRemove = function(self, bp)
+    ProcessEnhancementT3EngineeringRemove = function(self, bp)
         self.BuildBotTotal = 2
         local buildRate = self.Blueprint.Economy.BuildRate
         if not buildRate then return end
@@ -390,7 +390,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementCoolingUpgradeCybran = function(self, bp)
+    ProcessEnhancementCoolingUpgrade = function(self, bp)
         local wep = self:GetWeaponByLabel('RightRipper')
         wep:ChangeMaxRadius(bp.NewMaxRadius or 30)
         self.normalRange = bp.NewMaxRadius or 30
@@ -401,14 +401,14 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         oc:ChangeMaxRadius(bp.NewMaxRadius or 30)
         local aoc = self:GetWeaponByLabel('AutoOverCharge')
         aoc:ChangeMaxRadius(bp.NewMaxRadius or 30)
-        if not (self.Layer == 'Seabed' and self:HasEnhancement('NaniteTorpedoTubeCybran')) then
+        if not (self.Layer == 'Seabed' and self:HasEnhancement('NaniteTorpedoTube')) then
             self:GetWeaponByLabel('DummyWeapon'):ChangeMaxRadius(self.normalRange)
         end
     end,
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementCoolingUpgradeCybranRemove = function(self, bp)
+    ProcessEnhancementCoolingUpgradeRemove = function(self, bp)
         local wep = self:GetWeaponByLabel('RightRipper')
         local wepBp = self.Blueprint.Weapon
         for _, v in wepBp do
@@ -421,7 +421,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
                 self:GetWeaponByLabel('OverCharge'):ChangeMaxRadius(newRange)
                 self:GetWeaponByLabel('AutoOverCharge'):ChangeMaxRadius(newRange)
                 self.normalRange = newRange
-                if not (self.Layer == 'Seabed' and self:HasEnhancement('NaniteTorpedoTubeCybran')) then
+                if not (self.Layer == 'Seabed' and self:HasEnhancement('NaniteTorpedoTube')) then
                     self:GetWeaponByLabel('DummyWeapon'):ChangeMaxRadius(self.normalRange)
                 end
                 break
@@ -431,19 +431,19 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementMicrowaveLaserGeneratorCybran = function(self, bp)
+    ProcessEnhancementMicrowaveLaserGenerator = function(self, bp)
         self:SetWeaponEnabledByLabel('MLG', true)
     end,
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementMicrowaveLaserGeneratorCybranRemove = function(self, bp)
+    ProcessEnhancementMicrowaveLaserGeneratorRemove = function(self, bp)
         self:SetWeaponEnabledByLabel('MLG', false)
     end,
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementNaniteTorpedoTubeCybran = function(self, bp)
+    ProcessEnhancementNaniteTorpedoTube = function(self, bp)
         self:SetWeaponEnabledByLabel('Torpedo', true)
         self:SetIntelRadius('Sonar', bp.NewSonarRadius or 60)
         self:EnableUnitIntel('Enhancement', 'Sonar')
@@ -454,7 +454,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementNaniteTorpedoTubeCybranRemove = function(self, bp)
+    ProcessEnhancementNaniteTorpedoTubeRemove = function(self, bp)
         local bpIntel = self.Blueprint.Intel
         self:SetWeaponEnabledByLabel('Torpedo', false)
         self:SetIntelRadius('Sonar', bpIntel.SonarRadius or 26)
@@ -535,7 +535,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
     OnIntelEnabled = function(self, intel)
         ACUUnit.OnIntelEnabled(self, intel)
         if self.HasCloakEnh and self:IsIntelEnabled('Cloak') then
-            self:SetEnergyMaintenanceConsumptionOverride(self.Blueprint.Enhancements['CloakingGeneratorCybran'].MaintenanceConsumptionPerSecondEnergy
+            self:SetEnergyMaintenanceConsumptionOverride(self.Blueprint.Enhancements['CloakingGenerator'].MaintenanceConsumptionPerSecondEnergy
                 or 0)
             self:SetMaintenanceConsumptionActive()
             if not self.IntelEffectsBag then
@@ -543,7 +543,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
                 self:CreateTerrainTypeEffects(self.IntelEffects.Cloak, 'FXIdle', self.Layer, nil, self.IntelEffectsBag)
             end
         elseif self.HasStealthEnh and self:IsIntelEnabled('RadarStealth') and self:IsIntelEnabled('SonarStealth') then
-            self:SetEnergyMaintenanceConsumptionOverride(self.Blueprint.Enhancements['StealthGeneratorCybran'].MaintenanceConsumptionPerSecondEnergy
+            self:SetEnergyMaintenanceConsumptionOverride(self.Blueprint.Enhancements['StealthGenerator'].MaintenanceConsumptionPerSecondEnergy
                 or 0)
             self:SetMaintenanceConsumptionActive()
             if not self.IntelEffectsBag then
@@ -575,7 +575,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
     OnLayerChange = function(self, new, old)
         ACUUnit.OnLayerChange(self, new, old)
         if self:GetWeaponByLabel('DummyWeapon') == nil then return end
-        if new == "Seabed" and self:HasEnhancement('NaniteTorpedoTubeCybran') then
+        if new == "Seabed" and self:HasEnhancement('NaniteTorpedoTube') then
             self:GetWeaponByLabel('DummyWeapon'):ChangeMaxRadius(self.torpRange or 60)
         else
             self:GetWeaponByLabel('DummyWeapon'):ChangeMaxRadius(self.normalRange or 22)

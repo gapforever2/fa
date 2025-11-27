@@ -242,7 +242,7 @@ UnitBlueprint{
         UseVariableTeleportCosts = true,
     },
     Enhancements = {
-        EngineeringT2UEF = {
+        AdvancedEngineering = {
             BuildCostEnergy = 21000,
             BuildCostMass = 800,
             BuildTime = 1000,
@@ -262,21 +262,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        EngineeringT2UEFRemove = {
+        AdvancedEngineeringRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "aes",
             Name = "<LOC enhancements_0038>Remove Tech 2 Engineering Suite",
-            Prerequisite = "EngineeringT2UEF",
+            Prerequisite = "AdvancedEngineering",
             RemoveEnhancements = {
-                "EngineeringT2UEF",
-                "EngineeringT2UEFRemove",
+                "AdvancedEngineering",
+                "AdvancedEngineeringRemove",
             },
             Slot = "LCH",
         },
-        DamageStabilizationUEF = {
+        DamageStabilization = {
             BuildCostEnergy = 24000,
             BuildCostMass = 800,
             BuildTime = 800,
@@ -294,21 +294,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        DamageStabilizationUEFRemove = {
+        DamageStabilizationRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "dsu",
             Name = "<LOC enhancements_0040>Remove Nano-Repair System",
-            Prerequisite = "DamageStabilizationUEF",
+            Prerequisite = "DamageStabilization",
             RemoveEnhancements = {
-                "DamageStabilizationUEF",
-                "DamageStabilizationUEFRemove",
+                "DamageStabilization",
+                "DamageStabilizationRemove",
             },
             Slot = "LCH",
         },
-        HeavyAntiMatterCannonUEF = {
+        HeavyAntiMatterCannon = {
             BuildCostEnergy = 24000,
             BuildCostMass = 800,
             BuildTime = 800,
@@ -326,21 +326,21 @@ UnitBlueprint{
             UpgradeUnitAmbientBones = { "UEL0001" },
             ZephyrDamageMod = 100,
         },
-        HeavyAntiMatterCannonUEFRemove = {
+        HeavyAntiMatterCannonRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "hamc",
             Name = "<LOC enhancements_0042>Remove Zephyr Amplifier",
-            Prerequisite = "HeavyAntiMatterCannonUEF",
+            Prerequisite = "HeavyAntiMatterCannon",
             RemoveEnhancements = {
-                "HeavyAntiMatterCannonUEF",
-                "HeavyAntiMatterCannonUEFRemove",
+                "HeavyAntiMatterCannon",
+                "HeavyAntiMatterCannonRemove",
             },
             Slot = "RCH",
         },
-        HeavyAntiMatterDeeKeyUEF = {
+        HeavyAntiMatterDeeKey = {
             AdditionalDamage = 100,
             AllDamageModAdd = 200,
             BuildCostEnergy = 120000,
@@ -348,7 +348,7 @@ UnitBlueprint{
             BuildTime = 3500,
             Icon = "hamc2",
             Name = "<LOC enhancements_0153_gaf> Zephyr DeeKey",
-            Prerequisite = "HeavyAntiMatterCannonUEF",
+            Prerequisite = "HeavyAntiMatterCannon",
             NewMaxRadius = 30,
             NewRateOfFire = 1.5,
             NewDamageRadius = 1.5,
@@ -364,21 +364,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        HeavyAntiMatterDeeKeyUEFRemove = {
+        HeavyAntiMatterDeeKeyRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "hamc2",
             Name = "<LOC enhancements_0154_gaf> Remove Zephyr DeeKey",
-            Prerequisite = "HeavyAntiMatterDeeKeyUEF",
+            Prerequisite = "HeavyAntiMatterDeeKey",
             RemoveEnhancements = {
-                "HeavyAntiMatterDeeKeyUEF",
-                "HeavyAntiMatterDeeKeyUEFRemove",
+                "HeavyAntiMatterDeeKey",
+                "HeavyAntiMatterDeeKeyRemove",
             },
             Slot = "RCH",
         },
-        LeftPodUEF = {
+        LeftPod = {
             BuildCostEnergy = 2400,
             BuildCostMass = 300,
             BuildTime = 350,
@@ -389,21 +389,21 @@ UnitBlueprint{
             UpgradeEffectBones = { "AttachSpecial01" },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        LeftPodUEFRemove = {
+        LeftPodRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade_B01" },
             Icon = "led",
             Name = "<LOC enhancements_0044>Remove C-D1 Shoulder Drone",
-            Prerequisite = "LeftPodUEF",
+            Prerequisite = "LeftPod",
             RemoveEnhancements = {
-                "LeftPodUEF",
-                "LeftPodUEFRemove",
+                "LeftPod",
+                "LeftPodRemove",
             },
             Slot = "Back",
         },
-        ResourceAllocationUEF = {
+        ResourceAllocation = {
             BuildCostEnergy = 175000,
             BuildCostMass = 5000,
             BuildTime = 2800,
@@ -421,47 +421,47 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        ResourceAllocationUEFRemove = {
+        ResourceAllocationRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "isb",
             Name = "<LOC enhancements_0046>Remove Resource Allocation System",
-            Prerequisite = "ResourceAllocationUEF",
+            Prerequisite = "ResourceAllocation",
             RemoveEnhancements = {
-                "ResourceAllocationUEF",
-                "ResourceAllocationUEFRemove",
+                "ResourceAllocation",
+                "ResourceAllocationRemove",
             },
             Slot = "RCH",
         },
-        RightPodUEF = {
+        RightPod = {
             BuildCostEnergy = 2400,
             BuildCostMass = 300,
             BuildTime = 350,
             Icon = "red",
             Name = "<LOC enhancements_0043>C-D1 Shoulder Drone",
-            Prerequisite = "LeftPodUEF",
+            Prerequisite = "LeftPod",
             Slot = "Back",
             UpgradeEffectBones = { "AttachSpecial02" },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        RightPodUEFRemove = {
+        RightPodRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade_B01" },
             Icon = "red",
             Name = "<LOC enhancements_0044>Remove C-D1 Shoulder Drone",
-            Prerequisite = "RightPodUEF",
+            Prerequisite = "RightPod",
             RemoveEnhancements = {
-                "LeftPodUEF",
-                "RightPodUEF",
-                "RightPodUEFRemove",
+                "LeftPod",
+                "RightPod",
+                "RightPodRemove",
             },
             Slot = "Back",
         },
-        ShieldUEF = {
+        Shield = {
             BuildCostEnergy = 112500,
             BuildCostMass = 2300,
             BuildTime = 2100,
@@ -484,7 +484,7 @@ UnitBlueprint{
             UpgradeEffectBones = { "Back_Upgrade_B01" },
             UpgradeUnitAmbientBones = { "UEL0001" },
          },
-        RegenUEF = {
+        Regen = {
             BuildCostEnergy = 70000,
             BuildCostMass = 2100,
             BuildTime = 2100,
@@ -502,13 +502,13 @@ UnitBlueprint{
             ShieldRegenStartTime = 0,
             ShieldSize = 3,
             ShieldVerticalOffset = 0,
-            Prerequisite = "ShieldUEF",
+            Prerequisite = "Shield",
             ShowBones = { "Back_Upgrade_B01" },
             Slot = "Back",
             UpgradeEffectBones = { "Back_Upgrade_B01" },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        ShieldGeneratorFieldUEF = {
+        ShieldGeneratorField = {
             BuildCostEnergy = 45000,
             BuildCostMass = 1400,
             BuildTime = 1500,
@@ -533,45 +533,45 @@ UnitBlueprint{
             UpgradeEffectBones = { "Back_Upgrade_B01" },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        ShieldGeneratorFieldUEFRemove = {
+        ShieldGeneratorFieldRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade_B01" },
             Icon = "sgf",
             Name = "<LOC enhancements_0051>Remove Shields",
-            Prerequisite = "ShieldGeneratorFieldUEF",
+            Prerequisite = "ShieldGeneratorField",
             RemoveEnhancements = {
-                "ShieldGeneratorFieldUEF",
-                "ShieldGeneratorFieldUEFRemove",
+                "ShieldGeneratorField",
+                "ShieldGeneratorFieldRemove",
             },
             Slot = "Back",
         },
-        ShieldUEFRemove = {
+        ShieldRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade_B01" },
             Icon = "sgf",
             Name = "<LOC enhancements_0052>Remove Personal Shield Generator",
-            Prerequisite = "ShieldUEF",
+            Prerequisite = "Shield",
             RemoveEnhancements = {
-                "ShieldUEF",
-                "ShieldUEFRemove",
+                "Shield",
+                "ShieldRemove",
             },
             Slot = "Back",
         },
-        RegenUEFRemove = {
+        RegenRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade_B01" },
             Icon = "dse",
             Name = "<LOC enhancements_0156_gaf>Remove Personal Shield Regen",
-            Prerequisite = "RegenUEF",
+            Prerequisite = "Regen",
             RemoveEnhancements = {
-                "RegenUEF",
-                "RegenUEFRemove",
+                "Regen",
+                "RegenRemove",
             },
             Slot = "Back",
         },
@@ -592,7 +592,7 @@ UnitBlueprint{
                 y = 30,
             },
         },
-        T3EngineeringUEF = {
+        T3Engineering = {
             BuildCostEnergy = 50000,
             BuildCostMass = 2400,
             BuildTime = 8400,
@@ -602,7 +602,7 @@ UnitBlueprint{
             NewBuildRate = 100,
             NewHealth = 3000,
             NewRegenRate = 20,
-            Prerequisite = "EngineeringT2UEF",
+            Prerequisite = "AdvancedEngineering",
             Slot = "LCH",
             UpgradeEffectBones = {
                 "Left_Upgrade",
@@ -612,22 +612,22 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        T3EngineeringUEFRemove = {
+        T3EngineeringRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "ees",
             Name = "<LOC enhancements_0054>Remove Engineering Suites",
-            Prerequisite = "T3EngineeringUEF",
+            Prerequisite = "T3Engineering",
             RemoveEnhancements = {
-                "EngineeringT2UEF",
-                "T3EngineeringUEF",
-                "T3EngineeringUEFRemove",
+                "AdvancedEngineering",
+                "T3Engineering",
+                "T3EngineeringRemove",
             },
             Slot = "LCH",
         },
-        TacticalMissileUEF = {
+        TacticalMissile = {
             BuildCostEnergy = 50000,
             BuildCostMass = 1500,
             BuildTime = 1400,
@@ -638,48 +638,48 @@ UnitBlueprint{
             UpgradeEffectBones = { "Back_Upgrade_B01" },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        TacticalMissileUEFRemove = {
+        TacticalMissileRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade_B01" },
             Icon = "tm",
             Name = "<LOC enhancements_0056>Remove Tactical Missile Launcher",
-            Prerequisite = "TacticalMissileUEF",
+            Prerequisite = "TacticalMissile",
             RemoveEnhancements = {
-                "TacticalMissileUEF",
-                "TacticalMissileUEFRemove",
+                "TacticalMissile",
+                "TacticalMissileRemove",
             },
             Slot = "Back",
         },
-        TacticalNukeMissileUEF = {
+        TacticalNukeMissile = {
             BuildCostEnergy = 315000,
             BuildCostMass = 5400,
             BuildTime = 5600,
             Icon = "srtn",
             Name = "<LOC enhancements_0057>The 'Billy': Advanced Tactical Missile Launcher",
-            Prerequisite = "TacticalMissileUEF",
+            Prerequisite = "TacticalMissile",
             ShowBones = { "Back_Upgrade_B01" },
             Slot = "Back",
             UpgradeEffectBones = { "Back_Upgrade_B01" },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        TacticalNukeMissileUEFRemove = {
+        TacticalNukeMissileRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade_B01" },
             Icon = "srtn",
             Name = "<LOC enhancements_0058>Remove Missile Launcher",
-            Prerequisite = "TacticalNukeMissileUEF",
+            Prerequisite = "TacticalNukeMissile",
             RemoveEnhancements = {
-                "TacticalMissileUEF",
-                "TacticalNukeMissileUEF",
-                "TacticalNukeMissileUEFRemove",
+                "TacticalMissile",
+                "TacticalNukeMissile",
+                "TacticalNukeMissileRemove",
             },
             Slot = "Back",
         },
-        TeleporterUEF = {
+        Teleporter = {
             BuildCostEnergy = 1500000,
             BuildCostMass = 15000,
             BuildTime = 4200,
@@ -696,17 +696,17 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        TeleporterUEFRemove = {
+        TeleporterRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "pqt",
             Name = "<LOC enhancements_0060>Remove Personal Teleporter",
-            Prerequisite = "TeleporterUEF",
+            Prerequisite = "Teleporter",
             RemoveEnhancements = {
-                "TeleporterUEF",
-                "TeleporterUEFRemove",
+                "Teleporter",
+                "TeleporterRemove",
             },
             Slot = "LCH",
         },

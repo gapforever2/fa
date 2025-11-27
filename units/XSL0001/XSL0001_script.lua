@@ -103,8 +103,8 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param regenAuraType Enhancement
-    RegenBuffThread = function(self, regenAuraType, Ehh)
-        local bp = self.Blueprint.Enhancements[Ehh]
+    RegenBuffThread = function(self, regenAuraType)
+        local bp = self.Blueprint.Enhancements[regenAuraType]
         local buff = 'SeraphimACU' .. regenAuraType
 
         while not self.Dead do
@@ -122,7 +122,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementRegenAuraSeraphim = function(self, bp)
+    ProcessEnhancementRegenAura = function(self, bp)
         local type
         if not Buffs['SeraphimACURegenAura'] then
             local buff_bp = {
@@ -182,12 +182,12 @@ XSL0001 = ClassUnit(ACUUnit) {
             self.RegenThreadHandle = nil
         end
 
-        self.RegenThreadHandle = self:ForkThread(self.RegenBuffThread, "RegenAura", "RegenAuraSeraphim")
+        self.RegenThreadHandle = self:ForkThread(self.RegenBuffThread, "RegenAura")
     end,
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementRegenAuraSeraphimRemove = function(self, bp)
+    ProcessEnhancementRegenAuraRemove = function(self, bp)
         if self.ShieldEffectsBag then
             for _, v in self.ShieldEffectsBag do
                 v:Destroy()
@@ -204,7 +204,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementAdvancedRegenAuraSeraphim = function(self, bp)
+    ProcessEnhancementAdvancedRegenAura = function(self, bp)
         local type
         if not Buffs['SeraphimACUAdvancedRegenAura'] then
             local buff_bp = {
@@ -264,12 +264,12 @@ XSL0001 = ClassUnit(ACUUnit) {
             self.RegenThreadHandle = nil
         end
 
-        self.RegenThreadHandle = self:ForkThread(self.RegenBuffThread, "AdvancedRegenAura", "AdvancedRegenAuraSeraphim")
+        self.RegenThreadHandle = self:ForkThread(self.RegenBuffThread, "AdvancedRegenAura")
     end,
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementAdvancedRegenAuraSeraphimRemove = function(self, bp)
+    ProcessEnhancementAdvancedRegenAuraRemove = function(self, bp)
         if self.ShieldEffectsBag then
             for _, v in self.ShieldEffectsBag do
                 v:Destroy()
@@ -285,7 +285,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementResourceAllocationSeraphim = function(self, bp)
+    ProcessEnhancementResourceAllocation = function(self, bp)
         local bpEcon = self.Blueprint.Economy
         if not bp then return end
         self:SetProductionPerSecondEnergy((bp.ProductionPerSecondEnergy + bpEcon.ProductionPerSecondEnergy) or 0)
@@ -294,7 +294,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementResourceAllocationSeraphimRemove = function(self, bp)
+    ProcessEnhancementResourceAllocationRemove = function(self, bp)
         local bpEcon = self.Blueprint.Economy
         self:SetProductionPerSecondEnergy(bpEcon.ProductionPerSecondEnergy or 0)
         self:SetProductionPerSecondMass(bpEcon.ProductionPerSecondMass or 0)
@@ -302,7 +302,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementResourceAllocationAdvancedSeraphim = function(self, bp)
+    ProcessEnhancementResourceAllocationAdvanced = function(self, bp)
         local bpEcon = self.Blueprint.Economy
         if not bp then return end
         self:SetProductionPerSecondEnergy((bp.ProductionPerSecondEnergy + bpEcon.ProductionPerSecondEnergy) or 0)
@@ -311,7 +311,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementResourceAllocationAdvancedSeraphimRemove = function(self, bp)
+    ProcessEnhancementResourceAllocationAdvancedRemove = function(self, bp)
         local bpEcon = self.Blueprint.Economy
         self:SetProductionPerSecondEnergy(bpEcon.ProductionPerSecondEnergy or 0)
         self:SetProductionPerSecondMass(bpEcon.ProductionPerSecondMass or 0)
@@ -319,7 +319,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementDamageStabilizationSeraphim = function(self, bp)
+    ProcessEnhancementDamageStabilization = function(self, bp)
         if not Buffs['SeraphimACUDamageStabilization'] then
             BuffBlueprint {
                 Name = 'SeraphimACUDamageStabilization',
@@ -347,7 +347,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementDamageStabilizationSeraphimRemove = function(self, bp)
+    ProcessEnhancementDamageStabilizationRemove = function(self, bp)
         if Buff.HasBuff(self, 'SeraphimACUDamageStabilization') then
             Buff.RemoveBuff(self, 'SeraphimACUDamageStabilization')
         end
@@ -355,7 +355,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementDamageStabilizationAdvancedSeraphim = function(self, bp)
+    ProcessEnhancementDamageStabilizationAdvanced = function(self, bp)
         if not Buffs['SeraphimACUDamageStabilizationAdv'] then
             BuffBlueprint {
                 Name = 'SeraphimACUDamageStabilizationAdv',
@@ -383,7 +383,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementDamageStabilizationAdvancedSeraphimRemove = function(self, bp)
+    ProcessEnhancementDamageStabilizationAdvancedRemove = function(self, bp)
         -- since there's no way to just remove an upgrade anymore, if we're remove adv, were removing both
         if Buff.HasBuff(self, 'SeraphimACUDamageStabilizationAdv') then
             Buff.RemoveBuff(self, 'SeraphimACUDamageStabilizationAdv')
@@ -395,19 +395,19 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementTeleporterSeraphim = function(self, bp)
+    ProcessEnhancementTeleporter = function(self, bp)
         self:AddCommandCap('RULEUCC_Teleport')
     end,
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementTeleporterSeraphimRemove = function(self, bp)
+    ProcessEnhancementTeleporterRemove = function(self, bp)
         self:RemoveCommandCap('RULEUCC_Teleport')
     end,
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementMissileSeraphim = function(self, bp)
+    ProcessEnhancementMissile = function(self, bp)
         self:AddCommandCap('RULEUCC_Tactical')
         self:AddCommandCap('RULEUCC_SiloBuildTactical')
         self:SetWeaponEnabledByLabel('Missile', true)
@@ -415,7 +415,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementMissileSeraphimRemove = function(self, bp)
+    ProcessEnhancementMissileRemove = function(self, bp)
         self:RemoveCommandCap('RULEUCC_Tactical')
         self:RemoveCommandCap('RULEUCC_SiloBuildTactical')
         self:SetWeaponEnabledByLabel('Missile', false)
@@ -423,7 +423,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementEngineeringT2Seraphim = function(self, bp)
+    ProcessEnhancementAdvancedEngineering = function(self, bp)
         if not bp then return end
         local cat = ParseEntityCategory(bp.BuildableCategoryAdds)
         self:RemoveBuildRestriction(cat)
@@ -455,7 +455,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementEngineeringT2SeraphimRemove = function(self, bp)
+    ProcessEnhancementAdvancedEngineeringRemove = function(self, bp)
         local bp = self.Blueprint.Economy.BuildRate
         if not bp then return end
         self:RestoreBuildRestrictions()
@@ -468,7 +468,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementT3EngineeringSeraphim = function(self, bp)
+    ProcessEnhancementT3Engineering = function(self, bp)
         if not bp then return end
         local cat = ParseEntityCategory(bp.BuildableCategoryAdds)
         self:RemoveBuildRestriction(cat)
@@ -500,7 +500,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementT3EngineeringSeraphimRemove = function(self, bp)
+    ProcessEnhancementT3EngineeringRemove = function(self, bp)
         local bp = self.Blueprint.Economy.BuildRate
         if not bp then return end
         self:RestoreBuildRestrictions()
@@ -513,7 +513,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementBlastAttackSeraphim = function(self, bp)
+    ProcessEnhancementBlastAttack = function(self, bp)
         local wep = self:GetWeaponByLabel('ChronotronCannon')
         wep:AddDamageRadiusMod(bp.NewDamageRadius or 5)
         wep:AddDamageMod(bp.AdditionalDamage)
@@ -521,15 +521,15 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementBlastAttackSeraphimRemove = function(self, bp)
+    ProcessEnhancementBlastAttackRemove = function(self, bp)
         local wep = self:GetWeaponByLabel('ChronotronCannon')
-        wep:AddDamageRadiusMod(-self.Blueprint.Enhancements['BlastAttackSeraphim'].NewDamageRadius) -- unlimited AOE bug fix by brute51 [117]
-        wep:AddDamageMod(-self.Blueprint.Enhancements['BlastAttackSeraphim'].AdditionalDamage)
+        wep:AddDamageRadiusMod(-self.Blueprint.Enhancements['BlastAttack'].NewDamageRadius) -- unlimited AOE bug fix by brute51 [117]
+        wep:AddDamageMod(-self.Blueprint.Enhancements['BlastAttack'].AdditionalDamage)
     end,
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementRateOfFireSeraphim = function(self, bp)
+    ProcessEnhancementRateOfFire = function(self, bp)
         local wep = self:GetWeaponByLabel('ChronotronCannon')
         wep:ChangeRateOfFire(bp.NewRateOfFire or 2)
         wep:ChangeMaxRadius(bp.NewMaxRadius or 44)
@@ -541,7 +541,7 @@ XSL0001 = ClassUnit(ACUUnit) {
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementRateOfFireSeraphimRemove = function(self, bp)
+    ProcessEnhancementRateOfFireRemove = function(self, bp)
         local wep = self:GetWeaponByLabel('ChronotronCannon')
         local bpDisrupt = self.Blueprint.Weapon[1].RateOfFire
         wep:ChangeRateOfFire(bpDisrupt or 1)

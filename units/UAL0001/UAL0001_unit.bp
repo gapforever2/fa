@@ -225,7 +225,7 @@ UnitBlueprint{
         UseVariableTeleportCosts = true,
     },
     Enhancements = {
-        EngineeringT2Aeon = {
+        AdvancedEngineering = {
             BuildCostEnergy = 21000,
             BuildCostMass = 800,
             BuildTime = 1000,
@@ -243,21 +243,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
-        EngineeringT2AeonRemove = {
+        AdvancedEngineeringRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "aes",
             Name = "<LOC enhancements_0001>Remove Advanced Engineering Suite",
-            Prerequisite = "EngineeringT2Aeon",
+            Prerequisite = "AdvancedEngineering",
             RemoveEnhancements = {
-                "EngineeringT2Aeon",
-                "EngineeringT2AeonRemove",
+                "AdvancedEngineering",
+                "AdvancedEngineeringRemove",
             },
             Slot = "LCH",
         },
-        ChronoDampenerAeon = {
+        ChronoDampener = {
             BuildCostEnergy = 60375,
             BuildCostMass = 2100,
             BuildTime = 1225,
@@ -273,21 +273,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
-        ChronoDampenerAeonRemove = {
+        ChronoDampenerRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "cd",
             Name = "<LOC enhancements_0003>Remove Chrono Dampener",
-            Prerequisite = "ChronoDampenerAeon",
+            Prerequisite = "ChronoDampener",
             RemoveEnhancements = {
-                "ChronoDampenerAeon",
-                "ChronoDampenerAeonRemove",
+                "ChronoDampener",
+                "ChronoDampenerRemove",
             },
             Slot = "Back",
         },
-        EnhancedSensorsAeon = {
+        EnhancedSensors = {
             BuildCostEnergy = 5000,
             BuildCostMass = 350,
             BuildTime = 500,
@@ -303,21 +303,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
-        EnhancedSensorsAeonRemove = {
+        EnhancedSensorsRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "ess",
             Name = "<LOC enhancements_0007>Remove Enhanced Sensor System",
-            Prerequisite = "EnhancedSensorsAeon",
+            Prerequisite = "EnhancedSensors",
             RemoveEnhancements = {
-                "EnhancedSensorsAeon",
-                "EnhancedSensorsAeonRemove",
+                "EnhancedSensors",
+                "EnhancedSensorsRemove",
             },
             Slot = "RCH",
         },
-        GAP_CrysalisBeamAdvancedAeon = {
+        FAF_CrysalisBeamAdvanced = {
             BuildCostEnergy = 31000,
             BuildCostMass = 900,
             BuildTime = 1100,
@@ -333,22 +333,22 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
-        GAP_CrysalisBeamAdvancedAeonRemove = {
+        FAF_CrysalisBeamAdvancedRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "ecba",
             Name = "<LOC enhancements_0149_faf>Remove Quantum Disruptor Enhancements",
-            Prerequisite = "GAP_CrysalisBeamAdvancedAeon",
+            Prerequisite = "FAF_CrysalisBeamAdvanced",
             RemoveEnhancements = {
-                "CrysalisBeamAeon",
-                "GAP_CrysalisBeamAdvancedAeon",
-                "GAP_CrysalisBeamAdvancedAeonRemove",
+                "CrysalisBeam",
+                "FAF_CrysalisBeamAdvanced",
+                "FAF_CrysalisBeamAdvancedRemove",
             },
             Slot = "LCH",
         },
-        HeatSinkAeon = {
+        HeatSink = {
             BuildCostEnergy = 24000,
             BuildCostMass = 800,
             BuildTime = 800,
@@ -366,21 +366,21 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
-        HeatSinkAeonRemove = {
+        HeatSinkRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "hsa",
             Name = "<LOC enhancements_0009>Remove Quantum Accelerator",
-            Prerequisite = "HeatSinkAeon",
+            Prerequisite = "HeatSink",
             RemoveEnhancements = {
-                "HeatSinkAeon",
-                "HeatSinkAeonRemove",
+                "HeatSink",
+                "HeatSinkRemove",
             },
             Slot = "LCH",
         },
-        ResourceAllocationAeon = {
+        ResourceAllocation = {
             BuildCostEnergy = 175000,
             BuildCostMass = 5000,
             BuildTime = 2800,
@@ -397,13 +397,13 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
-        ResourceAllocationAdvancedAeon = {
+        ResourceAllocationAdvanced = {
             BuildCostEnergy = 175000,
             BuildCostMass = 5000,
             BuildTime = 2800,
             Icon = "eras",
             Name = "<LOC enhancements_0011>Advanced Resource Allocation System",
-            Prerequisite = "ResourceAllocationAeon",
+            Prerequisite = "ResourceAllocation",
             ProductionPerSecondEnergy = 3400,
             ProductionPerSecondMass = 36,
             ShowBones = { "Back_Upgrade" },
@@ -415,36 +415,36 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
-        ResourceAllocationAdvancedAeonRemove = {
+        ResourceAllocationAdvancedRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "eras",
             Name = "<LOC enhancements_0012>Remove Advanced Allocation System",
-            Prerequisite = "ResourceAllocationAdvancedAeon",
+            Prerequisite = "ResourceAllocationAdvanced",
             RemoveEnhancements = {
-                "ResourceAllocationAeon",
-                "ResourceAllocationAdvancedAeon",
-                "ResourceAllocationAdvancedAeonRemove",
+                "ResourceAllocation",
+                "ResourceAllocationAdvanced",
+                "ResourceAllocationAdvancedRemove",
             },
             Slot = "Back",
         },
-        ResourceAllocationAeonRemove = {
+        ResourceAllocationRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "ras",
             Name = "<LOC enhancements_0013>Remove Resource Allocation System",
-            Prerequisite = "ResourceAllocationAeon",
+            Prerequisite = "ResourceAllocation",
             RemoveEnhancements = {
-                "ResourceAllocationAeon",
-                "ResourceAllocationAeonRemove",
+                "ResourceAllocation",
+                "ResourceAllocationRemove",
             },
             Slot = "Back",
         },
-        ShieldAeon = {
+        Shield = {
             BuildCostEnergy = 38500,
             BuildCostMass = 1430,
             BuildTime = 1450,
@@ -469,7 +469,7 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
-        ShieldHeavyAeon = {
+        ShieldHeavy = {
             BuildCostEnergy = 136125,
             BuildCostMass = 2530,
             BuildTime = 2450,
@@ -479,7 +479,7 @@ UnitBlueprint{
             Name = "<LOC enhancements_0015>Heavy Personal Shield Generator",
             OwnerShieldMesh = "/units/ual0001/ual0001_phaseshield_mesh",
             PersonalShield = true,
-            Prerequisite = "ShieldAeon",
+            Prerequisite = "Shield",
             ShieldEnergyDrainRechargeTime = 5,
             ShieldMaxHealth = 25000,
             ShieldRechargeTime = 160,
@@ -494,32 +494,32 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
-        ShieldHeavyAeonRemove = {
+        ShieldHeavyRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "phtsg",
             Name = "<LOC enhancements_0016>Remove Shields",
-            Prerequisite = "ShieldHeavyAeon",
+            Prerequisite = "ShieldHeavy",
             RemoveEnhancements = {
-                "ShieldAeon",
-                "ShieldHeavyAeon",
-                "ShieldHeavyAeonRemove",
+                "Shield",
+                "ShieldHeavy",
+                "ShieldHeavyRemove",
             },
             Slot = "RCH",
         },
-        ShieldAeonRemove = {
+        ShieldRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "ptsg",
             Name = "<LOC enhancements_0017>Remove Personal Shield",
-            Prerequisite = "ShieldAeon",
+            Prerequisite = "Shield",
             RemoveEnhancements = {
-                "ShieldAeon",
-                "ShieldAeonRemove",
+                "Shield",
+                "ShieldRemove",
             },
             Slot = "RCH",
         },
@@ -540,7 +540,7 @@ UnitBlueprint{
                 y = -10,
             },
         },
-        T3EngineeringAeon = {
+        T3Engineering = {
             BuildCostEnergy = 50000,
             BuildCostMass = 2400,
             BuildTime = 8400,
@@ -550,7 +550,7 @@ UnitBlueprint{
             NewBuildRate = 100,
             NewHealth = 3000,
             NewRegenRate = 20,
-            Prerequisite = "EngineeringT2Aeon",
+            Prerequisite = "AdvancedEngineering",
             ShowBones = { "Left_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -559,22 +559,22 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
-        T3EngineeringAeonRemove = {
+        T3EngineeringRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "ees",
             Name = "<LOC enhancements_0019>Remove Engineering Suites",
-            Prerequisite = "T3EngineeringAeon",
+            Prerequisite = "T3Engineering",
             RemoveEnhancements = {
-                "EngineeringT2Aeon",
-                "T3EngineeringAeon",
-                "T3EngineeringAeonRemove",
+                "AdvancedEngineering",
+                "T3Engineering",
+                "T3EngineeringRemove",
             },
             Slot = "LCH",
         },
-        TeleporterAeon = {
+        Teleporter = {
             BuildCostEnergy = 1500000,
             BuildCostMass = 15000,
             BuildTime = 4200,
@@ -590,17 +590,17 @@ UnitBlueprint{
             },
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
-        TeleporterAeonRemove = {
+        TeleporterRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "pqt",
             Name = "<LOC enhancements_0021>Remove Personal Teleporter",
-            Prerequisite = "TeleporterAeon",
+            Prerequisite = "Teleporter",
             RemoveEnhancements = {
-                "TeleporterAeon",
-                "TeleporterAeonRemove",
+                "Teleporter",
+                "TeleporterRemove",
             },
             Slot = "Back",
         },
