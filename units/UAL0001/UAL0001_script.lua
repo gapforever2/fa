@@ -71,50 +71,50 @@ UAL0001 = ClassUnit(ACUUnit) {
         ACUUnit.CreateEnhancement(self, enh)
         local bp = self:GetBlueprint().Enhancements[enh]
         -- Resource Allocation
-        if enh == 'ResourceAllocation' then
+        if enh == 'ResourceAllocationAeon' then
             local bp = self:GetBlueprint().Enhancements[enh]
             local bpEcon = self:GetBlueprint().Economy
             if not bp then return end
             self:SetProductionPerSecondEnergy((bp.ProductionPerSecondEnergy + bpEcon.ProductionPerSecondEnergy) or 0)
             self:SetProductionPerSecondMass((bp.ProductionPerSecondMass + bpEcon.ProductionPerSecondMass) or 0)
-        elseif enh == 'ResourceAllocationRemove' then
+        elseif enh == 'ResourceAllocationAeonRemove' then
             local bpEcon = self:GetBlueprint().Economy
             self:SetProductionPerSecondEnergy(bpEcon.ProductionPerSecondEnergy or 0)
             self:SetProductionPerSecondMass(bpEcon.ProductionPerSecondMass or 0)
-        elseif enh == 'ResourceAllocationAdvanced' then
+        elseif enh == 'ResourceAllocationAdvancedAeon' then
             local bp = self:GetBlueprint().Enhancements[enh]
             local bpEcon = self:GetBlueprint().Economy
             if not bp then return end
             self:SetProductionPerSecondEnergy((bp.ProductionPerSecondEnergy + bpEcon.ProductionPerSecondEnergy) or 0)
             self:SetProductionPerSecondMass((bp.ProductionPerSecondMass + bpEcon.ProductionPerSecondMass) or 0)
-        elseif enh == 'ResourceAllocationAdvancedRemove' then
+        elseif enh == 'ResourceAllocationAdvancedAeonRemove' then
             local bpEcon = self:GetBlueprint().Economy
             self:SetProductionPerSecondEnergy(bpEcon.ProductionPerSecondEnergy or 0)
             self:SetProductionPerSecondMass(bpEcon.ProductionPerSecondMass or 0)
         -- Shields
-        elseif enh == 'Shield' then
+        elseif enh == 'ShieldAeon' then
             self:AddToggleCap('RULEUTC_ShieldToggle')
             self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
             self:SetMaintenanceConsumptionActive()
             self:CreateShield(bp)
-        elseif enh == 'ShieldRemove' then
+        elseif enh == 'ShieldAeonRemove' then
             self:DestroyShield()
             self:SetMaintenanceConsumptionInactive()
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
-        elseif enh == 'ShieldHeavy' then
+        elseif enh == 'ShieldHeavyAeon' then
             self:AddToggleCap('RULEUTC_ShieldToggle')
             self:ForkThread(self.CreateHeavyShield, bp)
-        elseif enh == 'ShieldHeavyRemove' then
+        elseif enh == 'ShieldHeavyAeonRemove' then
             self:DestroyShield()
             self:SetMaintenanceConsumptionInactive()
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
         -- Teleporter
-        elseif enh == 'Teleporter' then
+        elseif enh == 'TeleporterAeon' then
             self:AddCommandCap('RULEUCC_Teleport')
-        elseif enh == 'TeleporterRemove' then
+        elseif enh == 'TeleporterAeonRemove' then
             self:RemoveCommandCap('RULEUCC_Teleport')
         -- Chrono Dampener
-        elseif enh == 'ChronoDampener' then
+        elseif enh == 'ChronoDampenerAeon' then
             self:SetWeaponEnabledByLabel('ChronoDampener', true)
             if not Buffs['AeonACUChronoDampener'] then
                 BuffBlueprint {
@@ -132,13 +132,13 @@ UAL0001 = ClassUnit(ACUUnit) {
                 }
             end
             Buff.ApplyBuff(self, 'AeonACUChronoDampener')
-        elseif enh == 'ChronoDampenerRemove' then
+        elseif enh == 'ChronoDampenerAeonRemove' then
             if Buff.HasBuff(self, 'AeonACUChronoDampener') then
                 Buff.RemoveBuff(self, 'AeonACUChronoDampener')
             end
             self:SetWeaponEnabledByLabel('ChronoDampener', false)
         -- T2 Engineering
-        elseif enh =='AdvancedEngineering' then
+        elseif enh =='EngineeringT2Aeon' then
             local bp = self:GetBlueprint().Enhancements[enh]
             if not bp then return end
             local cat = ParseEntityCategory(bp.BuildableCategoryAdds)
@@ -168,7 +168,7 @@ UAL0001 = ClassUnit(ACUUnit) {
                 }
             end
             Buff.ApplyBuff(self, 'AeonACUT2BuildRate')
-        elseif enh =='AdvancedEngineeringRemove' then
+        elseif enh =='EngineeringT2AeonRemove' then
             local bp = self:GetBlueprint().Economy.BuildRate
             if not bp then return end
             self:RestoreBuildRestrictions()
@@ -177,7 +177,7 @@ UAL0001 = ClassUnit(ACUUnit) {
                 Buff.RemoveBuff(self, 'AeonACUT2BuildRate')
          end
         -- T3 Engineering
-        elseif enh =='T3Engineering' then
+        elseif enh =='T3EngineeringAeon' then
             local bp = self:GetBlueprint().Enhancements[enh]
             if not bp then return end
             local cat = ParseEntityCategory(bp.BuildableCategoryAdds)
@@ -206,7 +206,7 @@ UAL0001 = ClassUnit(ACUUnit) {
                 }
             end
             Buff.ApplyBuff(self, 'AeonACUT3BuildRate')
-        elseif enh =='T3EngineeringRemove' then
+        elseif enh =='T3EngineeringAeonRemove' then
             local bp = self:GetBlueprint().Economy.BuildRate
             if not bp then return end
             self:RestoreBuildRestrictions()
@@ -215,7 +215,7 @@ UAL0001 = ClassUnit(ACUUnit) {
                 Buff.RemoveBuff(self, 'AeonACUT3BuildRate')
          end
         -- Crysalis Beam
-        elseif enh == 'CrysalisBeam' then
+        elseif enh == 'CrysalisBeamAeon' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
             wep:ChangeMaxRadius(bp.NewMaxRadius or 30)
             local oc = self:GetWeaponByLabel('OverCharge')
@@ -224,7 +224,7 @@ UAL0001 = ClassUnit(ACUUnit) {
             aoc:ChangeMaxRadius(bp.NewMaxRadius or 30)
             local cd = self:GetWeaponByLabel('ChronoDampener')
             cd:ChangeMaxRadius(bp.NewMaxRadius or 30)
-        elseif enh == 'CrysalisBeamRemove' then
+        elseif enh == 'CrysalisBeamAeonRemove' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
             local bpDisrupt = self:GetBlueprint().Weapon[1].MaxRadius
             wep:ChangeMaxRadius(bpDisrupt or 22)
@@ -235,7 +235,7 @@ UAL0001 = ClassUnit(ACUUnit) {
             local cd = self:GetWeaponByLabel('ChronoDampener')
             cd:ChangeMaxRadius(bpDisrupt or 22)
         -- Advanced Cryslised Beam
-        elseif enh == 'FAF_CrysalisBeamAdvanced' then
+        elseif enh == 'GAP_CrysalisBeamAdvancedAeon' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
             wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
             local oc = self:GetWeaponByLabel('OverCharge')
@@ -244,7 +244,7 @@ UAL0001 = ClassUnit(ACUUnit) {
             aoc:ChangeMaxRadius(bp.NewMaxRadius or 35)
             local cd = self:GetWeaponByLabel('ChronoDampener')
             cd:ChangeMaxRadius(bp.NewMaxRadius or 35)
-        elseif enh == 'FAF_CrysalisBeamAdvancedRemove' then
+        elseif enh == 'GAP_CrysalisBeamAdvancedAeonRemove' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
             local bpDisrupt = self:GetBlueprint().Weapon[1].MaxRadius
             wep:ChangeMaxRadius(bpDisrupt or 22)
@@ -255,7 +255,7 @@ UAL0001 = ClassUnit(ACUUnit) {
             local cd = self:GetWeaponByLabel('ChronoDampener')
             cd:ChangeMaxRadius(bpDisrupt or 22)
         -- Heat Sink Augmentation
-        elseif enh == 'HeatSink' then
+        elseif enh == 'HeatSinkAeon' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
             wep:ChangeRateOfFire(bp.NewRateOfFire or 2)
             local wep = self:GetWeaponByLabel('RightDisruptor')
@@ -266,7 +266,7 @@ UAL0001 = ClassUnit(ACUUnit) {
             aoc:ChangeMaxRadius(bp.NewMaxRadius or 30)
             local cd = self:GetWeaponByLabel('ChronoDampener')
             cd:ChangeMaxRadius(bp.NewMaxRadius or 30)
-        elseif enh == 'HeatSinkRemove' then
+        elseif enh == 'HeatSinkAeonRemove' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
             local bpDisrupt = self:GetBlueprint().Weapon[1].RateOfFire
             wep:ChangeRateOfFire(bpDisrupt or 1)
@@ -280,10 +280,10 @@ UAL0001 = ClassUnit(ACUUnit) {
             local cd = self:GetWeaponByLabel('ChronoDampener')
             cd:ChangeMaxRadius(bpDisrupt or 22)
         -- Enhanced Sensor Systems
-        elseif enh == 'EnhancedSensors' then
+        elseif enh == 'EnhancedSensorsAeon' then
             self:SetIntelRadius('Vision', bp.NewVisionRadius or 104)
             self:SetIntelRadius('Omni', bp.NewOmniRadius or 104)
-        elseif enh == 'EnhancedSensorsRemove' then
+        elseif enh == 'EnhancedSensorsAeonRemove' then
             local bpIntel = self:GetBlueprint().Intel
             self:SetIntelRadius('Vision', bpIntel.VisionRadius or 26)
             self:SetIntelRadius('Omni', bpIntel.OmniRadius or 26)
