@@ -99,6 +99,7 @@ OpAI = ClassSimple {
             ScenarioInfo.OSPlatoonCounter[self.MasterName..'_D1'] = diffTable[1]
             ScenarioInfo.OSPlatoonCounter[self.MasterName..'_D2'] = diffTable[2]
             ScenarioInfo.OSPlatoonCounter[self.MasterName..'_D3'] = diffTable[3]
+			ScenarioInfo.OSPlatoonCounter[self.MasterName..'_D4'] = diffTable[4]
         end,
 
         SetChildrenPlatoonAI = function(self, functionInfo, childType)
