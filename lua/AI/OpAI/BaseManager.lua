@@ -173,11 +173,6 @@ local BuildingCounterDefaultValues = {
         T2MissileDefense = 3,
         T3StrategicMissileDefense = 1,
     },
-	
-	-- Difficulty 4
-    {
-        Default = 3,
-    },
 
     -- Difficulty 3
     {
