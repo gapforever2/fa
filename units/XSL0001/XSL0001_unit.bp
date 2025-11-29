@@ -982,7 +982,7 @@ UnitBlueprint{
             DamageType = "Normal",
             DisplayName = "Laanse Tactical Missile Launcher",
             EffectiveRadius = 0,
-            EnabledByEnhancement = "Missile",
+            EnabledByEnhancement = "MissileSeraphim",
             FireTargetLayerCapsTable = {
                 Land = "Land|Water|Seabed",
                 Seabed = "Land|Water|Seabed",
@@ -1034,7 +1034,7 @@ UnitBlueprint{
             DamageType = "Normal",
             DisplayName = "Teleport in",
             DummyWeapon = true,
-            EnabledByEnhancement = "Teleporter",
+            EnabledByEnhancement = "TeleporterSeraphim",
             Label = "TeleportWeapon",
             ManualFire = true,
             MaxRadius = 1,

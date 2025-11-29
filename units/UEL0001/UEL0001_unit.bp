@@ -1035,7 +1035,7 @@ UnitBlueprint{
             DamageType = "Normal",
             DisplayName = "Tactical Warhead",
             EffectiveRadius = 0,
-            EnabledByEnhancement = "TacticalMissile",
+            EnabledByEnhancement = "TacticalMissileUEF",
             FireTargetLayerCapsTable = {
                 Land = "Land|Water|Seabed",
                 Seabed = "Land|Water|Seabed",
@@ -1094,7 +1094,7 @@ UnitBlueprint{
             DamageType = "Nuke",
             DisplayName = "Nuclear Warhead",
             EffectiveRadius = 0,
-            EnabledByEnhancement = "TacticalNukeMissile",
+            EnabledByEnhancement = "TacticalNukeMissileUEF",
             FireTargetLayerCapsTable = {
                 Land = "Land|Water|Seabed",
                 Seabed = "Land|Water|Seabed",
@@ -1182,7 +1182,7 @@ UnitBlueprint{
             DamageType = "Normal",
             DisplayName = "Teleport in",
             DummyWeapon = true,
-            EnabledByEnhancement = "Teleporter",
+            EnabledByEnhancement = "TeleporterUEF",
             Label = "TeleportWeapon",
             ManualFire = true,
             MaxRadius = 1,
