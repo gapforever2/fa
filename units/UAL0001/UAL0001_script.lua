@@ -214,27 +214,6 @@ UAL0001 = ClassUnit(ACUUnit) {
             if Buff.HasBuff(self, 'AeonACUT3BuildRate') then
                 Buff.RemoveBuff(self, 'AeonACUT3BuildRate')
          end
-        -- Crysalis Beam
-        elseif enh == 'CrysalisBeamAeon' then
-            local wep = self:GetWeaponByLabel('RightDisruptor')
-            wep:ChangeMaxRadius(bp.NewMaxRadius or 30)
-            local oc = self:GetWeaponByLabel('OverCharge')
-            oc:ChangeMaxRadius(bp.NewMaxRadius or 30)
-            local aoc = self:GetWeaponByLabel('AutoOverCharge')
-            aoc:ChangeMaxRadius(bp.NewMaxRadius or 30)
-            local cd = self:GetWeaponByLabel('ChronoDampener')
-            cd:ChangeMaxRadius(bp.NewMaxRadius or 30)
-        elseif enh == 'CrysalisBeamAeonRemove' then
-            local wep = self:GetWeaponByLabel('RightDisruptor')
-            local bpDisrupt = self:GetBlueprint().Weapon[1].MaxRadius
-            wep:ChangeMaxRadius(bpDisrupt or 22)
-            local oc = self:GetWeaponByLabel('OverCharge')
-            oc:ChangeMaxRadius(bpDisrupt or 22)
-            local aoc = self:GetWeaponByLabel('AutoOverCharge')
-            aoc:ChangeMaxRadius(bpDisrupt or 22)
-            local cd = self:GetWeaponByLabel('ChronoDampener')
-            cd:ChangeMaxRadius(bpDisrupt or 22)
-        -- Advanced Cryslised Beam
         elseif enh == 'GAP_CrysalisBeamAdvancedAeon' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
             wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
