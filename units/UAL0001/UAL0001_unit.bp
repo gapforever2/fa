@@ -324,7 +324,7 @@ UnitBlueprint{
             Icon = "ecba",
             Name = "<LOC enhancements_0148_faf>Advanced Quantum Disruptor",
             NewMaxRadius = 35,
-            Prerequisite = "HeatSink",
+            Prerequisite = "HeatSinkAeon",
             ShowBones = { "Left_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -342,7 +342,6 @@ UnitBlueprint{
             Name = "<LOC enhancements_0149_faf>Remove Quantum Disruptor Enhancements",
             Prerequisite = "GAP_CrysalisBeamAdvancedAeon",
             RemoveEnhancements = {
-                "CrysalisBeamAeon",
                 "GAP_CrysalisBeamAdvancedAeon",
                 "GAP_CrysalisBeamAdvancedAeonRemove",
             },
