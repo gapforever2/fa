@@ -308,7 +308,6 @@ URL0301 = ClassUnit(CCommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementFocusConvertor = function(self, bp)
         local wep = self:GetWeaponByLabel('RightDisintegrator')
-        wep:AddDamageMod(bp.NewDamageMod or 0)
         wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
         local wep = self:GetWeaponByLabel('Disintigrator')
         wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
