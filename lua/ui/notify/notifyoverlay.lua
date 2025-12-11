@@ -137,9 +137,9 @@ function createEnhancementOverlay(args)
         local timeRemaining = math.ceil(overlay.eta - seconds)
         if timeRemaining ~= overlay.lastTimeRemaining then
             if timeRemaining >= 0 then
-                overlay.etaText:SetText("ETA " .. string.format("%.2d:%.2d", timeRemaining / 60, math.mod(timeRemaining, 60)))
+                overlay.etaText:SetText("time " .. string.format("%.2d:%.2d", timeRemaining / 60, math.mod(timeRemaining, 60)))
             else
-                overlay.etaText:SetText("ETA --:--")
+                overlay.etaText:SetText("time --:--")
             end
             overlay.lastTimeRemaining = timeRemaining
         end
