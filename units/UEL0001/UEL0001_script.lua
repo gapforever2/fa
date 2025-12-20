@@ -121,6 +121,8 @@ UEL0001 = ClassUnit(ACUUnit) {
         self.HasRightPod = false
         -- Restrict what enhancements will enable later
         self:AddBuildRestriction(categories.UEF * (categories.BUILTBYTIER2COMMANDER + categories.BUILTBYTIER3COMMANDER))
+		
+		self:AddBuildRestriction(categories.UNITMOD)
 
         local hatchBone = 'Back_Upgrade_B02'
         if self:IsValidBone(hatchBone) then
@@ -208,6 +210,10 @@ UEL0001 = ClassUnit(ACUUnit) {
 
     ---@param self UEL0001
     ---@param PodNumber integer
+
+    ---@param self UEL0001
+    ---@param pod string
+    ---@param rebuildDrone boolean
     RebuildPod = function(self, PodNumber)
         if PodNumber == 1 then
             -- Force pod rebuilds to queue up
@@ -251,22 +257,19 @@ UEL0001 = ClassUnit(ACUUnit) {
         self:RequestRefreshUI()
     end,
 
-    ---@param self UEL0001
-    ---@param pod string
-    ---@param rebuildDrone boolean
     NotifyOfPodDeath = function(self, pod, rebuildDrone)
         if rebuildDrone == true then
-            if pod == 'LeftPodUEF' then
+            if pod == 'LeftPod' then
                 if self.HasLeftPod == true then
                     self.RebuildThread = self:ForkThread(self.RebuildPod, 1)
                 end
-            elseif pod == 'RightPodUEF' then
+            elseif pod == 'RightPod' then
                 if self.HasRightPod == true then
                     self.RebuildThread2 = self:ForkThread(self.RebuildPod, 2)
                 end
             end
         else
-            self:CreateEnhancement(pod .. 'Remove')
+            self:CreateEnhancement(pod..'Remove')
         end
     end,
 
@@ -309,7 +312,7 @@ UEL0001 = ClassUnit(ACUUnit) {
 
         local bp = self:GetBlueprint().Enhancements[enh]
         if not bp then return end
-        if enh == 'LeftPodUEF' then
+        if enh == 'LeftPod' then
             local location = self:GetPosition('AttachSpecial02')
             local pod = CreateUnitHPR('UEA0001', self.Army, location[1], location[2], location[3], 0, 0, 0)
             pod:SetParent(self, 'LeftPod')
@@ -317,7 +320,7 @@ UEL0001 = ClassUnit(ACUUnit) {
             self.Trash:Add(pod)
             self.HasLeftPod = true
             self.LeftPod = pod
-        elseif enh == 'RightPodUEF' then
+        elseif enh == 'RightPod' then
             local location = self:GetPosition('AttachSpecial01')
             local pod = CreateUnitHPR('UEA0001', self.Army, location[1], location[2], location[3], 0, 0, 0)
             pod:SetParent(self, 'RightPod')
@@ -325,7 +328,7 @@ UEL0001 = ClassUnit(ACUUnit) {
             self.Trash:Add(pod)
             self.HasRightPod = true
             self.RightPod = pod
-        elseif enh == 'LeftPodUEFRemove' or enh == 'RightPodUEFRemove' then
+        elseif enh == 'LeftPodRemove' or enh == 'RightPodRemove' then
             if self.HasLeftPod == true then
                 self.HasLeftPod = false
                 if self.LeftPod and not self.LeftPod.Dead then
