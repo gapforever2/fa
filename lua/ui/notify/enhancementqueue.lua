@@ -79,7 +79,7 @@ function ModifyBuildablesForACU(originalBuildables, selection)
             for _, enhancement in enhancementQueue[unit:GetEntityId()] or {} do
                 if enhancement.ID == 'EngineeringT2UEF' or enhancement.ID == 'EngineeringT2Aeon' or enhancement.ID == 'EngineeringT2Cybran' or enhancement.ID == 'EngineeringT2Seraphim' and techUpgrading < 2 then
                     techUpgrading = 2
-                elseif enhancement.ID == 'T3Engineering' then
+                elseif enhancement.ID == 'T3EngineeringUEF' or enhancement.ID == 'T3EngineeringAeon' or enhancement.ID == 'T3EngineeringCybran' or enhancement.ID == 'T3EngineeringSeraphim' then
                     techUpgrading = 3
                 end
             end
