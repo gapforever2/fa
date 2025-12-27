@@ -55,11 +55,11 @@ AIFGuidedMissile = ClassProjectile(AGuidedMissileProjectile) {
         local numProjectiles = 8
         local angle = (2 * math.pi) / numProjectiles
         local ChildProjectileBP = '/projectiles/AIFGuidedMissile02/AIFGuidedMissile02_proj.bp'
-        local spreadMul = 0.4 -- Adjusts the width of the dispersal
+        local spreadMul = 0.25 -- Adjusts the width of the dispersal
         local xVec, yVec, zVec = 0, vy, 0
         local target = self:GetCurrentTargetPosition()
         local tx, ty, tz = target[1], target[2], target[3]
-        local radius = 5
+        local radius = 2
 
         -- Launch projectiles at semi-random angles away from split location
         for i = 0, (numProjectiles - 1) do
