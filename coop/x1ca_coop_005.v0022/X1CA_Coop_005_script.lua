@@ -352,7 +352,7 @@ function StartMission1()
                 end
                 -- Warp in and buff Fletcher
                 ScenarioInfo.FletcherCDR = ScenarioFramework.SpawnCommander('Fletcher', 'Fletcher', 'Warp', LOC '{i Fletcher}', false, false, 
-                    {'ResourceAllocationUEF', 'EngineeringT2UEF', 'T3EngineeringUEF', 'LeftPodUEF', 'RightPodUEF'})
+                    {'ResourceAllocationUEF', 'EngineeringT2UEF', 'T3EngineeringUEF', 'LeftPod', 'RightPod'})
                 ScenarioInfo.FletcherCDR.CanBeKilled = false
                 ScenarioFramework.CreateUnitDamagedTrigger(FletcherWarp, ScenarioInfo.FletcherCDR, .8)
                 FletcherTM:AddTauntingCharacter(ScenarioInfo.FletcherCDR)
