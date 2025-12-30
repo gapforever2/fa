@@ -1,0 +1,28 @@
+version = 3 -- Lua Version. Dont touch this
+ScenarioInfo = {
+    name = "Custom Mission: QAI (6 players vs QAI)",
+    description = "Custom mission created by armagedon",
+    preview = '',
+    map_version = 5,
+    type = 'campaign_coop',
+    starts = true,
+    size = {1024, 1024},
+    reclaim = {4131044, 108235},
+    map = '/maps/Mission_War of Minds.0005/Map_Comp.scmap',
+    save = '/maps/Mission_War of Minds.0005/Map_Comp_save.lua',
+    script = '/maps/Mission_War of Minds.0005/Map_Comp_script.lua',
+    norushradius = 0,
+    Configurations = {
+        ['standard'] = {
+            teams = {
+                {
+                    name = 'FFA',
+                    armies = {'Player1', 'Player2', 'Player3', 'Player4', 'Player5', 'Player6', 'Player7'}
+                },
+            },
+            customprops = {
+            },
+			factions = { {'cybran'}, {'uef', 'aeon','cybran', 'seraphim'}, {'uef', 'aeon','cybran', 'seraphim'}, {'uef', 'aeon','cybran', 'seraphim'}, {'uef', 'aeon','cybran', 'seraphim'}, {'uef', 'aeon','cybran', 'seraphim'}, {'uef', 'aeon','cybran', 'seraphim'} },
+        },
+    },
+}
