@@ -17,7 +17,7 @@ local Behaviors = import('/lua/ai/opai/OpBehaviors.lua')
 local PrefetchUtils = import('/lua/sim/PrefetchUtilities.lua')
 local AIUtils = import('/lua/AI/aiutilities.lua')
 
-local OpStrings = import('/maps/Mission_War of Minds.0005/Map_Comp_strings.lua')
+local OpStrings = import('/maps/mission_war_of_minds.v0006/mission_war_of_minds_strings.lua')
 
 local OnEasy = { {text = '<LOC X06_M01_012_010>[Игровой ИИ]: Сложность: Легкая. Будет достаточно легко проходить.', vid = 'X05_QAI_M02_03855.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'Cybran'} }
 local OnMedium = { {text = '<LOC X06_M01_012_010>[Игровой ИИ]: Сложность: Средняя. Немного попотеть придется.', vid = 'X05_QAI_M02_03855.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'Cybran'} }
