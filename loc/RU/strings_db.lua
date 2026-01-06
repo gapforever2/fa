@@ -9145,6 +9145,12 @@ avatar_gaf="Аватарка"
 _KickObs="Выгнать наблюдателей"
 _DiscordGAF="Discord GAF"
 lobui_0001_gaf="Баланс патч"
+
+-- Mute tooltips
+lobby_mute_tooltip_title="Заглушен"
+lobby_mute_tooltip_local="Этот игрок заглушен вами локально."
+lobby_mute_tooltip_global="Этот игрок заглушен сервером."
+lobby_mute_tooltip_both="Этот игрок заглушен вами локально и сервером."
 lobui_0002_gaf="Выгнать всех наблюдатей из лобби"
 lobui_0003_gaf="Официальный Discord сервер GapForever"
 lobui_0004_gaf="Кликни сюда, чтобы узнать больше про актаульный баланс на сервере GAF"
