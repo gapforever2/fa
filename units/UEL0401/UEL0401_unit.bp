@@ -69,8 +69,8 @@ UnitBlueprint{
         AirThreatLevel = 11,
         ArmorType = "Experimental",
         EconomyThreatLevel = 2018,
-        Health = 12500,
-        MaxHealth = 12500,
+        Health = 15000,
+        MaxHealth = 15000,
         RegenRate = 20,
         Shield = {
             ImpactEffects = "UEFShieldHit01",
