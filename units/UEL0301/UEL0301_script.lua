@@ -247,8 +247,6 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementShieldGeneratorField = function(self, bp)
-        self:RemoveCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(99)
         self:DestroyShield()
         self:ForkThread(function()
             WaitTicks(1)
@@ -264,8 +262,6 @@ UEL0301 = ClassUnit(CommandUnit) {
         self:DestroyShield()
         self:SetMaintenanceConsumptionInactive()
         self:RemoveToggleCap('RULEUTC_ShieldToggle')
-        self:AddCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(self.Blueprint.Transport.TransportClass)
     end,
 
     ---@param self UEL0301
@@ -339,6 +335,9 @@ UEL0301 = ClassUnit(CommandUnit) {
         self:HideBone('Arm_Right_B03', true)
         local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
         self:SetWeaponEnabledByLabel('LeftHeavyPlasmaCannon', true)
+        self:RemoveCommandCap('RULEUCC_CallTransport')
+        self:SetTransportClass(99)
+        self:SetSpeedMult(0.9090)
         if not Buffs['ZeroBP'] then
             BuffBlueprint {
                 Name = 'ZeroBP',
@@ -370,6 +369,9 @@ UEL0301 = ClassUnit(CommandUnit) {
         self:HideBone('Arm_Right_Barrel01', true)  
         local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
         self:SetWeaponEnabledByLabel('LeftHeavyPlasmaCannon', false)
+        self:AddCommandCap('RULEUCC_CallTransport')
+        self:SetTransportClass(self.Blueprint.Transport.TransportClass)
+        self:SetSpeedMult(1)
         if Buff.HasBuff(self, 'ZeroBP') then
             Buff.RemoveBuff(self, 'ZeroBP')
         end
