@@ -226,8 +226,6 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementShield = function (self, bp)
         self:AddToggleCap('RULEUTC_ShieldToggle')
-        self:RemoveCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(99)
         self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
         self:SetMaintenanceConsumptionActive()
         self:CreateShield(bp)
@@ -240,8 +238,6 @@ UEL0301 = ClassUnit(CommandUnit) {
         self:DestroyShield()
         self:SetMaintenanceConsumptionInactive()
         self:RemoveToggleCap('RULEUTC_ShieldToggle')
-        self:AddCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(self.Blueprint.Transport.TransportClass)
     end,
 
     ---@param self UEL0301
