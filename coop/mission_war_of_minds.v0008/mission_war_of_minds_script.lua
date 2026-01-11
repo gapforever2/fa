@@ -170,11 +170,11 @@ function SpawnAllUnitsHex5()
 	WaitSeconds(1)
 	ForkThread(BotBaseAI)
 	if(Medium == true) then
-		ScenarioFramework.CreateTimerTrigger(SpawnMediumUnits, 160)
+		ScenarioFramework.CreateTimerTrigger(SpawnMediumUnits, 500)
 	end
 	if(Hard == true) then
 		WaitSeconds(1)
-		ScenarioFramework.CreateTimerTrigger(SpawnLAreaUnits, 280)
+		ScenarioFramework.CreateTimerTrigger(SpawnLAreaUnits, 500)
 		WaitSeconds(3)
 		if tblArmy[ScenarioInfo.Player8] then
 			ForkThread(SpawnPlayer8Units)
@@ -182,7 +182,7 @@ function SpawnAllUnitsHex5()
 	end
 	WaitSeconds(3)
 	if(Nightmarish == true) then
-		ScenarioFramework.CreateTimerTrigger(Spawnhex5Transport, 15*60)
+		ScenarioFramework.CreateTimerTrigger(Spawnhex5Transport, 35*60)
 	end
 end
 
@@ -614,17 +614,17 @@ function ChechPlayerQAIACU()
 	ScenarioFramework.CreateArmyIntelTrigger( DopZDKILLACU1, ArmyBrains[Player2], 'LOSNow', false, true, categories.url0002, true, ArmyBrains[Enemy] )
 	ScenarioFramework.CreateArmyIntelTrigger( DopZDKILLACU3, ArmyBrains[Player2], 'LOSNow', false, true, categories.url0402, true, ArmyBrains[Enemy] )
 	WaitSeconds(3)
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLandT1, 4*60 )
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLandT2B2, 9*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLandT1, 10*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLandT2B2, 14*60 )
 	WaitSeconds(4)
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackAir, 9*60)
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLightAir, 4*60)
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackAir, 20*60)
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLightAir, 10*60)
 	WaitSeconds(2)
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackAirT3, 14*60 )
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackExperemental, 25*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackAirT3, 24*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackExperemental, 40*60 )
 	
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackCirposh, 10*60 )
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttacksACUs, 21*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackCirposh, 20*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttacksACUs, 45*60 )
 end
 
 function SpawnArea1AttackCirposh()
