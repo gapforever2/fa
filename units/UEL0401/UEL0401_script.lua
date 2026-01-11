@@ -218,7 +218,7 @@ UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUni
                     Duration = -1,
                     Affects = {
                         MaxHealth = {
-                            Add = 38500,
+                            Add = 32000,
                             Mult = 1.0,
                         },
                     },
