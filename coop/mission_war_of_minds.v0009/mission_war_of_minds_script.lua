@@ -17,7 +17,7 @@ local Behaviors = import('/lua/ai/opai/OpBehaviors.lua')
 local PrefetchUtils = import('/lua/sim/PrefetchUtilities.lua')
 local AIUtils = import('/lua/AI/aiutilities.lua')
 
-local ThisFile = '/maps/mission_war_of_minds.v0008/mission_war_of_minds_script.lua'
+local ThisFile = '/maps/mission_war_of_minds.v0009/mission_war_of_minds_script.lua'
 
 ScenarioInfo.Deads = 0
 
@@ -25,9 +25,9 @@ ScenarioInfo.PointsN = {'Player2', 'Player3', 'Player4', 'Player5', 'Player6', '
 
 local CybranBotBase = BaseManager.CreateBaseManager()
 
-ScenarioInfo.Player8Respawns = 6
+ScenarioInfo.Player8Respawns = 3
 
-local OpStrings = import('/maps/mission_war_of_minds.v0008/mission_war_of_minds_strings.lua')
+local OpStrings = import('/maps/mission_war_of_minds.v0009/mission_war_of_minds_strings.lua')
 
 local KillEXPPreArea2 = { {text = '<LOC X06_M01_012_010>[{i HQ}]: Атака была отбита, хорошая работа.', vid = 'X01_HQ_M01_04848.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'NONE'} }
 
