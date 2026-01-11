@@ -1,12 +1,12 @@
 UnitBlueprint{
     Description = "<LOC uel0401_desc>Experimental Mobile Factory",
     AI = {
-        AttackAngle = 20,
+        AttackAngle = 2,
         RefuelingMultiplier = 75,
-        RefuelingRepairAmount = 500,
-        RepairConsumeEnergy = 30,
-        RepairConsumeMass = 0,
-        StagingPlatformScanRadius = 300,
+        RefuelingRepairAmount = 350,
+        RepairConsumeEnergy = 20,
+        RepairConsumeMass = 1,
+        StagingPlatformScanRadius = 200,
         TargetBones = {
             "Front_Core",
             "Rear_Core",
@@ -69,9 +69,9 @@ UnitBlueprint{
         AirThreatLevel = 11,
         ArmorType = "Experimental",
         EconomyThreatLevel = 2018,
-        Health = 10500,
-        MaxHealth = 10500,
-        RegenRate = 1,
+        Health = 15000,
+        MaxHealth = 15000,
+        RegenRate = 50,
         Shield = {
             ImpactEffects = "UEFShieldHit01",
             ImpactMesh = "/effects/entities/ShieldSection01/ShieldSection01_mesh",
@@ -221,10 +221,10 @@ UnitBlueprint{
         UniformScale = 0.215,
     },
     Economy = {
-        BuildCostEnergy = 390000,
-        BuildCostMass = 32500,
+        BuildCostEnergy = 396000,
+        BuildCostMass = 33000,
         BuildRate = 135,
-        BuildTime = 49000,
+        BuildTime = 49500,
         BuildableCategory = {
             "BUILTBYTIER3FACTORY UEF MOBILE LAND",
             "BUILTBYTIER2FACTORY UEF MOBILE LAND",
@@ -296,7 +296,7 @@ UnitBlueprint{
         BankingSlope = 3,
         DragCoefficient = 0.2,
         Elevation = 1,
-        LayerChangeOffsetHeight = -0.75,
+        LayerChangeOffsetHeight = -0.2,
         MaxAcceleration = 1.75,
         MaxBrake = 1.75,
         MaxSpeed = 1.65,

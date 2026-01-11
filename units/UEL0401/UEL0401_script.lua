@@ -193,19 +193,19 @@ UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUni
 				local wp4 = self:GetWeaponByLabel('LeftTurret02')
 				wp4:ChangeMaxRadius(70)
 				local DWP1 = self:GetWeaponByLabel('RightTurret01')
-				DWP1:AddDamageMod(70)
+				DWP1:AddDamageMod(50)
 				DWP1:ChangeRateOfFire(10/16.66)
 				DWP1:AddDamageRadiusMod(2)
 				local DWP2 = self:GetWeaponByLabel('RightTurret02')
-				DWP2:AddDamageMod(70)
+				DWP2:AddDamageMod(50)
 				DWP2:ChangeRateOfFire(10/16.66)
 				DWP2:AddDamageRadiusMod(2)
 				local DWP3 = self:GetWeaponByLabel('LeftTurret01')
-				DWP3:AddDamageMod(70)
+				DWP3:AddDamageMod(50)
 				DWP3:ChangeRateOfFire(10/16.66)
 				DWP3:AddDamageRadiusMod(2)
 				local DWP4 = self:GetWeaponByLabel('LeftTurret02')
-				DWP4:AddDamageMod(70)
+				DWP4:AddDamageMod(50)
 				DWP4:ChangeRateOfFire(10/16.66)
 				DWP4:AddDamageRadiusMod(2)
 				self:SetSpeedMult(0.01)
@@ -218,11 +218,7 @@ UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUni
                     Duration = -1,
                     Affects = {
                         MaxHealth = {
-                            Add = 36500,
-                            Mult = 1.0,
-                        },
-                        Regen = {
-                            Add = 39,
+                            Add = 38500,
                             Mult = 1.0,
                         },
                     },
@@ -246,19 +242,19 @@ UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUni
 				local wp4 = self:GetWeaponByLabel('LeftTurret02')
 				wp4:ChangeMaxRadius(80)
 				local DWP1 = self:GetWeaponByLabel('RightTurret01')
-				DWP1:AddDamageMod(-70)
+				DWP1:AddDamageMod(-50)
 				DWP1:ChangeRateOfFire(10/10.52)
 				DWP1:AddDamageRadiusMod(-2)
 				local DWP2 = self:GetWeaponByLabel('RightTurret02')
-				DWP2:AddDamageMod(-70)
+				DWP2:AddDamageMod(-50)
 				DWP2:ChangeRateOfFire(10/10.52)
 				DWP2:AddDamageRadiusMod(-2)
 				local DWP3 = self:GetWeaponByLabel('LeftTurret01')
-				DWP3:AddDamageMod(-70)
+				DWP3:AddDamageMod(-50)
 				DWP3:ChangeRateOfFire(10/10.52)
 				DWP3:AddDamageRadiusMod(-2)
 				local DWP4 = self:GetWeaponByLabel('LeftTurret02')
-				DWP4:AddDamageMod(-70)
+				DWP4:AddDamageMod(-50)
 				DWP4:ChangeRateOfFire(10/10.52)
 				DWP4:AddDamageRadiusMod(-2)
 			end
