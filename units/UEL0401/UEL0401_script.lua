@@ -208,7 +208,7 @@ UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUni
 				DWP4:AddDamageMod(70)
 				DWP4:ChangeRateOfFire(10/16.66)
 				DWP4:AddDamageRadiusMod(2)
-				self:SetSpeedMult(0)
+				self:SetSpeedMult(0.01)
 				if not Buffs['STHP'] then
                 BuffBlueprint {
                     Name = 'STHP',
