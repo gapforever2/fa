@@ -121,8 +121,6 @@ UEL0001 = ClassUnit(ACUUnit) {
         self.HasRightPod = false
         -- Restrict what enhancements will enable later
         self:AddBuildRestriction(categories.UEF * (categories.BUILTBYTIER2COMMANDER + categories.BUILTBYTIER3COMMANDER))
-		
-		self:AddBuildRestriction(categories.UNITMOD)
 
         local hatchBone = 'Back_Upgrade_B02'
         if self:IsValidBone(hatchBone) then
