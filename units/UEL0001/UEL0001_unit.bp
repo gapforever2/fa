@@ -222,7 +222,7 @@ UnitBlueprint{
     },
     Economy = {
         BuildCostEnergy = 5000000,
-        BuildCostMass = 3000,
+        BuildCostMass = 2000,
         BuildRate = 10,
         BuildTime = 6000000,
         BuildableCategory = {
@@ -378,7 +378,7 @@ UnitBlueprint{
             },
             Slot = "RCH",
         },
-        LeftPod = {
+        LeftPodUEF = {
             BuildCostEnergy = 2400,
             BuildCostMass = 300,
             BuildTime = 350,
@@ -389,17 +389,17 @@ UnitBlueprint{
             UpgradeEffectBones = { "AttachSpecial01" },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        LeftPodRemove = {
+        LeftPodUEFRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade_B01" },
             Icon = "led",
             Name = "<LOC enhancements_0044>Remove C-D1 Shoulder Drone",
-            Prerequisite = "LeftPod",
+            Prerequisite = "LeftPodUEF",
             RemoveEnhancements = {
-                "LeftPod",
-                "LeftPodRemove",
+                "LeftPodUEF",
+                "LeftPodUEFRemove",
             },
             Slot = "Back",
         },
@@ -435,29 +435,29 @@ UnitBlueprint{
             },
             Slot = "RCH",
         },
-        RightPod = {
+        RightPodUEF = {
             BuildCostEnergy = 2400,
             BuildCostMass = 300,
             BuildTime = 350,
             Icon = "red",
             Name = "<LOC enhancements_0043>C-D1 Shoulder Drone",
-            Prerequisite = "LeftPod",
+            Prerequisite = "LeftPodUEF",
             Slot = "Back",
             UpgradeEffectBones = { "AttachSpecial02" },
             UpgradeUnitAmbientBones = { "UEL0001" },
         },
-        RightPodRemove = {
+        RightPodUEFRemove = {
             BuildCostEnergy = 1,
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade_B01" },
             Icon = "red",
             Name = "<LOC enhancements_0044>Remove C-D1 Shoulder Drone",
-            Prerequisite = "RightPod",
+            Prerequisite = "RightPodUEF",
             RemoveEnhancements = {
-                "LeftPod",
-                "RightPod",
-                "RightPodRemove",
+                "LeftPodUEF",
+                "RightPodUEF",
+                "RightPodUEFRemove",
             },
             Slot = "Back",
         },
@@ -1188,19 +1188,6 @@ UnitBlueprint{
             MaxRadius = 1,
             RateOfFire = 10/10, --10/integer interval in ticks
             WeaponCategory = "Teleport",
-        },
-    },
-	Wreckage = {
-        Blueprint = "/props/DefaultWreckage/DefaultWreckage_prop.bp",
-        EnergyMult = 0,
-        HealthMult = 0.65,
-        MassMult = 0.5,
-        ReclaimTimeMultiplier = 0.85,
-        WreckageLayers = {
-            Land = true,
-            Seabed = true,
-            Sub = true,
-            Water = true,
         },
     },
 }
