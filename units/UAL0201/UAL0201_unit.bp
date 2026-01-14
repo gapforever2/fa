@@ -28,8 +28,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Normal",
-        Health = 255,
-        MaxHealth = 255,
+        Health = 155,
+        MaxHealth = 155,
         SurfaceThreatLevel = 2,
     },
     Display = {
@@ -167,7 +167,7 @@ UnitBlueprint{
             FiringRandomness = 0.05,
             FiringTolerance = 5,
             Label = "MainGun",
-            MaxRadius = 20,
+            MaxRadius = 24,
             MuzzleChargeDelay = 0.25,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 1,
