@@ -1,5 +1,5 @@
 UnitBlueprint{
-    Description = "<LOC xrl0005_desc>Crab Egg (Artillery)",
+    Description = "Яйцо краба (Жулик)",
     Audio = {
         Construct      = Sound { Bank = 'URB',        Cue = 'URB0101_Construct_Start',    LodCutoff = 'UnitMove_LodCutoff' },
         ConstructLoop  = Sound { Bank = 'URB',        Cue = 'URB0101_Construct_Loop',     LodCutoff = 'UnitMove_LodCutoff' },
