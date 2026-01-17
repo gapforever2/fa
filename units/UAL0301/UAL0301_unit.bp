@@ -251,7 +251,7 @@ UnitBlueprint{
             Enhancements = {
                 "StabilitySuppressant",
                 "SystemIntegrityCompensator",
-                "Redeemer",
+                "Shield",
             },
             HelpText = "<LOC ual0301_ShieldCombat_help>Support Armored Command Unit. Enhanced during construction with a personal shield and the reacton refractor enhancements.",
             SelectionPriority = 1,
