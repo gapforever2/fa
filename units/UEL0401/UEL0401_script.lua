@@ -10,7 +10,6 @@ local WeaponsFile = import("/lua/terranweapons.lua")
 local TDFGaussCannonWeapon = WeaponsFile.TDFLandGaussCannonWeapon
 local TDFRiotWeapon = WeaponsFile.TDFRiotWeapon
 local TAALinkedRailgun = WeaponsFile.TAALinkedRailgun
-local TANTorpedoAngler = WeaponsFile.TANTorpedoAngler
 local TAAFlakArtilleryCannon = import("/lua/terranweapons.lua").TAAFlakArtilleryCannon
 local EffectTemplate = import("/lua/effecttemplates.lua")
 local EffectUtil = import("/lua/effectutilities.lua")
@@ -83,7 +82,6 @@ UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUni
         },
         RightAAGun = ClassWeapon(TAALinkedRailgun) {},
         LeftAAGun = ClassWeapon(TAALinkedRailgun) {},
-        Torpedo = ClassWeapon(TANTorpedoAngler) {},
         RighFlakGun = ClassWeapon(TAAFlakArtilleryCannon) {},
         LeftFlakGun = ClassWeapon(TAAFlakArtilleryCannon) {},
     },
@@ -115,7 +113,6 @@ UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUni
         self.ReleaseEffectsBag = {}
         self.AttachmentSliderManip = CreateSlider(self, self.BuildAttachBone)
         ChangeState(self, self.IdleState)
-		ForkThread(self.STGamemode, self)
     end,
 
     ---@param self UEL0401
@@ -175,92 +172,6 @@ UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUni
             TMobileFactoryUnit.OnTransportDetach(self, attachBone, unit)
         end
     end,
-	
-	
-	STGamemode = function(self)
-		local GM = true
-		while not self:IsDead() do
-			if not self:IsDead() and self:GetScriptBit('RULEUTC_WeaponToggle') == true and GM == true then
-				self:RemoveCommandCap('RULEUCC_Move')
-				self:RemoveCommandCap('RULEUCC_Patrol')
-				GM = false
-				local wp1 = self:GetWeaponByLabel('RightTurret01')
-				wp1:ChangeMaxRadius(70)
-				local wp2 = self:GetWeaponByLabel('RightTurret02')
-				wp2:ChangeMaxRadius(70)
-				local wp3 = self:GetWeaponByLabel('LeftTurret01')
-				wp3:ChangeMaxRadius(70)
-				local wp4 = self:GetWeaponByLabel('LeftTurret02')
-				wp4:ChangeMaxRadius(70)
-				local DWP1 = self:GetWeaponByLabel('RightTurret01')
-				DWP1:AddDamageMod(50)
-				DWP1:ChangeRateOfFire(10/16.66)
-				DWP1:AddDamageRadiusMod(2)
-				local DWP2 = self:GetWeaponByLabel('RightTurret02')
-				DWP2:AddDamageMod(50)
-				DWP2:ChangeRateOfFire(10/16.66)
-				DWP2:AddDamageRadiusMod(2)
-				local DWP3 = self:GetWeaponByLabel('LeftTurret01')
-				DWP3:AddDamageMod(50)
-				DWP3:ChangeRateOfFire(10/16.66)
-				DWP3:AddDamageRadiusMod(2)
-				local DWP4 = self:GetWeaponByLabel('LeftTurret02')
-				DWP4:AddDamageMod(50)
-				DWP4:ChangeRateOfFire(10/16.66)
-				DWP4:AddDamageRadiusMod(2)
-				self:SetSpeedMult(0.01)
-				if not Buffs['STHP'] then
-                BuffBlueprint {
-                    Name = 'STHP',
-                    DisplayName = 'STHP',
-                    BuffType = 'ACUBUILDRATE',
-                    Stacks = 'REPLACE',
-                    Duration = -1,
-                    Affects = {
-                        MaxHealth = {
-                            Add = 32000,
-                            Mult = 1.0,
-                        },
-                    },
-                }
-            end
-			Buff.ApplyBuff(self, 'STHP')
-			elseif not self:IsDead() and self:GetScriptBit('RULEUTC_WeaponToggle') == false and GM == false then
-				self:AddCommandCap('RULEUCC_Move')
-				self:AddCommandCap('RULEUCC_Patrol')
-				self:SetSpeedMult(1)
-				if Buff.HasBuff(self, 'STHP') then
-					Buff.RemoveBuff(self, 'STHP')
-				end
-				GM = true
-				local wp1 = self:GetWeaponByLabel('RightTurret01')
-				wp1:ChangeMaxRadius(80)
-				local wp2 = self:GetWeaponByLabel('RightTurret02')
-				wp2:ChangeMaxRadius(80)
-				local wp3 = self:GetWeaponByLabel('LeftTurret01')
-				wp3:ChangeMaxRadius(80)
-				local wp4 = self:GetWeaponByLabel('LeftTurret02')
-				wp4:ChangeMaxRadius(80)
-				local DWP1 = self:GetWeaponByLabel('RightTurret01')
-				DWP1:AddDamageMod(-50)
-				DWP1:ChangeRateOfFire(10/10.52)
-				DWP1:AddDamageRadiusMod(-2)
-				local DWP2 = self:GetWeaponByLabel('RightTurret02')
-				DWP2:AddDamageMod(-50)
-				DWP2:ChangeRateOfFire(10/10.52)
-				DWP2:AddDamageRadiusMod(-2)
-				local DWP3 = self:GetWeaponByLabel('LeftTurret01')
-				DWP3:AddDamageMod(-50)
-				DWP3:ChangeRateOfFire(10/10.52)
-				DWP3:AddDamageRadiusMod(-2)
-				local DWP4 = self:GetWeaponByLabel('LeftTurret02')
-				DWP4:AddDamageMod(-50)
-				DWP4:ChangeRateOfFire(10/10.52)
-				DWP4:AddDamageRadiusMod(-2)
-			end
-			WaitTicks(8)
-		end
-	end,
 
     IdleState = State {
         ---@param self UEL0401
