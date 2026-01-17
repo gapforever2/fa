@@ -16,12 +16,14 @@ local CAABurstCloudFlakArtilleryWeapon = CybranWeaponsFile.CAABurstCloudFlakArti
 local CDFBrackmanCrabHackPegLauncherWeapon = CybranWeaponsFile.CDFBrackmanCrabHackPegLauncherWeapon
 local TranslateInXZDirection = import("/lua/utilities.lua").TranslateInXZDirection
 
-local CConstructionTemplate = import("/lua/cybranunits.lua").CConstructionTemplate
+local ExternalFactoryComponent = import("/lua/defaultcomponents.lua").ExternalFactoryComponent
 
----@class XRL0403 : CWalkingLandUnit, CConstructionTemplate
-XRL0403 = ClassUnit(CWalkingLandUnit, CConstructionTemplate) {
+---@class XRL0403 : CWalkingLandUnit, 
+XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
     BotBlueprintId = 'ura0001o',
     BotBone = 'Centraltgt',
+	BuildAttachBone = 'Attachpoint',
+    FactoryAttachBone = 'ExternalFactoryPoint',
 
     Weapons = {
         ParticleGunRight = ClassWeapon(CDFHvyProtonCannonWeapon) {},
@@ -69,44 +71,33 @@ XRL0403 = ClassUnit(CWalkingLandUnit, CConstructionTemplate) {
     ---@param self XRL0403 |m
     OnCreate = function(self)
         CWalkingLandUnit.OnCreate(self)
-        CConstructionTemplate.OnCreate(self)
 
         self:SetWeaponEnabledByLabel('HackPegLauncher', false)
-        if self:IsValidBone('Missile_Turret') then
-            self:HideBone('Missile_Turret', true)
-        end
+		if self:IsValidBone('Missile_Turret') then
+			self:HideBone('Missile_Turret', true)
+		end
     end,
 
     ---@param self CConstructionUnit
     DestroyAllBuildEffects = function(self)
         CWalkingLandUnit.DestroyAllBuildEffects(self)
-        CConstructionTemplate.DestroyAllBuildEffects(self)
     end,
 
    ---@param self CConstructionUnit
     ---@param built boolean
     StopBuildingEffects = function(self, built)
         CWalkingLandUnit.StopBuildingEffects(self, built)
-        CConstructionTemplate.StopBuildingEffects(self, built)
     end,
 
     ---@param self CConstructionUnit
     OnPaused = function(self)
         CWalkingLandUnit.OnPaused(self)
-        CConstructionTemplate.OnPaused(self)
     end,
 
-    ---@param self CConstructionUnit
-    ---@param unitBeingBuilt Unit
-    ---@param order number
-    CreateBuildEffects = function(self, unitBeingBuilt, order)
-        CConstructionTemplate.CreateBuildEffects(self, unitBeingBuilt, order, true)
-    end,
 
     ---@param self CConstructionUnit
     OnDestroy = function(self) 
         CWalkingLandUnit.OnDestroy(self)
-        CConstructionTemplate.OnDestroy(self)
     end,
 
     ---@param self XRL0403
@@ -114,23 +105,6 @@ XRL0403 = ClassUnit(CWalkingLandUnit, CConstructionTemplate) {
     ---@param layer Layer
     OnStartBeingBuilt = function(self, builder, layer)
         CWalkingLandUnit.OnStartBeingBuilt(self, builder, layer)
-        if not self.AnimationManipulator then
-            self.AnimationManipulator = CreateAnimator(self)
-            self.Trash:Add(self.AnimationManipulator)
-        end
-
-        self.AnimationManipulator:PlayAnim(self.Blueprint.Display.AnimationActivate, false):SetRate(0)
-
-        self:SetCollisionShape(
-            'Box',
-            self.Blueprint.CollisionOffsetX,
-            0.5 * self.Blueprint.SizeY,
-            self.Blueprint.CollisionOffsetZ,
-            0.5 * self.Blueprint.SizeX,
-            0.5 * self.Blueprint.SizeY,
-            0.5 * self.Blueprint.SizeZ
-        )
-
     end,
 
     ---@param self XRL0403
@@ -138,28 +112,20 @@ XRL0403 = ClassUnit(CWalkingLandUnit, CConstructionTemplate) {
     ---@param layer Layer
     OnStopBeingBuilt = function(self, builder, layer)
         CWalkingLandUnit.OnStopBeingBuilt(self, builder, layer)
-        self:RevertCollisionShape()
-
-        if self:IsValidBone('Missile_Turret') then
-            self:HideBone('Missile_Turret', true)
-        end
-
-        if self.AnimationManipulator then
-            self:SetUnSelectable(true)
-            self.AnimationManipulator:SetRate(1)
-
-            self.Trash:Add(ForkThread(function()
-                WaitSeconds(self.AnimationManipulator:GetAnimationDuration() * self.AnimationManipulator:GetRate())
-                self:SetUnSelectable(false)
-                self.AnimationManipulator:Destroy()
-            end, self))
-        end
+		ExternalFactoryComponent.OnStopBeingBuilt(self, builder, layer)
+        ChangeState(self, self.IdleState)
+    end,
+	
+	OnFailedToBuild = function(self)
+        CWalkingLandUnit.OnFailedToBuild(self)
+        ChangeState(self, self.IdleState)
     end,
 
     ---@param self XRL0403
     OnLayerChange = function(self, new, old)
         CWalkingLandUnit.OnLayerChange(self, new, old)
-
+		ExternalFactoryComponent.OnLayerChange(self, new, old)
+		
         if new == 'Land' then
             self:DisableUnitIntel('Layer', 'Sonar')
             self:SetSpeedMult(1)
@@ -167,6 +133,22 @@ XRL0403 = ClassUnit(CWalkingLandUnit, CConstructionTemplate) {
             self:EnableUnitIntel('Layer', 'Sonar')
             self:SetSpeedMult(self.Blueprint.Physics.WaterSpeedMultiplier or 1)
         end
+		
+		if self.ExternalFactory then
+            if new == 'Land' then
+                self.ExternalFactory:RestoreBuildRestrictions()
+                self.ExternalFactory:RequestRefreshUI()
+            elseif new == 'Seabed' then
+                self.ExternalFactory:AddBuildRestriction(categories.ALLUNITS)
+                self.ExternalFactory:RequestRefreshUI()
+            end
+        end
+		
+    end,
+	
+	OnKilled = function(self, instigator, type, overkillRatio)
+        CWalkingLandUnit.OnKilled(self, instigator, type, overkillRatio)
+        ExternalFactoryComponent.OnKilled(self, instigator, type, overkillRatio)
     end,
 
     ---@param self XRL0403
@@ -183,6 +165,37 @@ XRL0403 = ClassUnit(CWalkingLandUnit, CConstructionTemplate) {
             end
         end
     end,
+	
+	IdleState = State {
+        Main = function(self)
+            self:DetachAll(self.BuildAttachBone)
+            self:SetBusy(false)
+            self:OnIdle()
+        end,
+
+        OnStartBuild = function(self, unitBuilding, order)
+            CWalkingLandUnit.OnStartBuild(self, unitBuilding, order)
+            self.UnitBeingBuilt = unitBuilding
+            ChangeState(self, self.BuildingState)
+        end,
+    },
+
+    BuildingState = State {
+        Main = function(self)
+            local unitBuilding = self.UnitBeingBuilt
+            self:SetBusy(true)
+            local bone = self.BuildAttachBone
+            self:DetachAll(bone)
+            unitBuilding:AttachTo(self, bone)
+            unitBuilding:HideBone(0, true)
+            self.UnitDoneBeingBuilt = false
+        end,
+
+        OnStopBuild = function(self, unitBeingBuilt)
+            CWalkingLandUnit.OnStopBuild(self, unitBeingBuilt)
+            ExternalFactoryComponent.OnStopBuildWithStorage(self, unitBeingBuilt)
+        end,
+    },
 
     ---@param self XRL0403
     DeathThread = function(self)
