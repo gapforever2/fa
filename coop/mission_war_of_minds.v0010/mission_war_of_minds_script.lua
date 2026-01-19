@@ -17,17 +17,16 @@ local Behaviors = import('/lua/ai/opai/OpBehaviors.lua')
 local PrefetchUtils = import('/lua/sim/PrefetchUtilities.lua')
 local AIUtils = import('/lua/AI/aiutilities.lua')
 
-local ThisFile = '/maps/mission_war_of_minds.v0009/mission_war_of_minds_script.lua'
+local ThisFile = '/maps/mission_war_of_minds.v0010/mission_war_of_minds_script.lua'
 
 ScenarioInfo.Deads = 0
+ScenarioInfo.PlayersRespawn = 0
 
 ScenarioInfo.PointsN = {'Player2', 'Player3', 'Player4', 'Player5', 'Player6', 'Player7', 'Blank Marker 52', 'M3_QAI_NavalBase_Def2_1', 'Blank Marker 65', 'Blank Marker 11G'}
 
 local CybranBotBase = BaseManager.CreateBaseManager()
 
-ScenarioInfo.Player8Respawns = 3
-
-local OpStrings = import('/maps/mission_war_of_minds.v0009/mission_war_of_minds_strings.lua')
+local OpStrings = import('/maps/mission_war_of_minds.v0010/mission_war_of_minds_strings.lua')
 
 local KillEXPPreArea2 = { {text = '<LOC X06_M01_012_010>[{i HQ}]: Атака была отбита, хорошая работа.', vid = 'X01_HQ_M01_04848.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'NONE'} }
 
@@ -62,7 +61,6 @@ ScenarioInfo.Player5 = 5
 ScenarioInfo.Player6 = 6
 ScenarioInfo.Player7 = 7
 ScenarioInfo.Bot = 8
-ScenarioInfo.Player8 = 9
 
 local MOD = ScenarioInfo.Options.Mod
 
@@ -74,7 +72,6 @@ local Player4 = ScenarioInfo.Player4
 local Player5 = ScenarioInfo.Player5
 local Player6 = ScenarioInfo.Player6
 local Player7 = ScenarioInfo.Player7
-local Player8 = ScenarioInfo.Player8
 
 local CybranBot = ScenarioInfo.Bot
 
@@ -100,8 +97,7 @@ function OnPopulate()
         ['Player4'] = {20, 20, 240}, 
         ['Player5'] = {255, 191, 128}, 
         ['Player6'] = {139, 5, 255}, 
-        ['Player7'] = {89, 133, 39},
-		['Player8'] = {81, 14, 5},  		
+        ['Player7'] = {89, 133, 39},		
     }
     
     local tblArmy = ListArmies()
@@ -112,22 +108,22 @@ function OnPopulate()
     end
 	if(MOD == 1) then
 		if tblArmy[ScenarioInfo.Player2] then
-		ScenarioFramework.AddRestriction(Player2, categories.url0002 + categories.urb2306)
+		ScenarioFramework.AddRestriction(Player2, categories.url0002 + categories.urb2306 + categories.xab1401)
 		end
 		if tblArmy[ScenarioInfo.Player3] then
-		ScenarioFramework.AddRestriction(Player3, categories.url0002 + categories.urb2306)
+		ScenarioFramework.AddRestriction(Player3, categories.url0002 + categories.urb2306 + categories.xab1401)
 		end
 		if tblArmy[ScenarioInfo.Player4] then
-		ScenarioFramework.AddRestriction(Player4, categories.url0002 + categories.urb2306)
+		ScenarioFramework.AddRestriction(Player4, categories.url0002 + categories.urb2306 + categories.xab1401)
 		end
 		if tblArmy[ScenarioInfo.Player5] then
-		ScenarioFramework.AddRestriction(Player5, categories.url0002 + categories.urb2306)
+		ScenarioFramework.AddRestriction(Player5, categories.url0002 + categories.urb2306 + categories.xab1401)
 		end
 		if tblArmy[ScenarioInfo.Player6] then
-		ScenarioFramework.AddRestriction(Player6, categories.url0002 + categories.urb2306)
+		ScenarioFramework.AddRestriction(Player6, categories.url0002 + categories.urb2306 + categories.xab1401)
 		end
 		if tblArmy[ScenarioInfo.Player7] then
-		ScenarioFramework.AddRestriction(Player7, categories.url0002 + categories.urb2306)
+		ScenarioFramework.AddRestriction(Player7, categories.url0002 + categories.urb2306 + categories.xab1401)
 		end
 	end
     SetIgnorePlayableRect(Enemy, true)
@@ -159,10 +155,6 @@ function SpawnAllUnitsHex5()
 		ForkThread(ChechPlayerQAIACU)
 	end
 	WaitSeconds(1)
-	local tblArmy = ListArmies()
-	if tblArmy[ScenarioInfo.Player8] then
-		ForkThread(SpawnAllyPlayerHex5)
-	end
 	WaitSeconds(2)
 	ForkThread(SpawnEXPArea1)
 	WaitSeconds(1)
@@ -170,19 +162,13 @@ function SpawnAllUnitsHex5()
 	WaitSeconds(1)
 	ForkThread(BotBaseAI)
 	if(Medium == true) then
-		ScenarioFramework.CreateTimerTrigger(SpawnMediumUnits, 500)
+		ScenarioFramework.CreateTimerTrigger(SpawnMediumUnits, 4*60)
 	end
 	if(Hard == true) then
 		WaitSeconds(1)
-		ScenarioFramework.CreateTimerTrigger(SpawnLAreaUnits, 500)
-		WaitSeconds(3)
-		if tblArmy[ScenarioInfo.Player8] then
-			ForkThread(SpawnPlayer8Units)
-		end
-	end
-	WaitSeconds(3)
-	if(Nightmarish == true) then
-		ScenarioFramework.CreateTimerTrigger(Spawnhex5Transport, 35*60)
+		ScenarioFramework.CreateTimerTrigger(SpawnLAreaUnits, 5*60)
+		WaitSeconds(4)
+		ScenarioFramework.CreateTimerTrigger(Spawnhex5Transport, 32*60)
 	end
 end
 
@@ -196,29 +182,6 @@ function Spawnhex5Transport()
 	end
 end
 
-function SpawnPlayer8Units()
-	local TransportsT1 = ScenarioUtils.CreateArmyGroup('Player8', 'TransportsHard')
-	local Player8InUnits = ArmyBrains[Player8]:MakePlatoon('', '')
-	local unit = false
-	for i = 1, 2 do
-		unit = CreateUnitHPR( 'url0301', 'Player8', 1008.5, 31.10346, 364.5, 0, 0, 0 )
-		ArmyBrains[Player8]:AssignUnitsToPlatoon(Player8InUnits, {unit}, 'attack', 'GrowthFormation')
-	end
-	for i = 1, 2 do
-		unit = CreateUnitHPR( 'uel0301', 'Player8', 1008.5, 31.10346, 364.5, 0, 0, 0 )
-		ArmyBrains[Player8]:AssignUnitsToPlatoon(Player8InUnits, {unit}, 'attack', 'GrowthFormation')
-	end
-	for i = 1, 2 do
-		unit = CreateUnitHPR( 'ual0301', 'Player8', 1008.5, 31.10346, 364.5, 0, 0, 0 )
-		ArmyBrains[Player8]:AssignUnitsToPlatoon(Player8InUnits, {unit}, 'attack', 'GrowthFormation')
-	end
-	for i = 1, 2 do
-		unit = CreateUnitHPR( 'xsl0301', 'Player8', 1008.5, 31.10346, 364.5, 0, 0, 0 )
-		ArmyBrains[Player8]:AssignUnitsToPlatoon(Player8InUnits, {unit}, 'attack', 'GrowthFormation')
-	end
-	ScenarioFramework.AttachUnitsToTransports(Player8InUnits:GetPlatoonUnits(), TransportsT1)
-	IssueTransportUnload(TransportsT1, ScenarioPlatoonAI.PlatoonChooseRandomNonNegative(ArmyBrains[Player8], ScenarioUtils.ChainToPositions('Player8_sACU_Chain'), 4))
-end
 
 function SpawnMediumUnits()
 	if(Area1 == true) then
@@ -226,7 +189,7 @@ function SpawnMediumUnits()
 		local RandomChainGrMid = {'M1_Hex5_Main_LandAttack_1', 'M1_Hex5_Main_LandAttack_2', 'M1_Hex5_Main_LandAttack_3', 'M1_Hex5_Main_LandAttack_4', 'M1_Hex5_Resource1_Att1_Chain', 'M1_Hex5_Resource1_Att1b_Chain'}
 		units = ScenarioUtils.CreateArmyGroupAsPlatoon('Player1', RandomGroupAtMid[Random(1,6)], 'GrowthFormation')
 		ScenarioFramework.PlatoonPatrolChain(units, RandomChainGrMid[Random(1,6)])
-		ScenarioFramework.CreateTimerTrigger(SpawnMediumUnits, Random(42, 112))
+		ScenarioFramework.CreateTimerTrigger(SpawnMediumUnits, Random(42, 74))
 	end
 end
 
@@ -234,40 +197,7 @@ function SpawnLAreaUnits()
 	if(Hard == true and Area1 == true ) then
 		platoon = ScenarioUtils.CreateArmyGroupAsPlatoon('Player1', 'M1_Hex5_DropArea'.. Random(1,4), 'GrowthFormation')
 		ScenarioFramework.PlatoonPatrolChain(platoon, 'M3_QAI_Main_Base_LandAttack_Chain')
-		ScenarioFramework.CreateTimerTrigger(SpawnLAreaUnits, Random(36, 94))
-	end
-end
-
-function SpawnAllyPlayerHex5()
-	ScenarioInfo.Player8CDR = ScenarioFramework.SpawnCommander('Player8', 'CybranExperementalCDR', 'Warp', true, true, Player8Respawn)
-	ScenarioInfo.Player8CDR:CreateEnhancement('EngineeringT2Cybran')
-	ScenarioInfo.Player8CDR:CreateEnhancement('T3EngineeringCybran')
-	ScenarioInfo.Player8CDR:CreateEnhancement('ResourceAllocationCybran')
-	ScenarioInfo.Player8CDR:CreateEnhancement('StealthGeneratorCybran')
-	ScenarioInfo.Player8CDR:CreateEnhancement('GAP_SelfRepairSystemCybran')
-	ScenarioInfo.Player8CDR:CreateEnhancement('CloakingGeneratorCybran')
-	ScenarioInfo.Player8CDR:SetVeterancy(1)
-	ScenarioInfo.Player8CDR:SetMaxHealth(35000)
-	ScenarioInfo.Player8CDR:SetHealth(nil, 35000)
-end
-
-function Player8Respawn()
-	ScenarioInfo.Player8Respawns = ScenarioInfo.Player8Respawns - 1
-	if(ScenarioInfo.Player8Respawns > 0) then
-		ScenarioFramework.SimAnnouncement('Осталось возрождений: ' .. ScenarioInfo.Player8Respawns .. '.')
-		ScenarioInfo.Player8CDR = ScenarioFramework.SpawnCommander('Player8', 'CybranExperementalCDR', 'Warp', true, true, Player8Respawn)
-		ScenarioInfo.Player8CDR:CreateEnhancement('EngineeringT2Cybran')
-		ScenarioInfo.Player8CDR:CreateEnhancement('T3EngineeringCybran')
-		ScenarioInfo.Player8CDR:CreateEnhancement('ResourceAllocationCybran')
-		ScenarioInfo.Player8CDR:CreateEnhancement('StealthGeneratorCybran')
-		ScenarioInfo.Player8CDR:CreateEnhancement('GAP_SelfRepairSystemCybran')
-		ScenarioInfo.Player8CDR:CreateEnhancement('CloakingGeneratorCybran')
-		ScenarioInfo.Player8CDR:SetVeterancy(1)
-		ScenarioInfo.Player8CDR:SetMaxHealth(35000)
-		ScenarioInfo.Player8CDR:SetHealth(nil, 35000)
-	else
-		ScenarioFramework.SimAnnouncement('8 Игрок проиграл.')
-		GetArmyBrain('Player8'):OnDefeat()
+		ScenarioFramework.CreateTimerTrigger(SpawnLAreaUnits, Random(24, 68))
 	end
 end
 
@@ -614,17 +544,17 @@ function ChechPlayerQAIACU()
 	ScenarioFramework.CreateArmyIntelTrigger( DopZDKILLACU1, ArmyBrains[Player2], 'LOSNow', false, true, categories.url0002, true, ArmyBrains[Enemy] )
 	ScenarioFramework.CreateArmyIntelTrigger( DopZDKILLACU3, ArmyBrains[Player2], 'LOSNow', false, true, categories.url0402, true, ArmyBrains[Enemy] )
 	WaitSeconds(3)
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLandT1, 10*60 )
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLandT2B2, 14*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLandT1, 5*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLandT2B2, 8*60 )
 	WaitSeconds(4)
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackAir, 20*60)
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLightAir, 10*60)
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackAir, 13*60)
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLightAir, 9*60)
 	WaitSeconds(2)
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackAirT3, 24*60 )
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackExperemental, 40*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackAirT3, 22*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackExperemental, 36*60 )
 	
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackCirposh, 20*60 )
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttacksACUs, 45*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackCirposh, 19*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttacksACUs, 40*60 )
 end
 
 function SpawnArea1AttackCirposh()
@@ -941,7 +871,6 @@ function CapArea1Players1()
 	SetArmyUnitCap(Player7, 600)
 	end
 	SetArmyUnitCap(Enemy, 2000)
-	SetArmyUnitCap(Player8, 1300)
 	SetArmyUnitCap(CybranBot, 1200)
 end
 
@@ -1365,7 +1294,20 @@ function SpawnEnemyBases()
 	WaitSeconds(0.5)
 	ForkThread(SpawnAirScoutHex5Ar1)
 	WaitSeconds(0.5)
-
+	ScenarioInfo.PlayersRespawn = 8
+	WaitSeconds(1)
+	if(Medium == true) then
+		ScenarioInfo.PlayersRespawn = 6
+	end
+	WaitSeconds(0.5)
+	if(Hard == true) then
+		ScenarioInfo.PlayersRespawn = 4
+	end
+	if(Nightmarish == true) then
+		ScenarioInfo.PlayersRespawn = 3
+	end
+	
+	-- ScenarioFramework.SimAnnouncement('Количество респавнов играков: ' .. ScenarioInfo.PlayersRespawn .. ' ')
     units = ScenarioUtils.CreateArmyGroupAsPlatoon('Player1', 'M1_Hex5_Resource1_LandDef_D' .. Random(1,3), 'GrowthFormation')
     ScenarioFramework.PlatoonPatrolChain(units, 'M1_Hex5_Resource1_Def1_Chain')
 	
@@ -1956,20 +1898,13 @@ function AssignM1S2()
 end
 
 function SpawnFletherPlayer5()
-	local tblArmy = ListArmies()
-	if tblArmy[ScenarioInfo.Player8] then
-		WaitSeconds(2)
-		ForkThread(SpawnPlayer1AndPlayer8Units)
-	else
-		WaitSeconds(4)
-		ForkThread(StartArea2)
-	end
+	WaitSeconds(3)
+	ForkThread(SpawnAttacksEnemyPreArea2)
 end
 
-function SpawnPlayer1AndPlayer8Units()
-	ScenarioInfo.Player8UnitsPreArea2 = ArmyBrains[Player8]:MakePlatoon('', '')
+function SpawnAttacksEnemyPreArea2()
 	ScenarioInfo.EnemyUnitsPreArea2 = ArmyBrains[Enemy]:MakePlatoon('', '')
-	for i = 1, Random(4, 6) do
+	for i = 1, Random(5, 7) do
 		unit = CreateUnitHPR('url0402', 'Player1', 832, 30, 803, 0, 0, 0)
 		ArmyBrains[Enemy]:AssignUnitsToPlatoon(ScenarioInfo.EnemyUnitsPreArea2, {unit}, 'attack', 'GrowthFormation')
 	end
@@ -1985,25 +1920,24 @@ function SpawnPlayer1AndPlayer8Units()
 		unit = CreateUnitHPR('url0002', 'Player1', 832, 30, 803, 0, 0, 0)
 		ArmyBrains[Enemy]:AssignUnitsToPlatoon(ScenarioInfo.EnemyUnitsPreArea2, {unit}, 'attack', 'GrowthFormation')
 	end
-	for i = 1, Random(4, 6) do
-		unit = CreateUnitHPR('url0402', 'Player8', 840, 30, 803, 0, 0, 0)
-		ArmyBrains[Player8]:AssignUnitsToPlatoon(ScenarioInfo.Player8UnitsPreArea2, {unit}, 'attack', 'GrowthFormation')
+	for i = 1, Random(8, 12) do
+		unit = CreateUnitHPR('url0305', 'Player1', 840, 30, 803, 0, 0, 0)
+		ArmyBrains[Enemy]:AssignUnitsToPlatoon(ScenarioInfo.EnemyUnitsPreArea2, {unit}, 'attack', 'GrowthFormation')
 	end
 	for i = 1, Random(2, 5) do
-		unit = CreateUnitHPR('xrl0403', 'Player8', 840, 30, 803, 0, 0, 0)
-		ArmyBrains[Player8]:AssignUnitsToPlatoon(ScenarioInfo.Player8UnitsPreArea2, {unit}, 'attack', 'GrowthFormation')
+		unit = CreateUnitHPR('xrl0403', 'Player1', 840, 30, 803, 0, 0, 0)
+		ArmyBrains[Enemy]:AssignUnitsToPlatoon(ScenarioInfo.EnemyUnitsPreArea2, {unit}, 'attack', 'GrowthFormation')
 	end
-	for i = 1, Random(2, 4) do
-		unit = CreateUnitHPR('url0002', 'Player8', 840, 30, 803, 0, 0, 0)
-		ArmyBrains[Player8]:AssignUnitsToPlatoon(ScenarioInfo.Player8UnitsPreArea2, {unit}, 'attack', 'GrowthFormation')
+	for i = 1, Random(4, 7) do
+		unit = CreateUnitHPR('ura0401', 'Player1', 840, 30, 803, 0, 0, 0)
+		ArmyBrains[Enemy]:AssignUnitsToPlatoon(ScenarioInfo.EnemyUnitsPreArea2, {unit}, 'attack', 'GrowthFormation')
 	end
-	WaitSeconds(10)
+	WaitSeconds(5)
 	ForkThread(DefensePlayers)
 end
 
 function DefensePlayers()
 	ScenarioFramework.CreatePlatoonDeathTrigger(UA1, ScenarioInfo.EnemyUnitsPreArea2)
-	ScenarioFramework.CreatePlatoonDeathTrigger(UA2, ScenarioInfo.Player8UnitsPreArea2)
 	ScenarioInfo.X1S = Objectives.Basic(
         'primary',                          -- type
         'incomplete',                       -- complete
@@ -2020,13 +1954,8 @@ function UA1()
 	ForkThread(D1S)
 end
 
-function UA2()
-	ScenarioInfo.Deads = ScenarioInfo.Deads + 1
-	ForkThread(D1S)
-end
-
 function D1S()
-	if(ScenarioInfo.Deads == 2) then
+	if(ScenarioInfo.Deads == 1) then
 		ScenarioFramework.Dialogue(KillEXPPreArea2, StartArea2, true)
 		ScenarioInfo.X1S:ManualResult(true)
 	end
