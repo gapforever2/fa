@@ -1,6 +1,6 @@
 UnitBlueprint{
     Description = "<LOC xsl0309_desc>Engineer",
-    AI = { GuardScanRadius = 26 },
+    AI = { GuardScanRadius = 65 },
     Audio = {
         AmbientMove        = Sound { Bank = 'XSL',            Cue = 'XSL0309_Move_Loop',       LodCutoff = 'UnitMove_LodCutoff' },
         CaptureLoop        = Sound { Bank = 'XSL',            Cue = 'XSL0309_Capture_Loop',    LodCutoff = 'UnitMove_LodCutoff' },

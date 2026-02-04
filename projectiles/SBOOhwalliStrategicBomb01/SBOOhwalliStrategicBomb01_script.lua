@@ -64,13 +64,13 @@ SBOOhwalliStategicBomb01 = ClassProjectile(SOhwalliStrategicBombProjectile) {
         DamageArea(instigator, position, 0.75 * radius, 1, 'TreeForce', true, true)
 
         -- initial damage
-        DamageArea(instigator, position, radius, 0.1 * damage, damageType, damageFriendly, damageSelf)
+        DamageArea(instigator, position, radius, 0.9 * damage, damageType, damageFriendly, damageSelf)
         DamageArea(instigator, position, 0.9 * radius, 1, 'TreeFire', true, true)
 
         -- wait for the full explosion and then deal the remaining damage
         WaitTicks(28)
         DamageArea(instigator, position, 0.4 * radius, 1, 'Disintegrate', true, true)
-        DamageArea(instigator, position, radius, 0.9 * damage, damageType, damageFriendly, damageSelf)
+        DamageArea(instigator, position, radius, 0.1 * damage, damageType, damageFriendly, damageSelf)
     end,
 }
 TypeClass = SBOOhwalliStategicBomb01
