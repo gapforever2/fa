@@ -29,8 +29,8 @@ UnitBlueprint{
     Defense = {
         ArmorType = "Normal",
         EconomyThreatLevel = 24,
-        Health = 500,
-        MaxHealth = 500,
+        Health = 700,
+        MaxHealth = 700,
         SurfaceThreatLevel = 12,
     },
     Display = {
@@ -140,9 +140,9 @@ UnitBlueprint{
     LifeBarSize = 1,
     Physics = {
         DragCoefficient = 0.2,
-        MaxAcceleration = 2.5,
-        MaxBrake = 2.5,
-        MaxSpeed = 2.5,
+        MaxAcceleration = 2.2,
+        MaxBrake = 2.2,
+        MaxSpeed = 2.2,
         MaxSpeedReverse = 0,
         MaxSteerForce = 10,
         MeshExtentsX = 1,
@@ -193,7 +193,7 @@ UnitBlueprint{
             FiringRandomnessWhileMoving = 0.2,
             FiringTolerance = 2,
             Label = "MainGun",
-            MaxRadius = 70,
+            MaxRadius = 60,
             MuzzleChargeDelay = 0.2,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 1,
