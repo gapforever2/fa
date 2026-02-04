@@ -94,8 +94,8 @@ UnitBlueprint{
         UniformScale = 0.06,
     },
     Economy = {
-        BuildCostEnergy = 1900,
-        BuildCostMass = 250,
+        BuildCostEnergy = 1500,
+        BuildCostMass = 150,
         BuildTime = 600,
     },
     Footprint = {
@@ -160,7 +160,7 @@ UnitBlueprint{
             BallisticArc = "RULEUBA_None",
             CannotAttackGround = true,
             CollideFriendly = false,
-            Damage = 300,
+            Damage = 150,
             DamageType = "Normal",
             DisplayName = "Sonic Pulse Battery",
             FireTargetLayerCapsTable = {
