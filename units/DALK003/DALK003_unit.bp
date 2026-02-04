@@ -20,7 +20,9 @@ UnitBlueprint{
         "LAND",
         "MOBILE",
         "OVERLAYANTIAIR",
+        "OVERLAYRADAR",
         "PRODUCTDL",
+        "RADAR",
         "RECLAIMABLE",
         "SELECTABLE",
         "TECH3",
@@ -33,7 +35,10 @@ UnitBlueprint{
         MaxHealth = 1700,
     },
     Display = {
-        Abilities = { "<LOC ability_aa>Anti-Air" },
+        Abilities = { 
+            "<LOC ability_aa>Anti-Air",
+            "<LOC ability_radar>Radar",
+             },
         AnimationDeath = {
             {
                 Animation = "/units/DALK003/DALK003_death01.sca",
@@ -92,8 +97,8 @@ UnitBlueprint{
         UniformScale = 0.048,
     },
     Economy = {
-        BuildCostEnergy = 7500,
-        BuildCostMass = 600,
+        BuildCostEnergy = 9600,
+        BuildCostMass = 720,
         BuildTime = 3000,
         TeleportEnergyMod = 0.15,
         TeleportMassMod = 1,
@@ -113,7 +118,10 @@ UnitBlueprint{
         Icon = "land",
         UnitName = "<LOC dalk003_name>Redeemer",
     },
-    Intel = { VisionRadius = 26 },
+    Intel = { 
+        VisionRadius = 26,
+        RadarRadius = 70,
+    },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.35,
     LifeBarSize = 1,
@@ -181,7 +189,7 @@ UnitBlueprint{
             BallisticArc = "RULEUBA_None",
             CannotAttackGround = true,
             CollideFriendly = false,
-            Damage = 1200,
+            Damage = 700,
             DamageRadius = 1.5,
             DamageType = "Normal",
             DisplayName = "AA Serpentine",
@@ -192,10 +200,10 @@ UnitBlueprint{
             },
             FiringTolerance = 100,
             Label = "Missile",
-            MaxRadius = 64,
+            MaxRadius = 50,
             MuzzleChargeDelay = 0.1,
-            MuzzleSalvoDelay = 0,
-            MuzzleSalvoSize = 1,
+            MuzzleSalvoDelay = 0.2,
+            MuzzleSalvoSize = 2,
             MuzzleVelocity = 34,
             ProjectileId = "/projectiles/AASerpentine/AASerpentine_proj.bp",
             ProjectileLifetime = 8,
@@ -214,7 +222,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_AntiAir",
-            RateOfFire = 10/60, --10/integer interval in ticks
+            RateOfFire = 10/50, --10/integer interval in ticks
             SlavedToBody = false,
             TargetPriorities = {
                 "AIR MOBILE EXPERIMENTAL",

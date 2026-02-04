@@ -19,8 +19,10 @@ UnitBlueprint{
         "LAND",
         "MOBILE",
         "OVERLAYANTIAIR",
+        "OVERLAYRADAR",
         "OVERLAYDIRECTFIRE",
         "PRODUCTDL",
+        "RADAR",
         "RECLAIMABLE",
         "SELECTABLE",
         "TECH3",
@@ -35,7 +37,10 @@ UnitBlueprint{
         SurfaceThreatLevel = 10,
     },
     Display = {
-        Abilities = { "<LOC ability_aa>Anti-Air" },
+        Abilities = { 
+            "<LOC ability_aa>Anti-Air",
+            "<LOC ability_radar>Radar",
+             },
         AnimationDeath = {
             {
                 Animation = "/units/DRLK001/DRLK001_death01.sca",
@@ -91,8 +96,8 @@ UnitBlueprint{
         UniformScale = 0.2,
     },
     Economy = {
-        BuildCostEnergy = 7500,
-        BuildCostMass = 600,
+        BuildCostEnergy =9600,
+        BuildCostMass = 720,
         BuildTime = 3000,
         TeleportEnergyMod = 0.15,
         TeleportMassMod = 1,
@@ -116,7 +121,10 @@ UnitBlueprint{
         Icon = "land",
         UnitName = "<LOC DRLK001_name>Bouncer",
     },
-    Intel = { VisionRadius = 26 },
+    Intel = { 
+        VisionRadius = 26,
+        RadarRadius = 70,
+    },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.55,
     LifeBarSize = 1,
@@ -312,7 +320,7 @@ UnitBlueprint{
             BallisticArc = "RULEUBA_None",
             CannotAttackGround = true,
             CollideFriendly = false,
-            Damage = 100,
+            Damage = 115,
             DamageFriendly = false,
             DamageRadius = 1.5,
             DamageType = "Normal",
@@ -321,7 +329,7 @@ UnitBlueprint{
             FiringTolerance = 10,
             Label = "AAGun",
             LeadTarget = true,
-            MaxRadius = 62,
+            MaxRadius = 50,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 2,
             MuzzleVelocity = 15,
