@@ -1,6 +1,6 @@
 UnitBlueprint{
     Description = "<LOC uel0309_desc>Engineer",
-    AI = { GuardScanRadius = 26 },
+    AI = { GuardScanRadius = 65 },
     Audio = {
         AmbientMove        = Sound { Bank = 'UEL',        Cue = 'UEL0309_Move_Loop',       LodCutoff = 'UnitMove_LodCutoff' },
         CaptureLoop        = Sound { Bank = 'UEL',        Cue = 'UEL0309_Capture_Loop',    LodCutoff = 'UnitMove_LodCutoff' },
