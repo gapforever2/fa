@@ -1,8 +1,23 @@
 ---@type number
-last_version = 9
+last_version = 10
 
 ---@type PatchNotes[]
 gamePatches = {
+    {
+        version = 10,
+        name = "Royal times",
+        patchnoteUrl = "balances/10.html",
+        description = {
+            "# Баланс-патч 10 (4 февраля 2026)",
+            "",
+            "★«Начало новых времен» Представляет собой Корректирование юнитов",
+            "★Нерф снайперов.",
+            "★Откат фетбоя.",
+            "★Изменения Эон дезинтегратора щитов.",
+			"★Полный список изменений – на сайте. Нажмите на кнопку \"Описание патча\" (Patch info).",
+            "Баланс-команда: LIN,Armagedon,Angel_Fugu.",
+        }
+    },
     {
         version = 9,
         name = "Royal times",
