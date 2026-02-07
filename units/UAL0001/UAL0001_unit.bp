@@ -1058,4 +1058,17 @@ UnitBlueprint{
             WeaponCategory = "Teleport",
         },
     },
+	Wreckage = {
+        Blueprint = "/props/DefaultWreckage/DefaultWreckage_prop.bp",
+        EnergyMult = 0,
+        HealthMult = 0.65,
+        MassMult = 0.5,
+        ReclaimTimeMultiplier = 0.85,
+        WreckageLayers = {
+            Land = true,
+            Seabed = true,
+            Sub = true,
+            Water = true,
+        },
+    },
 }
