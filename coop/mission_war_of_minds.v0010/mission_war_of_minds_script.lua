@@ -1291,23 +1291,9 @@ function SpawnEnemyBases()
         ScenarioFramework.GroupPatrolRoute({v}, ScenarioPlatoonAI.GetRandomPatrolRoute(ScenarioUtils.ChainToPositions('M1_Hex5_Main_AirDef_Chain')))
     end
 	
-	WaitSeconds(0.5)
-	ForkThread(SpawnAirScoutHex5Ar1)
-	WaitSeconds(0.5)
-	ScenarioInfo.PlayersRespawn = 8
 	WaitSeconds(1)
-	if(Medium == true) then
-		ScenarioInfo.PlayersRespawn = 6
-	end
-	WaitSeconds(0.5)
-	if(Hard == true) then
-		ScenarioInfo.PlayersRespawn = 4
-	end
-	if(Nightmarish == true) then
-		ScenarioInfo.PlayersRespawn = 3
-	end
-	
-	-- ScenarioFramework.SimAnnouncement('Количество респавнов играков: ' .. ScenarioInfo.PlayersRespawn .. ' ')
+	ForkThread(SpawnAirScoutHex5Ar1)
+	WaitSeconds(3)
     units = ScenarioUtils.CreateArmyGroupAsPlatoon('Player1', 'M1_Hex5_Resource1_LandDef_D' .. Random(1,3), 'GrowthFormation')
     ScenarioFramework.PlatoonPatrolChain(units, 'M1_Hex5_Resource1_Def1_Chain')
 	
