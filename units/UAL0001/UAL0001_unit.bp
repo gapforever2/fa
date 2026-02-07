@@ -1027,9 +1027,9 @@ UnitBlueprint{
             MuzzleSalvoSize = 1,
             MuzzleVelocity = 0,
             NukeInnerRingDamage = 2000,
-            NukeInnerRingRadius = 30,
+            NukeInnerRingRadius = 20,
             NukeOuterRingDamage = 500,
-            NukeOuterRingRadius = 40,
+            NukeOuterRingRadius = 24,
             ProjectileId = "/projectiles/AIFQuantumWarhead02/AIFQuantumWarhead02_proj.bp",
             RackBones = {
                 {
