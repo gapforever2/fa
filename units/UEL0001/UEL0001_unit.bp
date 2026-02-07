@@ -1159,9 +1159,9 @@ UnitBlueprint{
             MuzzleSalvoSize = 1,
             MuzzleVelocity = 0,
             NukeInnerRingDamage = 2000,
-            NukeInnerRingRadius = 30,
+            NukeInnerRingRadius = 24,
             NukeOuterRingDamage = 500,
-            NukeOuterRingRadius = 40,
+            NukeOuterRingRadius = 20,
             ProjectileId = "/effects/Entities/UEFNukeEffectController01/UEFNukeEffectController01_proj.bp",
             RackBones = {
                 {
