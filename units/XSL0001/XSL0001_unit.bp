@@ -713,7 +713,7 @@ UnitBlueprint{
         2500,
         3500,
     },
-    VeteranMassMult = 0.5,
+    VeteranMassMult = 0.3,
     Weapon = {
         {
             AboveWaterFireOnly = true,
