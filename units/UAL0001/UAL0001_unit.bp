@@ -205,7 +205,7 @@ UnitBlueprint{
     },
     Economy = {
         BuildCostEnergy = 5000000,
-        BuildCostMass = 2000,
+        BuildCostMass = 3000,
         BuildRate = 10,
         BuildTime = 6000000,
         BuildableCategory = {
@@ -347,14 +347,14 @@ UnitBlueprint{
             Slot = "LCH",
         },
 		GAP_CrysalisBeamAdaptiveAeon = {
-            BuildCostEnergy = 38500,
-            BuildCostMass = 1000,
+            BuildCostEnergy = 35500,
+            BuildCostMass = 900,
             BuildTime = 1450,
             Icon = "ecba2",
             Name = "<LOC enhancements_0167_gaf>Enhanced advanced cascade amplifier",
 			Prerequisite = "HeatSinkAeon",
-            NewMaxRadius = 38,
-			NewRateOfFire = 2.2,
+            NewMaxRadius = 36,
+			NewRateOfFire = 1.8,
             ShowBones = { "Left_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -1062,7 +1062,7 @@ UnitBlueprint{
         Blueprint = "/props/DefaultWreckage/DefaultWreckage_prop.bp",
         EnergyMult = 0,
         HealthMult = 0.65,
-        MassMult = 0.5,
+        MassMult = 0.3,
         ReclaimTimeMultiplier = 0.85,
         WreckageLayers = {
             Land = true,
