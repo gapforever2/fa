@@ -318,12 +318,12 @@ UnitBlueprint{
             Slot = "RCH",
         },
         GAP_CrysalisBeamAdvancedAeon = {
-            BuildCostEnergy = 23000,
-            BuildCostMass = 500,
-            BuildTime = 940,
+            BuildCostEnergy = 18500,
+            BuildCostMass = 350,
+            BuildTime = 750,
             Icon = "ecba",
             Name = "<LOC enhancements_0148_faf>Advanced Quantum Disruptor",
-            NewMaxRadius = 28,
+            NewMaxRadius = 26,
             ShowBones = { "Left_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -354,7 +354,7 @@ UnitBlueprint{
             Name = "<LOC enhancements_0167_gaf>Enhanced advanced cascade amplifier",
 			Prerequisite = "HeatSinkAeon",
             NewMaxRadius = 36,
-			NewRateOfFire = 1.8,
+			NewRateOfFire = 2,
             ShowBones = { "Left_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -384,7 +384,7 @@ UnitBlueprint{
             Icon = "hsa",
             Name = "<LOC enhancements_0008>Quantum Accelerator",
 			Prerequisite = "GAP_CrysalisBeamAdvancedAeon",
-            NewRateOfFire = 1.4,
+            NewRateOfFire = 2,
             ShowBones = { "Right_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
