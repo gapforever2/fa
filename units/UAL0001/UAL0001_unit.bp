@@ -323,7 +323,7 @@ UnitBlueprint{
             BuildTime = 300,
             Icon = "ecba",
             Name = "<LOC enhancements_0148_faf>Advanced Quantum Disruptor",
-            NewMaxRadius = 28,
+            NewMaxRadius = 30,
             ShowBones = { "Left_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -353,8 +353,8 @@ UnitBlueprint{
             Icon = "ecba2",
             Name = "<LOC enhancements_0167_gaf>Enhanced advanced cascade amplifier",
 			Prerequisite = "HeatSinkAeon",
-            NewMaxRadius = 38,
-			NewRateOfFire = 2.2,
+            NewMaxRadius = 36,
+			NewRateOfFire = 2,
             ShowBones = { "Left_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -384,7 +384,8 @@ UnitBlueprint{
             Icon = "hsa",
             Name = "<LOC enhancements_0008>Quantum Accelerator",
 			Prerequisite = "GAP_CrysalisBeamAdvancedAeon",
-            NewRateOfFire = 1.4,
+            NewRateOfFire = 2,
+			NewMaxRadius = 30,
             ShowBones = { "Right_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
