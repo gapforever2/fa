@@ -125,6 +125,8 @@ function OnPopulate()
 		ScenarioFramework.AddRestriction(Player7, categories.url0002 + categories.urb2306 + categories.xab1401)
 		end
 	end
+	ScenarioFramework.AddRestriction(Player1, categories.TECH3 + categories.EXPERIMENTAL)
+	
     SetIgnorePlayableRect(Enemy, true)
 end
 
@@ -159,6 +161,8 @@ function SpawnAllUnitsHex5()
 	ForkThread(PatrolEXPArea1)
 	WaitSeconds(2)
 	ForkThread(BotBaseAI)
+	ScenarioFramework.CreateTimerTrigger(RemoveTech3Bot, 16*60)
+	ScenarioFramework.CreateTimerTrigger(RemoveExpBot, 24*60)
 	if(Medium == true) then
 		ScenarioFramework.CreateTimerTrigger(SpawnMediumUnits, 5*60)
 	end
@@ -180,6 +184,13 @@ function Spawnhex5Transport()
 	end
 end
 
+function RemoveTech3Bot()
+	ScenarioFramework.RemoveRestriction(Player1, categories.TECH3)
+end
+
+function RemoveExpBot()
+	ScenarioFramework.RemoveRestriction(Player1, categories.EXPERIMENTAL)
+end
 
 function SpawnMediumUnits()
 	if(Area1 == true) then
