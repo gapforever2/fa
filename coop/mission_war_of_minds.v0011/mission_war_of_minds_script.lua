@@ -17,7 +17,7 @@ local Behaviors = import('/lua/ai/opai/OpBehaviors.lua')
 local PrefetchUtils = import('/lua/sim/PrefetchUtilities.lua')
 local AIUtils = import('/lua/AI/aiutilities.lua')
 
-local ThisFile = '/maps/mission_war_of_minds.v0010/mission_war_of_minds_script.lua'
+local ThisFile = '/maps/mission_war_of_minds.v0011/mission_war_of_minds_script.lua'
 
 ScenarioInfo.Deads = 0
 ScenarioInfo.PlayersRespawn = 0
@@ -26,14 +26,14 @@ ScenarioInfo.PointsN = {'Player2', 'Player3', 'Player4', 'Player5', 'Player6', '
 
 local CybranBotBase = BaseManager.CreateBaseManager()
 
-local OpStrings = import('/maps/mission_war_of_minds.v0010/mission_war_of_minds_strings.lua')
+local OpStrings = import('/maps/mission_war_of_minds.v0011/mission_war_of_minds_strings.lua')
 
 local KillEXPPreArea2 = { {text = '<LOC X06_M01_012_010>[{i HQ}]: Атака была отбита, хорошая работа.', vid = 'X01_HQ_M01_04848.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'NONE'} }
 
 local OnEasy = { {text = '<LOC X06_M01_012_010>[Игровой ИИ]: Сложность: Легкая. Будет достаточно легко проходить.', vid = 'X05_QAI_M02_03855.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'Cybran'} }
 local OnMedium = { {text = '<LOC X06_M01_012_010>[Игровой ИИ]: Сложность: Средняя. Немного попотеть придется.', vid = 'X05_QAI_M02_03855.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'Cybran'} }
-local OnHard = { {text = '<LOC X06_M01_012_010>[Игровой ИИ]: Сложность: Сложная. Придется сильно попоптеть, ожидайте почти всего от врага!', vid = 'X05_QAI_M02_03855.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'Cybran'} }
-local OnNightmarish = { {text = '<LOC X06_M01_012_010>[Игровой ИИ]: Сложность: Кошмарная, Добро пожаловать в ад командующие хах ха! Враг все использует у себя.', vid = 'X05_QAI_M02_03855.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'Cybran'} }
+local OnHard = { {text = '<LOC X06_M01_012_010>[Игровой ИИ]: Сложность: Сложная. Придется сильно попотеть. Силы врага усилены.', vid = 'X05_QAI_M02_03855.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'Cybran'} }
+local OnNightmarish = { {text = '<LOC X06_M01_012_010>[Игровой ИИ]: Выбрана кошмарная сложность! Желаем удачи командующие. Выживите в этом аду.', vid = 'X05_QAI_M02_03855.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'Cybran'} }
 local BaseOffHex5 = { {text = '<LOC X06_M01_012_010>[{i HQ}]: База была уничтожена, поздравляю командующие. Действуйте дальше. Конец связи.', vid = 'X01_HQ_M01_04848.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'NONE'} }
 local KillACUsQAI = { {text = '<LOC X06_M01_012_010>[{i HQ}]: Отлично. БМК КИИ был уничтожен. Продвигайтесь дальше. Конец связи.', vid = 'X01_HQ_M01_04848.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'NONE'} }
 local HEX5Target = { {text = '<LOC X05_M01_190_020>[{i HQ}]: You heard the old man, Commander. Destroy Hex5. HQ out.', vid = 'X05_HQ_M01_04439.sfd', bank = 'X05_VO', cue = 'X05_HQ_M01_04439', faction = 'NONE'} }
@@ -50,7 +50,6 @@ local UnitsMB1 = true
 local UnitsMB2 = true
 local UnitsMB3 = true
 local UnitsMB4 = true
-
 
 
 ScenarioInfo.Player1 = 1
@@ -154,21 +153,20 @@ function SpawnAllUnitsHex5()
 		WaitSeconds(1)
 		ForkThread(ChechPlayerQAIACU)
 	end
-	WaitSeconds(1)
 	WaitSeconds(2)
 	ForkThread(SpawnEXPArea1)
 	WaitSeconds(1)
 	ForkThread(PatrolEXPArea1)
-	WaitSeconds(1)
+	WaitSeconds(2)
 	ForkThread(BotBaseAI)
 	if(Medium == true) then
-		ScenarioFramework.CreateTimerTrigger(SpawnMediumUnits, 4*60)
+		ScenarioFramework.CreateTimerTrigger(SpawnMediumUnits, 5*60)
 	end
 	if(Hard == true) then
-		WaitSeconds(1)
-		ScenarioFramework.CreateTimerTrigger(SpawnLAreaUnits, 5*60)
-		WaitSeconds(4)
-		ScenarioFramework.CreateTimerTrigger(Spawnhex5Transport, 32*60)
+		WaitSeconds(2)
+		ScenarioFramework.CreateTimerTrigger(SpawnLAreaUnits, 6*60)
+		WaitSeconds(5)
+		ScenarioFramework.CreateTimerTrigger(Spawnhex5Transport, 38*60)
 	end
 end
 
@@ -474,6 +472,43 @@ function BuildBotUnits()
     ArmyBrains[CybranBot]:PBMAddPlatoon(Builder)
 end
 
+local ATTACK_WAVESLandm2 = {
+    {
+        units = {
+            {id = 'url0107', count = {2, 4}},
+			{id = 'url0106', count = {6, 8}},
+			{id = 'url0101', count = {1, 2}}
+        },
+        spawn = {473, 23, 745.5},
+        chain = 'M1_AttackMinibase2_Chain'
+    },
+    {
+        units = {
+            {id = 'url0106', count = {8, 12}},
+			{id = 'url0107', count = {6, 10}}
+        },
+        spawn = {473, 23, 745.5},
+        chain = 'M1_AttackMinibase2_Chain'
+    },
+	{
+        units = {
+            {id = 'url0107', count = {4, 8}},
+			{id = 'url0103', count = {2, 6}},
+			{id = 'url0101', count = {1, 3}}
+        },
+        spawn = {473, 23, 745.5},
+        chain = 'M1_AttackMinibase2_Chain'
+    },
+	{
+        units = {
+            {id = 'url0106', count = {4, 8}},
+			{id = 'url0101', count = {1, 2}}
+        },
+        spawn = {473, 23, 745.5},
+        chain = 'M1_AttackMinibase2_Chain'
+    },
+}
+
 function GivePlayerUnits(platoon)
     local givenUnits = {}
 	local data = platoon.PlatoonData
@@ -518,7 +553,7 @@ function GivePlayerUnits(platoon)
 end
 function SpawnEXPArea1()
 	local Hex5LandEXPP = ArmyBrains[Enemy]:MakePlatoon('', '')
-	for i = 1, Random(2, 5) do
+	for i = 1, Random(3, 7) do
 		EXP = CreateUnitHPR('url0402', 'Player1', 832, 24, 484, 0, 0, 0)
 		ArmyBrains[Enemy]:AssignUnitsToPlatoon(Hex5LandEXPP, {EXP}, 'attack', 'GrowthFormation')
 	end
@@ -530,7 +565,7 @@ end
 
 function PatrolEXPArea1()
 	local Hex5LandEXPPat = ArmyBrains[Enemy]:MakePlatoon('', '')
-	for i = 1, Random(1, 2) do
+	for i = 1, Random(2, 3) do
 		EXP = CreateUnitHPR('url0402', 'Player1', 759, 24, 590, 0, 0, 0)
 		ArmyBrains[Enemy]:AssignUnitsToPlatoon(Hex5LandEXPPat, {EXP}, 'attack', 'GrowthFormation')
 	end
@@ -544,17 +579,200 @@ function ChechPlayerQAIACU()
 	ScenarioFramework.CreateArmyIntelTrigger( DopZDKILLACU1, ArmyBrains[Player2], 'LOSNow', false, true, categories.url0002, true, ArmyBrains[Enemy] )
 	ScenarioFramework.CreateArmyIntelTrigger( DopZDKILLACU3, ArmyBrains[Player2], 'LOSNow', false, true, categories.url0402, true, ArmyBrains[Enemy] )
 	WaitSeconds(3)
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1NavalPatrol, 1*16)
+	WaitSeconds(1)
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1NavalDop, 1*42)
+	WaitSeconds(3)
 	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLandT1, 5*60 )
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLandT2B2, 8*60 )
-	WaitSeconds(4)
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackAir, 13*60)
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLightAir, 9*60)
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLandT1MB2, 4*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLandT2B2, 11*60 )
 	WaitSeconds(2)
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackAirT3, 22*60 )
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackExperemental, 36*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackTransportsG, 6*60)
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackTransportsMB1, 7*60)
+	WaitSeconds(4)
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackAir, 12*60)
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackLightAir, 8*60)
+	WaitSeconds(2)
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackAirT3, 16*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackExperemental, 26*60 )
+	WaitSeconds(2)
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackCirposh, 14*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackT3Mang, 13*60 )
+	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttacksACUs, 25*60 )
+end
+
+function SpawnArea1AttackTransportsMB1()
+	if(Area1 == true) then
+		local CybranMB1Land = ArmyBrains[Enemy]:MakePlatoon('', '')
+		local unit = false
+		-- T1
+		local TransportsAMB1 = ScenarioUtils.CreateArmyGroup('Player1', 'TransportArea1MB1')
+		
+		for i = 1, 12 do
+			unit = CreateUnitHPR( 'url0107', 'Player1', 630.5, 32, 528.5, 0, 0, 0 )
+			ArmyBrains[Enemy]:AssignUnitsToPlatoon(CybranMB1Land, {unit}, 'attack', 'GrowthFormation')
+		end
+		
+		for i = 1, 10 do
+			unit = CreateUnitHPR( 'url0103', 'Player1', 630.5, 32, 528.5, 0, 0, 0 )
+			ArmyBrains[Enemy]:AssignUnitsToPlatoon(CybranMB1Land, {unit}, 'attack', 'GrowthFormation')
+		end
+		
+		for i = 1, 8 do
+			unit = CreateUnitHPR( 'url0104', 'Player1', 630.5, 32, 528.5, 0, 0, 0 )
+			ArmyBrains[Enemy]:AssignUnitsToPlatoon(CybranMB1Land, {unit}, 'attack', 'GrowthFormation')
+		end
+		
+		ScenarioFramework.AttachUnitsToTransports(CybranMB1Land:GetPlatoonUnits(), TransportsAMB1)
+		IssueTransportUnload(TransportsAMB1, ScenarioPlatoonAI.PlatoonChooseRandomNonNegative(ArmyBrains[Enemy], ScenarioUtils.ChainToPositions('Patrol_Players'), 10))
+		for k, v in CybranMB1Land:GetPlatoonUnits() do
+			ScenarioFramework.GroupPatrolRoute({v}, ScenarioPlatoonAI.GetRandomPatrolRoute(ScenarioUtils.ChainToPositions('Patrol_Players')))
+		end
+		WaitSeconds(4)
+		for k, v in TransportsAMB1 do
+			IssueMove({v}, ScenarioUtils.MarkerToPosition('M1_Hex5_Main_Eng_2'))
+		end
+		
+		WaitSeconds(4)
+		
+		for k, v in TransportsAMB1 do
+			while(not v:IsDead() and v:IsUnitState('Moving')) do
+				WaitSeconds(1)
+			end
+			v:Destroy()
+		end
+		
+		ScenarioFramework.CreateTimerTrigger(SpawnArea1AttackTransportsMB1, 3*60)
+	end
+end
+
+function SpawnArea1NavalPatrol()
+	local CybranA1Naval = ArmyBrains[Enemy]:MakePlatoon('', '')
+	local unit = false
+	-- T1
 	
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttackCirposh, 19*60 )
-	ScenarioFramework.CreateTimerTrigger( SpawnArea1AttacksACUs, 40*60 )
+	for i = 1, Random(3,7) do
+		unit = CreateUnitHPR( 'urs0203', 'Player1', 62.5, 5, 780.5, 0, 0, 0 )
+		ArmyBrains[Enemy]:AssignUnitsToPlatoon(CybranA1Naval, {unit}, 'attack', 'GrowthFormation')
+	end
+	
+	for i = 1, Random(1,3) do
+		unit = CreateUnitHPR( 'xrs0204', 'Player1', 66.5, 5, 780.5, 0, 0, 0 )
+		ArmyBrains[Enemy]:AssignUnitsToPlatoon(CybranA1Naval, {unit}, 'attack', 'GrowthFormation')
+	end
+	
+	Factory1 = CreateUnitHPR( 'urb0203', 'Player1', 66, 6, 770.5, 0, 0, 0 )
+	Factory2 = CreateUnitHPR( 'urb0203', 'Player1', 62, 6, 786.5, 0, 0, 0 )
+	Nv = CreateUnitHPR( 'xrs0205', 'Player1', 64.5, 5, 776.5, 0, 0, 0 )
+	
+	ScenarioFramework.PlatoonPatrolChain(CybranA1Naval, 'M1_NavalPatrol_Hex5')
+end
+
+function SpawnArea1NavalDop()
+	local CybranA1Naval2 = ArmyBrains[Enemy]:MakePlatoon('', '')
+	local unit = false
+	-- T1
+	
+	for i = 1, Random(4,8) do
+		unit = CreateUnitHPR( 'urs0203', 'Player1', 62.5, 5, 780.5, 0, 0, 0 )
+		ArmyBrains[Enemy]:AssignUnitsToPlatoon(CybranA1Naval2, {unit}, 'attack', 'GrowthFormation')
+	end
+	
+	ScenarioFramework.PlatoonPatrolChain(CybranA1Naval2, 'M1_NavalPatrol_Hex5')
+end
+
+function SpawnArea1AttackTransportsG()
+	if(Area1 == true) then
+		local CybranGLand = ArmyBrains[Enemy]:MakePlatoon('', '')
+		local unit = false
+		-- T1
+		local TransportsAG1 = ScenarioUtils.CreateArmyGroup('Player1', 'TransportArea1GB')
+		
+		for i = 1, Random(2,4) do
+			unit = CreateUnitHPR( 'url0105', 'Player1', 803.5, 23, 573.5, 0, 0, 0 )
+			ArmyBrains[Enemy]:AssignUnitsToPlatoon(CybranGLand, {unit}, 'attack', 'GrowthFormation')
+		end
+		
+		for i = 1, Random(2,5) do
+			unit = CreateUnitHPR( 'url0208', 'Player1', 803.5, 23, 573.5, 0, 0, 0 )
+			ArmyBrains[Enemy]:AssignUnitsToPlatoon(CybranGLand, {unit}, 'attack', 'GrowthFormation')
+		end
+		
+		for i = 1, 6 do
+			unit = CreateUnitHPR( 'url0107', 'Player1', 803.5, 23, 573.5, 0, 0, 0 )
+			ArmyBrains[Enemy]:AssignUnitsToPlatoon(CybranGLand, {unit}, 'attack', 'GrowthFormation')
+		end
+		
+		for i = 1, 6 do
+			unit = CreateUnitHPR( 'url0106', 'Player1', 803.5, 23, 573.5, 0, 0, 0 )
+			ArmyBrains[Enemy]:AssignUnitsToPlatoon(CybranGLand, {unit}, 'attack', 'GrowthFormation')
+		end
+		
+		ScenarioFramework.AttachUnitsToTransports(CybranGLand:GetPlatoonUnits(), TransportsAG1)
+		IssueTransportUnload(TransportsAG1, ScenarioPlatoonAI.PlatoonChooseRandomNonNegative(ArmyBrains[Enemy], ScenarioUtils.ChainToPositions('Patrol_Players'), 8))
+		for k, v in CybranGLand:GetPlatoonUnits() do
+			ScenarioFramework.GroupPatrolRoute({v}, ScenarioPlatoonAI.GetRandomPatrolRoute(ScenarioUtils.ChainToPositions('Patrol_Players')))
+		end
+		WaitSeconds(4)
+		for k, v in TransportsAG1 do
+			IssueMove({v}, ScenarioUtils.MarkerToPosition('M1_Hex5_Main_Eng_2'))
+		end
+		
+		WaitSeconds(4)
+		
+		for k, v in TransportsAG1 do
+			while(not v:IsDead() and v:IsUnitState('Moving')) do
+				WaitSeconds(1)
+			end
+			v:Destroy()
+		end
+		
+		ScenarioFramework.CreateTimerTrigger(SpawnArea1AttackTransportsG, 4*60)
+	end
+end
+
+local function CreateUnitGroupMB2(platoon, unitId, count, spawnPos, enemyBrain)
+	for i = 1, count do
+		local unit = CreateUnitHPR(unitId, 'Player1', spawnPos[1], spawnPos[2], spawnPos[3], 0, 0, 0)
+		enemyBrain:AssignUnitsToPlatoon(platoon, {unit}, 'attack', 'GrowthFormation')
+	end
+end
+
+function SpawnArea1AttackLandT1MB2()
+	if not UnitsMB2 then return end
+	
+	
+    local enemyBrain = ArmyBrains[Enemy]
+    local waveIndex = Random(1, 4)
+    local waveConfig = ATTACK_WAVESLandm2[waveIndex]
+    
+    local Mini2T1LandAttackPlatoon = enemyBrain:MakePlatoon('', '')    
+    for _, unitConfig in ipairs(waveConfig.units) do
+        local unitCount = Random(unitConfig.count[1], unitConfig.count[2])
+        CreateUnitGroupMB2(Mini2T1LandAttackPlatoon, unitConfig.id, unitCount, waveConfig.spawn, enemyBrain)
+    end
+    ScenarioFramework.PlatoonPatrolChain(Mini2T1LandAttackPlatoon, waveConfig.chain)
+    
+    ScenarioFramework.CreateTimerTrigger(SpawnArea1AttackLandT1MB2, 55)
+end
+
+
+function SpawnArea1AttackT3Mang()
+	if(Area1 == true) then
+		local RandomChainsT3 = {'M1_Hex5_T3Heavy_Land1_Chain','M1_Hex5_T3Heavy_Land2_Chain'}
+		local Hex5T3land = ArmyBrains[Enemy]:MakePlatoon('', '')
+		local unit = false
+		for i = 1, Random(4,14) do
+			unit = CreateUnitHPR( 'url0303', 'Player1', 804.5, 23.10346, 567.5, 0, 0, 0 )
+			ArmyBrains[Enemy]:AssignUnitsToPlatoon(Hex5T3land, {unit}, 'attack', 'GrowthFormation')
+		end
+		for i = 1, Random(4, 10) do
+			unit = CreateUnitHPR( 'url0305', 'Player1', 804.5, 23.10346, 567.5, 0, 0, 0 )
+			ArmyBrains[Enemy]:AssignUnitsToPlatoon(Hex5T3land, {unit}, 'attack', 'GrowthFormation')
+		end
+		ScenarioFramework.PlatoonPatrolChain(Hex5T3land, RandomChainsT3[Random(1,2)])
+		ScenarioFramework.CreateTimerTrigger(SpawnArea1AttackT3Mang, 50)
+	end
 end
 
 function SpawnArea1AttackCirposh()
@@ -626,6 +844,7 @@ local function CreateUnitGroup(platoon, unitId, count, spawnPos, enemyBrain)
 		enemyBrain:AssignUnitsToPlatoon(platoon, {unit}, 'attack', 'GrowthFormation')
 	end
 end
+
 
 function SpawnArea1AttackLandT1()
     if not UnitsMB1 then return end
@@ -930,11 +1149,10 @@ function OnStart(self)
 end
 
 function EcoStart()
-	ArmyBrains[Enemy]:GiveStorage('ENERGY', 1000000)
     while(ECO == true) do
-        ArmyBrains[Enemy]:GiveResource('MASS', 20000)
-        ArmyBrains[Enemy]:GiveResource('ENERGY', 30000)
-        WaitSeconds(2)
+        ArmyBrains[Enemy]:GiveResource('MASS', 85000)
+        ArmyBrains[Enemy]:GiveResource('ENERGY', 120000)
+        WaitSeconds(1)
     end
 end
 
@@ -943,6 +1161,7 @@ function SpawnComs()
 end
 
 function StartGame()
+	ScenarioUtils.CreateArmyGroup('BotAreas', 'DeadUnitsRecleimStart', true)
 	WaitSeconds(1)
 	ScenarioFramework.SetPlayableArea('Area1', false)
 	WaitSeconds(1)
@@ -1043,7 +1262,7 @@ function SpawnArea1AttackLightAir()
 			unit = CreateUnitHPR( 'xra0105', 'Player1', 684, 32.10346, 542, 0, 0, 0 )
 			ArmyBrains[Enemy]:AssignUnitsToPlatoon(Hex5AirT1Attack, {unit}, 'attack', 'GrowthFormation')
 		end
-		for i = 1, Random(3,9) do
+		for i = 1, Random(3,8) do
 			unit = CreateUnitHPR( 'ura0102', 'Player1', 684, 32.10346, 542, 0, 0, 0 )
 			ArmyBrains[Enemy]:AssignUnitsToPlatoon(Hex5AirT1Attack, {unit}, 'attack', 'GrowthFormation')
 		end
@@ -1206,12 +1425,12 @@ function SpawnAirScoutHex5Ar1()
 		local unit = false
 		
 		if(Random(1,2) == 1) then
-			for i = 1, Random(2,4) do
+			for i = 1, Random(1,3) do
 				unit = CreateUnitHPR( 'ura0101', 'Player1', 764, 28.10, 556.5, 0, 0, 0 )
 				ArmyBrains[Enemy]:AssignUnitsToPlatoon(Hex5AirScout, {unit}, 'attack', 'GrowthFormation')
 			end
 		elseif(Random(1,2) == 2) then
-			for i = 1, 2 do
+			for i = 1, Random(1,2) do
 				unit = CreateUnitHPR( 'ura0302', 'Player1', 764, 33.10, 706.5, 0, 0, 0 )
 				ArmyBrains[Enemy]:AssignUnitsToPlatoon(Hex5AirScout, {unit}, 'attack', 'GrowthFormation')
 			end
@@ -1222,7 +1441,7 @@ function SpawnAirScoutHex5Ar1()
 				ScenarioFramework.GroupPatrolRoute({v}, ScenarioPlatoonAI.GetRandomPatrolRoute(ScenarioUtils.ChainToPositions('M1_Scout_Hex5_Chain')))
 			end
 		end
-		ScenarioFramework.CreateTimerTrigger(SpawnAirScoutHex5Ar1, 80)
+		ScenarioFramework.CreateTimerTrigger(SpawnAirScoutHex5Ar1, 190)
 	end
 end
 
@@ -1261,7 +1480,6 @@ function SpawnEnemyBases()
 	ScenarioFramework.Dialogue(OpStrings.X05_M01_011)
 	WaitSeconds(5)
 	ForkThread(SpawnAllUnitsHex5)
-	ScenarioFramework.Dialogue(OpStrings.X05_M01_012)
 	WaitSeconds(6)
 	ScenarioFramework.Dialogue(OpStrings.X05_M01_013)
 	units = ScenarioUtils.CreateArmyGroupAsPlatoon('Player1', 'M1_Hex5_Main_LandDefPatrol_D' .. Random(1,3), 'GrowthFormation')
