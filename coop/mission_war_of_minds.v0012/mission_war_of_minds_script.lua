@@ -26,7 +26,7 @@ ScenarioInfo.PointsN = {'Player2', 'Player3', 'Player4', 'Player5', 'Player6', '
 
 local CybranBotBase = BaseManager.CreateBaseManager()
 
-local OpStrings = import('/maps/mission_war_of_minds.v0011/mission_war_of_minds_strings.lua')
+local OpStrings = import('/maps/mission_war_of_minds.v0012/mission_war_of_minds_strings.lua')
 
 local KillEXPPreArea2 = { {text = '<LOC X06_M01_012_010>[{i HQ}]: Атака была отбита, хорошая работа.', vid = 'X01_HQ_M01_04848.sfd', bank = 'X05_VO', cue = 'NONE', faction = 'NONE'} }
 
@@ -125,7 +125,7 @@ function OnPopulate()
 		ScenarioFramework.AddRestriction(Player7, categories.url0002 + categories.urb2306 + categories.xab1401)
 		end
 	end
-	ScenarioFramework.AddRestriction(Player1, categories.TECH3 + categories.EXPERIMENTAL)
+	ScenarioFramework.AddRestriction(Enemy, categories.TECH3 + categories.EXPERIMENTAL)
 	
     SetIgnorePlayableRect(Enemy, true)
 end
@@ -185,11 +185,11 @@ function Spawnhex5Transport()
 end
 
 function RemoveTech3Bot()
-	ScenarioFramework.RemoveRestriction(Player1, categories.TECH3)
+	ScenarioFramework.RemoveRestriction(Enemy, categories.TECH3)
 end
 
 function RemoveExpBot()
-	ScenarioFramework.RemoveRestriction(Player1, categories.EXPERIMENTAL)
+	ScenarioFramework.RemoveRestriction(Enemy, categories.EXPERIMENTAL)
 end
 
 function SpawnMediumUnits()
