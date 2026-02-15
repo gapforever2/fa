@@ -1069,6 +1069,14 @@ function OnShiftF3()
     ForkThread(SpawnCDRCybranArea1)
 end
 
+function OnShiftF4()
+    ForkThread(RemoveTech3Bot)
+end
+
+function OnShiftF5()
+    ForkThread(RemoveExpBot)
+end
+
 function SpawnCDRCybranArea1()
 	if( ArmyBrains[Enemy].Nickname == 'Armagedon3113') then
 	ScenarioInfo.ACUQAI = CreateUnitHPR('url0002', 'Player1', 1016, 32, 360, 0, 0, 0)
