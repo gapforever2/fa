@@ -17,7 +17,7 @@ local Behaviors = import('/lua/ai/opai/OpBehaviors.lua')
 local PrefetchUtils = import('/lua/sim/PrefetchUtilities.lua')
 local AIUtils = import('/lua/AI/aiutilities.lua')
 
-local ThisFile = '/maps/mission_war_of_minds.v0011/mission_war_of_minds_script.lua'
+local ThisFile = '/maps/mission_war_of_minds.v0012/mission_war_of_minds_script.lua'
 
 ScenarioInfo.Deads = 0
 ScenarioInfo.PlayersRespawn = 0
