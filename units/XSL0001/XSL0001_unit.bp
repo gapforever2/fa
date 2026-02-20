@@ -211,7 +211,7 @@ UnitBlueprint{
     },
     Economy = {
         BuildCostEnergy = 5000000,
-        BuildCostMass = 2000,
+        BuildCostMass = 3000,
         BuildRate = 10,
         BuildTime = 6000000,
         BuildableCategory = {
@@ -713,7 +713,7 @@ UnitBlueprint{
         2500,
         3500,
     },
-    VeteranMassMult = 0.5,
+    VeteranMassMult = 0.3,
     Weapon = {
         {
             AboveWaterFireOnly = true,
@@ -952,9 +952,9 @@ UnitBlueprint{
             MuzzleSalvoSize = 1,
             MuzzleVelocity = 0,
             NukeInnerRingDamage = 2000,
-            NukeInnerRingRadius = 30,
+            NukeInnerRingRadius = 24,
             NukeOuterRingDamage = 500,
-            NukeOuterRingRadius = 40,
+            NukeOuterRingRadius = 20,
             ProjectileId = "/effects/entities/InainoEffectController01/InainoEffectController01_proj.bp",
             RackBones = {
                 {
@@ -1040,6 +1040,19 @@ UnitBlueprint{
             MaxRadius = 1,
             RateOfFire = 10/10, --10/integer interval in ticks
             WeaponCategory = "Teleport",
+        },
+    },
+	Wreckage = {
+        Blueprint = "/props/DefaultWreckage/DefaultWreckage_prop.bp",
+        EnergyMult = 0,
+        HealthMult = 0.65,
+        MassMult = 0.3,
+        ReclaimTimeMultiplier = 0.85,
+        WreckageLayers = {
+            Land = true,
+            Seabed = true,
+            Sub = true,
+            Water = true,
         },
     },
 }

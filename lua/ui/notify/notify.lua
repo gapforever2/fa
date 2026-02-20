@@ -126,18 +126,18 @@ function processIncomingMessage(sender, msg)
     if customMessagesDisabled then
         local message = defaultMessages[category][source]
         if trigger == 'started' then
-            msg.text = LOC('<LOC notify_starting>') .. message
+            msg.text = ('Start') .. message
         elseif trigger == 'cancelled' then
-            msg.text = message .. LOC('<LOC notify_cancelled>')
+            msg.text = message .. ('cancelled')
         elseif trigger == 'completed' then
             local time = msg.data.time
             if time then
-                msg.text = string.format("%s %s (%.2fs)", message, LOC('<LOC notify_done>'), time)
+                msg.text = string.format("%s %s (%.2fs)", message, ('done!'), time)
             else
-                msg.text = message .. LOC('<LOC notify_done>')
+                msg.text = message .. ('done!')
             end
         else
-            msg.text = LOC('<LOC notify_abnormal>') .. message
+            msg.text = ('destroys the player game') .. message
         end
     end
     return true
@@ -256,7 +256,7 @@ function sendEnhancementMessage(messageTable)
 end
 
 function onStartEnhancement(id, army, category, source)
-    local msg = {to = 'notify', Chat = true, text = 'Starting ' .. messages()[category][source], data = {category = category, source = source, trigger = 'started'}}
+    local msg = {to = 'notify', Chat = true, text = 'Start ' .. messages()[category][source], data = {category = category, source = source, trigger = 'started'}}
 
     -- Start by storing ACU IDs for future use
     if id and (focusArmy == -1 or army == focusArmy) then
@@ -297,7 +297,7 @@ function onCompletedEnhancement(id, category, source)
         local data = ACUs[id]
         if data then
             local time = round(GetGameTimeSeconds() - data.startTime, 2)
-            msg.text = string.format("%s %s (%.2fs)", messages()[category][source], LOC('<LOC notify_done>'), time)
+            msg.text = string.format("%s %s (%.2f seconds)", messages()[category][source], LOC('<LOC notify_done>'), time)
             msg.data.time = time
             killWatcher(data)
         end

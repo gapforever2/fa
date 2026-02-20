@@ -1434,7 +1434,7 @@ function OnClickHandler(button, modifiers)
             if performUpgrade then
                 IssueUpgradeOrders(sortedOptions.selection, item.id)
             else
-                if itembp.Physics.MotionType == 'RULEUMT_None' or EntityCategoryContains(categories.NEEDMOBILEBUILD, item.id) then
+                if itembp.Physics.MotionType == 'RULEUMT_None' and not EntityCategoryContains(categories.CRABEGG, item.id) or EntityCategoryContains(categories.NEEDMOBILEBUILD, item.id) then
                     -- Stationary means it needs to be placed, so go in to build mobile mode
                     import("/lua/ui/game/commandmode.lua").StartCommandMode(buildCmd, {name = item.id})
                 else
