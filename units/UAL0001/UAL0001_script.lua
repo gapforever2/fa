@@ -233,16 +233,38 @@ UAL0001 = ClassUnit(ACUUnit) {
             aoc:ChangeMaxRadius(bpDisrupt or 22)
             local cd = self:GetWeaponByLabel('ChronoDampener')
             cd:ChangeMaxRadius(bpDisrupt or 22)
+		elseif enh == 'GAP_CrysalisBeamAdaptiveAeon' then
+            local wep = self:GetWeaponByLabel('RightDisruptor')
+            wep:ChangeMaxRadius(bp.NewMaxRadius)
+			wep:ChangeRateOfFire(bp.NewRateOfFire)
+            local oc = self:GetWeaponByLabel('OverCharge')
+            oc:ChangeMaxRadius(bp.NewMaxRadius)
+            local aoc = self:GetWeaponByLabel('AutoOverCharge')
+            aoc:ChangeMaxRadius(bp.NewMaxRadius)
+            local cd = self:GetWeaponByLabel('ChronoDampener')
+            cd:ChangeMaxRadius(bp.NewMaxRadius)
+        elseif enh == 'GAP_CrysalisBeamAdaptiveAeonRemove' then
+            local wep = self:GetWeaponByLabel('RightDisruptor')
+            local bpDisrupt = self:GetBlueprint().Weapon[1].MaxRadius
+			local bpDisrupt = self:GetBlueprint().Weapon[1].RateOfFire
+            wep:ChangeRateOfFire(bpDisrupt)
+			wep:ChangeMaxRadius(bpDisrupt)
+            local oc = self:GetWeaponByLabel('OverCharge')
+            oc:ChangeMaxRadius(bpDisrupt)
+            local aoc = self:GetWeaponByLabel('AutoOverCharge')
+            aoc:ChangeMaxRadius(bpDisrupt)
+            local cd = self:GetWeaponByLabel('ChronoDampener')
+            cd:ChangeMaxRadius(bpDisrupt)
         -- Heat Sink Augmentation
         elseif enh == 'HeatSinkAeon' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
-            wep:ChangeRateOfFire(bp.NewRateOfFire or 2)
+            wep:ChangeRateOfFire(bp.NewRateOfFire)
             local wep = self:GetWeaponByLabel('RightDisruptor')
-            wep:ChangeMaxRadius(bp.NewMaxRadius or 30)
+            wep:ChangeMaxRadius(bp.NewMaxRadius)
             local oc = self:GetWeaponByLabel('OverCharge')
-            oc:ChangeMaxRadius(bp.NewMaxRadius or 30)
+            oc:ChangeMaxRadius(bp.NewMaxRadius)
             local aoc = self:GetWeaponByLabel('AutoOverCharge')
-            aoc:ChangeMaxRadius(bp.NewMaxRadius or 30)
+            aoc:ChangeMaxRadius(bp.NewMaxRadius)
             local cd = self:GetWeaponByLabel('ChronoDampener')
             cd:ChangeMaxRadius(bp.NewMaxRadius or 30)
         elseif enh == 'HeatSinkAeonRemove' then
