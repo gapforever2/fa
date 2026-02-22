@@ -136,7 +136,7 @@ UnitBlueprint{
     Intel = {
         ActiveIntel = { Radar = true },
         Cloak = true,
-        RadarRadius = 40,
+        RadarRadius = 44,
         RadarStealth = true,
         StealthWaitTime = 1.5,
         VisionRadius = 24,
