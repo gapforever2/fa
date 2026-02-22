@@ -258,13 +258,13 @@ UAL0001 = ClassUnit(ACUUnit) {
         -- Heat Sink Augmentation
         elseif enh == 'HeatSinkAeon' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
-            wep:ChangeRateOfFire(bp.NewRateOfFire)
+            wep:ChangeRateOfFire(bp.NewRateOfFire or 2)
             local wep = self:GetWeaponByLabel('RightDisruptor')
-            wep:ChangeMaxRadius(bp.NewMaxRadius)
+            wep:ChangeMaxRadius(bp.NewMaxRadius or 30)
             local oc = self:GetWeaponByLabel('OverCharge')
-            oc:ChangeMaxRadius(bp.NewMaxRadius)
+            oc:ChangeMaxRadius(bp.NewMaxRadius or 30)
             local aoc = self:GetWeaponByLabel('AutoOverCharge')
-            aoc:ChangeMaxRadius(bp.NewMaxRadius)
+            aoc:ChangeMaxRadius(bp.NewMaxRadius or 30)
             local cd = self:GetWeaponByLabel('ChronoDampener')
             cd:ChangeMaxRadius(bp.NewMaxRadius or 30)
         elseif enh == 'HeatSinkAeonRemove' then

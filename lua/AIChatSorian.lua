@@ -16,7 +16,7 @@ function AIChat(group, text, sender)
         end
         ChatTo:Set(group)
         msg = { to = ChatTo(), Chat = true }
-        msg.text = LOC(text) or text
+        msg.text = text
         msg.aisender = sender
         local armynumber = GetArmyData(sender)
         if ChatTo() == 'allies' then
