@@ -8320,6 +8320,12 @@ avatar_gaf="Avatar"
 _KickObs="Kick observers"
 _DiscordGAF="Discord GAF"
 lobui_0001_gaf="Balance patch"
+
+-- Mute tooltips
+lobby_mute_tooltip_title="Muted"
+lobby_mute_tooltip_local="This player is muted locally by you."
+lobby_mute_tooltip_global="This player is muted globally by the server."
+lobby_mute_tooltip_both="This player is muted locally (by you) and globally (by server)."
 lobui_0002_gaf="Kick all observers from lobby"
 lobui_0003_gaf="Official GapForever Discord Server"
 lobui_0004_gaf="Click here to get more information about the current balance patch on the GAF server"
