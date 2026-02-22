@@ -192,7 +192,7 @@ UnitBlueprint{
             AutoInitiateAttackCommand = true,
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
-            Damage = 28,
+            Damage = 30,
             DamageType = "Normal",
             DisplayName = "Quad Light Laser",
             FireTargetLayerCapsTable = {
