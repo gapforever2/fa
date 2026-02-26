@@ -94,8 +94,8 @@ UnitBlueprint{
         UniformScale = 0.06,
     },
     Economy = {
-        BuildCostEnergy = 2000,
-        BuildCostMass = 300,
+        BuildCostEnergy = 1500,
+        BuildCostMass = 150,
         BuildTime = 600,
     },
     Footprint = {
@@ -160,7 +160,7 @@ UnitBlueprint{
             BallisticArc = "RULEUBA_None",
             CannotAttackGround = true,
             CollideFriendly = false,
-            Damage = 250,
+            Damage = 150,
             DamageType = "Normal",
             DisplayName = "Sonic Pulse Battery",
             FireTargetLayerCapsTable = {
@@ -171,11 +171,11 @@ UnitBlueprint{
             FiringTolerance = 0.5,
             Label = "MainGun",
             MaxRadius = 50,
-            MuzzleSalvoDelay = 0.25,
+            MuzzleSalvoDelay = 0.2,
             MuzzleSalvoSize = 3,
             MuzzleVelocity = 60,
             ProjectileId = "/projectiles/AAASonicPulse0112/AAASonicPulse0112_proj.bp",
-            ProjectileLifetimeUsesMultiplier = 1.45,
+            ProjectileLifetimeUsesMultiplier = 1.25,
             ProjectilesPerOnFire = 3,
             RackBones = {
                 {

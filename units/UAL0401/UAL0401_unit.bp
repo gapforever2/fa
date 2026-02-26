@@ -48,7 +48,7 @@ UnitBlueprint{
         Health = 99999,
         MaxHealth = 99999,
         RegenRate = 10,
-        SurfaceThreatLevel = 250,
+        SurfaceThreatLevel = 200,
     },
     Display = {
         Abilities = {
@@ -225,7 +225,7 @@ UnitBlueprint{
             BeamLifetime = 0,
             CollideFriendly = false,
             ContinuousBeam = true,
-            Damage = 250,
+            Damage = 200,
             DamageRadius = 0.5,
             DamageType = "Normal",
             DisplayName = "Phason Laser",

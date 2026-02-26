@@ -15,8 +15,10 @@ UnitBlueprint{
         "LAND",
         "MOBILE",
         "OVERLAYANTIAIR",
+        "OVERLAYRADAR",
         "OVERLAYDIRECTFIRE",
         "PRODUCTDL",
+        "RADAR",
         "RECLAIMABLE",
         "SELECTABLE",
         "SERAPHIM",
@@ -32,7 +34,10 @@ UnitBlueprint{
         SurfaceThreatLevel = 6,
     },
     Display = {
-        Abilities = { "<LOC ability_aa>Anti-Air" },
+        Abilities = { 
+            "<LOC ability_aa>Anti-Air",
+            "<LOC ability_radar>Radar",
+             },
         AnimationDeath = {
             {
                 Animation = "/units/DSLK004/DSLK004_death.sca",
@@ -116,7 +121,10 @@ UnitBlueprint{
         Icon = "land",
         UnitName = "<LOC dslk004_name>Uyanah",
     },
-    Intel = { VisionRadius = 26 },
+    Intel = { 
+        VisionRadius = 26,
+        RadarRadius = 70,
+    },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.58,
     LifeBarSize = 0.8,

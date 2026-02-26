@@ -1,50 +1,41 @@
-# About Gap Forever
+
+# About Forged Alliance Forever
+
 ![Impression of the game](/images/impression-a.jpg)
 
-**Gap Forever** (GAF) — это живое сообщество-ориентированный проект, созданный для возрождения и поддержки онлайн-игры в **Supreme Commander: Forged Alliance** в классическом виде. Мы делаем свой баланс игры, добавляем новые кооперативные кампании, карты и удобства для мультиплеера. Проект включает тысячи игроков со всего мира, особенно активное русскоязычное сообщество.
-
-Наш сайт: https://gapforever.com/  
-Русскоязычная версия: https://www.gapforever.ru/ (или https://faforever.ru/)
+Forged Alliance Forever is a vibrant, community-driven [project](https://github.com/FAForever) designed to enhance the gameplay of [Supreme Commander: Forged Alliance](https://store.steampowered.com/app/9420). Our active community has developed a custom [client](https://github.com/FAForever/downlords-faf-client), [backend](https://github.com/FAForever/server) and [website](https://github.com/FAForever/website). We provide a rich gaming experience with an extensive library of community-made maps, mods and co-op scenarios. The project can be financially supported through [Patreon](https://www.patreon.com/faf).
 
 ## Getting started playing
 
-- Скачай **Supreme Commander: Forged Alliance** (через Steam или GOG — лицензия обязательна только для EU)
-- Зарегистрируйся на сайте [gapforever.com](https://gapforever.com/) или [gapforever.ru](https://www.gapforever.ru/)
-- Скачай и установи **Game Client** прямо с главной страницы сайта (кнопка **Download Game Client**)
-- Запусти клиент, войди под своим аккаунтом
-- Создавай/присоединяйся к играм:  
-  • 1v1, командные бои до 16 человек  
-  • Кооперативные миссии с друзьями (до 4 человек)  
-  • Новые кастомные кооп-кампании и тысячи карт от сообщества
-
-## Engage with the community
-
-- Официальный **[Discord](https://discord.com/invite/3wvXGZHHFp)** — основной центр общения, поиска игр, обсуждения баланса и помощи новичкам  
-  (ссылка обычно на главной странице gapforever.com или в клиенте)
-- Форумы и чат внутри клиента
-- Каналы в Telegram / VK — для русскоязычных игроков ([ищи по «Gap Forever»](https://t.me/+5eK9G5toB9ZjOTg6))
+- [Register](https://faforever.com/account/register) through our [website](https://faforever.com/) and verify through either [Steam](https://store.steampowered.com/) or [GOG](https://www.gog.com/) your ownership of a copy of Supreme Commander: Forged Alliance.
+- Download the client from our [website](https://faforever.com/).
+- Log in using the account you registered and host a game with AIs and/or players, queue up for matchmaker or upload your own content to our vaults for other players to enjoy.
+- Engage with the community through the [forums](https://forum.faforever.com/) using the account you registered or join us on the official [Discord server](https://discord.gg/mXahVSKGVb).
 
 ## Information for contributors
 
-Все участники сообщества соблюдают правила и уважительное общение (Code of Conduct доступен на сайте).
+All contributions are expected to apply the [code of conduct](https://www.faforever.com/rules) to create a healthy and sustainable contributor environment.
 
-Хочешь помочь проекту развиваться?
-- Создавай новые карты и кооперативные сценарии
-- Предлагай балансные правки (патчноута публикуются здесь: https://gapforever2.github.io/patchnotes)
-- Помогай с переводом, документацией, тестированием
-- Пиши о багах/предложениях в Discord или Issues на связанных репозиториях
+- [Changelog](./.github/CHANGELOG.md): documentation about how we manage changelogs and release notes.
+- [Development](./.github/DEVELOPMENT.md): documentation about development including how to setup a development environment and various best practices.
+- [Deployment](./.github/DEVELOPMENT.md): documentation about deployment to the FAF, FAF Beta Balance and FAF Develop game types.
 
-### Кооператив и кампании
-- Новые кооп-миссии и кампании (встроены в клиент и обновляются сообществом)
+In addition, there is an [extensive guide](./setup/setup-english.md) to help you setup your development environment. This guide is due to be replaced by the development file.
 
-### Баланс и информация по юнитам
-- Актуальный список юнитов: https://gapforever2.github.io/spooky-db
-- История балансных патчей: https://gapforever2.github.io/patchnotes
+## Related repositories
 
-### Полезные инструменты
-- FA Lua intellisense (если занимаешься моддингом/картами) — можно использовать от FAF или адаптировать
+### Campaign or co-op content
 
-Gap Forever — это про классический Supreme Commander, долгие эпичные игры, кооператив с друзьями и тысячи разнообразных карт.  
-Присоединяйся — здесь всегда кто-то играет!
+- [Campaign/co-op featured mod](https://github.com/FAForever/fa-coop)
+- [Campaign/co-op maps](https://github.com/FAForever/faf-coop-maps)
 
-Удачных сражений, Commander! 🚀
+### Lua plugin
+
+ - [FA Lua intellisense extension](https://github.com/FAForever/fa-lua-vscode-extension)
+ - [FA Lua intellisense language server](https://github.com/FAForever/fa-lua-language-server)
+
+### Assembly patches
+
+ - [Executable patcher](https://github.com/FAForever/FA_Patcher)
+ - [Executable patches](https://github.com/FAForever/FA-Binary-Patches)
+ - [Exception debugger](https://github.com/FAForever/FADeepProbe)

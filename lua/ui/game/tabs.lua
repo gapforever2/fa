@@ -1200,15 +1200,6 @@ function RemoveModeText(modeID)
     UpdateModeDisplay()
 end
 
-function ClearModeText()
-    local keys = table.keys(modes, false)
-    for k = 1, table.getn(keys) do
-        modes[keys[k]] = nil
-    end
-
-    UpdateModeDisplay()
-end
-
 function UpdateModeDisplay()
     if controls.modeDisplay then
         controls.modeDisplay:Destroy()
@@ -1268,8 +1259,4 @@ function UpdateModeDisplay()
         controls.modeDisplay.minCap:DisableHitTest()
         controls.modeDisplay.maxCap:DisableHitTest()
     end
-end
-
-FocusArmyChanged = function()
-    ClearModeText()
 end

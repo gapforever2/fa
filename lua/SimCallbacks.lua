@@ -360,6 +360,173 @@ Callbacks.RingWithStorages = function(data, selection)
     import("/lua/sim/commands/ringing/ring-with-storages.lua").RingExtractor(extractor, engineers)
 end
 
+do
+    -- Support rebuilding a mass extractor via UI mods using a sim callback.
+    -- This is similar in spirit to RingWithStorages: UI provides engineers + target,
+    -- sim validates and performs the work.
+
+    local FindNearestUnit = import("/lua/sim/commands/shared.lua").FindNearestUnit
+    local SortOffsetsByDistanceToPoint = import("/lua/sim/commands/shared.lua").SortOffsetsByDistanceToPoint
+    local SortUnitsByTech = import("/lua/sim/commands/shared.lua").SortUnitsByTech
+    local FindBuildingSkirts = import("/lua/sim/commands/ringing/shared.lua").FindBuildingSkirts
+
+    local BuildOffsets = { { 2, 0 }, { 0, 2 }, { -2, 0 }, { 0, -2 } }
+
+    -- cached for performance
+    local CacheX1 = {}
+    local CacheZ1 = {}
+    local CacheX2 = {}
+    local CacheZ2 = {}
+
+    local BuildLocation = {}
+    local EmptyTable = {}
+
+    --- Rings the point (cx, cz) with a structure at the 4 cardinal offsets (±2).
+    --- Performs basic collision checks similar to ringing/shared.lua.
+    ---@param cx number
+    ---@param cz number
+    ---@param skirtSize number
+    ---@param engineers Unit[]
+    ---@param blueprintId UnitId
+    local function RingAtPosition(cx, cz, skirtSize, engineers, blueprintId)
+        local cx1, cz1, cx2, cz2, buildingSkirtCount = FindBuildingSkirts(cx, cz, skirtSize, CacheX1, CacheZ1, CacheX2,
+            CacheZ2)
+
+        local nearestEngineer = FindNearestUnit(engineers, cx, cz)
+        if nearestEngineer then
+            local ex, _, ez = nearestEngineer:GetPositionXYZ()
+            SortOffsetsByDistanceToPoint(BuildOffsets, cx, cz, ex, ez)
+        end
+
+        local buildLocation = BuildLocation
+        local emptyTable = EmptyTable
+        for _, offset in BuildOffsets do
+            local bx = cx + offset[1]
+            local bz = cz + offset[2]
+
+            buildLocation[1] = bx
+            buildLocation[3] = bz
+            buildLocation[2] = GetTerrainHeight(bx, bz)
+
+            -- determine if location is free to build
+            local freeToBuild = engineers[1]:GetAIBrain():CanBuildStructureAt(blueprintId, buildLocation)
+            if freeToBuild then
+                for k = 1, buildingSkirtCount do
+                    if bx > cx1[k] and bx < cx2[k] then
+                        if bz > cz1[k] and bz < cz2[k] then
+                            freeToBuild = false
+                            break
+                        end
+                    end
+                end
+            end
+
+            if freeToBuild then
+                IssueBuildAllMobile(engineers, buildLocation, blueprintId, emptyTable)
+            end
+        end
+    end
+
+    --- Rebuild the target mex into a T3 mex and optionally ring it with storages.
+    --- Intended for UI mods that want a true "one click mex rebuild".
+    ---
+    ---@param data { target?: EntityId, Target?: EntityId, ClearCommands?: boolean, ringStorages?: boolean, RingStorages?: boolean }
+    ---@param selection Unit[]
+    Callbacks.RebuildMexWithStorages = function(data, selection)
+        -- verify selection
+        selection = SecureUnits(selection)
+        if (not selection) or TableEmpty(selection) then
+            return
+        end
+
+        -- verify we have engineers
+        local engineers = EntityCategoryFilterDown(categories.ENGINEER, selection)
+        if TableEmpty(engineers) then
+            return
+        end
+
+        -- verify the extractor
+        local targetId = data.target or data.Target
+        local extractor = (targetId and GetUnitById(targetId)) --[[@as Unit]]
+        if (not extractor) or
+            (not extractor.Army) or
+            (not OkayToMessWithArmy(extractor.Army)) or
+            (not EntityCategoryContains(categories.MASSEXTRACTION, extractor))
+        then
+            return
+        end
+
+        -- determine what to build (based on the extractor we are rebuilding)
+        local extractorBp = extractor.Blueprint and extractor.Blueprint.BlueprintId or extractor:GetBlueprint().BlueprintId
+        if not extractorBp then
+            return
+        end
+
+        local prefix = extractorBp:sub(1, 2)
+        if not prefix then
+            return
+        end
+
+        local mexBp = prefix .. 'b1302'
+        local storageBp = prefix .. 'b1106'
+
+        if (not __blueprints[mexBp]) then
+            return
+        end
+
+        -- engineers that can build the desired mex (supports captured engineers)
+        SortUnitsByTech(engineers)
+        local builders = {}
+        local assistants = {}
+        for _, eng in engineers do
+            if eng.CanBuild and eng:CanBuild(mexBp) then
+                TableInsert(builders, eng)
+            else
+                TableInsert(assistants, eng)
+            end
+        end
+
+        if TableEmpty(builders) then
+            return
+        end
+
+        -- optionally clear all commands on selection
+        if data.ClearCommands then
+            IssueClearCommands(engineers)
+        end
+
+        local ringStorages = (data.ringStorages ~= false) and (data.RingStorages ~= false)
+
+        local cx, _, cz = extractor:GetPositionXYZ()
+        local buildPos = { cx, GetTerrainHeight(cx, cz), cz }
+
+        -- fork as we need to let the engine process the destruction first
+        ForkThread(function()
+            if not IsDestroyed(extractor) then
+                extractor:Kill()
+            end
+
+            -- allow the destroyed unit / reclaimables to update
+            WaitTicks(2)
+
+            -- build the new extractor (engineers will reclaim blockers as needed)
+            IssueBuildAllMobile(builders, buildPos, mexBp, EmptyTable)
+
+            -- ring with storages (skip if already occupied / can't build)
+            if ringStorages and __blueprints[storageBp] and builders[1]:CanBuild(storageBp) then
+                local mexBlueprint = __blueprints[mexBp]
+                local skirtSize = (mexBlueprint.Physics and mexBlueprint.Physics.SkirtSizeX) or 1
+                RingAtPosition(cx, cz, skirtSize, builders, storageBp)
+            end
+
+            -- remaining engineers assist the first builder
+            if not TableEmpty(assistants) then
+                IssueGuard(assistants, builders[1])
+            end
+        end)
+    end
+end
+
 ---@param data { target: EntityId, allFabricators: boolean }
 ---@param selection Unit[]
 Callbacks.RingWithFabricators = function(data, selection)
