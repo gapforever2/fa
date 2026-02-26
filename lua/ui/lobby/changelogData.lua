@@ -1,23 +1,8 @@
 ---@type number
-last_version = 9
+last_version = 8
 
 ---@type PatchNotes[]
 gamePatches = {
-    {
-        version = 9,
-        name = "Royal times",
-        patchnoteUrl = "balances/9.html",
-        description = {
-            "# Баланс-патч 9 (29 декабрь 2025)",
-            "",
-            "★«Королевские времена» представляет собой, оживление утраченных тактик и возможностей (всё интересное новое ,это давно забытое старое",
-            "★Нерф снайперов.",
-            "★Ребаланс фетбоя.",
-            "★Изменения Эон лодки пво.",
-			"★Полный список изменений – на сайте. Нажмите на кнопку \"Описание патча\" (Patch info).",
-            "Баланс-команда: LIN, Aiverse,Armagedon,Angel_Fugu.",
-        }
-    },
     {
         version = 8,
         name = "Reboot",

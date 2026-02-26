@@ -465,18 +465,6 @@ end
 --- Get a PlayerData object for the local player, configured using data from their profile.
 function GetLocalPlayerData()
     local version, gametype, commit = import("/lua/version.lua").GetVersionData()
-    local mean = argv.playerMean
-    local dev = argv.playerDeviation
-    local pl = playerRating
-    local numGames = argv.numGames
-
-    -- For players with fewer than 10 games, force a fixed rating of 100 +/- 0
-    if type(numGames) == 'number' and numGames < 1000 then
-        mean = 100
-        dev = 10
-        pl = 100
-    end
-
     return PlayerData(
         {
             PlayerName = localPlayerName,
@@ -485,10 +473,10 @@ function GetLocalPlayerData()
             PlayerColor = GetSanitisedLastColor(),
             Faction = GetSanitisedLastFaction(),
             PlayerClan = argv.playerClan,
-            PL = pl,
-            NG = numGames,
-            MEAN = mean,
-            DEV = dev,
+            PL = playerRating,
+            NG = argv.numGames,
+            MEAN = argv.playerMean,
+            DEV = argv.playerDeviation,
             Country = argv.PrefLanguage,
             Avatar = argv.Urlava,
             TooltipAvatar = argv.Tlpava,
@@ -497,7 +485,7 @@ function GetLocalPlayerData()
             GameType = gametype,
             Commit = commit,
         }
-    )
+)
 end
 
 --- Compute an estimation of the rating of the given AI. The values originate from 'aitypes.lua'

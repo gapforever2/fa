@@ -19,9 +19,7 @@ UnitBlueprint{
         "LAND",
         "MOBILE",
         "OVERLAYANTIAIR",
-        "OVERLAYRADAR",
         "PRODUCTFA",
-        "RADAR",
         "RECLAIMABLE",
         "SELECTABLE",
         "SERAPHIM",
@@ -38,7 +36,6 @@ UnitBlueprint{
         Abilities = {
             "<LOC ability_aa>Anti-Air",
             "<LOC ability_hover>Hover",
-            "<LOC ability_radar>Radar",
         },
         AnimationDeath = {
             {
@@ -148,10 +145,7 @@ UnitBlueprint{
         Icon = "amph",
         UnitName = "<LOC xsl0205_name>Iashavoh",
     },
-    Intel = { 
-        VisionRadius = 20,
-        RadarRadius = 50,
-    },
+    Intel = { VisionRadius = 20 },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.58,
     LifeBarSize = 0.8,

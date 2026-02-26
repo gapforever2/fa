@@ -29,8 +29,8 @@ UnitBlueprint{
     Defense = {
         ArmorType = "Normal",
         EconomyThreatLevel = 24,
-        Health = 700,
-        MaxHealth = 700,
+        Health = 500,
+        MaxHealth = 500,
         SurfaceThreatLevel = 12,
     },
     Display = {
@@ -193,7 +193,7 @@ UnitBlueprint{
             FiringRandomnessWhileMoving = 0.2,
             FiringTolerance = 2,
             Label = "MainGun",
-            MaxRadius = 60,
+            MaxRadius = 70,
             MuzzleChargeDelay = 0.2,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 1,

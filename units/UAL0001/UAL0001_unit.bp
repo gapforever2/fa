@@ -318,12 +318,12 @@ UnitBlueprint{
             Slot = "RCH",
         },
         GAP_CrysalisBeamAdvancedAeon = {
-            BuildCostEnergy = 4000,
-            BuildCostMass = 200,
-            BuildTime = 300,
+            BuildCostEnergy = 23000,
+            BuildCostMass = 500,
+            BuildTime = 940,
             Icon = "ecba",
             Name = "<LOC enhancements_0148_faf>Advanced Quantum Disruptor",
-            NewMaxRadius = 30,
+            NewMaxRadius = 28,
             ShowBones = { "Left_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -378,14 +378,13 @@ UnitBlueprint{
             Slot = "LCH",
         },
         HeatSinkAeon = {
-            BuildCostEnergy = 20000,
-            BuildCostMass = 600,
-            BuildTime = 500,
+            BuildCostEnergy = 21500,
+            BuildCostMass = 650,
+            BuildTime = 800,
             Icon = "hsa",
             Name = "<LOC enhancements_0008>Quantum Accelerator",
 			Prerequisite = "GAP_CrysalisBeamAdvancedAeon",
-            NewRateOfFire = 2,
-			NewMaxRadius = 30,
+            NewRateOfFire = 1.4,
             ShowBones = { "Right_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -1028,9 +1027,9 @@ UnitBlueprint{
             MuzzleSalvoSize = 1,
             MuzzleVelocity = 0,
             NukeInnerRingDamage = 2000,
-            NukeInnerRingRadius = 24,
+            NukeInnerRingRadius = 30,
             NukeOuterRingDamage = 500,
-            NukeOuterRingRadius = 20,
+            NukeOuterRingRadius = 40,
             ProjectileId = "/projectiles/AIFQuantumWarhead02/AIFQuantumWarhead02_proj.bp",
             RackBones = {
                 {
@@ -1057,6 +1056,19 @@ UnitBlueprint{
             MaxRadius = 1,
             RateOfFire = 10/10, --10/integer interval in ticks
             WeaponCategory = "Teleport",
+        },
+    },
+	Wreckage = {
+        Blueprint = "/props/DefaultWreckage/DefaultWreckage_prop.bp",
+        EnergyMult = 0,
+        HealthMult = 0.65,
+        MassMult = 0.5,
+        ReclaimTimeMultiplier = 0.85,
+        WreckageLayers = {
+            Land = true,
+            Seabed = true,
+            Sub = true,
+            Water = true,
         },
     },
 }
