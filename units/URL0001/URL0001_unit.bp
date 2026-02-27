@@ -81,6 +81,7 @@ UnitBlueprint{
             "<LOC ability_deathaoe>Volatile",
         },
         AnimationWalk = "/units/url0001/url0001_awalk02.sca",
+		AnimationAction = "/units/url0001/CERDACER_CYB.sca",
         AnimationWalkRate = 1.45,
         IdleEffects = {
             Seabed = {
