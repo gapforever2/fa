@@ -207,6 +207,7 @@ UnitBlueprint{
         BuildCostMass = 2250,
         BuildTime = 10000,
     },
+    
     Footprint = {
         SizeX = 3,
         SizeZ = 5,
@@ -232,10 +233,10 @@ UnitBlueprint{
         UnitName = "<LOC urs0201_name>Salem Class",
     },
     Intel = {
-        RadarRadius = 36,
-        SonarRadius = 32,
-        VisionRadius = 32,
-        WaterVisionRadius = 44,
+        RadarRadius = 40,
+        SonarRadius = 40,
+        VisionRadius = 30,
+        WaterVisionRadius = 38,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 1.8,
@@ -260,6 +261,7 @@ UnitBlueprint{
     SelectionSizeX = 0.65,
     SelectionSizeZ = 3,
     SelectionThickness = 0.22,
+    CollisionOffsetY = -0.4,
     SizeX = 1.2,
     SizeY = 1.2,
     SizeZ = 4.7,
@@ -420,6 +422,7 @@ UnitBlueprint{
             MuzzleSalvoDelay = 0.8,
             MuzzleSalvoSize = 2,
             MuzzleVelocity = 5,
+            NotExclusive = true,
             ProjectileId = "/projectiles/CANTorpedoNanite02/CANTorpedoNanite02_proj.bp",
             ProjectileLifetime = 7,
             ProjectilesPerOnFire = 1,
