@@ -11,88 +11,60 @@ local TDFGaussCannonWeapon = WeaponsFile.TDFLandGaussCannonWeapon
 local TDFRiotWeapon = WeaponsFile.TDFRiotWeapon
 local TAALinkedRailgun = WeaponsFile.TAALinkedRailgun
 local TANTorpedoAngler = WeaponsFile.TANTorpedoAngler
-local TAAFlakArtilleryCannon = import("/lua/terranweapons.lua").TAAFlakArtilleryCannon
 local EffectTemplate = import("/lua/effecttemplates.lua")
 local EffectUtil = import("/lua/effectutilities.lua")
 
-local TShieldLandUnit = import("/lua/terranunits.lua").TShieldLandUnit
 local ExternalFactoryComponent = import("/lua/defaultcomponents.lua").ExternalFactoryComponent
-local ShieldEffectsComponent = import("/lua/defaultcomponents.lua").ShieldEffectsComponent
 local DefaultExplosions = import("/lua/defaultexplosions.lua")
 
 local IsDestroyed = IsDestroyed
-
-local Buff = import("/lua/sim/buff.lua")
 
 ---@class UEL0401 : TMobileFactoryUnit, ExternalFactoryComponent
 ---@field UnitBeingBuilt Unit | nil
 ---@field AttachmentSliderManip moho.SlideManipulator
 ---@field PrepareToBuildManipulator moho.AnimationManipulator
-UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUnit, ShieldEffectsComponent) {
+UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent) {
     PrepareToBuildAnimRate = 5,
     BuildAttachBone = 'Build_Attachpoint',
     FactoryAttachBone = 'ExternalFactoryPoint',
     RollOffBones = { 'Arm_Right03_Build_Emitter', 'Arm_Left03_Build_Emitter', },
 
-	ShieldEffectsBone = 'Spinner',
-    ShieldEffects = {
-        '/effects/emitters/terran_shield_generator_mobile_01_emit.bp',
-        '/effects/emitters/terran_shield_generator_mobile_02_emit.bp',
-    },
-
     ExplosionBones = {
         'Turret_Right01',
-        '1Turret_Right02',
+        'Turret_Right02',
         'Turret_Left01',
-        '1Turret_Left02',
+        'Turret_Left02',
         'Wheel_Right01',
         'Wheel_Right02',
         'Wheel_Left01',
-        '1Wheel_Left02',
-        'AA_Turret_Left',
-        'AA_Turret_Right',
-        'Flak_Turret_Left',
-        'Flak_Turret_Right',
-        'Attachpoint_field01',
-        'Attachpoint_field02',
-        'Attachpoint_field03',
+        'Wheel_Left02',
+        'Turret_Left_AA',
+        'Turret_Right_AA',
+        'Attachpoint01',
+        'Attachpoint02',
+        'Attachpoint03',
         'Bay_Cover',
     },
+
     Weapons = {
         RightTurret01 = ClassWeapon(TDFGaussCannonWeapon) {},
         RightTurret02 = ClassWeapon(TDFGaussCannonWeapon) {},
         LeftTurret01 = ClassWeapon(TDFGaussCannonWeapon) {},
         LeftTurret02 = ClassWeapon(TDFGaussCannonWeapon) {},
-        RiotgunRight01 = ClassWeapon(TDFRiotWeapon) {
+        RightRiotgun = ClassWeapon(TDFRiotWeapon) {
             FxMuzzleFlash = EffectTemplate.TRiotGunMuzzleFxTank
         },
-        RiotgunRight02 = ClassWeapon(TDFRiotWeapon) {
-            FxMuzzleFlash = EffectTemplate.TRiotGunMuzzleFxTank
-        },
-        RiotgunRight03 = ClassWeapon(TDFRiotWeapon) {
-            FxMuzzleFlash = EffectTemplate.TRiotGunMuzzleFxTank
-        },
-        RiotgunLeft01 = ClassWeapon(TDFRiotWeapon) {
-            FxMuzzleFlash = EffectTemplate.TRiotGunMuzzleFxTank
-        },
-        RiotgunLeft02 = ClassWeapon(TDFRiotWeapon) {
-            FxMuzzleFlash = EffectTemplate.TRiotGunMuzzleFxTank
-        },
-        RiotgunLeft03 = ClassWeapon(TDFRiotWeapon) {
+        LeftRiotgun = ClassWeapon(TDFRiotWeapon) {
             FxMuzzleFlash = EffectTemplate.TRiotGunMuzzleFxTank
         },
         RightAAGun = ClassWeapon(TAALinkedRailgun) {},
         LeftAAGun = ClassWeapon(TAALinkedRailgun) {},
         Torpedo = ClassWeapon(TANTorpedoAngler) {},
-        RighFlakGun = ClassWeapon(TAAFlakArtilleryCannon) {},
-        LeftFlakGun = ClassWeapon(TAAFlakArtilleryCannon) {},
     },
 
     ---@param self UEL0401
     OnCreate = function(self)
         TMobileFactoryUnit.OnCreate(self)
-		TShieldLandUnit.OnCreate(self)
-		ShieldEffectsComponent.OnCreate(self)
         local blueprint = self.Blueprint
         self.BuildEffectBones = blueprint.General.BuildBones.BuildEffectBones
         if blueprint.General.BuildBones then
@@ -108,14 +80,12 @@ UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUni
     ---@param layer Layer
     OnStopBeingBuilt = function(self, builder, layer)
         TMobileFactoryUnit.OnStopBeingBuilt(self, builder, layer)
-		TShieldLandUnit.OnStopBeingBuilt(self, builder, layer)
         ExternalFactoryComponent.OnStopBeingBuilt(self, builder, layer)
         self.PrepareToBuildManipulator = CreateAnimator(self)
         self.PrepareToBuildManipulator:PlayAnim(self:GetBlueprint().Display.AnimationBuild, false):SetRate(0)
         self.ReleaseEffectsBag = {}
         self.AttachmentSliderManip = CreateSlider(self, self.BuildAttachBone)
         ChangeState(self, self.IdleState)
-		ForkThread(self.STGamemode, self)
     end,
 
     ---@param self UEL0401
@@ -151,7 +121,6 @@ UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUni
     ---@param old Layer
     OnLayerChange = function(self, new, old)
         TMobileFactoryUnit.OnLayerChange(self, new, old)
-		TShieldLandUnit.OnLayerChange(self, new, old)
         ExternalFactoryComponent.OnLayerChange(self, new, old)
         if self.ExternalFactory then
             if new == 'Land' then
@@ -175,96 +144,6 @@ UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUni
             TMobileFactoryUnit.OnTransportDetach(self, attachBone, unit)
         end
     end,
-	
-	
-	STGamemode = function(self)
-		local GM = true
-		while not self:IsDead() do
-			if not self:IsDead() and self:GetScriptBit('RULEUTC_WeaponToggle') == true and GM == true then
-				self:RemoveCommandCap('RULEUCC_Move')
-				self:RemoveCommandCap('RULEUCC_Patrol')
-				GM = false
-				local wp1 = self:GetWeaponByLabel('RightTurret01')
-				wp1:ChangeMaxRadius(60)
-				local wp2 = self:GetWeaponByLabel('RightTurret02')
-				wp2:ChangeMaxRadius(60)
-				local wp3 = self:GetWeaponByLabel('LeftTurret01')
-				wp3:ChangeMaxRadius(60)
-				local wp4 = self:GetWeaponByLabel('LeftTurret02')
-				wp4:ChangeMaxRadius(60)
-				local DWP1 = self:GetWeaponByLabel('RightTurret01')
-				DWP1:AddDamageMod(100)
-				DWP1:ChangeRateOfFire(10/16.66)
-				DWP1:AddDamageRadiusMod(2)
-				local DWP2 = self:GetWeaponByLabel('RightTurret02')
-				DWP2:AddDamageMod(100)
-				DWP2:ChangeRateOfFire(10/16.66)
-				DWP2:AddDamageRadiusMod(2)
-				local DWP3 = self:GetWeaponByLabel('LeftTurret01')
-				DWP3:AddDamageMod(100)
-				DWP3:ChangeRateOfFire(10/16.66)
-				DWP3:AddDamageRadiusMod(2)
-				local DWP4 = self:GetWeaponByLabel('LeftTurret02')
-				DWP4:AddDamageMod(100)
-				DWP4:ChangeRateOfFire(10/16.66)
-				DWP4:AddDamageRadiusMod(2)
-				self:SetSpeedMult(0)
-				if not Buffs['STHP'] then
-                BuffBlueprint {
-                    Name = 'STHP',
-                    DisplayName = 'STHP',
-                    BuffType = 'ACUBUILDRATE',
-                    Stacks = 'REPLACE',
-                    Duration = -1,
-                    Affects = {
-                        MaxHealth = {
-                            Add = 45000,
-                            Mult = 1.0,
-                        },
-                        Regen = {
-                            Add = 55,
-                            Mult = 1.0,
-                        },
-                    },
-                }
-            end
-			Buff.ApplyBuff(self, 'STHP')
-			elseif not self:IsDead() and self:GetScriptBit('RULEUTC_WeaponToggle') == false and GM == false then
-				self:AddCommandCap('RULEUCC_Move')
-				self:AddCommandCap('RULEUCC_Patrol')
-				self:SetSpeedMult(1)
-				if Buff.HasBuff(self, 'STHP') then
-					Buff.RemoveBuff(self, 'STHP')
-				end
-				GM = true
-				local wp1 = self:GetWeaponByLabel('RightTurret01')
-				wp1:ChangeMaxRadius(100)
-				local wp2 = self:GetWeaponByLabel('RightTurret02')
-				wp2:ChangeMaxRadius(100)
-				local wp3 = self:GetWeaponByLabel('LeftTurret01')
-				wp3:ChangeMaxRadius(100)
-				local wp4 = self:GetWeaponByLabel('LeftTurret02')
-				wp4:ChangeMaxRadius(100)
-				local DWP1 = self:GetWeaponByLabel('RightTurret01')
-				DWP1:AddDamageMod(-100)
-				DWP1:ChangeRateOfFire(10/10.52)
-				DWP1:AddDamageRadiusMod(-2)
-				local DWP2 = self:GetWeaponByLabel('RightTurret02')
-				DWP2:AddDamageMod(-100)
-				DWP2:ChangeRateOfFire(10/10.52)
-				DWP2:AddDamageRadiusMod(-2)
-				local DWP3 = self:GetWeaponByLabel('LeftTurret01')
-				DWP3:AddDamageMod(-100)
-				DWP3:ChangeRateOfFire(10/10.52)
-				DWP3:AddDamageRadiusMod(-2)
-				local DWP4 = self:GetWeaponByLabel('LeftTurret02')
-				DWP4:AddDamageMod(-100)
-				DWP4:ChangeRateOfFire(10/10.52)
-				DWP4:AddDamageRadiusMod(-2)
-			end
-			WaitTicks(8)
-		end
-	end,
 
     IdleState = State {
         ---@param self UEL0401
@@ -490,55 +369,6 @@ UEL0401 = ClassUnit(TMobileFactoryUnit, ExternalFactoryComponent, TShieldLandUni
 
         self:DestroyUnit(overkillRatio)
     end,
-	
-	OnShieldEnabled = function(self)
-		TShieldLandUnit.OnShieldEnabled(self)
-        TMobileFactoryUnit.OnShieldEnabled(self)
-        ShieldEffectsComponent.OnShieldEnabled(self)
-
-        KillThread(self.DestroyManipulatorsThread)
-        if not self.RotatorManipulator then
-            self.RotatorManipulator = CreateRotator(self, 'Spinner', 'y')
-            self.Trash:Add(self.RotatorManipulator)
-        end
-        self.RotatorManipulator:SetAccel(5)
-        self.RotatorManipulator:SetTargetSpeed(30)
-        if not self.AnimationManipulator then
-            local myBlueprint = self:GetBlueprint()
-            self.AnimationManipulator = CreateAnimator(self)
-            self.AnimationManipulator:PlayAnim(myBlueprint.Display.AnimationOpen)
-            self.Trash:Add(self.AnimationManipulator)
-        end
-        self.AnimationManipulator:SetRate(1)
-    end,
-	
-	OnShieldDisabled = function(self)
-		TShieldLandUnit.OnShieldDisabled(self)
-        TMobileFactoryUnit.OnShieldDisabled(self)
-        ShieldEffectsComponent.OnShieldDisabled(self)
-        KillThread(self.DestroyManipulatorsThread)
-        self.DestroyManipulatorsThread = self:ForkThread(self.DestroyManipulators)
-    end,
-	
-	DestroyManipulators = function(self)
-        if self.RotatorManipulator then
-            self.RotatorManipulator:SetAccel(10)
-            self.RotatorManipulator:SetTargetSpeed(0)
-            -- Unless it goes smoothly back to its original position,
-            -- it will snap there when the manipulator is destroyed.
-            -- So for now, we'll just keep it on.
-            --WaitFor( self.RotatorManipulator )
-            --self.RotatorManipulator:Destroy()
-            --self.RotatorManipulator = nil
-        end
-        if self.AnimationManipulator then
-            self.AnimationManipulator:SetRate(-1)
-            WaitFor(self.AnimationManipulator)
-            self.AnimationManipulator:Destroy()
-            self.AnimationManipulator = nil
-        end
-    end,
-	
 }
 
 TypeClass = UEL0401
