@@ -207,9 +207,16 @@ UnitBlueprint{
         BuildCostMass = 2250,
         BuildTime = 10000,
     },
+    AltFootprint = -- water only
+    {
+        SizeX = 2,
+        SizeZ = 8,
+        OccupancyCaps = 8,
+        MinWaterDepth = 1.5,
+    },
     Footprint = {
-        SizeX = 3,
-        SizeZ = 5,
+        SizeX = 2,
+        SizeZ = 8,
     },
     General = {
         CommandCaps = {
@@ -260,9 +267,10 @@ UnitBlueprint{
     SelectionSizeX = 0.65,
     SelectionSizeZ = 3,
     SelectionThickness = 0.22,
-    SizeX = 1.2,
-    SizeY = 1.2,
-    SizeZ = 4.7,
+    CollisionOffsetY = -0.4,
+    SizeX = 1.5,
+    SizeY = 1.4,
+    SizeZ = 5.4,
     StrategicIconName = "icon_ship2_antinavy",
     StrategicIconSortPriority = 155,
     Veteran = {

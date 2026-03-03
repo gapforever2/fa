@@ -20,9 +20,7 @@ UnitBlueprint{
         "LAND",
         "MOBILE",
         "OVERLAYANTIAIR",
-        "OVERLAYRADAR",
         "PRODUCTDL",
-        "RADAR",
         "RECLAIMABLE",
         "SELECTABLE",
         "TECH3",
@@ -35,10 +33,7 @@ UnitBlueprint{
         MaxHealth = 1700,
     },
     Display = {
-        Abilities = { 
-            "<LOC ability_aa>Anti-Air",
-            "<LOC ability_radar>Radar",
-             },
+        Abilities = { "<LOC ability_aa>Anti-Air" },
         AnimationDeath = {
             {
                 Animation = "/units/DALK003/DALK003_death01.sca",
@@ -118,10 +113,7 @@ UnitBlueprint{
         Icon = "land",
         UnitName = "<LOC dalk003_name>Redeemer",
     },
-    Intel = { 
-        VisionRadius = 26,
-        RadarRadius = 70,
-    },
+    Intel = { VisionRadius = 26 },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.35,
     LifeBarSize = 1,

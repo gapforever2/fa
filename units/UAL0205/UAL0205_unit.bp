@@ -20,9 +20,7 @@ UnitBlueprint{
         "LAND",
         "MOBILE",
         "OVERLAYANTIAIR",
-        "OVERLAYRADAR",
         "PRODUCTSC1",
-        "RADAR",
         "RECLAIMABLE",
         "SELECTABLE",
         "TECH2",
@@ -38,7 +36,6 @@ UnitBlueprint{
         Abilities = {
             "<LOC ability_aa>Anti-Air",
             "<LOC ability_hover>Hover",
-            "<LOC ability_radar>Radar",
         },
         IdleEffects = {
             Land = {
@@ -116,10 +113,7 @@ UnitBlueprint{
         Icon = "amph",
         UnitName = "<LOC ual0205_name>Ascendant",
     },
-    Intel = { 
-        VisionRadius = 20, 
-        RadarRadius = 50,
-    },
+    Intel = { VisionRadius = 20 },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.4,
     LifeBarSize = 0.8,

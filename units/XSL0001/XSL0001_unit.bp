@@ -91,6 +91,7 @@ UnitBlueprint{
             "<LOC ability_deathaoe>Volatile",
         },
         AnimationWalk = "/units/xsl0001/xsl0001_awalk.sca",
+		AnimationAction = "/units/xsl0001/CERDACER_SERA.sca",
         AnimationWalkRate = 1.1,
         IdleEffects = {
             Seabed = {
@@ -713,7 +714,7 @@ UnitBlueprint{
         2500,
         3500,
     },
-    VeteranMassMult = 0.3,
+    VeteranMassMult = 0.5,
     Weapon = {
         {
             AboveWaterFireOnly = true,
@@ -952,9 +953,9 @@ UnitBlueprint{
             MuzzleSalvoSize = 1,
             MuzzleVelocity = 0,
             NukeInnerRingDamage = 2000,
-            NukeInnerRingRadius = 24,
+            NukeInnerRingRadius = 30,
             NukeOuterRingDamage = 500,
-            NukeOuterRingRadius = 20,
+            NukeOuterRingRadius = 40,
             ProjectileId = "/effects/entities/InainoEffectController01/InainoEffectController01_proj.bp",
             RackBones = {
                 {
@@ -1046,7 +1047,7 @@ UnitBlueprint{
         Blueprint = "/props/DefaultWreckage/DefaultWreckage_prop.bp",
         EnergyMult = 0,
         HealthMult = 0.65,
-        MassMult = 0.3,
+        MassMult = 0.5,
         ReclaimTimeMultiplier = 0.85,
         WreckageLayers = {
             Land = true,
