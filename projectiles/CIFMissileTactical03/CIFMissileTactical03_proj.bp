@@ -23,7 +23,7 @@ ProjectileBlueprint{
         ImpactEffects = { Type = "Medium02" },
         MeshBlueprint = "/projectiles/CIFMissileTactical01/CIFMissileTactical01_mesh.bp",
         StrategicIconSize = 4,
-        UniformScale = 0.1,
+        UniformScale = 0.25,
     },
     Economy = {
         BuildCostEnergy = 3600,
@@ -36,11 +36,11 @@ ProjectileBlueprint{
     },
     Interface = { HelpText = 0 },
     Physics = {
-        Acceleration = 3,
+        Acceleration = 4,
         DestroyOnWater = true,
-        InitialSpeed = 3,
+        InitialSpeed = 4,
         LifeTime = 30,
-        MaxSpeed = 12,
+        MaxSpeed = 16,
         MaxZigZag = 1,
         RotationalVelocity = 0,
         RotationalVelocityRange = 0,
