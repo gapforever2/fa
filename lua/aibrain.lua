@@ -436,6 +436,24 @@ AIBrain = Class(FactoryManagerBrainComponent, StatManagerBrainComponent, JammerM
     end,
 
     ---@param self AIBrain
+    ---@param status string
+    SetDefeatStatus = function(self, status)
+        self.Status = status
+
+        local selfIndex = self.Army or self:GetArmyIndex()
+        UpdateUnitCap(selfIndex)
+        SimPingOnArmyDefeat(selfIndex)
+
+        if status ~= "Recalled" then
+            RecallOnArmyDefeat(selfIndex)
+        end
+
+        if self.BrainType == 'AI' then
+            DisableAI(self--[[@as BaseAIBrain]])
+        end
+    end,
+
+    ---@param self AIBrain
     OnDraw = function(self)
         self.Status = 'Draw'
     end,
