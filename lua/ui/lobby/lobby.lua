@@ -471,7 +471,7 @@ function GetLocalPlayerData()
     local numGames = argv.numGames
 
     -- For players with fewer than 10 games, force a fixed rating of 100 +/- 0
-    if type(numGames) == 'number' and numGames < 1000 then
+    if type(numGames) == 'number' and numGames < 15 then
         mean = 100
         dev = 10
         pl = 100
