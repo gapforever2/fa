@@ -333,7 +333,7 @@ UnitBlueprint{
                 },
             },
             RackFireTogether = false,
-            RackRecoilDistance = -0.1,
+            RackRecoilDistance = 0,
             RackReloadTimeout = 0,
             RackSalvoChargeTime = 0,
             RackSalvoReloadTime = 0,
