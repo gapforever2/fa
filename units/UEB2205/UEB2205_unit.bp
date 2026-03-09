@@ -12,7 +12,7 @@ UnitBlueprint{
         DoneBeingBuilt = Sound { Bank = 'UEB',        Cue = 'UEB2205_Activate',     LodCutoff = 'UnitMove_LodCutoff' },
         UISelection    = Sound { Bank = 'Interface',  Cue = 'UEF_Select_Gun',       LodCutoff = 'UnitMove_LodCutoff' },
     },
-    AverageDensity = 12800,
+    AverageDensity = 6400,
     BuildIconSortPriority = 130,
     Categories = {
         "ANTINAVY",
@@ -39,8 +39,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Structure",
-        Health = 12800,
-        MaxHealth = 12800,
+        Health = 6400,
+        MaxHealth = 6400,
         SubThreatLevel = 18,
     },
     Display = {
@@ -88,8 +88,8 @@ UnitBlueprint{
         UniformScale = 0.075,
     },
     Economy = {
-        BuildCostEnergy = 9000,
-        BuildCostMass = 1080,
+        BuildCostEnergy = 15000,
+        BuildCostMass = 2250,
         BuildTime = 1400,
         RebuildBonusIds = { "ueb2205" },
     },
@@ -110,9 +110,9 @@ UnitBlueprint{
         UnitName = "<LOC ueb2205_name>Tsunami",
     },
     Intel = {
-        SonarRadius = 36,
+        SonarRadius = 60,
         VisionRadius = 20,
-        WaterVisionRadius = 44,
+        WaterVisionRadius = 45,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.6,
@@ -154,7 +154,8 @@ UnitBlueprint{
             },
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
-            Damage = 180,
+            Damage = 360,
+            DamageRadius = 1,
             DamageType = "Normal",
             DisplayName = "Angler Torpedo",
             FireTargetLayerCapsTable = { Water = "Seabed|Sub|Water" },

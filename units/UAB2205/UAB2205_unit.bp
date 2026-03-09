@@ -12,7 +12,7 @@ UnitBlueprint{
         DoneBeingBuilt = Sound { Bank = 'UAB',        Cue = 'UAB2205_Activate', LodCutoff = 'UnitMove_LodCutoff' },
         UISelection    = Sound { Bank = 'Interface',  Cue = 'Aeon_Select_Gun',  LodCutoff = 'UnitMove_LodCutoff' },
     },
-    AverageDensity = 12200,
+    AverageDensity = 6100,
     BuildIconSortPriority = 130,
     Categories = {
         "AEON",
@@ -39,8 +39,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Structure",
-        Health = 12200,
-        MaxHealth = 12200,
+        Health = 6100,
+        MaxHealth = 6100,
         SubThreatLevel = 18,
     },
     Display = {
@@ -82,8 +82,8 @@ UnitBlueprint{
         UniformScale = 0.45,
     },
     Economy = {
-        BuildCostEnergy = 9000,
-        BuildCostMass = 1080,
+        BuildCostEnergy = 15000,
+        BuildCostMass = 2250,
         BuildTime = 1400,
         RebuildBonusIds = { "uab2205" },
     },
@@ -104,9 +104,9 @@ UnitBlueprint{
         UnitName = "<LOC uab2205_name>Wave Break",
     },
     Intel = {
-        SonarRadius = 36,
+        SonarRadius = 60,
         VisionRadius = 20,
-        WaterVisionRadius = 44,
+        WaterVisionRadius = 45,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.6,
@@ -148,7 +148,8 @@ UnitBlueprint{
             },
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
-            Damage = 180,
+            Damage = 360,
+            DamageRadius = 1,
             DamageType = "Normal",
             DisplayName = "Chrono Torpedo",
             FireTargetLayerCapsTable = { Water = "Seabed|Sub|Water" },
