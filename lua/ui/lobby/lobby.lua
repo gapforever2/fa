@@ -1088,6 +1088,13 @@ function SetSlotInfo(slotNum, playerInfo)
 
     playerInfo.StartSpot = slotNum
 
+    -- For human players with fewer than 10 games, force a fixed rating of 100 +/- 0
+    if playerInfo.Human and type(playerInfo.NG) == 'number' and playerInfo.NG < 15 then
+        playerInfo.MEAN = 100
+        playerInfo.DEV = 15
+        playerInfo.PL = 100
+    end
+
     local slot = GUI.slots[slotNum]
     local isHost = lobbyComm:IsHost()
     local isLocallyOwned = IsLocallyOwned(slotNum)
