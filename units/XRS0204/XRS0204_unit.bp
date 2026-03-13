@@ -177,7 +177,7 @@ UnitBlueprint{
     },
     Intel = {
         RadarStealth = true,
-        SonarRadius = 60,
+        SonarRadius = 50,
         SonarStealth = true,
         VisionRadius = 32,
         WaterVisionRadius = 40,

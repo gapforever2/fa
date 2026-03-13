@@ -145,6 +145,7 @@ UnitBlueprint{
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
             Damage = 50,
+            DamageRadius = 1
             DamageType = "Normal",
             DisplayName = "Kril Torpedo",
             DoTPulses = 5,
@@ -152,7 +153,7 @@ UnitBlueprint{
             FireTargetLayerCapsTable = { Water = "Seabed|Sub|Water" },
             FiringTolerance = 2,
             Label = "Turret01",
-            MaxRadius = 70,
+            MaxRadius = 80,
             MuzzleSalvoDelay = 0.6,
             MuzzleSalvoSize = 6,
             MuzzleVelocity = 5,

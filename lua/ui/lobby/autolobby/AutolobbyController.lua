@@ -23,6 +23,9 @@
 local Utils = import("/lua/system/utils.lua")
 local MapUtil = import("/lua/ui/maputil.lua")
 local GameColors = import("/lua/gamecolors.lua")
+-- Rating defaults (single place to tweak, can be overridden by defining globals in init).
+local NEW_PLAYER_GAMES_THRESHOLD = rawget(_G, 'NEW_PLAYER_GAMES_THRESHOLD') or 10
+local NEW_PLAYER_DISPLAY_RATING = rawget(_G, 'NEW_PLAYER_DISPLAY_RATING') or 100
 
 local MohoLobbyMethods = moho.lobby_methods
 local DebugComponent = import("/lua/shared/components/debugcomponent.lua").DebugComponent
@@ -184,6 +187,10 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         info.DIV = self:GetCommandLineArgumentString("/division", "")
         info.SUBDIV = self:GetCommandLineArgumentString("/subdivision", "")
         info.PL = math.floor(info.MEAN - 3 * info.DEV)
+        -- For new / low-games players force a minimal visible rating in lobby
+        if type(info.NG) == 'number' and info.NG < NEW_PLAYER_GAMES_THRESHOLD then
+            info.PL = NEW_PLAYER_DISPLAY_RATING
+        end
         info.PlayerClan = self:GetCommandLineArgumentString("/clan", "")
 
         return info
@@ -329,8 +336,13 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         local allRatings = {}
 
         for slot, options in pairs(playerOptions) do
-            if options.Human and options.PL then
-                allRatings[options.PlayerName] = options.PL
+            if options.Human then
+                -- For new / low-games players force a minimal visible rating in lobby
+                if type(options.NG) == 'number' and options.NG < NEW_PLAYER_GAMES_THRESHOLD then
+                    allRatings[options.PlayerName] = NEW_PLAYER_DISPLAY_RATING
+                else
+                    allRatings[options.PlayerName] = options.PL or 0
+                end
             end
         end
 
@@ -345,7 +357,7 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         local allDivisions = {}
 
         for slot, options in pairs(playerOptions) do
-            if options.Human and options.PL then
+            if options.Human then
                 if options.DIV ~= "unlisted" then
                     local division = options.DIV
                     if options.SUBDIV and options.SUBDIV ~= "" then
@@ -559,11 +571,19 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
                 WaitSeconds(5.0)
                 if (not IsDestroyed(self)) and self:CanLaunch(self.LaunchStatutes) then
 
+                    -- Army numbers need to be calculated: they are numbered incrementally in slot order.
+                    local slots = {}
+                    for slotIndex, _ in pairs(self.PlayerOptions) do
+                        table.insert(slots, slotIndex)
+                    end
+                    table.sort(slots)
+
                     -- send player options to the server
-                    for slot, playerOptions in self.PlayerOptions do
+                    for armyIndex, slotIndex in ipairs(slots) do
+                        local playerOptions = self.PlayerOptions[slotIndex]
                         local ownerId = playerOptions.OwnerID
                         self:SendPlayerOptionToServer(ownerId, 'Team', playerOptions.Team)
-                        self:SendPlayerOptionToServer(ownerId, 'Army', playerOptions.StartSpot)
+                        self:SendPlayerOptionToServer(ownerId, 'Army', armyIndex)
                         self:SendPlayerOptionToServer(ownerId, 'StartSpot', playerOptions.StartSpot)
                         self:SendPlayerOptionToServer(ownerId, 'Faction', playerOptions.Faction)
                     end
