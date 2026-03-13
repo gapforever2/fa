@@ -2324,6 +2324,9 @@ local function TryLaunch(skipNoObserversCheck)
         if scenarioInfo.AdaptiveMap then
             gameInfo.GameOptions["SpawnMex"] = gameInfo.SpawnMex
         end
+        if gameInfo.GameOptions["CheatsEnabled"] == "true" and singlePlayer then
+            gameInfo.GameOptions["GameSpeed"] = "adjustable"
+        end
 
         HostUtils.SendArmySettingsToServer()
 

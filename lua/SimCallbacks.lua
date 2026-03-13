@@ -43,6 +43,8 @@ local IssueAggressiveMove = IssueAggressiveMove
 local IssueGuard = IssueGuard
 local IssueFerry = IssueFerry
 
+local GetCurrentCommandSourceArmy = SimUtils.GetCurrentCommandSourceArmy
+
 -- upvalue categories for performance
 local CategoriesTransportation = categories.TRANSPORTATION
 
@@ -66,7 +68,18 @@ function DoCallback(name, data, units)
 
     local timeTaken = GetSystemTimeSecondsOnlyForProfileUse() - start
     if (timeTaken > 0.005) then
-        SPEW(string.format("Time to process %s from %d: %f", name, timeTaken, GetCurrentCommandSource() or -2))
+        local commandSourceNickname
+        local commandSourceArmy = GetCurrentCommandSourceArmy()
+        if commandSourceArmy then
+            commandSourceNickname = tostring(ArmyBrains[commandSourceArmy].Nickname)
+        else
+            commandSourceNickname = string.format("Observer (source %d)", GetCurrentCommandSource())
+        end
+        SPEW(string.format("Time to process \"%s\" from %s: %f"
+            , name
+            , commandSourceNickname
+            , timeTaken
+        ))
     end
 end
 
@@ -890,7 +903,7 @@ do
         -- verify selection
         selection = SecureUnits(selection)
         if (not selection) or TableEmpty(selection) then
-            if (GetFocusArmy() == GetCurrentCommandSource()) then
+            if (GetFocusArmy() == GetCurrentCommandSourceArmy()) then
                 print("Unable to interrupt path finding")
             end
 
@@ -900,7 +913,7 @@ do
         -- only apply this to engineers
         local engineers = EntityCategoryFilterDown(categories.ENGINEER + categories.COMMAND, selection)
         if table.empty(engineers) then
-            if (GetFocusArmy() == GetCurrentCommandSource()) then
+            if (GetFocusArmy() == GetCurrentCommandSourceArmy()) then
                 print("Unable to interrupt path finding")
             end
 
@@ -913,7 +926,7 @@ do
         local commandSourceGuard = CommandSourceGuards[commandSource]
 
         if commandSourceGuard and commandSourceGuard + 5 >= gameTick then
-            if (GetFocusArmy() == GetCurrentCommandSource()) then
+            if (GetFocusArmy() == GetCurrentCommandSourceArmy()) then
                 print("Unable to interrupt path finding")
             end
 
@@ -936,7 +949,7 @@ do
         -- verify selection
         selection = SecureUnits(selection)
         if (not selection) or TableEmpty(selection) then
-            if (GetFocusArmy() == GetCurrentCommandSource()) then
+            if (GetFocusArmy() == GetCurrentCommandSourceArmy()) then
                 print("Unable to discharge")
             end
 
@@ -955,7 +968,7 @@ do
         end
 
         if table.empty(unitsWithShields) then
-            if (GetFocusArmy() == GetCurrentCommandSource()) then
+            if (GetFocusArmy() == GetCurrentCommandSourceArmy()) then
                 print("Unable to discharge")
             end
 
@@ -968,7 +981,7 @@ do
         local commandSourceGuard = CommandSourceGuards[commandSource]
 
         if commandSourceGuard and commandSourceGuard + 5 >= gameTick then
-            if (GetFocusArmy() == GetCurrentCommandSource()) then
+            if (GetFocusArmy() == GetCurrentCommandSourceArmy()) then
                 print("Unable to discharge")
             end
 
@@ -1087,7 +1100,7 @@ do
     ---@param data UIShareableBrushStrokeCallbackMessage
     local SyncPainting = function(data)
         -- used to determine the color of the painting
-        data.ShareablePainting.PeerName = GetArmyBrain(GetCurrentCommandSource()).Nickname
+        data.ShareablePainting.PeerName = GetArmyBrain(GetCurrentCommandSourceArmy()).Nickname
 
         Sync.SharePaintingBrushStroke = Sync.SharePaintingBrushStroke or {}
         table.insert(Sync.SharePaintingBrushStroke, data)
@@ -1096,7 +1109,7 @@ do
     ---@param data UIShareableBrushStrokeCallbackMessage
     Callbacks.SharePaintingBrushStroke = function(data)
         local focusArmy = GetFocusArmy()
-        local currentCommandSource = GetCurrentCommandSource()
+        local currentCommandSourceArmy = GetCurrentCommandSourceArmy()
 
         -- spectators are able to see all paintings. We take into account
         -- the original focus army because spectators can change focus army
@@ -1106,7 +1119,7 @@ do
         end
 
         -- allies are able to see each others paintings
-        if IsAlly(focusArmy, currentCommandSource) then
+        if IsAlly(focusArmy, currentCommandSourceArmy) then
             SyncPainting(data)
             return
         end
@@ -1131,7 +1144,6 @@ end
 local function PassesAIAntiCheatCheck()
     return ScenarioInfo.GameHasAIs or PassesAntiCheatCheck()
 end
-
 
 local SpawnedMeshes = {}
 
@@ -1667,8 +1679,14 @@ end
 ---@param data CallbackModeratorEventData
 Callbacks.ModeratorEvent = function(data)
     -- show up in the game logs
-    local brain = GetArmyBrain(GetCurrentCommandSource())
-    SPEW(string.format("Moderator event for %s: %s", tostring(brain.Nickname), tostring(data.Message)))
+    local commandSourceNickname
+    local commandSourceArmy = GetCurrentCommandSourceArmy()
+    if commandSourceArmy then
+        commandSourceNickname = tostring(GetArmyBrain(commandSourceArmy).Nickname)
+    else
+        commandSourceNickname = string.format("Observer (source %d)", GetCurrentCommandSource())
+    end
+    SPEW(string.format("Moderator event for %s: %s", commandSourceNickname, tostring(data.Message)))
 end
 
 --#endregion
