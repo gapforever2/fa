@@ -18,7 +18,9 @@ UnitBlueprint{
         "LAND",
         "MOBILE",
         "OVERLAYANTIAIR",
+        "OVERLAYRADAR",
         "PRODUCTSC1",
+        "RADAR",
         "RECLAIMABLE",
         "SELECTABLE",
         "TECH2",
@@ -31,7 +33,10 @@ UnitBlueprint{
         MaxHealth = 1000,
     },
     Display = {
-        Abilities = { "<LOC ability_aa>Anti-Air" },
+        Abilities = { 
+            "<LOC ability_aa>Anti-Air",
+            "<LOC ability_radar>Radar",
+         },
         Mesh = {
             IconFadeInZoom = 130,
             LODs = {
@@ -98,7 +103,10 @@ UnitBlueprint{
         Icon = "land",
         UnitName = "<LOC url0205_name>Banger",
     },
-    Intel = { VisionRadius = 20 },
+    Intel = { 
+        VisionRadius = 20,
+        RadarRadius = 50,
+    },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.45,
     LifeBarSize = 1,
