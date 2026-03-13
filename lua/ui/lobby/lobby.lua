@@ -471,9 +471,9 @@ function GetLocalPlayerData()
     local numGames = argv.numGames
 
     -- For players with fewer than 10 games, force a fixed rating of 100 +/- 0
-    if type(numGames) == 'number' and numGames < 15 then
+    if type(numGames) == 'number' and numGames < 10 then
         mean = 100
-        dev = 10
+        dev = 0
         pl = 100
     end
 
@@ -1099,6 +1099,13 @@ function SetSlotInfo(slotNum, playerInfo)
     end
 
     playerInfo.StartSpot = slotNum
+
+    -- For human players with fewer than 10 games, force a fixed rating of 100 +/- 0
+    if playerInfo.Human and type(playerInfo.NG) == 'number' and playerInfo.NG < 15 then
+        playerInfo.MEAN = 100
+        playerInfo.DEV = 15
+        playerInfo.PL = 100
+    end
 
     local slot = GUI.slots[slotNum]
     local isHost = lobbyComm:IsHost()
