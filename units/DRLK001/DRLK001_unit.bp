@@ -19,10 +19,8 @@ UnitBlueprint{
         "LAND",
         "MOBILE",
         "OVERLAYANTIAIR",
-        "OVERLAYRADAR",
         "OVERLAYDIRECTFIRE",
         "PRODUCTDL",
-        "RADAR",
         "RECLAIMABLE",
         "SELECTABLE",
         "TECH3",
@@ -37,10 +35,7 @@ UnitBlueprint{
         SurfaceThreatLevel = 10,
     },
     Display = {
-        Abilities = { 
-            "<LOC ability_aa>Anti-Air",
-            "<LOC ability_radar>Radar",
-             },
+        Abilities = { "<LOC ability_aa>Anti-Air" },
         AnimationDeath = {
             {
                 Animation = "/units/DRLK001/DRLK001_death01.sca",
@@ -121,10 +116,7 @@ UnitBlueprint{
         Icon = "land",
         UnitName = "<LOC DRLK001_name>Bouncer",
     },
-    Intel = { 
-        VisionRadius = 26,
-        RadarRadius = 70,
-    },
+    Intel = { VisionRadius = 26 },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.55,
     LifeBarSize = 1,

@@ -180,7 +180,7 @@ UnitBlueprint{
         SonarRadius = 60,
         SonarStealth = true,
         VisionRadius = 32,
-        WaterVisionRadius = 32,
+        WaterVisionRadius = 40,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 1.2,

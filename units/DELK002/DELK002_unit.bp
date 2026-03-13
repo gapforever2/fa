@@ -19,9 +19,7 @@ UnitBlueprint{
         "LAND",
         "MOBILE",
         "OVERLAYANTIAIR",
-        "OVERLAYRADAR",
         "PRODUCTDL",
-        "RADAR",
         "RECLAIMABLE",
         "SELECTABLE",
         "TECH3",
@@ -35,10 +33,7 @@ UnitBlueprint{
         MaxHealth = 1900,
     },
     Display = {
-        Abilities = { 
-            "<LOC ability_aa>Anti-Air",
-            "<LOC ability_radar>Radar",
-             },
+        Abilities = { "<LOC ability_aa>Anti-Air" },
         Mesh = {
             IconFadeInZoom = 130,
             LODs = {
@@ -111,10 +106,7 @@ UnitBlueprint{
         Icon = "land",
         UnitName = "<LOC DELK002_name>Cougar",
     },
-    Intel = { 
-        VisionRadius = 26,
-        RadarRadius = 70,
-    },
+    Intel = { VisionRadius = 26 },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.35,
     LifeBarSize = 1,
