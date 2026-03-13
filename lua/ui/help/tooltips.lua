@@ -125,6 +125,11 @@ Tooltips = {
         description = "",
         keyID = "teleport",
     },
+    play_animation = {
+        title = "<LOC tooltipui0900>Play Animation",
+        description = "<LOC tooltipui0901>Play unit animation (commander only)",
+        keyID = "play_animation",
+    },
     ferry = {
         title = "<LOC tooltipui0026>Ferry",
         description = "",

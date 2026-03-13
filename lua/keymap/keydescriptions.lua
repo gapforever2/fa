@@ -208,6 +208,7 @@ keyDescriptions = {
     ['toggle_objective_screen'] = '<LOC key_desc_0096>Toggles the Objective Window',
     ['toggle_transmission_screen'] = '<LOC key_desc_0097>Toggles the Transmission Window',
     ['toggle_diplomacy_screen'] = '<LOC key_desc_0098>Toggles the Diplomacy Window',
+    ['show_animation_panel'] = '<LOC key_desc_0900>Hold to show animation panel (commander)',
     ['toggle_disconnect_screen'] = '<LOC key_desc_0099>Toggles the Connectivity Screen',
     ['toggle_key_bindings'] = '<LOC key_desc_0100>Toggles the Key Bindings Screen',
     ['toggle_notify_customiser'] = '<LOC key_desc_0388>Toggles the Notify customisation screen',

@@ -49,6 +49,8 @@ local CategoriesTransportation = categories.TRANSPORTATION
 --- List of callbacks that is being populated throughout this file
 ---@type table<string, fun(data: table, units?: Unit[])>
 local Callbacks = {}
+local AnimationPanelCooldownSeconds = 10
+local AnimationPanelNextAllowedByArmy = {}
 
 ---@param name string
 ---@param data table
@@ -289,6 +291,75 @@ Callbacks.AttackMove = function(data, units)
     IssueAggressiveMove(allNonStructures, { x, y, z })
 end
 
+---@param data { Animation?: string }
+---@param selection? Unit[]
+Callbacks.PlayUnitAnimation = function(data, selection)
+    selection = SecureUnits(selection)
+    if not selection or TableEmpty(selection) then
+        return
+    end
+    local commanders = EntityCategoryFilterDown(categories.COMMAND, selection)
+    if not commanders[1] then
+        return
+    end
+    local unit = commanders[1]
+    if not IsEntity(unit) or not OkayToMessWithArmy(unit.Army) then
+        return
+    end
+    local bp = unit:GetBlueprint()
+    local display = bp and bp.Display
+    if not display then
+        return
+    end
+    local animKey = data.Animation or "AnimationWalk"
+    local animPath = display[animKey]
+    if (not animPath or type(animPath) ~= "string") then
+        local function pathFromAnimTable(t)
+            if not t or type(t) ~= "table" then return nil end
+            for _, entry in t do
+                if type(entry) == "table" and type(entry.Animation) == "string" then
+                    return entry.Animation
+                end
+            end
+            return nil
+        end
+        if animKey == "AnimationFold" then
+            animPath = pathFromAnimTable(display.TransportAnimation)
+        elseif animKey == "AnimationUnfold" then
+            animPath = pathFromAnimTable(display.TransportDropAnimation)
+        end
+    end
+    if not animPath or type(animPath) ~= "string" then
+        return
+    end
+
+    local now = GetSystemTimeSecondsOnlyForProfileUse()
+    local nextAllowed = AnimationPanelNextAllowedByArmy[unit.Army] or 0
+    if now < nextAllowed then
+        return
+    end
+    AnimationPanelNextAllowedByArmy[unit.Army] = now + AnimationPanelCooldownSeconds
+
+    local animRate = 1
+    if animKey == "AnimationAction" then
+        animRate = 0.5
+    end
+    local anim = CreateAnimator(unit):PlayAnim(animPath, false):SetRate(animRate)
+    unit.Trash:Add(anim)
+    unit:ForkThread(function()
+        WaitFor(anim)
+        if not anim then return end
+
+        if animKey == "AnimationAction" then
+            anim:SetAnimationFraction(1)
+            anim:SetRate(-animRate)
+            WaitFor(anim)
+        end
+
+        anim:Destroy()
+    end)
+end
+
 --tells a unit to toggle its pointer
 Callbacks.FlagShield = function(data, units)
     units = SecureUnits(units)
@@ -358,6 +429,185 @@ Callbacks.RingWithStorages = function(data, selection)
     end
 
     import("/lua/sim/commands/ringing/ring-with-storages.lua").RingExtractor(extractor, engineers)
+end
+
+do
+    local FindNearestUnit = import("/lua/sim/commands/shared.lua").FindNearestUnit
+    local SortOffsetsByDistanceToPoint = import("/lua/sim/commands/shared.lua").SortOffsetsByDistanceToPoint
+    local SortUnitsByTech = import("/lua/sim/commands/shared.lua").SortUnitsByTech
+    local FindBuildingSkirts = import("/lua/sim/commands/ringing/shared.lua").FindBuildingSkirts
+
+    local BuildOffsets = { { 2, 0 }, { 0, 2 }, { -2, 0 }, { 0, -2 } }
+    local CacheX1 = {}
+    local CacheZ1 = {}
+    local CacheX2 = {}
+    local CacheZ2 = {}
+
+    local BuildLocation = {}
+    local EmptyTable = {}
+    ---@param cx number
+    ---@param cz number
+    ---@param skirtSize number
+    ---@param engineers Unit[]
+    ---@param blueprintId UnitId
+    local function RingAtPosition(cx, cz, skirtSize, engineers, blueprintId)
+        local cx1, cz1, cx2, cz2, buildingSkirtCount = FindBuildingSkirts(cx, cz, skirtSize, CacheX1, CacheZ1, CacheX2,
+            CacheZ2)
+
+        local nearestEngineer = FindNearestUnit(engineers, cx, cz)
+        if nearestEngineer then
+            local ex, _, ez = nearestEngineer:GetPositionXYZ()
+            SortOffsetsByDistanceToPoint(BuildOffsets, cx, cz, ex, ez)
+        end
+
+        local buildLocation = BuildLocation
+        local emptyTable = EmptyTable
+        for _, offset in BuildOffsets do
+            local bx = cx + offset[1]
+            local bz = cz + offset[2]
+
+            buildLocation[1] = bx
+            buildLocation[3] = bz
+            buildLocation[2] = GetTerrainHeight(bx, bz)
+            local freeToBuild = engineers[1]:GetAIBrain():CanBuildStructureAt(blueprintId, buildLocation)
+            if freeToBuild then
+                for k = 1, buildingSkirtCount do
+                    if bx > cx1[k] and bx < cx2[k] then
+                        if bz > cz1[k] and bz < cz2[k] then
+                            freeToBuild = false
+                            break
+                        end
+                    end
+                end
+            end
+
+            if freeToBuild then
+                IssueBuildAllMobile(engineers, buildLocation, blueprintId, emptyTable)
+            end
+        end
+    end
+    ---
+    ---@param data { target?: EntityId, Target?: EntityId, ClearCommands?: boolean, ringStorages?: boolean, RingStorages?: boolean, pos?: any, mexBp?: string, storageBp?: string, DelayTicks?: integer }
+    ---@param selection Unit[]
+    Callbacks.RebuildMexWithStorages = function(data, selection)
+        selection = SecureUnits(selection)
+        if (not selection) or TableEmpty(selection) then
+            return
+        end
+
+        local engineers = EntityCategoryFilterDown(categories.ENGINEER, selection)
+        if TableEmpty(engineers) then
+            return
+        end
+        if data.pos and data.mexBp then
+            local pos = data.pos
+            local cx = pos[1] or pos.x
+            local cz = pos[3] or pos.z or pos[2]
+            if not (cx and cz) then
+                return
+            end
+
+            local mexBp = data.mexBp
+            if not __blueprints[mexBp] then
+                return
+            end
+
+            if data.ClearCommands then
+                IssueClearCommands(engineers)
+            end
+
+            local delay = data.DelayTicks or 0
+            local cx0, cz0 = cx, cz
+
+            ForkThread(function()
+                if delay > 0 then
+                    WaitTicks(delay)
+                end
+
+                local buildPos = { cx0, GetTerrainHeight(cx0, cz0), cz0 }
+
+                IssueBuildAllMobile(engineers, buildPos, mexBp, EmptyTable)
+
+                local storageBp = data.storageBp
+                if storageBp and __blueprints[storageBp] and engineers[1] and engineers[1]:CanBuild(storageBp) then
+                    local mexBlueprint = __blueprints[mexBp]
+                    local skirtSize = (mexBlueprint.Physics and mexBlueprint.Physics.SkirtSizeX) or 1
+                    RingAtPosition(cx0, cz0, skirtSize, engineers, storageBp)
+                end
+            end)
+
+            return
+        end
+
+        local targetId = data.target or data.Target
+        local extractor = (targetId and GetUnitById(targetId)) --[[@as Unit]]
+        if (not extractor) or
+            (not extractor.Army) or
+            (not OkayToMessWithArmy(extractor.Army)) or
+            (not EntityCategoryContains(categories.MASSEXTRACTION, extractor))
+        then
+            return
+        end
+
+        local extractorBp = extractor.Blueprint and extractor.Blueprint.BlueprintId or extractor:GetBlueprint().BlueprintId
+        if not extractorBp then
+            return
+        end
+
+        local prefix = extractorBp:sub(1, 2)
+        if not prefix then
+            return
+        end
+
+        local mexBp = prefix .. 'b1302'
+        local storageBp = prefix .. 'b1106'
+
+        if (not __blueprints[mexBp]) then
+            return
+        end
+        SortUnitsByTech(engineers)
+        local builders = {}
+        local assistants = {}
+        for _, eng in engineers do
+            if eng.CanBuild and eng:CanBuild(mexBp) then
+                TableInsert(builders, eng)
+            else
+                TableInsert(assistants, eng)
+            end
+        end
+
+        if TableEmpty(builders) then
+            return
+        end
+        if data.ClearCommands then
+            IssueClearCommands(engineers)
+        end
+
+        local ringStorages = (data.ringStorages ~= false) and (data.RingStorages ~= false)
+
+        local cx, _, cz = extractor:GetPositionXYZ()
+        local buildPos = { cx, GetTerrainHeight(cx, cz), cz }
+
+        ForkThread(function()
+            if not IsDestroyed(extractor) then
+                extractor:Kill()
+            end
+
+            WaitTicks(2)
+
+            IssueBuildAllMobile(builders, buildPos, mexBp, EmptyTable)
+
+            if ringStorages and __blueprints[storageBp] and builders[1]:CanBuild(storageBp) then
+                local mexBlueprint = __blueprints[mexBp]
+                local skirtSize = (mexBlueprint.Physics and mexBlueprint.Physics.SkirtSizeX) or 1
+                RingAtPosition(cx, cz, skirtSize, builders, storageBp)
+            end
+
+            if not TableEmpty(assistants) then
+                IssueGuard(assistants, builders[1])
+            end
+        end)
+    end
 end
 
 ---@param data { target: EntityId, allFabricators: boolean }

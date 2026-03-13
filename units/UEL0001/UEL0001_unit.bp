@@ -86,6 +86,7 @@ UnitBlueprint{
             "<LOC ability_deathaoe>Volatile",
         },
         AnimationWalk = "/units/uel0001/uel0001_a001.sca",
+		AnimationAction = "/units/uel0001/CERDACER.sca",
         AnimationWalkRate = 1.7,
         AttackReticleSize = 55,
         DamageEffects = {
