@@ -208,7 +208,7 @@ UnitBlueprint{
             FiringTolerance = 2,
             Label = "Disintigrator",
             LeadTarget = true,
-            MaxRadius = 20,
+            MaxRadius = 24,
             MuzzleChargeDelay = 0.1,
             MuzzleSalvoDelay = 0.3,
             MuzzleSalvoSize = 3,
