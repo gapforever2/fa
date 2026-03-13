@@ -127,9 +127,9 @@ UnitBlueprint{
     },
     Intel = {
         RadarRadius = 40,
-        SonarRadius = 40,
-        VisionRadius = 30,
-        WaterVisionRadius = 38,
+        SonarRadius = 44,
+        VisionRadius = 32,
+        WaterVisionRadius = 39,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 2.15,
