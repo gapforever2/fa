@@ -124,8 +124,8 @@ UnitBlueprint{
         UnitName = "<LOC xes0102_name>Cooper",
     },
     Intel = {
-        SonarRadius = 72,
-        VisionRadius = 32,
+        SonarRadius = 60,
+        VisionRadius = 30,
         WaterVisionRadius = 56,
     },
     LifeBarHeight = 0.075,

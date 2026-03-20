@@ -23,6 +23,15 @@ local SetWeaponPriorities = import("/lua/keymap/misckeyactions.lua").SetWeaponPr
 local LoadIntoTransports = import("/lua/ui/game/hotkeys/load-in-transport.lua").LoadIntoTransports
 local CommandMode = import("/lua/ui/game/commandmode.lua")
 local Construction = import("/lua/ui/game/construction.lua")
+local AnimationPanel = false
+local GROUP_DEV_ROLES = {
+    mod = true,
+    bal = true,
+    admin = true,
+    yt = true,
+    bs = true,
+}
+local canUseAnimationPanelCached = nil
 
 controls = import("/lua/ui/controls.lua").Get()
 
@@ -110,6 +119,35 @@ end
 local orderCheckboxMap = false
 ---@type UserUnit[]
 local currentSelection = nil
+
+local function GetAnimationPanelModule()
+    if not AnimationPanel then
+        AnimationPanel = import("/lua/ui/game/animationpanel.lua")
+    end
+    return AnimationPanel
+end
+
+local function CanUseAnimationPanel()
+    if canUseAnimationPanelCached == nil then
+        local arg = GetCommandLineArg("/group", 1)
+        if not arg or not arg[1] then
+            canUseAnimationPanelCached = false
+        else
+            local role = string.lower(tostring(arg[1]))
+            canUseAnimationPanelCached = GROUP_DEV_ROLES[role] == true
+        end
+    end
+    return canUseAnimationPanelCached
+end
+
+local function AnimationPanelOrderBehavior(self, modifiers)
+    if modifiers and modifiers.Left then
+        local panel = GetAnimationPanelModule()
+        if panel and panel.Toggle then
+            panel.Toggle()
+        end
+    end
+end
 
 -- Helper function to create order bitmaps
 -- Note, your bitmaps must be in /game/orders/ and have the standard button naming convention
@@ -1126,6 +1164,7 @@ local defaultOrdersTable = {
     RULEUCC_Capture = {             helpText = "capture",           bitmapId = 'convert',               preferredSlot = 13, behavior = StandardOrderBehavior},
     RULEUCC_Repair = {              helpText = "repair",            bitmapId = 'repair',                preferredSlot = 14, behavior = StandardOrderBehavior},
     RULEUCC_Dock = {                helpText = "dock",              bitmapId = 'dock',                  preferredSlot = 14, behavior = DockOrderBehavior},
+    RULEUCC_AnimationPanel = {      helpText = "AnimationPanel",              bitmapId = 'intel-counter',                  preferredSlot = 13, behavior = AnimationPanelOrderBehavior},
 
     DroneL = {                      helpText = "drone",             bitmapId = 'unload02',              preferredSlot = 10, behavior = DroneBehavior,               initialStateFunc = DroneInit},
     DroneR = {                      helpText = "drone",             bitmapId = 'unload02',              preferredSlot = 11, behavior = DroneBehavior,               initialStateFunc = DroneInit},
@@ -1637,6 +1676,11 @@ function SetAvailableOrders(availableOrders, availableToggles, newSelection)
     -- Apply any overrides
     ApplyOverrides(standardOrdersTable, newSelection)
 
+    if CanUseAnimationPanel() and newSelection and not table.empty(newSelection) and table.getn(newSelection) == 1
+        and EntityCategoryContains(categories.COMMAND, newSelection[1]) then
+        table.insert(availableOrders, "RULEUCC_AnimationPanel")
+    end
+
     CreateCommonOrders(availableOrders)
 
     local numValidOrders = 0
@@ -1661,6 +1705,7 @@ function SetAvailableOrders(availableOrders, availableToggles, newSelection)
     elseif controls.bg.Mini then
         controls.bg.Mini(false)
     end
+
 end
 
 function CreateControls()

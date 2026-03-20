@@ -216,23 +216,23 @@ UAL0001 = ClassUnit(ACUUnit) {
          end
         elseif enh == 'GAP_CrysalisBeamAdvancedAeon' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
-            wep:ChangeMaxRadius(bp.NewMaxRadius)
+            wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
             local oc = self:GetWeaponByLabel('OverCharge')
-            oc:ChangeMaxRadius(bp.NewMaxRadius)
+            oc:ChangeMaxRadius(bp.NewMaxRadius or 35)
             local aoc = self:GetWeaponByLabel('AutoOverCharge')
-            aoc:ChangeMaxRadius(bp.NewMaxRadius)
+            aoc:ChangeMaxRadius(bp.NewMaxRadius or 35)
             local cd = self:GetWeaponByLabel('ChronoDampener')
-            cd:ChangeMaxRadius(bp.NewMaxRadius)
+            cd:ChangeMaxRadius(bp.NewMaxRadius or 35)
         elseif enh == 'GAP_CrysalisBeamAdvancedAeonRemove' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
             local bpDisrupt = self:GetBlueprint().Weapon[1].MaxRadius
-            wep:ChangeMaxRadius(bpDisrupt)
+            wep:ChangeMaxRadius(bpDisrupt or 22)
             local oc = self:GetWeaponByLabel('OverCharge')
-            oc:ChangeMaxRadius(bpDisrupt)
+            oc:ChangeMaxRadius(bpDisrupt or 22)
             local aoc = self:GetWeaponByLabel('AutoOverCharge')
-            aoc:ChangeMaxRadius(bpDisrupt)
+            aoc:ChangeMaxRadius(bpDisrupt or 22)
             local cd = self:GetWeaponByLabel('ChronoDampener')
-            cd:ChangeMaxRadius(bpDisrupt)
+            cd:ChangeMaxRadius(bpDisrupt or 22)
 		elseif enh == 'GAP_CrysalisBeamAdaptiveAeon' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
             wep:ChangeMaxRadius(bp.NewMaxRadius)
@@ -258,28 +258,28 @@ UAL0001 = ClassUnit(ACUUnit) {
         -- Heat Sink Augmentation
         elseif enh == 'HeatSinkAeon' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
-            wep:ChangeRateOfFire(bp.NewRateOfFire)
+            wep:ChangeRateOfFire(bp.NewRateOfFire or 2)
             local wep = self:GetWeaponByLabel('RightDisruptor')
-            wep:ChangeMaxRadius(bp.NewMaxRadius)
+            wep:ChangeMaxRadius(bp.NewMaxRadius or 30)
             local oc = self:GetWeaponByLabel('OverCharge')
-            oc:ChangeMaxRadius(bp.NewMaxRadius)
+            oc:ChangeMaxRadius(bp.NewMaxRadius or 30)
             local aoc = self:GetWeaponByLabel('AutoOverCharge')
-            aoc:ChangeMaxRadius(bp.NewMaxRadius)
+            aoc:ChangeMaxRadius(bp.NewMaxRadius or 30)
             local cd = self:GetWeaponByLabel('ChronoDampener')
-            cd:ChangeMaxRadius(bp.NewMaxRadius)
+            cd:ChangeMaxRadius(bp.NewMaxRadius or 30)
         elseif enh == 'HeatSinkAeonRemove' then
             local wep = self:GetWeaponByLabel('RightDisruptor')
             local bpDisrupt = self:GetBlueprint().Weapon[1].RateOfFire
-            wep:ChangeRateOfFire(bpDisrupt)
+            wep:ChangeRateOfFire(bpDisrupt or 1)
             local wep = self:GetWeaponByLabel('RightDisruptor')
             local bpDisrupt = self:GetBlueprint().Weapon[1].MaxRadius
-            wep:ChangeMaxRadius(bpDisrupt)
+            wep:ChangeMaxRadius(bpDisrupt or 22)
             local oc = self:GetWeaponByLabel('OverCharge')
-            oc:ChangeMaxRadius(bpDisrupt)
+            oc:ChangeMaxRadius(bpDisrupt or 22)
             local aoc = self:GetWeaponByLabel('AutoOverCharge')
-            aoc:ChangeMaxRadius(bpDisrupt)
+            aoc:ChangeMaxRadius(bpDisrupt or 22)
             local cd = self:GetWeaponByLabel('ChronoDampener')
-            cd:ChangeMaxRadius(bpDisrupt)
+            cd:ChangeMaxRadius(bpDisrupt or 22)
         -- Enhanced Sensor Systems
         elseif enh == 'EnhancedSensorsAeon' then
             self:SetIntelRadius('Vision', bp.NewVisionRadius or 104)

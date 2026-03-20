@@ -99,6 +99,7 @@ defaultKeyMap = {
     ['Shift-Q']             = 'zoom_in_fast',
     ['Shift-W']             = 'zoom_out_fast',
     ['T']                   = 'track_unit',
+    ['Alt-T']                = 'show_animation_panel',
     ['Ctrl-Shift-T']        = 'track_unit_minimap',
     ['Ctrl-Alt-T']          = 'track_unit_second_mon',
     ['V']                   = 'reset_camera',

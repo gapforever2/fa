@@ -12,7 +12,7 @@ UnitBlueprint{
         Killed         = Sound { Bank = 'XSL_Destroy',    Cue = 'XSB_Destroy_Lrg_PreDestroy', LodCutoff = 'UnitMove_LodCutoff' },
         UISelection    = Sound { Bank = 'SeraphimSelect', Cue = 'Seraphim_Select_gun',        LodCutoff = 'UnitMove_LodCutoff' },
     },
-    AverageDensity = 9600,
+    AverageDensity = 4800,
     BuildIconSortPriority = 130,
     Categories = {
         "ANTINAVY",
@@ -41,8 +41,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Structure",
-        Health = 9600,
-        MaxHealth = 9600,
+        Health = 4800,
+        MaxHealth = 4800,
         SubThreatLevel = 18,
     },
     Display = {
@@ -88,8 +88,8 @@ UnitBlueprint{
         UniformScale = 0.05,
     },
     Economy = {
-        BuildCostEnergy = 9000,
-        BuildCostMass = 1080,
+        BuildCostEnergy = 15000,
+        BuildCostMass = 2250,
         BuildTime = 1400,
         RebuildBonusIds = { "xsb2205" },
     },
@@ -110,9 +110,9 @@ UnitBlueprint{
         UnitName = "<LOC xsb2205_name>Uosthu",
     },
     Intel = {
-        SonarRadius = 36,
+        SonarRadius = 60,
         VisionRadius = 20,
-        WaterVisionRadius = 44,
+        WaterVisionRadius = 45,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 1.1,
@@ -153,7 +153,8 @@ UnitBlueprint{
             },
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
-            Damage = 242,
+            Damage = 424,
+            DamageRadius = 1,
             DamageType = "Normal",
             DisplayName = "Heavy Cavitation Torpedo Cluster",
             FireTargetLayerCapsTable = { Water = "Seabed|Sub|Water" },

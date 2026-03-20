@@ -34,7 +34,6 @@ UnitBlueprint{
         "OVERLAYDIRECTFIRE",
         "OVERLAYINDIRECTFIRE",
         "OVERLAYRADAR",
-        "OVERLAYSONAR",
         "PRODUCTSC1",
         "RECLAIMABLE",
         "SELECTABLE",
@@ -58,7 +57,6 @@ UnitBlueprint{
         Abilities = {
             "<LOC ability_aa>Anti-Air",
             "<LOC ability_radar>Radar",
-            "<LOC ability_sonar>Sonar",
             "<LOC ability_tacmissiledef>Tactical Missile Defense",
         },
         AnimationDeath = {
@@ -150,9 +148,8 @@ UnitBlueprint{
     },
     Intel = {
         RadarRadius = 152,
-        SonarRadius = 120,
         VisionRadius = 64,
-        WaterVisionRadius = 60,
+        WaterVisionRadius = 0,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 2.45,

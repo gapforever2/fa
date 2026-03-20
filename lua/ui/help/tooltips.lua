@@ -125,6 +125,11 @@ Tooltips = {
         description = "",
         keyID = "teleport",
     },
+    play_animation = {
+        title = "<LOC tooltipui0900>Play Animation",
+        description = "<LOC tooltipui0901>Play unit animation (commander only)",
+        keyID = "play_animation",
+    },
     ferry = {
         title = "<LOC tooltipui0026>Ferry",
         description = "",
@@ -375,7 +380,7 @@ Tooltips = {
     },
     chat_filter = {
         title = "<LOC tooltipui0401>Chat Filters",
-        description = "<LOC tooltipui0402>Show or hide messages and paintings from players",
+        description = "<LOC tooltipui0402>Show or hide messages from players",
     },
     chat_color = {
         title = "<LOC tooltipui0403>Chat Color",

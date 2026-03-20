@@ -186,7 +186,7 @@ UnitBlueprint{
             FiringTolerance = 0.1,
             Label = "RocketBackpack",
             LeadTarget = true,
-            MaxRadius = 34,
+            MaxRadius = 38,
             MuzzleSalvoDelay = 0.1,
             MuzzleSalvoSize = 3,
             MuzzleVelocity = 25,
