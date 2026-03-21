@@ -239,7 +239,7 @@ local adj = {           -- SIZE4     SIZE8   SIZE12    SIZE16   SIZE20
         EnergyProduction=   {0.25, 0.125, 0.083334, 0.0625, 0.05},
     },
     T1MassStorage={
-        MassProduction=     {0.125, 0.0625, 0.03, 0.03125, 0.025},
+        MassProduction=     {0.167, 0.0625, 0.03, 0.03125, 0.025},
     },
 }
 
