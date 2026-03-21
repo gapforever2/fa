@@ -34,7 +34,7 @@ local Commit = 'unknown'    -- The use of `'` instead of `"` is **intentional**
 
 --#endregion
 
-local Version = "11"
+local Version = "12"
 ---@alias PATCH "11"
 ---@alias VERSION "11"
 ---@return PATCH    # Game release
