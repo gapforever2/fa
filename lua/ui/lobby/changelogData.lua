@@ -1,8 +1,20 @@
 ---@type number
-last_version = 10
+last_version = 11
 
 ---@type PatchNotes[]
 gamePatches = {
+     {
+        version = 11,
+        name = "Storm",
+        patchnoteUrl = "balances/11.html",
+        description = {
+            "# Баланс-патч 11 (21 марта 2026)",
+            "",
+            "★«Шторм» Представляет собой Корректирование юнитов",
+			"★Полный список изменений – на сайте. Нажмите на кнопку \"Описание патча\" (Patch info).",
+            "Баланс-команда: LIN,Armagedon,Angel_Fugu.",
+        }
+    },
     {
         version = 10,
         name = "Royal times",
