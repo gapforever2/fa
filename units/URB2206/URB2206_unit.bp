@@ -35,8 +35,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Structure",
-        Health = 5600,
-        MaxHealth = 5600,
+        Health = 5800,
+        MaxHealth = 5800,
         SubThreatLevel = 23,
     },
     Display = {
@@ -101,9 +101,9 @@ UnitBlueprint{
         UnitName = "<LOC urb2205_name>Nanite Torpedo Array",
     },
     Intel = {
-        SonarRadius = 36,
+        SonarRadius = 60,
         VisionRadius = 20,
-        WaterVisionRadius = 44,
+        WaterVisionRadius = 45,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.75,
