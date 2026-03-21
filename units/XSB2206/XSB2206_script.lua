@@ -45,7 +45,7 @@ XSB2206 = ClassUnit(SStructureUnit) {
 	DepthWatcher = function(self)
         self.sinkingFromBuild = true
 
-        local sinkFor = 2.7
+        local sinkFor = 2.15
         while self.sinkProjectile and sinkFor > 0 do
             WaitTicks(1)
             sinkFor = sinkFor - 0.1
