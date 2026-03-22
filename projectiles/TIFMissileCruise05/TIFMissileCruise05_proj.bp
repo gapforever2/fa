@@ -1,4 +1,4 @@
-ProjectileBlueprint {
+	ProjectileBlueprint {
     Audio = {
         Impact        = Sound { Bank = 'Impacts', Cue = 'UEF_Expl_Med_Impact', LodCutoff = 'Weapon_LodCutoff' },
         ImpactTerrain = Sound { Bank = 'Impacts', Cue = 'Impact_Land_Gen_UEF', LodCutoff = 'Weapon_LodCutoff' },
@@ -13,8 +13,8 @@ ProjectileBlueprint {
         "UEF",
     },
     Defense = {
-        Health = 1,
-        MaxHealth = 1,
+        Health = 2,
+        MaxHealth = 2,
     },
     DesiredShooterCap = 2,
     Display = {
