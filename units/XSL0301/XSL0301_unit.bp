@@ -352,6 +352,8 @@ UnitBlueprint{
             NewOmniRadius = 30,
             NewVisionRadius = 30,
             Slot = "RCH",
+			UpgradeEffectBones = { "Back_Upgrade" },
+            UpgradeUnitAmbientBones = { "Torso" },
         },
         EnhancedSensorsRemove = {
             BuildCostEnergy = 1,
@@ -373,6 +375,8 @@ UnitBlueprint{
             Icon = "medu",
             Name = "<LOC enhancements_0165_gaf>Medusa",
             Slot = "LCH",
+			UpgradeEffectBones = { "Back_Upgrade" },
+            UpgradeUnitAmbientBones = { "Torso" },
         },
         MedusaRemove = {
             BuildCostEnergy = 1,
