@@ -45,7 +45,7 @@
         InitialSpeed = 3,
         LifeTime = 30,
         MaxSpeed = 16,
-        MaxZigZag = 10,
+        MaxZigZag = 1,
         RotationalVelocity = 0,
         RotationalVelocityRange = 0,
         TrackTarget = true,
@@ -53,6 +53,6 @@
         TurnRate = 0,
         UseGravity = false,
         VelocityAlign = true,
-        ZigZagFrequency = 8,
+        ZigZagFrequency = 2,
     },
 }
