@@ -498,6 +498,8 @@ UnitBlueprint{
             MaintenanceConsumptionPerSecondEnergy = 10000,
             Name = "<LOC enhancements_0035>Personal Teleporter",
             Slot = "LCH",
+			UpgradeEffectBones = { "Back_Upgrade" },
+            UpgradeUnitAmbientBones = { "Torso" },
         },
         TeleporterRemove = {
             BuildCostEnergy = 1,
