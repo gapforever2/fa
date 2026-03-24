@@ -32,8 +32,9 @@ Description = {
     ['uel0301-rj'] = "<LOC Unit_Description_0020> Radar Jammer creates false radar images. Countered by Omni sensors.",
     ['uel0301-isb'] = "<LOC Unit_Description_0021> Increases SACU's resource generation.",
     ['uel0301-sre'] = "<LOC Unit_Description_0022> Greatly expands the range of the standard on-board SACU sensor systems.",
-    ['uel0301-acu'] = "<LOC Unit_Description_0023> Rapidly cools any weapon mounted onto the SACU. Increases rate of fire.",
+    ['uel0301-col'] = "<LOC Unit_Description_0023> Rapidly cools any weapon mounted onto the SACU. Increases rate of fire.",
     ['uel0301-heo'] = "<LOC Unit_Description_0024> Equips the standard SACU Heavy plasma cannon with area-of-effect damage.",
+    ['uel0301-dga'] = "<LOC Unit_Description_0001_gaf> Adds an additional weapon Double Gun, which causes SACU to shoot with both hands.",
 
     -- UEF -- Support Commander Presets
     ['uel0301_BubbleShield'] = "<LOC uel0301_BubbleShield_help> Support Armored Command Unit. Enhanced during construction with the bubble shield generator enhancement.",
@@ -42,6 +43,7 @@ Description = {
     ['uel0301_IntelJammer'] = "<LOC uel0301_IntelJammer_help> Support Armored Command Unit. Enhanced during construction with the radar jammer and enhanced sensor system enhancements.",
     ['uel0301_Rambo'] = "<LOC uel0301_Rambo_help> Support Armored Command Unit. Enhanced during construction with a personal shield, energy accelerator and heavy plasma refractor enhancements.",
     ['uel0301_RAS'] = "<LOC uel0301_RAS_help> Support Armored Command Unit. Enhanced during construction with a Resource Allocation System.",
+    ['uel0301_RASE'] = "<LOC uel0301_RASE_help> Support Armored Command Unit. Enhanced during construction with a Resource Allocation System and Pod Engineer module.",
 
     -- UEF -- Land Units
     ['uel0101'] = "<LOC Unit_Description_0025> Fast, lightly armored reconnaissance vehicle. Armed with a machine gun and a state-of-the-art sensor suite.",
@@ -177,15 +179,16 @@ Description = {
 
     -- CYBRAN -- Support Commander Units/Upgrades
     ['url0301'] = "<LOC Unit_Description_0115> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
-    ['url0301-cfs'] = "<LOC Unit_Description_0116> Cloaks the SACU from optical sensors. Can be detected by Omni Sensors. Requires Energy to run.",
-    ['url0301-emp'] = "<LOC Unit_Description_0117> EMP burst effectively disables enemy units for a few seconds.",
-    ['url0301-fc'] = "<LOC Unit_Description_0118> Greatly enhances the pulse laser's cohesion, almost doubling its damage output.",
-    ['url0301-nms'] = "<LOC Unit_Description_0119> Adds AA defensive system.",
+    ['url0301-cfs'] = "<LOC Unit_Description_0116> Personal camouflage system completely hides the battery from visual detection by optical sensors, sonars and radars.\nUnmasked by an all-wave sensor.\nConsumes a large amount of energy -3500.\nIncreases health by 11000",
+    ['url0301-emp'] = "<LOC Unit_Description_0117_gaf> Additional weapon Disintegrator Allows you to shoot at the hall from three enhanced shots with the effect of stunning and damage of 700.\nStun: (Radius-Duration) for t1,t2,t3,saku (4-3)(3.5-2)(3-1)(3-0.3).\nDPS: 636", --Disintegrator
+    ['url0301-fc'] = "<LOC Unit_Description_0118> Increases the firing range of primary and secondary weapons.\nFiring range 25-->35",
+    ['url0301-nms'] = "<LOC Unit_Description_0119> Adds an anti-air SAM weapon system.\n\nNanite Missile System - DPS: 365, Range: 60.",
     ['url0301-ras'] = "<LOC Unit_Description_0120> Increases SACU's resource generation.",
     ['url0301-ses'] = "<LOC Unit_Description_0121> Speeds up all engineering-related functions.",
-    ['url0301-srs'] = "<LOC Unit_Description_0122> Greatly increases the speed at which the SACU repairs itself.",
-    ['url0301-sfs'] = "<LOC Unit_Description_0123> Hides the SACU from radar. Requires Energy to run.",
-
+    ['url0301-srs'] = "<LOC Unit_Description_0122> Significantly increases the speed of repair of the SACU armor, and also strengthens the armor. \nThe most powerful, but expensive nano regen of all SACU\n+400 HP/s, + 9000 HP",
+    ['url0301-sfs'] = "<LOC Unit_Description_0123> Hides the SACU from radar.\nRequires Energy to run (-100).",
+    ['url0301-saa'] = "<LOC Unit_Description_0002_gaf> The main gun of the SACU is equipped with a cooling module, which allows it to fire twice as often.\nDPS: 300-->600", --Rapid Fire
+    
     -- CYBRAN -- Support Commander Presets
     ['url0301_AntiAir'] = "<LOC url0301_AntiAir_help> Support Armored Command Unit. Enhanced during construction with the nanite missile system enhancement.",
     ['url0301_Cloak'] = "<LOC url0301_Cloak_help> Support Armored Command Unit. Enhanced during construction with the personal cloaking generator and dis-integrator amplifier enhancements.",
@@ -193,6 +196,7 @@ Description = {
     ['url0301_Engineer'] = "<LOC url0301_Engineer_help> Support Armored Command Unit. Enhanced during construction with the rapid fabricator enhancement.",
     ['url0301_Rambo'] = "<LOC url0301_Rambo_help> Support Armored Command Unit. Enhanced during construction with the EMP burst, dis-integrator amplifier and nano-repair system enhancements.",
     ['url0301_RAS'] = "<LOC url0301_RAS_help> Support Armored Command Unit. Enhanced during construction with a Resource Allocation System.",
+    ['url0301_RASE'] = "<LOC url0301_RASE_help> Support Armored Command Unit. Enhanced during construction with a Resource Allocation System and Engineer module.",
     ['url0301_Stealth'] = "<LOC url0301_Stealth_help> Support Armored Command Unit. Enhanced during construction with the personal stealth generator enhancement.",
 
     -- CYBRAN -- Land Units
@@ -341,21 +345,23 @@ Description = {
 
     -- AEON -- Support Commander Units/Upgrades
     ['ual0301'] = "<LOC Unit_Description_0167> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
-    ['ual0301-efm'] = "<LOC Unit_Description_0168> Speeds up all engineering-related functions.",
+    ['ual0301-efm'] = "<LOC Unit_Description_0168> Speeds up all engineering-related functions.\n\nBuildpower: 56-->112",
     ['ual0301-ras'] = "<LOC Unit_Description_0169> Increases SACU's resource generation.",
     ['ual0301-sp'] = "<LOC Unit_Description_0170> SACU is sacrificed and its Mass is added to a structure. This destroys the SACU.",
-    ['ual0301-tsg'] = "<LOC Unit_Description_0171> Creates a protective shield around the SACU.",
-    ['ual0301-phtsg'] = "<LOC Unit_Description_0172> Upgrades the SACU's protective shield. Requires Energy to run.",
-    ['ual0301-ss'] = "<LOC Unit_Description_0173> Equips the standard SACU's Reacton cannon with area-of-effect damage.",
+    ['ual0301-tsg'] = "<LOC Unit_Description_0171> Creates a protective shield around the SACU.\nEnergy consumed for support: -300 Energy/s \nShield strength: 20000 HP \nShield regen: 40 HP/s \nFull shield restoration: 150 sec. \nShield activation: 5 sec.",
+    ['ual0301-phtsg'] = "<LOC Unit_Description_0172> Greatly improves Personal Shield HP and regeneration. \nEnergy consumed for support: -600 Energy/s \nShield strength: 40000 HP \nShield regen: 120 HP/s \nFull shield restoration: 200 sec. \nShield activation: 5 sec.",
+    ['ual0301-ss'] = "<LOC Unit_Description_0173> Increases the firing range of all SACU guns, making it the longest-ranged in its class. Improves the standard SACU gun with a shockwave effect.\nFiring range: 30-->40\nMain gun splash: 0-->4",
     ['ual0301-sic'] = "<LOC Unit_Description_0174> Greatly increases the speed at which the SACU repairs itself.",
     ['ual0301-pqt'] = "<LOC Unit_Description_0175> Adds teleporter. Requires considerable Energy to activate.",
+    ['ual0301-rdmr'] = "<LOC Unit_Description_0003_gaf> The Redeemer secondary weapon allows the ACP to fire a boost shot that deals 1800 damage.\nDPS: 600 \n(With this upgrade, the engineering module is lost)", 
 
     -- AEON -- Support Commander Presets
     ['ual0301_Engineer']     = "<LOC ual0301_Engineer_help> Support Armored Command Unit. Enhanced during construction with rapid fabrication enhancement.",
     ['ual0301_NanoCombat'] = "<LOC ual0301_NanoCombat_help> Support Armored Command Unit. Enhanced during construction with the reacton refractor and nano-repair system enhancements.",
     ['ual0301_Rambo'] = "<LOC ual0301_Rambo_help> Support Armored Command Unit. Enhanced during construction with a heavy personal shield and the reacton refractor enhancements.",
     ['ual0301_RAS'] = "<LOC ual0301_RAS_help> Support Armored Command Unit. Enhanced during construction with a Resource Allocation System.",
-    ['ual0301_ShieldCombat'] = "<LOC ual0301_ShieldCombat_help> Support Armored Command Unit. Enhanced during construction with a personal shield and the reacton refractor enhancements.",
+    ['ual0301_RASE'] = "<LOC ual0301_RASE_help> Support Armored Command Unit. Enhanced during construction with a Resource Allocation System and Engineer module.",
+    ['ual0301_ShieldCombat'] = "<LOC ual0301_Special_help> Support Armored Command Unit. Enhanced during construction with a personal shield and the reacton refractor enhancements.",
     ['ual0301_SimpleCombat'] = "<LOC ual0301_SimpleCombat_help> Support Armored Command Unit. Enhanced during construction with the reacton refractor enhancement.",
 
     -- AEON -- Land Units
@@ -488,14 +494,15 @@ Description = {
     ['xsl0001-tml'] = "<LOC Unit_Description_0432> Mounts a tactical cruise missile launcher onto the back of the ACU.",
 
     -- SERAPHIM -- Support Commander Units/Upgrades
-    ['xsl0301'] = "<LOC Unit_Description_0433> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
+    ['xsl0301'] = "<LOC Unit_Description_0433> Universal combat engineering bot.\nInitial resource production differs significantly from other SACU, but the cost of SACU without presets increases.\n+3 mass/sec and +300 energy/sec.",
     ['xsl0301-tmu'] = "<LOC Unit_Description_0434> Mounts a tactical cruise missile launcher onto the back of the SACU.",
-    ['xsl0301-dss'] = "<LOC Unit_Description_0435> Increases the speed at which the SACU repairs itself. Also increases hit points.",
-    ['xsl0301-sre'] = "<LOC Unit_Description_0436> Greatly expands the range of the standard on-board SACU sensor systems, including Omni.",
-    ['xsl0301-efm'] = "<LOC Unit_Description_0437> Speeds up all engineering-related functions.",
-    ['xsl0301-sp'] = "<LOC Unit_Description_0438> Adds a personal shield generator to the SACU.",
+    ['xsl0301-dss'] = "<LOC Unit_Description_0435> Significantly speeds up the restoration of the SACU armor, and also almost doubles its durability.\nHealth regeneration: +250 HP/s, Health: +14000 HP",
+    ['xsl0301-sre'] = "<LOC Unit_Description_0436> The firing range of weapons and the radius of the SACU sensors are significantly increased.\nRadius of the omni radar: 16-->60.\nRadius of vision: 26-->36.\nRadius of vision in water: 24-->36.\n\nFiring range: 25-->35.",
+    ['xsl0301-efm'] = "<LOC Unit_Description_0437> Enhances the engineering functions of the SACU.\nConstruction speed: 56-->98.",
+    ['xsl0301-sp'] = "<LOC Unit_Description_0438> Installs a personal shield on the battery.\nEnergy consumed for support: -300.\nShield durability: 20000 HP \nShield regeneration: 22 HP/s \nFull shield restoration: 160 sec. \nShield activation: 5 sec.",
     ['xsl0301-pqt'] = "<LOC Unit_Description_0439> Adds teleporter. Requires considerable Energy to activate.",
-    ['xsl0301-oc'] = "<LOC Unit_Description_0440> Single shot destroys most units. Consumes large amount of Energy.",
+    ['xsl0301-oc'] = "<LOC Unit_Description_0440> Expands the arsenal of the SACU with the Gun Overload function, similar to the ability of the BMK.\nDamage to units max: 10000. 6 batteries = 60000 energy.\nDamage to units min: 1600. 1 battery = 7500 energy.\nDamage to buildings (fixed): 800.\nDamage to commanders (fixed): 400.\nOvercharge recharge: 10 seconds.\nAUTO overcharge recharge: 12 seconds.",
+    ['xsl0301-medu'] = "<LOC Unit_Description_0004_gaf> Adds the Medusa machine gun with SACU homing projectiles.\nDPS = 1200.\n(This upgrade causes the engineering module to be lost)",
 
     -- SERAPHIM -- Support Commander Presets
     ['xsl0301_AdvancedCombat'] = "<LOC xsl0301_AdvancedCombat_help> Support Armored Command Unit. Enhanced during construction with the enhanced sensor system, nano-repair system and overcharge enhancements.",

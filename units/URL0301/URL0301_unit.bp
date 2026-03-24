@@ -247,6 +247,17 @@ UnitBlueprint{
             SortCategory = "SORTECONOMY",
             UnitName = "<LOC url0301_RAS_name>SACU (RAS preset)",
         },
+        RASE = {
+            Description = "<LOC url0301_RASE_desc>SACU (RAS and Engineer preset)",
+            BuildIconSortPriority = 30,
+            Enhancements = { 
+                "ResourceAllocation",
+                "Switchback",
+            },
+            HelpText = "<LOC url0301_RASE_help>Support Armored Command Unit. Enhanced during construction with a Resource Allocation System and Engineer module.",
+            SortCategory = "SORTECONOMY",
+            UnitName = "<LOC url0301_RASE_name>SACU (RAS and Engineer module.)",
+        },
         Rambo = {
             Description = "<LOC url0301_Rambo_desc>Support Armored Command Unit (Rambo preset)",
             BuildIconSortPriority = 25,
@@ -277,11 +288,11 @@ UnitBlueprint{
     },
     Enhancements = {
         CloakingGenerator = {
-            BuildCostEnergy = 200000,
-            BuildCostMass = 5000,
-            BuildTime = 14000,
+            BuildCostEnergy = 176200,
+            BuildCostMass = 3600,
+            BuildTime = 13440,
             Icon = "cfs",
-            MaintenanceConsumptionPerSecondEnergy = 1500,
+            MaintenanceConsumptionPerSecondEnergy = 1520,
             Name = "<LOC enhancements_0089>Personal Cloaking Generator",
             NewHealth = 15500,
             Prerequisite = "StealthGenerator",
@@ -350,8 +361,8 @@ UnitBlueprint{
             Slot = "RCH",
         },
         DisintigratorGun = {
-            BuildCostEnergy = 90000,
-            BuildCostMass = 3300,
+            BuildCostEnergy = 70000,
+            BuildCostMass = 2300,
             BuildTime = 5040,
             Icon = "emp",
             Name = "<LOC enhancements_0159_gaf>Disintegrator",
@@ -482,9 +493,9 @@ UnitBlueprint{
             Slot = "Back",
         },
         Switchback = {
-            BuildCostEnergy = 51100,
-            BuildCostMass = 800,
-            BuildTime = 1680,
+            BuildCostEnergy = 12800,
+            BuildCostMass = 560,
+            BuildTime = 1120,
             Icon = "ses",
             Name = "<LOC enhancements_0109>Rapid Fabricator",
             BuildableCategoryAdds = "BUILTBYTIER3ENGINEER CYBRAN",
@@ -554,7 +565,7 @@ UnitBlueprint{
     Physics = {
         DragCoefficient = 0.2,
         LayerChangeOffsetHeight = -0.9,
-        MaxAcceleration = 2.1,
+        MaxAcceleration = 2.5,
         MaxBrake = 2,
         MaxSpeed = 2,
         MaxSpeedReverse = 0,
