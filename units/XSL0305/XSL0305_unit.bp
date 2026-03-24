@@ -201,7 +201,7 @@ UnitBlueprint{
                 Water = "Land|Water|Seabed",
             },
             Label = "DummyWeapon",
-            MaxRadius = 60,
+            MaxRadius = 65,
             RackBones = {
                 {
                     MuzzleBones = { "Muzzle" },
@@ -333,7 +333,7 @@ UnitBlueprint{
                 },
             },
             RackFireTogether = false,
-            RackRecoilDistance = -0.1,
+            RackRecoilDistance = 0,
             RackReloadTimeout = 0,
             RackSalvoChargeTime = 0,
             RackSalvoReloadTime = 0,

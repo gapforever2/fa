@@ -12,7 +12,7 @@ UnitBlueprint{
         DoneBeingBuilt = Sound { Bank = 'URB',        Cue = 'URB2205_Activate',  LodCutoff = 'UnitMove_LodCutoff' },
         UISelection    = Sound { Bank = 'Interface',  Cue = 'Cybran_Select_Gun', LodCutoff = 'UnitMove_LodCutoff' },
     },
-    AverageDensity = 11600,
+    AverageDensity = 5600,
     BuildIconSortPriority = 130,
     Categories = {
         "ANTINAVY",
@@ -39,8 +39,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Structure",
-        Health = 11600,
-        MaxHealth = 11600,
+        Health = 5600,
+        MaxHealth = 5600,
         SubThreatLevel = 23,
     },
     Display = {
@@ -71,7 +71,7 @@ UnitBlueprint{
         Tarmacs = {
             {
                 Albedo = "Tarmacs/Tar6x_cybran_01_albedo",
-                DeathLifetime = 300,
+                DeathLifetime = 400,
                 FadeOut = 150,
                 Length = 6.4,
                 Normal = "Tarmacs/Tar6x_cybran_01_normals",
@@ -83,8 +83,8 @@ UnitBlueprint{
         UniformScale = 0.17,
     },
     Economy = {
-        BuildCostEnergy = 9000,
-        BuildCostMass = 1080,
+        BuildCostEnergy = 15000,
+        BuildCostMass = 2250,
         BuildTime = 1400,
         RebuildBonusIds = { "urb2205" },
     },
@@ -145,7 +145,8 @@ UnitBlueprint{
             },
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
-            Damage = 60,
+            Damage = 120,
+            DamageRadius = 1,
             DamageType = "Normal",
             DisplayName = "Nanite Torpedo",
             DoTPulses = 5,

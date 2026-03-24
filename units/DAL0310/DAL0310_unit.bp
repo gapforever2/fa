@@ -52,7 +52,7 @@ UnitBlueprint {
         'TANK',
         'OVERLAYDIRECTFIRE',
     },
-    CollisionOffsetZ = 0.1,
+    CollisionOffsetZ = 0.5,
     Defense = {
         AirThreatLevel = 0,
         ArmorType = 'Normal',

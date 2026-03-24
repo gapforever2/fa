@@ -1,8 +1,47 @@
 ---@type number
-last_version = 9
+last_version = 12
 
 ---@type PatchNotes[]
 gamePatches = {
+	{
+        version = 12,
+        name = "Storm",
+        patchnoteUrl = "balances/11.html",
+        description = {
+            "# Баг фикс 12 (21 марта 2026)",
+            "",
+            "★«Шторм» Представляет собой Корректирование юнитов",
+			"★Полный список изменений – на сайте. Нажмите на кнопку \"Описание патча\" (Patch info).",
+            "Баланс-команда: LIN,Armagedon,Angel_Fugu.",
+        }
+	},
+    {
+        version = 11,
+        name = "Storm",
+        patchnoteUrl = "balances/11.html",
+        description = {
+            "# Баланс-патч 11 (21 марта 2026)",
+            "",
+            "★«Шторм» Представляет собой Корректирование юнитов",
+			"★Полный список изменений – на сайте. Нажмите на кнопку \"Описание патча\" (Patch info).",
+            "Баланс-команда: LIN,Armagedon,Angel_Fugu.",
+        }
+    },
+    {
+        version = 10,
+        name = "Royal times",
+        patchnoteUrl = "balances/10.html",
+        description = {
+            "# Баланс-патч 10 (4 февраля 2026)",
+            "",
+            "★«Начало новых времен» Представляет собой Корректирование юнитов",
+            "★Нерф снайперов.",
+            "★Откат фетбоя.",
+            "★Изменения Эон дезинтегратора щитов.",
+			"★Полный список изменений – на сайте. Нажмите на кнопку \"Описание патча\" (Patch info).",
+            "Баланс-команда: LIN,Armagedon,Angel_Fugu.",
+        }
+    },
     {
         version = 9,
         name = "Royal times",

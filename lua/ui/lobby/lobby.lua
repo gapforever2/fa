@@ -215,98 +215,6 @@ for it1212 in string.gmatch(argv.foe_list, "[^,]+") do
    foe_it1212 = foe_it1212 + 1
 end
 
--- Server-issued lobby mute: the FAF client can launch the game with /mute for muted players.
--- We propagate that status to other peers via PlayerData so everyone can render it.
-local lobbyMuteArgPresent = HasCommandLineArg('/mute')
-local serverMutedByUID = {} -- [uid] = boolean
-
-local function ToBool(v)
-    if v == nil then
-        return nil
-    end
-
-    local t = type(v)
-    if t == 'boolean' then
-        return v
-    elseif t == 'number' then
-        return v ~= 0
-    elseif t == 'string' then
-        local s = string.lower(v)
-        return s == 'true' or s == '1' or s == 'yes' or s == 'y' or s == 'on'
-    end
-
-    -- Fallback: Lua truthiness
-    return v and true or false
-end
-
-local function IsPlayerLocallyMuted(playerInfo)
-    if not playerInfo or not playerInfo.PlayerName then
-        return false
-    end
-
-    for _, mutedPlayerName in foe_list_ do
-        if mutedPlayerName == playerInfo.PlayerName then
-            return true
-        end
-    end
-
-    return false
-end
-
-local function IsPlayerGloballyMuted(playerInfo)
-    if not playerInfo then
-        return false
-    end
-
-    -- Prefer a propagated field, but accept a few likely variants for compatibility.
-    local v = playerInfo.LobbyMuted
-    if v == nil then v = playerInfo.ServerMuted end
-    if v == nil then v = playerInfo.GlobalMuted end
-    if v == nil then v = playerInfo.Muted end
-
-    local b = ToBool(v)
-    if b ~= nil then
-        return b
-    end
-
-    -- Fallback: use a host-broadcasted map keyed by uid (doesn't depend on PlayerData serialization).
-    if playerInfo.OwnerID and serverMutedByUID[playerInfo.OwnerID] ~= nil then
-        return serverMutedByUID[playerInfo.OwnerID]
-    end
-
-    -- Backwards compatible: only the local client knows /mute via argv.
-    return lobbyMuteArgPresent and playerInfo.PlayerName == localPlayerName
-end
-
-local function ShouldShowMuteIcon(playerInfo)
-    return IsPlayerLocallyMuted(playerInfo) or IsPlayerGloballyMuted(playerInfo)
-end
-
---- Returns a tooltip table describing the mute status for the given player.
--- @param playerInfo The player data table.
--- @return A table with 'text' and 'body' keys suitable for Tooltip.AddControlTooltip, or nil if not muted.
-local function GetMuteTooltip(playerInfo)
-    local isLocal = IsPlayerLocallyMuted(playerInfo)
-    local isGlobal = IsPlayerGloballyMuted(playerInfo)
-
-    if not isLocal and not isGlobal then
-        return nil
-    end
-
-    local title = LOC("<LOC lobby_mute_tooltip_title>Muted")
-    local body
-
-    if isLocal and isGlobal then
-        body = LOC("<LOC lobby_mute_tooltip_both>This player is muted locally (by you) and globally (by server).")
-    elseif isLocal then
-        body = LOC("<LOC lobby_mute_tooltip_local>This player is muted locally by you.")
-    else
-        body = LOC("<LOC lobby_mute_tooltip_global>This player is muted globally by the server.")
-    end
-
-    return {text = title, body = body}
-end
-
 local playerRating = math.floor(Trueskill.round2((argv.playerMean - 3 * argv.playerDeviation) / 100.0) * 100)
 
 local function ParseWhisper(params)
@@ -557,6 +465,18 @@ end
 --- Get a PlayerData object for the local player, configured using data from their profile.
 function GetLocalPlayerData()
     local version, gametype, commit = import("/lua/version.lua").GetVersionData()
+    local mean = argv.playerMean
+    local dev = argv.playerDeviation
+    local pl = playerRating
+    local numGames = argv.numGames
+
+    -- For players with fewer than 10 games, force a fixed rating of 100 +/- 0
+    if type(numGames) == 'number' and numGames < 10 then
+        mean = 100
+        dev = 10
+        pl = 100
+    end
+
     return PlayerData(
         {
             PlayerName = localPlayerName,
@@ -565,10 +485,10 @@ function GetLocalPlayerData()
             PlayerColor = GetSanitisedLastColor(),
             Faction = GetSanitisedLastFaction(),
             PlayerClan = argv.playerClan,
-            PL = playerRating,
-            NG = argv.numGames,
-            MEAN = argv.playerMean,
-            DEV = argv.playerDeviation,
+            PL = pl,
+            NG = numGames,
+            MEAN = mean,
+            DEV = dev,
             Country = argv.PrefLanguage,
             Avatar = argv.Urlava,
             TooltipAvatar = argv.Tlpava,
@@ -576,9 +496,8 @@ function GetLocalPlayerData()
             Version = version,
             GameType = gametype,
             Commit = commit,
-            LobbyMuted = lobbyMuteArgPresent,
         }
-)
+    )
 end
 
 --- Compute an estimation of the rating of the given AI. The values originate from 'aitypes.lua'
@@ -1049,12 +968,11 @@ end
 
 function GetPlayerDisplayName(playerInfo)
     local playerName = playerInfo.PlayerName
-    local display = playerName
     if playerInfo.PlayerClan ~= "" then
-        display = string.format("[%s] %s", playerInfo.PlayerClan, playerName)
+        return string.format("[%s] %s", playerInfo.PlayerClan, playerName)
+    else
+        return playerName
     end
-
-    return display
 end
 
 -- Refresh (with a sledgehammer) all the items in the observer list.
@@ -1181,6 +1099,13 @@ function SetSlotInfo(slotNum, playerInfo)
     end
 
     playerInfo.StartSpot = slotNum
+
+    -- For human players with fewer than 10 games, force a fixed rating of 100 +/- 0
+    if playerInfo.Human and type(playerInfo.NG) == 'number' and playerInfo.NG < 15 then
+        playerInfo.MEAN = 100
+        playerInfo.DEV = 15
+        playerInfo.PL = 100
+    end
 
     local slot = GUI.slots[slotNum]
     local isHost = lobbyComm:IsHost()
@@ -1320,19 +1245,6 @@ function SetSlotInfo(slotNum, playerInfo)
     if wasConnected(playerInfo.OwnerID) or isLocallyOwned or not playerInfo.Human then
         slot.name:SetTitleText(GetPlayerDisplayName(playerInfo))
         slot.name._text:SetFont('Arial Gras', 15)
-        -- show/hide mute icon safely
-        local iconPath = UIUtil.UIFile('/textures/ui/common/icons/mute.dds')
-        if slot.muteIcon and DiskGetFileInfo(iconPath) then
-            if ShouldShowMuteIcon(playerInfo) then
-                slot.muteIcon:Show()
-                local muteTooltip = GetMuteTooltip(playerInfo)
-                if muteTooltip then
-                    Tooltip.AddControlTooltip(slot.muteIcon, muteTooltip)
-                end
-            else
-                slot.muteIcon:Hide()
-            end
-        end
         if not table.find(ConnectionEstablished, playerName) then
             if playerInfo.Human and not isLocallyOwned then
                 AddChatText(LOCF("<LOC Engine0004>Connection to %s established.", playerName))
@@ -1349,18 +1261,6 @@ function SetSlotInfo(slotNum, playerInfo)
     else
         slot.name:SetTitleText(LOCF('<LOC Engine0005>Connecting to %s...', playerName))
         slot.name._text:SetFont('Arial Gras', 11)
-        local iconPath = UIUtil.UIFile('/textures/ui/common/icons/mute.dds')
-        if slot.muteIcon and DiskGetFileInfo(iconPath) then
-            if ShouldShowMuteIcon(playerInfo) then
-                slot.muteIcon:Show()
-                local muteTooltip = GetMuteTooltip(playerInfo)
-                if muteTooltip then
-                    Tooltip.AddControlTooltip(slot.muteIcon, muteTooltip)
-                end
-            else
-                slot.muteIcon:Hide()
-            end
-        end
     end
 
     slot.faction:Show()
@@ -1399,38 +1299,6 @@ function SetSlotInfo(slotNum, playerInfo)
         slot.KinderCountry:SetTexture(UIUtil.UIFile('/countries/'..playerInfo.Country..'.dds'))
 
         Tooltip.AddControlTooltip(slot.KinderCountry, {text=LOC("<LOC lobui_0413>Country"), body=LOC(CountryTooltips[playerInfo.Country])})
-    end
-
-    -- Mute column icon (same column semantics as Country but separate column)
-    do
-        local mutePath = UIUtil.UIFile('/textures/ui/common/icons/mute.dds')
-        if DiskGetFileInfo(mutePath) then
-            if not slot.KinderMute then
-                -- container that takes the column space and the slot height
-                local muteGroup = Group(slot)
-                slot.KinderMute = muteGroup
-                LayoutHelpers.SetWidth(muteGroup, COLUMN_WIDTHS[6])
-                muteGroup.Height:Set(slot.Height)
-                slot:AddChild(muteGroup)
-
-                -- the actual icon, fixed size and vertically centered
-                local muteIcon = Bitmap(muteGroup, mutePath)
-                slot.KinderMuteIcon = muteIcon
-                LayoutHelpers.SetDimensions(muteIcon, 18, 18)
-                LayoutHelpers.AtCenterIn(muteIcon, muteGroup)
-
-                muteGroup:Hide()
-            end
-            if ShouldShowMuteIcon(playerInfo) then
-                slot.KinderMute:Show()
-                local muteTooltip = GetMuteTooltip(playerInfo)
-                if muteTooltip and slot.KinderMuteIcon then
-                    Tooltip.AddControlTooltip(slot.KinderMuteIcon, muteTooltip)
-                end
-            else
-                slot.KinderMute:Hide()
-            end
-        end
     end
 
     UpdateSlotBackground(slotNum)
@@ -2475,6 +2343,9 @@ local function TryLaunch(skipNoObserversCheck)
         if scenarioInfo.AdaptiveMap then
             gameInfo.GameOptions["SpawnMex"] = gameInfo.SpawnMex
         end
+        if gameInfo.GameOptions["CheatsEnabled"] == "true" and singlePlayer then
+            gameInfo.GameOptions["GameSpeed"] = "adjustable"
+        end
 
         HostUtils.SendArmySettingsToServer()
 
@@ -2929,14 +2800,13 @@ function CreateSlotsUI(makeLabel)
     local ColumnLayout = import("/lua/ui/controls/columnlayout.lua").ColumnLayout
 
     -- The dimensions of the columns used for slot UI controls.
-    -- Inserted a dedicated 'Mute' column after Country with same width as Country.
-     local COLUMN_POSITIONS = {1, 21, 47, 92, 137, 157, 400, 445, 515, 585, 657, 709, 749}
-    local COLUMN_WIDTHS = {20, 20, 45, 45, 20, 241, 40, 62, 59, 59, 62, 62, 51}
+     local COLUMN_POSITIONS = {1, 21, 47, 91, 133, 380, 425, 495, 565, 637, 709, 749}
+    local COLUMN_WIDTHS = {20, 20, 45, 45, 241, 40, 62, 59, 59, 62, 62, 51}
 
     local labelGroup = ColumnLayout(GUI.playerPanel, COLUMN_POSITIONS, COLUMN_WIDTHS)
 
     GUI.labelGroup = labelGroup
-    LayoutHelpers.SetDimensions(labelGroup, 771, 21)
+    LayoutHelpers.SetDimensions(labelGroup, 791, 21)
     LayoutHelpers.AtLeftTopIn(labelGroup, GUI.playerPanel, 5, 5)
 
     local slotLabel = makeLabel("--", 14)
@@ -2950,10 +2820,6 @@ function CreateSlotsUI(makeLabel)
 
     local numGamesLabel = makeLabel("G", 14)
     labelGroup:AddChild(numGamesLabel)
-
-    -- Mute column label (after Games)
-    local muteLabel = makeLabel("M", 14)
-    labelGroup:AddChild(muteLabel)
 
     local nameLabel = makeLabel(LOC("<LOC NICKNAME>Nickname"), 14)
     labelGroup:AddChild(nameLabel)
@@ -3068,31 +2934,12 @@ function CreateSlotsUI(makeLabel)
         Tooltip.AddControlTooltip(numGamesText, 'num_games')
         newSlot:AddChild(numGamesText)
 
-        -- MUTE column (placed after Games, before Nickname)
-        do
-            local mutePath = UIUtil.UIFile('/textures/ui/common/icons/mute.dds')
-            if DiskGetFileInfo(mutePath) then
-                local muteGroup = Group(newSlot)
-                newSlot.KinderMute = muteGroup
-                LayoutHelpers.SetWidth(muteGroup, COLUMN_WIDTHS[6])
-                muteGroup.Height:Set(newSlot.Height)
-                newSlot:AddChild(muteGroup)
-
-                local muteBmp = Bitmap(muteGroup, mutePath)
-                newSlot.KinderMuteIcon = muteBmp
-                LayoutHelpers.SetDimensions(muteBmp, 18, 18)
-                LayoutHelpers.AtCenterIn(muteBmp, muteGroup)
-
-                muteGroup:Hide()
-            end
-        end
-
         -- Name
         local nameLabel = Combo(newSlot, 14, 16, true, nil, "UI_Tab_Rollover_01", "UI_Tab_Click_01")
         newSlot.name = nameLabel
         nameLabel._text:SetFont('Arial Gras', 15)
         newSlot:AddChild(nameLabel)
-        LayoutHelpers.SetWidth(nameLabel, COLUMN_WIDTHS[6])
+        LayoutHelpers.SetWidth(nameLabel, COLUMN_WIDTHS[5])
         -- left deal with name clicks
         nameLabel.OnEvent = defaultHandler
         nameLabel.OnClick = function(self, index, text)
@@ -3106,13 +2953,11 @@ function CreateSlotsUI(makeLabel)
                 associatedMarker.indicator:Stop()
             end
         end
-        
-        -- (mute overlay handled inside Country column; nothing to add here)
 
         -- Avatar
         local avatar = Bitmap(newSlot)
         newSlot.KinderAvatar = avatar
-        LayoutHelpers.SetWidth(avatar, COLUMN_WIDTHS[7])
+        LayoutHelpers.SetWidth(avatar, COLUMN_WIDTHS[6])
         newSlot:AddChild(avatar)
 
     -- Color
@@ -3124,7 +2969,7 @@ function CreateSlotsUI(makeLabel)
         )
         newSlot.color = colorSelector
         newSlot:AddChild(colorSelector)
-        LayoutHelpers.SetWidth(colorSelector, COLUMN_WIDTHS[8])
+        LayoutHelpers.SetWidth(colorSelector, COLUMN_WIDTHS[7])
 
         colorSelector.OnClick = function(self, index)
             local playerInfo = gameInfo.PlayerOptions[curRow]
@@ -3175,7 +3020,7 @@ function CreateSlotsUI(makeLabel)
         newSlot.faction = factionSelector
         newSlot.AvailableFactions = factionList
         newSlot:AddChild(factionSelector)
-        LayoutHelpers.SetWidth(factionSelector, COLUMN_WIDTHS[9])
+        LayoutHelpers.SetWidth(factionSelector, COLUMN_WIDTHS[8])
         factionSelector.OnClick = function(self, index)
             SetPlayerOption(curRow, 'Faction', index)
             if curRow == FindSlotForID(FindIDForName(localPlayerName)) then
@@ -3201,7 +3046,7 @@ function CreateSlotsUI(makeLabel)
         teamSelector._titleColor = 'White'
         newSlot.team = teamSelector
         newSlot:AddChild(teamSelector)
-        LayoutHelpers.SetWidth(teamSelector, COLUMN_WIDTHS[10])
+        LayoutHelpers.SetWidth(teamSelector, COLUMN_WIDTHS[9])
         teamSelector.OnClick = function(self, index, text)
             Tooltip.DestroyMouseoverDisplay()
             SetPlayerOption(curRow, 'Team', index)
@@ -3214,7 +3059,7 @@ function CreateSlotsUI(makeLabel)
         local barMin = 0
         local CPUGroup = Group(newSlot)
         newSlot.CPUGroup = CPUGroup
-        LayoutHelpers.SetWidth(CPUGroup, COLUMN_WIDTHS[11])
+        LayoutHelpers.SetWidth(CPUGroup, COLUMN_WIDTHS[10])
         CPUGroup.Height:Set(newSlot.Height)
         newSlot:AddChild(CPUGroup)
         local CPUSpeedBar = StatusBar(CPUGroup, barMin, barMax, false, false,
@@ -3234,7 +3079,7 @@ function CreateSlotsUI(makeLabel)
         barMin = 0
         local pingGroup = Group(newSlot)
         newSlot.pingGroup = pingGroup
-        LayoutHelpers.SetWidth(pingGroup, COLUMN_WIDTHS[12])
+        LayoutHelpers.SetWidth(pingGroup, COLUMN_WIDTHS[11])
         pingGroup.Height:Set(newSlot.Height)
         newSlot:AddChild(pingGroup)
         local pingStatus = StatusBar(pingGroup, barMin, barMax, false, false,
@@ -3249,8 +3094,6 @@ function CreateSlotsUI(makeLabel)
 
         -- Ready Checkbox
         local readyBox = UIUtil.CreateCheckbox(newSlot, '/CHECKBOX/')
-        LayoutHelpers.SetWidth(readyBox, COLUMN_WIDTHS[13])
-        LayoutHelpers.AtVerticalCenterIn(readyBox, newSlot)
         newSlot.ready = readyBox
         newSlot:AddChild(readyBox)
         readyBox.OnCheck = function(self, checked)
@@ -3267,8 +3110,6 @@ function CreateSlotsUI(makeLabel)
             -- hide these to clear slot of visible data
             avatar:Hide()
             flag:Hide()
-            if newSlot.KinderMute then newSlot.KinderMute:Hide() end
-            if newSlot.MuteIconNearFlag then newSlot.MuteIconNearFlag:Hide() end
             ratingText:Hide()
             numGamesText:Hide()
             factionSelector:Hide()
@@ -5257,18 +5098,6 @@ function CalcConnectionStatus(peer)
 
             slot.name:SetTitleText(GetPlayerDisplayName(playerInfo))
             slot.name._text:SetFont('Arial Gras', 15)
-            local iconPath = UIUtil.UIFile('/textures/ui/common/icons/mute.dds')
-            if GUI.slots[peerSlot].muteIcon and DiskGetFileInfo(iconPath) then
-                if ShouldShowMuteIcon(playerInfo) then
-                    GUI.slots[peerSlot].muteIcon:Show()
-                    local muteTooltip = GetMuteTooltip(playerInfo)
-                    if muteTooltip then
-                        Tooltip.AddControlTooltip(GUI.slots[peerSlot].muteIcon, muteTooltip)
-                    end
-                else
-                    GUI.slots[peerSlot].muteIcon:Hide()
-                end
-            end
             if not table.find(ConnectionEstablished, peer.name) then
                 if playerInfo.Human and not IsLocallyOwned(peerSlot) then
                     table.insert(ConnectionEstablished, peer.name)
@@ -5588,11 +5417,6 @@ end
 
 function SendCompleteGameStateToPeer(peerId)
     lobbyComm:SendData(peerId, {Type = 'GameInfo', GameInfo = GameInfo.Flatten(gameInfo)})
-
-    -- Also send known server-mute statuses (so late joiners see the icons immediately).
-    if lobbyComm:IsHost() and not table.empty(serverMutedByUID) then
-        lobbyComm:SendData(peerId, {Type = 'ServerMuteStatus', MutedPlayers = serverMutedByUID})
-    end
 end
 
 function UpdateClientModStatus(newHostSimMods)
@@ -5704,55 +5528,6 @@ local MessageHandlers = {
                 if mutedPlayerName == data.SenderName then return end
             end
             AddChatText("<<" .. LOCF("<LOC lobui_0442>From %s", data.SenderName) .. ">> " .. data.Text)
-        end
-    },
-
-    -- Host-broadcasted global lobby mute (/mute) status.
-    -- Players report their own status to the host; the host redistributes and stores it.
-    ServerMuteStatus = {
-        Accept = function(data)
-            -- full map update is host-only
-            if data.MutedPlayers then
-                return IsFromHost(data)
-            end
-
-            -- targeted update (host-only), or self-report (anyone)
-            if data.PlayerID ~= nil then
-                return IsFromHost(data)
-            end
-
-            -- self-report must contain a valid boolean-like value
-            return ToBool(data.Muted) ~= nil
-        end,
-        Handle = function(data)
-            -- Full snapshot from host
-            if data.MutedPlayers then
-                for uid, muted in data.MutedPlayers do
-                    local b = ToBool(muted)
-                    if b ~= nil then
-                        serverMutedByUID[uid] = b
-                        local slot = FindSlotForID(uid)
-                        if slot then
-                            SetSlotInfo(slot, gameInfo.PlayerOptions[slot])
-                        end
-                    end
-                end
-                return
-            end
-
-            local subjectID = data.PlayerID or data.SenderID
-            local muted = ToBool(data.Muted) or false
-            serverMutedByUID[subjectID] = muted
-
-            local slot = FindSlotForID(subjectID)
-            if slot then
-                SetSlotInfo(slot, gameInfo.PlayerOptions[slot])
-            end
-
-            -- If we're the host and this is a self-report, redistribute to everyone else.
-            if lobbyComm:IsHost() and data.PlayerID == nil then
-                lobbyComm:BroadcastData({Type = 'ServerMuteStatus', PlayerID = subjectID, Muted = muted})
-            end
         end
     },
 
@@ -6227,10 +6002,6 @@ function InitLobbyComm(protocol, localPort, desiredPlayerName, localPlayerUID, n
             }
         )
 
-        -- Report our server mute status to the host so it can be shown for everyone.
-        serverMutedByUID[localPlayerID] = lobbyMuteArgPresent
-        lobbyComm:SendData(hostID, { Type = 'ServerMuteStatus', Muted = lobbyMuteArgPresent })
-
         -- Update, if needed, and broadcast, your CPU benchmark value.
         if not singlePlayer then
             ForkThread(function() UpdateBenchmark() end)
@@ -6361,11 +6132,6 @@ function InitLobbyComm(protocol, localPort, desiredPlayerName, localPlayerUID, n
         local myPlayerData = GetLocalPlayerData()
 
         gameInfo.PlayerOptions[1] = myPlayerData
-
-        -- Record local player's server mute status
-        if lobbyMuteArgPresent then
-            serverMutedByUID[localPlayerID] = true
-        end
 
         -- set default lobby values
         for _, option in globalOpts do

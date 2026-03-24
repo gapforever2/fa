@@ -1914,6 +1914,10 @@ local keyActionsUI = {
         action = 'UI_Lua import("/lua/ui/game/tabs.lua").ToggleTab("diplomacy")',
         category = 'ui',
     },
+    ['show_animation_panel'] = {
+        action = 'UI_Lua import("/lua/ui/game/animationpanel.lua").Toggle()',
+        category = 'ui',
+    },
     ['ping_alert'] = {
         action = 'UI_Lua import("/lua/ui/game/ping.lua").DoPing("alert")',
         category = 'ui',
