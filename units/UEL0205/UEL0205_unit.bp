@@ -103,8 +103,8 @@ UnitBlueprint{
         UnitName = "<LOC uel0205_name>Sky Boxer",
     },
     Intel = { 
-        VisionRadius = 20, 
-        RadarRadius = 50,
+        VisionRadius = 22, 
+        RadarRadius = 52,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.4,
