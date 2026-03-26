@@ -44,7 +44,7 @@ UEL0301 = ClassUnit(CommandUnit) {
         CommandUnit.OnCreate(self)
         self:SetCapturable(false)
         self:ShowBone('Arm_Right_B03', true)
-        self:HideBone('Arm_Right_Barrel01', true)           
+        self:HideBone('Arm_Right_Barrel01', true)
         self:HideBone('Jetpack', true)
         self:HideBone('SAM', true)
         self:SetupBuildBones()
@@ -60,6 +60,8 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param layer Layer
     OnStopBeingBuilt = function(self, builder, layer)
         CommandUnit.OnStopBeingBuilt(self, builder, layer)
+        self:SetWeaponEnabledByLabel('TargetPainter', true)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', true)
         self:SetWeaponEnabledByLabel('LeftHeavyPlasmaCannon', false)
         -- Block Jammer until Enhancement is built
         self:DisableUnitIntel('Enhancement', 'Jammer')
@@ -81,6 +83,8 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param unitBeingBuilt Unit
     ---@param order string
     OnStartBuild = function(self, unitBeingBuilt, order)
+        self:SetWeaponEnabledByLabel('TargetPainter', false)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', false)
         CommandUnit.OnStartBuild(self, unitBeingBuilt, order)
         self:RefreshPodFocus()
     end,
@@ -89,6 +93,8 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param unitBeingBuilt Unit
     ---@param order string
     OnStopBuild = function(self, unitBeingBuilt, order)
+        self:SetWeaponEnabledByLabel('TargetPainter', true)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', true)
         CommandUnit.OnStopBuild(self, unitBeingBuilt, order)
         self:RefreshPodFocus()
     end,
@@ -96,6 +102,8 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param unitBeingRepaired Unit
     OnStartRepair = function(self, unitBeingRepaired)
+        self:SetWeaponEnabledByLabel('TargetPainter', false)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', false)
         CommandUnit.OnStartRepair(self, unitBeingRepaired)
         self:RefreshPodFocus()
     end,
@@ -103,6 +111,8 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param unitBeingRepaired Unit
     OnStopRepair = function(self, unitBeingRepaired)
+        self:SetWeaponEnabledByLabel('TargetPainter', true)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', true)
         CommandUnit.OnStopRepair(self, unitBeingRepaired)
         self:RefreshPodFocus()
     end,
@@ -110,6 +120,8 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param target Unit|Prop
     OnStartReclaim = function(self, target)
+        self:SetWeaponEnabledByLabel('TargetPainter', false)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', false)
         CommandUnit.OnStartReclaim(self, target)
         self:RefreshPodFocus()
     end,
@@ -117,6 +129,8 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param target Unit|Prop
     OnStopReclaim = function(self, target)
+        self:SetWeaponEnabledByLabel('TargetPainter', true)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', true)
         CommandUnit.OnStopReclaim(self, target)
         self:RefreshPodFocus()
     end,
@@ -351,6 +365,8 @@ UEL0301 = ClassUnit(CommandUnit) {
         self:RemoveCommandCap('RULEUCC_Repair')
         self:RemoveCommandCap('RULEUCC_Capture')
         self:RemoveCommandCap('RULEUCC_Reclaim')
+        self:RemoveCommandCap('RULEUCC_Guard')
+        self:RemoveCommandCap('RULEUCC_Patrol')
         self:AddBuildRestriction(categories.ALLUNITS)
         self:RequestRefreshUI()
     end,
@@ -372,6 +388,8 @@ UEL0301 = ClassUnit(CommandUnit) {
         self:AddCommandCap('RULEUCC_Repair')
         self:AddCommandCap('RULEUCC_Capture')
         self:AddCommandCap('RULEUCC_Reclaim')
+        self:AddCommandCap('RULEUCC_Guard')
+        self:AddCommandCap('RULEUCC_Patrol')
         self:RestoreBuildRestrictions()
         self:RequestRefreshUI()
     end,
