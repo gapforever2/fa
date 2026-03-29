@@ -107,7 +107,7 @@ UnitBlueprint{
         BuildCostEnergy = 6000,
         BuildCostMass = 600,
         BuildTime = 3000,
-        MaintenanceConsumptionPerSecondEnergy = 200,
+        MaintenanceConsumptionPerSecondEnergy = 100,
     },
     Footprint = {
         SizeX = 2,
@@ -134,9 +134,9 @@ UnitBlueprint{
     },
     Intel = {
         RadarRadius = 64,
-        RadarStealthFieldRadius = 52,
+        RadarStealthFieldRadius = 50,
         SonarRadius = 60,
-        SonarStealthFieldRadius = 52,
+        SonarStealthFieldRadius = 50,
         VisionRadius = 32,
     },
     LifeBarHeight = 0.075,

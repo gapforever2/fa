@@ -117,8 +117,8 @@ UnitBlueprint{
         UnitName = "<LOC ual0205_name>Ascendant",
     },
     Intel = { 
-        VisionRadius = 22, 
-        RadarRadius = 52,
+        VisionRadius = 20, 
+        RadarRadius = 50,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.4,

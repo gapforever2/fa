@@ -206,7 +206,7 @@ UnitBlueprint{
     },
     Economy = {
         BuildCostEnergy = 5000000,
-        BuildCostMass = 3000,
+        BuildCostMass = 2000,
         BuildRate = 10,
         BuildTime = 6000000,
         BuildableCategory = {
@@ -319,12 +319,12 @@ UnitBlueprint{
             Slot = "RCH",
         },
         GAP_CrysalisBeamAdvancedAeon = {
-            BuildCostEnergy = 4000,
-            BuildCostMass = 200,
-            BuildTime = 200,
+            BuildCostEnergy = 23000,
+            BuildCostMass = 500,
+            BuildTime = 940,
             Icon = "ecba",
             Name = "<LOC enhancements_0148_faf>Advanced Quantum Disruptor",
-            NewMaxRadius = 30,
+            NewMaxRadius = 28,
             ShowBones = { "Left_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -348,14 +348,14 @@ UnitBlueprint{
             Slot = "LCH",
         },
 		GAP_CrysalisBeamAdaptiveAeon = {
-            BuildCostEnergy = 32000,
+            BuildCostEnergy = 38500,
             BuildCostMass = 1000,
-            BuildTime = 1200,
+            BuildTime = 1450,
             Icon = "ecba2",
             Name = "<LOC enhancements_0167_gaf>Enhanced advanced cascade amplifier",
 			Prerequisite = "HeatSinkAeon",
-            NewMaxRadius = 34,
-			NewRateOfFire = 2,
+            NewMaxRadius = 38,
+			NewRateOfFire = 2.2,
             ShowBones = { "Left_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -379,14 +379,13 @@ UnitBlueprint{
             Slot = "LCH",
         },
         HeatSinkAeon = {
-            BuildCostEnergy = 20000,
-            BuildCostMass = 600,
-            BuildTime = 600,
+            BuildCostEnergy = 21500,
+            BuildCostMass = 650,
+            BuildTime = 800,
             Icon = "hsa",
             Name = "<LOC enhancements_0008>Quantum Accelerator",
 			Prerequisite = "GAP_CrysalisBeamAdvancedAeon",
-            NewMaxRadius = 30,
-            NewRateOfFire = 2,
+            NewRateOfFire = 1.4,
             ShowBones = { "Right_Upgrade" },
             Slot = "LCH",
             UpgradeEffectBones = {
@@ -1064,7 +1063,7 @@ UnitBlueprint{
         Blueprint = "/props/DefaultWreckage/DefaultWreckage_prop.bp",
         EnergyMult = 0,
         HealthMult = 0.65,
-        MassMult = 0.3,
+        MassMult = 0.5,
         ReclaimTimeMultiplier = 0.85,
         WreckageLayers = {
             Land = true,
