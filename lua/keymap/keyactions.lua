@@ -341,6 +341,10 @@ local keyActionsSelectionQuickSelect = {
         action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").GetNearestIdleLTMex()',
         category = 'selection',
     },
+    ['select_nearest_lowest_mex_add_to_group'] = {
+        action = 'UI_Lua import("/lua/ui/game/hotkeys/nearest-lowest-mex-add-to-group.lua").SelectNearestLowestMexAndAddToGroup()',
+        category = 'selection',
+    },
     ['acu_select_cg'] = {
         action = 'UI_Lua import("/lua/keymap/misckeyactions.lua").ACUSelectCG()',
         category = 'selection',
