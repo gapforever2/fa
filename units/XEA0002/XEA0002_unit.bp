@@ -182,7 +182,7 @@ UnitBlueprint{
             RateOfFire = 10/200, --10/integer interval in ticks
             RenderFireClock = true,
             SlavedToBody = false,
-            TargetCheckInterval = 0.05,
+            TargetCheckInterval = 0.01,
             TargetPriorities = {
                 "EXPERIMENTAL MASSFABRICATION",
                 "(EXPERIMENTAL * ARTILLERY - FACTORY)",
@@ -212,7 +212,7 @@ UnitBlueprint{
             Turreted = true,
             UseFiringSolutionInsteadOfAimBone = true,
             WeaponCategory = "Direct Fire",
-            WeaponRepackTimeout = 9,
+            WeaponRepackTimeout = 6,
             WeaponUnpacks = false,
         },
         {
