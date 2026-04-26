@@ -11,7 +11,9 @@ UnitBlueprint{
         UISelection    = Sound { Bank = 'Interface',  Cue = 'Cybran_Select_Factory',      LodCutoff = 'UnitMove_LodCutoff' },
     },
     AverageDensity = 10,
-    BuildIconSortPriority = 30,
+	UnitsCol = 2,
+	Timeropen = 10,
+    BuildIconSortPriority = 24,
     Categories = {
         "CONSTRUCTION",
         "CRABEGG",
@@ -30,8 +32,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Normal",
-        Health = 10,
-        MaxHealth = 10,
+        Health = 100,
+        MaxHealth = 100,
     },
     Display = {
         AnimationOpen = "/units/xrl0004/xrl0004_aopen.sca",
@@ -54,10 +56,10 @@ UnitBlueprint{
         UniformScale = 0.05,
     },
     Economy = {
-        BuildCostEnergy = 800,
-        BuildCostMass = 160,
-        BuildTime = 400,
-        BuildUnit = "url0205",
+        BuildCostEnergy = 1600,
+        BuildCostMass = 320,
+        BuildTime = 500,
+        BuildUnit = 'url0205',
     },
     Footprint = {
         SizeX = 1,
@@ -67,6 +69,7 @@ UnitBlueprint{
         CommandCaps = { RULEUCC_Stop = true },
         FactionName = "Cybran",
         Icon = "land",
+		SelectionPriority = 7,
     },
     Intel = { VisionRadius = 4 },
     LifeBarHeight = 0.075,

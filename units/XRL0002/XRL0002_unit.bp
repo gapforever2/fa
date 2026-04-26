@@ -11,6 +11,8 @@ UnitBlueprint{
         UISelection    = Sound { Bank = 'Interface',  Cue = 'Cybran_Select_Factory',      LodCutoff = 'UnitMove_LodCutoff' },
     },
     AverageDensity = 10,
+	UnitsCol = 1,
+	Timeropen = 5,
     BuildIconSortPriority = 10,
     Categories = {
         "CONSTRUCTION",
@@ -30,11 +32,13 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Normal",
-        Health = 10,
-        MaxHealth = 10,
+        Health = 100,
+        MaxHealth = 100,
+		RegenRate = 2,
     },
     Display = {
         AnimationOpen = "/units/xrl0002/xrl0002_aopen.sca",
+		MovePoint = "ExternalFactoryPoint",
         BuildAttachBone = "AttachPoint",
         Mesh = {
             IconFadeInZoom = 130,
@@ -56,7 +60,7 @@ UnitBlueprint{
     Economy = {
         BuildCostEnergy = 1560,
         BuildCostMass = 312,
-        BuildTime = 780,
+        BuildTime = 500,
         BuildUnit = "url0309",
     },
     Footprint = {
@@ -66,7 +70,8 @@ UnitBlueprint{
     General = {
         CommandCaps = { RULEUCC_Stop = true },
         FactionName = "Cybran",
-        Icon = "land",
+        Icon = "amph",
+		SelectionPriority = 6,
     },
     Intel = { VisionRadius = 4 },
     LifeBarHeight = 0.075,
