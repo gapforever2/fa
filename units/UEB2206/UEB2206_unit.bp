@@ -25,7 +25,6 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "SIZE4",
-        "SNIPEMODE",
         "SORTDEFENSE",
         "STEALTH",
         "STRUCTURE",

@@ -54,7 +54,6 @@ UnitBlueprint{
         "PRODUCTFA",
         "SELECTABLE",
         "SHOWQUEUE",
-        "SNIPEMODE",
         "SNIPER",
         "SONAR",
         "VISIBLETORECON",

@@ -34,7 +34,6 @@ UnitBlueprint{
         "PRODUCTSC1",
         "RECLAIMABLE",
         "SELECTABLE",
-        "SNIPEMODE",
         "SUBMERSIBLE",
         "T1SUBMARINE",
         "TECH1",

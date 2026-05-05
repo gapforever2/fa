@@ -28,7 +28,6 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "SIZE20",
-        "SNIPEMODE",
         "STRATEGIC",
         "STRUCTURE",
         "VISIBLETORECON",

@@ -51,7 +51,6 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "SERAPHIM",
-        "SNIPEMODE",
         "TECH2",
         "VISIBLETORECON",
     },

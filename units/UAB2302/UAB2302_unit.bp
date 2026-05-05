@@ -28,7 +28,6 @@ UnitBlueprint{
         "SELECTABLE",
         "SHOWATTACKRETICLE",
         "SIZE16",
-        "SNIPEMODE",
         "SORTSTRATEGIC",
         "STRATEGIC",
         "STRUCTURE",

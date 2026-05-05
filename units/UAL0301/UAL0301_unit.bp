@@ -45,7 +45,6 @@ UnitBlueprint{
         "REPAIR",
         "SELECTABLE",
         "SHOWQUEUE",
-        "SNIPEMODE",
         "SUBCOMMANDER",
         "TECH3",
         "USEBUILDPRESETS",
