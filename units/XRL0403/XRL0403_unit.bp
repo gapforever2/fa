@@ -619,7 +619,7 @@ UnitBlueprint{
             },
             BallisticArc = "RULEUBA_LowArc",
             CollideFriendly = false,
-            Damage = 1500,
+            Damage = 1000,
             DamageFriendly = true,
             DamageRadius = 10,
             DamageType = "Normal",
@@ -636,7 +636,7 @@ UnitBlueprint{
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 1,
             MuzzleVelocity = 26,
-            ProjectileId = "/projectiles/CIFArtilleryProton04/CIFArtilleryProton04_proj.bp",
+            ProjectileId = "/projectiles/CIFArtilleryProton02/CIFArtilleryProton02_proj.bp",
             ProjectileLifetime = 60,
             ProjectilesPerOnFire = 1,
             RackBones = {
@@ -653,7 +653,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
 			RangeCategory = "UWRC_IndirectFire",
-            RateOfFire = 10/80, --10/integer interval in ticks
+            RateOfFire = 10/100, --10/integer interval in ticks
 			SlavedToBody = true,
             SlavedToBodyArcRange = 45,
             TargetPriorities = {
