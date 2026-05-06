@@ -470,13 +470,6 @@ function GetLocalPlayerData()
     local pl = playerRating
     local numGames = argv.numGames
 
-    -- For players with fewer than 10 games, force a fixed rating of 100 +/- 0
-    if type(numGames) == 'number' and numGames < 5 then
-        mean = 100
-        dev = 5
-        pl = 100
-    end
-
     return PlayerData(
         {
             PlayerName = localPlayerName,
@@ -485,10 +478,10 @@ function GetLocalPlayerData()
             PlayerColor = GetSanitisedLastColor(),
             Faction = GetSanitisedLastFaction(),
             PlayerClan = argv.playerClan,
-            PL = pl,
-            NG = numGames,
-            MEAN = mean,
-            DEV = dev,
+            PL = playerRating,
+            NG = argv.numGames,
+            MEAN = argv.playerMean,
+            DEV = argv.playerDeviation,
             Country = argv.PrefLanguage,
             Avatar = argv.Urlava,
             TooltipAvatar = argv.Tlpava,
@@ -1099,13 +1092,6 @@ function SetSlotInfo(slotNum, playerInfo)
     end
 
     playerInfo.StartSpot = slotNum
-
-    -- For human players with fewer than 10 games, force a fixed rating of 100 +/- 0
-    if playerInfo.Human and type(playerInfo.NG) == 'number' and playerInfo.NG < 5 then
-        playerInfo.MEAN = 100
-        playerInfo.DEV = 5
-        playerInfo.PL = 100
-    end
 
     local slot = GUI.slots[slotNum]
     local isHost = lobbyComm:IsHost()
