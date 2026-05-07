@@ -31,7 +31,6 @@ local SDFAireauWeapon = WeaponsFile.SDFAireauWeapon
 XSL0301 = ClassUnit(CommandUnit) {
     Weapons = {
         LightChronatronCannon = ClassWeapon(SDFLightChronotronCannonWeapon) {},
-        MedusaGun = ClassWeapon(SDFAireauWeapon) {},
         DeathWeapon = ClassWeapon(SCUDeathWeapon) {},
         OverCharge = ClassWeapon(SDFOverChargeWeapon) {},
         AutoOverCharge = ClassWeapon(SDFOverChargeWeapon) {},
@@ -53,8 +52,6 @@ XSL0301 = ClassUnit(CommandUnit) {
     ---@param layer Layer
     OnStopBeingBuilt = function(self, builder, layer)
         CommandUnit.OnStopBeingBuilt(self, builder, layer)
-        self:SetWeaponEnabledByLabel('MedusaGun', false)
-        self:SetWeaponEnabledByLabel('SniperGun', false)
     end,
 
     OnCreate = function(self)
@@ -212,8 +209,6 @@ XSL0301 = ClassUnit(CommandUnit) {
     ---@param self XSL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementDamageStabilization = function (self, bp)
-        self:RemoveCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(99)
         if not Buffs['SeraphimSCUDamageStabilization'] then
             BuffBlueprint {
                 Name = 'SeraphimSCUDamageStabilization',
@@ -245,15 +240,30 @@ XSL0301 = ClassUnit(CommandUnit) {
         if Buff.HasBuff(self, 'SeraphimSCUDamageStabilization') then
             Buff.RemoveBuff(self, 'SeraphimSCUDamageStabilization')
         end
-        self:AddCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(self.Blueprint.Transport.TransportClass)
+    end,
+
+    ---@param self URL0301
+    ---@param bp UnitBlueprintEnhancement
+    ProcessEnhancementSensorRangeEnhancer = function(self, bp)
+        self:SetIntelRadius('Vision', bp.NewVisionRadius or 40)
+        self:SetIntelRadius('Omni', bp.NewOmniRadius or 40)
+        self:SetIntelRadius('Radar', bp.NewRadarRadius or 90)
+        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        self:SetMaintenanceConsumptionActive()
+    end,
+
+    ---@param self URL0301
+    ---@param bp UnitBlueprintEnhancement unused
+    ProcessEnhancementSensorRangeEnhancerRemove = function(self, bp)
+        local bpIntel = self.Blueprint.Intel
+        self:SetIntelRadius('Vision', bpIntel.VisionRadius or 26)
+        self:SetIntelRadius('Omni', bpIntel.OmniRadius or 26)
+        self:SetIntelRadius('Radar', bp.RadarRadius or 0)
     end,
 
     ---@param self XSL0301
     ---@param bp UnitBlueprintEnhancement 
-    ProcessEnhancementEnhancedSensors = function(self, bp)
-        self:SetIntelRadius('Vision', bp.NewVisionRadius or 30)
-        self:SetIntelRadius('Omni', bp.NewOmniRadius or 30)
+    ProcessEnhancementRapidFire = function(self, bp)
         local wep = self:GetWeaponByLabel('LightChronatronCannon')
         wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
         wep:ChangeRateOfFire(bp.NewRateOfFire or 1.5)
@@ -262,16 +272,11 @@ XSL0301 = ClassUnit(CommandUnit) {
         wep:ChangeMaxRadius(35)
         local aoc = self:GetWeaponByLabel('AutoOverCharge')
         aoc:ChangeMaxRadius(35)
-        local wep = self:GetWeaponByLabel('MedusaGun')
-        wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
     end,
 
     ---@param self XSL0301
     ---@param bp UnitBlueprintEnhancement 
-    ProcessEnhancementEnhancedSensorsRemove = function(self, bp)
-        local bpIntel = self.Blueprint.Intel
-        self:SetIntelRadius('Vision', bpIntel.VisionRadius or 26)
-        self:SetIntelRadius('Omni', bpIntel.OmniRadius or 16)
+    ProcessEnhancementRapidFireRemove = function(self, bp)
         local wep = self:GetWeaponByLabel('LightChronatronCannon')
         wep:ChangeMaxRadius(bp.NewMaxRadius or 25)
         wep:ChangeRateOfFire(bp.RateOfFire or 1)
@@ -280,60 +285,6 @@ XSL0301 = ClassUnit(CommandUnit) {
         wep:ChangeMaxRadius(bp.NewMaxRadius or 25)
         local aoc = self:GetWeaponByLabel('AutoOverCharge')
         aoc:ChangeMaxRadius(bp.NewMaxRadius or 25)
-        local wep = self:GetWeaponByLabel('MedusaGun')
-        wep:ChangeMaxRadius(bp.NewMaxRadius or 25)
-    end,
-
-    ---@param self XSL0301
-    ---@param bp UnitBlueprintEnhancement 
-    ProcessEnhancementMedusa = function(self, bp)
-        self:ShowBone('Turret', true)
-        self:HideBone('Left_Arm', true)
-        local wep = self:GetWeaponByLabel('MedusaGun')
-        self:SetWeaponEnabledByLabel('MedusaGun', true)
-        self:RemoveCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(99)
-        self:SetSpeedMult(0.9090)
-        self:RemoveCommandCap('RULEUCC_Repair')
-        self:RemoveCommandCap('RULEUCC_Capture')
-        self:RemoveCommandCap('RULEUCC_Reclaim')
-        if not Buffs['ZeroBP'] then
-            BuffBlueprint {
-                Name = 'ZeroBP',
-                DisplayName = 'ZeroBP',
-                BuffType = 'SCUBUILDRATE',
-                Stacks = 'REPLACE',
-                Duration = -1,
-                Affects = {
-                    BuildRate = {
-                        Mult = 0.01,
-                    },
-                },
-            }
-        end
-        Buff.ApplyBuff(self, 'ZeroBP')
-        self:AddBuildRestriction(categories.ALLUNITS)
-        self:RequestRefreshUI()
-    end,
-
-    ---@param self XSL0301
-    ---@param bp UnitBlueprintEnhancement 
-    ProcessEnhancementMedusaRemove = function(self, bp)
-        self:ShowBone('Left_Arm', true)
-        self:HideBone('Turret', true)
-        local wep = self:GetWeaponByLabel('MedusaGun')
-        self:SetWeaponEnabledByLabel('MedusaGun', false)
-        self:AddCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(self.Blueprint.Transport.TransportClass)
-        self:SetSpeedMult(1)
-        self:AddCommandCap('RULEUCC_Repair')
-        self:AddCommandCap('RULEUCC_Capture')
-        self:AddCommandCap('RULEUCC_Reclaim')
-        if Buff.HasBuff(self, 'ZeroBP') then
-            Buff.RemoveBuff(self, 'ZeroBP')
-        end
-        self:RestoreBuildRestrictions()
-        self:RequestRefreshUI()
     end,
 
     ---@param self XSL0301
