@@ -25,7 +25,15 @@ local LandFactoryUnit = import('/lua/defaultunits.lua').LandFactoryUnit
 
 ---@class CConstructionEggUnit : CStructureUnit
 CConstructionEggUnit = ClassUnit(CStructureUnit) {
+	
+	TimeOpen = 30,
+	
+	OnCreate = function(self)
+        CStructureUnit.OnCreate(self)
 
+		self.IsAutoOpen = true
+    end,
+	
     ---@param self CConstructionEggUnit
     ---@param builder Unit
     ---@param layer Layer
@@ -34,38 +42,53 @@ CConstructionEggUnit = ClassUnit(CStructureUnit) {
 
         -- prevent the unit from being reclaimed
         self:SetReclaimable(false)
+		
+		if self.IsAutoOpen then
+			self:ForkThread(function()
+				self:OpenEggAnimation()
+			end
+			)
+		end
+    end,
 
-        local bp = self:GetBlueprint()
-        local buildUnit = bp.Economy.BuildUnit
-        local pos = self:GetPosition()
-        local aiBrain = self:GetAIBrain()
-
-
-        self.Spawn = CreateUnitHPR(
-            buildUnit,
-            aiBrain.Name,
-            pos[1], pos[2], pos[3],
-            0, 0, 0
-        )
-
-        self:ForkThread(function()
-            self.OpenAnimManip = CreateAnimator(self)
-            self.Trash:Add(self.OpenAnimManip)
-            self.OpenAnimManip:PlayAnim(self:GetBlueprint().Display.AnimationOpen, false):SetRate(0.1)
-            self:PlaySound(bp.Audio['EggOpen'])
-
-            WaitFor(self.OpenAnimManip)
-
-            self.EggSlider = CreateSlider(self, 0, 0, -20, 0, 5)
-            self.Trash:Add(self.EggSlider)
-            self:PlaySound(bp.Audio['EggSink'])
-
-            WaitFor(self.EggSlider)
-
-            self:Destroy()
+	OpenEgg = function(self)
+		self:ForkThread(function()
+			WaitSeconds(self.TimeOpen)
+            self:OpenEggAnimation()
         end
         )
-    end,
+	end,
+	
+	OpenEggAnimation = function(self)
+		local bp = self:GetBlueprint()
+		local buildUnit = bp.Economy.BuildUnit
+		local aiBrain = self:GetAIBrain()
+		
+		self.OpenAnimManip = CreateAnimator(self)
+        self.Trash:Add(self.OpenAnimManip)
+        self.OpenAnimManip:PlayAnim(self:GetBlueprint().Display.AnimationOpen, false):SetRate(0.1)
+        self:PlaySound(bp.Audio['EggOpen'])
+		local pos = self:GetPosition()
+		self.Spawn = CreateUnitHPR(
+			buildUnit,
+			aiBrain.Name,
+			pos[1], pos[2], pos[3],
+			0, 0, 0
+		)
+        WaitFor(self.OpenAnimManip)
+
+        self.EggSlider = CreateSlider(self, 0, 0, -20, 0, 5)
+        self.Trash:Add(self.EggSlider)
+        self:PlaySound(bp.Audio['EggSink'])
+
+        WaitFor(self.EggSlider)
+
+        self:Destroy()
+	end,
+	
+
+	OnNotAdjacentTo = function(self, adjacentUnit)
+	end,
 
     ---@param self CConstructionEggUnit
     ---@param instigator Unit

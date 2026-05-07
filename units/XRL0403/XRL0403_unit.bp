@@ -83,6 +83,7 @@ UnitBlueprint{
             "<LOC ability_deathaoe>Volatile",
         },
         AnimationActivate = "/units/xrl0403/xrl0403_awake.sca",
+		AnimationOpen = "/units/xrl0403/xrl0403_open.sca",
         AnimationDeath = {
             {
                 Animation = "/units/xrl0403/xrl0403_adeath.sca",
@@ -181,12 +182,11 @@ UnitBlueprint{
         BuildRate = 45,
         BuildTime = 60625,
         BuildableCategory = {
-			"xrl0001",
+			"url0309",
             "xrl0002",
             "xrl0003",
             "xrl0004",
             "xrl0005",
-			"xrl0006",
             "drlk005",
         },
     },
@@ -223,8 +223,8 @@ UnitBlueprint{
         BackUpDistance = 15,
         DragCoefficient = 0.2,
         LayerChangeOffsetHeight = -2.5,
-        MaxAcceleration = 1.2,
-        MaxSpeed = 2.2,
+        MaxAcceleration = 2,
+        MaxSpeed = 2,
         MaxSpeedReverse = 1,
         MotionType = "RULEUMT_Amphibious",
         RotateOnSpot = false,
@@ -234,8 +234,8 @@ UnitBlueprint{
         SkirtSizeX = 9,
         SkirtSizeZ = 9,
         TurnRadius = 15,
-        TurnRate = 36,
-        WaterSpeedMultiplier = 1.5,
+        TurnRate = 45,
+        WaterSpeedMultiplier = 1.25,
     },
     SelectionSizeX = 5.3,
     SelectionSizeZ = 5.3,
@@ -306,7 +306,7 @@ UnitBlueprint{
             RangeCategory = "UWRC_DirectFire",
             RateOfFire = 10/12, --10/integer interval in ticks
             SlavedToBody = true,
-            SlavedToBodyArcRange = 60,
+            SlavedToBodyArcRange = 50,
             TargetPriorities = {
                 "EXPERIMENTAL",
                 "SUBCOMMANDER",
@@ -358,6 +358,7 @@ UnitBlueprint{
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 1,
             MuzzleVelocity = 65,
+            PrefersPrimaryWeaponTarget = true,
             ProjectileId = "/projectiles/CDFProtonCannon05/CDFProtonCannon05_proj.bp",
             ProjectileLifetime = 0.9,
             RackBones = {
@@ -379,7 +380,7 @@ UnitBlueprint{
             RangeCategory = "UWRC_DirectFire",
             RateOfFire = 10/12, --10/integer interval in ticks
             SlavedToBody = true,
-            SlavedToBodyArcRange = 60,
+            SlavedToBodyArcRange = 50,
             TargetPriorities = {
                 "EXPERIMENTAL",
                 "SUBCOMMANDER",

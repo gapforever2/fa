@@ -16,6 +16,7 @@ local CAABurstCloudFlakArtilleryWeapon = CybranWeaponsFile.CAABurstCloudFlakArti
 local CDFBrackmanCrabHackPegLauncherWeapon = CybranWeaponsFile.CDFBrackmanCrabHackPegLauncherWeapon
 local TranslateInXZDirection = import("/lua/utilities.lua").TranslateInXZDirection
 
+
 local ExternalFactoryComponent = import("/lua/defaultcomponents.lua").ExternalFactoryComponent
 
 ---@class XRL0403 : CWalkingLandUnit, 
@@ -73,9 +74,9 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
         CWalkingLandUnit.OnCreate(self)
 
         self:SetWeaponEnabledByLabel('HackPegLauncher', false)
-		if self:IsValidBone('Missile_Turret') then
-			self:HideBone('Missile_Turret', true)
-		end
+        if self:IsValidBone('Missile_Turret') then
+            self:HideBone('Missile_Turret', true)
+        end
     end,
 
     ---@param self CConstructionUnit
@@ -113,6 +114,8 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
     OnStopBeingBuilt = function(self, builder, layer)
         CWalkingLandUnit.OnStopBeingBuilt(self, builder, layer)
 		ExternalFactoryComponent.OnStopBeingBuilt(self, builder, layer)
+		self.AnimationManipulator = CreateAnimator(self)
+        self.AnimationManipulator:PlayAnim(self:GetBlueprint().Display.AnimationOpen, false):SetRate(0)
         ChangeState(self, self.IdleState)
     end,
 	
@@ -176,12 +179,15 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
         OnStartBuild = function(self, unitBuilding, order)
             CWalkingLandUnit.OnStartBuild(self, unitBuilding, order)
             self.UnitBeingBuilt = unitBuilding
+			
+			
             ChangeState(self, self.BuildingState)
         end,
     },
 
     BuildingState = State {
         Main = function(self)
+
             local unitBuilding = self.UnitBeingBuilt
             self:SetBusy(true)
             local bone = self.BuildAttachBone
@@ -189,11 +195,44 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
             unitBuilding:AttachTo(self, bone)
             unitBuilding:HideBone(0, true)
             self.UnitDoneBeingBuilt = false
+			
+			if EntityCategoryContains(categories.CRABEGG, unitBuilding) then
+                 unitBuilding.IsAutoOpen = false
+            end
+			
         end,
 
         OnStopBuild = function(self, unitBeingBuilt)
             CWalkingLandUnit.OnStopBuild(self, unitBeingBuilt)
-            ExternalFactoryComponent.OnStopBuildWithStorage(self, unitBeingBuilt)
+			ExternalFactoryComponent.OnStopBuildWithStorage(self, unitBeingBuilt)
+			
+			ChangeState(self, self.RollingOffState)
+        end,
+    },
+	
+	RollingOffState = State {
+        ---@param self UEL0401
+        Main = function(self)
+            local unitBuilding = self.UnitBeingBuilt
+			local bone = self.BuildAttachBone
+            self:DetachAll(bone)
+            unitBuilding:AttachTo(self, bone)
+			if not unitBuilding.Dead then
+                unitBuilding:ShowBone(0, true)
+            end
+			
+			self.AnimationManipulator:SetRate(0.5)
+            WaitFor(self.AnimationManipulator)
+					
+			if EntityCategoryContains(categories.CRABEGG, unitBuilding) then
+				unitBuilding:OpenEgg()
+			end
+			self:DetachAll(self.BuildAttachBone)
+			
+			self.AnimationManipulator:SetRate(-0.5)
+			WaitFor(self.AnimationManipulator)
+			
+            ChangeState(self, self.IdleState)
         end,
     },
 

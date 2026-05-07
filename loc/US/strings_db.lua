@@ -4490,6 +4490,7 @@ key_desc_0405="Dock"
 
 key_desc_0407="Select all Bombers (Normal)"
 key_desc_0408="Select all Bombers (Torpedo)"
+key_desc_0409="Select the nearest Matter Extractor of the lowest level that is not being upgraded and add it to the group"
 
 keymap_category_0000="UI"
 keymap_category_0004="Selection"
