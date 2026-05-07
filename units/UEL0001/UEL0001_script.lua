@@ -365,16 +365,6 @@ UEL0001 = ClassUnit(ACUUnit) {
             self:SetMaintenanceConsumptionInactive()
             RemoveUnitEnhancement(self, 'ShieldRemove')
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
-        elseif enh == 'RegenUEF' then
-            self:AddToggleCap('RULEUTC_ShieldToggle')
-            self:CreateShield(bp)
-            self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-            self:SetMaintenanceConsumptionActive()
-        elseif enh == 'RegenUEFRemove' then
-            self:DestroyShield()
-            self:SetMaintenanceConsumptionInactive()
-            RemoveUnitEnhancement(self, 'Shield1Remove')
-            self:RemoveToggleCap('RULEUTC_ShieldToggle')
         elseif enh == 'ShieldGeneratorFieldUEF' then
             self:AddToggleCap('RULEUTC_ShieldToggle')
             self:DestroyShield()
