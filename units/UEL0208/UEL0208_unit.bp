@@ -1,7 +1,7 @@
 UnitBlueprint{
     Description = "<LOC uel0208_desc>Engineer",
     AI = {
-        GuardScanRadius = 26,
+        GuardScanRadius = 40,
         TargetBones = {
             "AttachPoint",
         },
