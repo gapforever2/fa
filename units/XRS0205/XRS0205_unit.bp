@@ -134,9 +134,9 @@ UnitBlueprint{
     },
     Intel = {
         RadarRadius = 64,
-        RadarStealthFieldRadius = 52,
+        RadarStealthFieldRadius = 42,
         SonarRadius = 60,
-        SonarStealthFieldRadius = 52,
+        SonarStealthFieldRadius = 42,
         VisionRadius = 32,
     },
     LifeBarHeight = 0.075,
