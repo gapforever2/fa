@@ -501,11 +501,13 @@ Description = {
     ['xsl0301'] = "<LOC Unit_Description_0433> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
     ['xsl0301-tmu'] = "<LOC Unit_Description_0434> Mounts a tactical cruise missile launcher onto the back of the SACU.",
     ['xsl0301-dss'] = "<LOC Unit_Description_0435> Increases the speed at which the SACU repairs itself. Also increases hit points.",
-    ['xsl0301-sre'] = "<LOC Unit_Description_0436> Greatly expands the range of the standard on-board SACU sensor systems, including Omni.",
+    ['xsl0301-sre'] = "<LOC Unit_Description_0436> Significantly expands the capabilities of standard onboard SACU sensor systems: Radar, Omni, Vision.",
     ['xsl0301-efm'] = "<LOC Unit_Description_0437> Speeds up all engineering-related functions.",
     ['xsl0301-sp'] = "<LOC Unit_Description_0438> Adds a personal shield generator to the SACU.",
     ['xsl0301-pqt'] = "<LOC Unit_Description_0439> Adds teleporter. Requires considerable Energy to activate.",
     ['xsl0301-oc'] = "<LOC Unit_Description_0440> Single shot destroys most units. Consumes large amount of Energy.",
+    ['xsl0301-cba'] = "<LOC Unit_Description_0005_gaf> SACU main gun upgrade: increased firing speed, range. Added splash damage.",
+    ['xsl0301-ras'] = "<LOC Unit_Description_0006_gaf> Increases SACU's resource generation.",
 
     -- SERAPHIM -- Support Commander Presets
     ['xsl0301_AdvancedCombat'] = "<LOC xsl0301_AdvancedCombat_help> Support Armored Command Unit. Enhanced during construction with the enhanced sensor system, nano-repair system and overcharge enhancements.",
@@ -515,6 +517,8 @@ Description = {
     ['xsl0301_NanoCombat'] = "<LOC xsl0301_NanoCombat_help> Support Armored Command Unit. Enhanced during construction with the enhanced sensor system and nano-repair system enhancements.",
     ['xsl0301_Rambo'] = "<LOC xsl0301_Rambo_help> Support Armored Command Unit. Enhanced during construction with the personal shield generator, nano-repair system and overcharge enhancements.",
 
+
+    
     -- SERAPHIM -- Land Units
     ['xsl0101'] = "<LOC Unit_Description_0337> Light, fast mobile reconnaissance unit. When stationary, deploys cloaking and stealth fields.",
     ['xsl0201'] = "<LOC Unit_Description_0338> Lightly armored tank. Armed with a single cannon.",
