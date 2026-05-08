@@ -15,7 +15,7 @@ Description = {
     ['uel0001-aes'] = "<LOC Unit_Description_0005> Expands the number of available schematics and increases the ACU's build speed and maximum health.",
     ['uel0001-dsu'] = "<LOC Unit_Description_0006> Greatly increases the speed at which the ACU repairs itself.",
     ['uel0001-ees'] = "<LOC Unit_Description_0007> Replaces the Tech 2 Engineering Suite. Expands the number of available schematics and further increases the ACU's build speed and maximum health.",
-    ['uel0001-hamc'] = "<LOC Unit_Description_0008> Increases main cannon's damage output by several factors. Also increases range of main cannon and Overcharge.",
+    ['uel0001-hamc'] = "<LOC Unit_Description_0008> Doubles the damage of the main gun of the ACU, and increases the range of fire, including Overload fire.",
     ['uel0001-srtn'] = "<LOC Unit_Description_0009> Adds a short-range tactical nuke.",
     ['uel0001-pqt'] = "<LOC Unit_Description_0010> Adds teleporter. Requires considerable Energy to activate.",
     ['uel0001-sgf'] = "<LOC Unit_Description_0011> Expands the radius of the ACU's personal shield. Requires Energy to run.",
@@ -23,7 +23,8 @@ Description = {
     ['uel0001-psg'] = "<LOC Unit_Description_0013> Creates a protective shield around the ACU. Requires Energy to run.",
     ['uel0001-led'] = "<LOC Unit_Description_0014> Engineering Drone acts as a secondary Engineer. Assists the ACU where applicable.",
     ['uel0001-red'] = "<LOC Unit_Description_0015> Adds a second Engineering Drone. Requires an initial Engineering Drone.",
-
+	['uel0001-hamc2'] = "<LOC Unit_Description_0016> Increases the rate of fire of the ACU cannon, and adds splash damage to the cannon.",
+	
     -- UEF -- Support Commander Units/Upgrades
     ['uel0301'] = "<LOC Unit_Description_0016> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer. ",
     ['uel0301-ed'] = "<LOC Unit_Description_0017> Engineering Drone acts as a secondary Engineer. Assists the SACU where applicable.",
@@ -337,7 +338,8 @@ Description = {
     ['ual0001-aes'] = "<LOC Unit_Description_0156> Expands the number of available schematics and increases the ACU's build speed and maximum health.",
     ['ual0001-cd'] = "<LOC Unit_Description_0157> Creates a Quantum Stasis Field around the ACU. Immobilizes enemy units within the ACU's main cannon range. Multiple Quantum Stasis Fields interfere with each other, having a limited effect.",
     ['ual0001-cba'] = "<LOC Unit_Description_0158>Increases the range of the ACU's main cannon and that of Overcharge.",
-    ['ual0001-ecba'] = "<LOC Unit_Description_0466_faf>Massively increases the range of the ACU's main cannon and that of Overcharge.",
+    ['ual0001-ecba'] = "<LOC Unit_Description_0466_gaf>Massively increases the range of the ACU's main cannon and that of Overcharge.",
+	['ual0001-ecba2'] = "<LOC Unit_Description_0467_gaf>Massively increases the range of the ACU's main cannon and that of Overcharge.",
     ['ual0001-ess'] = "<LOC Unit_Description_0159> Greatly expands the range of the standard on-board ACU sensor systems.",
     ['ual0001-ees'] = "<LOC Unit_Description_0160> Replaces the Tech 2 Engineering Suite. Expands the number of available schematics and further increases the ACU's build speed and maximum health.",
     ['ual0001-hsa'] = "<LOC Unit_Description_0161> Rapidly cools the Quantum Disruptor beam. Increases rate of fire.",
