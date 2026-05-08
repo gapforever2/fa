@@ -131,7 +131,7 @@ UnitBlueprint{
     LifeBarOffset = 1,
     LifeBarSize = 1,
     Physics = {
-        Elevation = 10,
+        Elevation = 18,
         FuelRechargeRate = 10,
         FuelUseTime = 600,
         GroundCollisionOffset = 1.6,
