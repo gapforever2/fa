@@ -15,7 +15,7 @@ Description = {
     ['uel0001-aes'] = "<LOC Unit_Description_0005> Expands the number of available schematics and increases the ACU's build speed and maximum health.",
     ['uel0001-dsu'] = "<LOC Unit_Description_0006> Greatly increases the speed at which the ACU repairs itself.",
     ['uel0001-ees'] = "<LOC Unit_Description_0007> Replaces the Tech 2 Engineering Suite. Expands the number of available schematics and further increases the ACU's build speed and maximum health.",
-    ['uel0001-hamc'] = "<LOC Unit_Description_0008> Increases main cannon's damage output by several factors. Also increases range of main cannon and Overcharge.",
+    ['uel0001-hamc'] = "<LOC Unit_Description_0008> Doubles the damage of the main gun of the ACU, and increases the range of fire, including Overload fire.",
     ['uel0001-srtn'] = "<LOC Unit_Description_0009> Adds a short-range tactical nuke.",
     ['uel0001-pqt'] = "<LOC Unit_Description_0010> Adds teleporter. Requires considerable Energy to activate.",
     ['uel0001-sgf'] = "<LOC Unit_Description_0011> Expands the radius of the ACU's personal shield. Requires Energy to run.",
@@ -23,7 +23,8 @@ Description = {
     ['uel0001-psg'] = "<LOC Unit_Description_0013> Creates a protective shield around the ACU. Requires Energy to run.",
     ['uel0001-led'] = "<LOC Unit_Description_0014> Engineering Drone acts as a secondary Engineer. Assists the ACU where applicable.",
     ['uel0001-red'] = "<LOC Unit_Description_0015> Adds a second Engineering Drone. Requires an initial Engineering Drone.",
-
+	['uel0001-hamc2'] = "<LOC Unit_Description_0016> Increases the rate of fire of the ACU cannon, and adds splash damage to the cannon.",
+	
     -- UEF -- Support Commander Units/Upgrades
     ['uel0301'] = "<LOC Unit_Description_0016> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer. ",
     ['uel0301-ed'] = "<LOC Unit_Description_0017> Engineering Drone acts as a secondary Engineer. Assists the SACU where applicable.",
@@ -337,7 +338,8 @@ Description = {
     ['ual0001-aes'] = "<LOC Unit_Description_0156> Expands the number of available schematics and increases the ACU's build speed and maximum health.",
     ['ual0001-cd'] = "<LOC Unit_Description_0157> Creates a Quantum Stasis Field around the ACU. Immobilizes enemy units within the ACU's main cannon range. Multiple Quantum Stasis Fields interfere with each other, having a limited effect.",
     ['ual0001-cba'] = "<LOC Unit_Description_0158>Increases the range of the ACU's main cannon and that of Overcharge.",
-    ['ual0001-ecba'] = "<LOC Unit_Description_0466_faf>Massively increases the range of the ACU's main cannon and that of Overcharge.",
+    ['ual0001-ecba'] = "<LOC Unit_Description_0466_gaf>Massively increases the range of the ACU's main cannon and that of Overcharge.",
+	['ual0001-ecba2'] = "<LOC Unit_Description_0467_gaf>Massively increases the range of the ACU's main cannon and that of Overcharge.",
     ['ual0001-ess'] = "<LOC Unit_Description_0159> Greatly expands the range of the standard on-board ACU sensor systems.",
     ['ual0001-ees'] = "<LOC Unit_Description_0160> Replaces the Tech 2 Engineering Suite. Expands the number of available schematics and further increases the ACU's build speed and maximum health.",
     ['ual0001-hsa'] = "<LOC Unit_Description_0161> Rapidly cools the Quantum Disruptor beam. Increases rate of fire.",
@@ -499,11 +501,13 @@ Description = {
     ['xsl0301'] = "<LOC Unit_Description_0433> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
     ['xsl0301-tmu'] = "<LOC Unit_Description_0434> Mounts a tactical cruise missile launcher onto the back of the SACU.",
     ['xsl0301-dss'] = "<LOC Unit_Description_0435> Increases the speed at which the SACU repairs itself. Also increases hit points.",
-    ['xsl0301-sre'] = "<LOC Unit_Description_0436> Greatly expands the range of the standard on-board SACU sensor systems, including Omni.",
+    ['xsl0301-sre'] = "<LOC Unit_Description_0436> Significantly expands the capabilities of standard onboard SACU sensor systems: Radar, Omni, Vision.",
     ['xsl0301-efm'] = "<LOC Unit_Description_0437> Speeds up all engineering-related functions.",
     ['xsl0301-sp'] = "<LOC Unit_Description_0438> Adds a personal shield generator to the SACU.",
     ['xsl0301-pqt'] = "<LOC Unit_Description_0439> Adds teleporter. Requires considerable Energy to activate.",
     ['xsl0301-oc'] = "<LOC Unit_Description_0440> Single shot destroys most units. Consumes large amount of Energy.",
+    ['xsl0301-cba'] = "<LOC Unit_Description_0005_gaf> SACU main gun upgrade: increased firing speed, range. Added splash damage.",
+    ['xsl0301-ras'] = "<LOC Unit_Description_0006_gaf> Increases SACU's resource generation.",
 
     -- SERAPHIM -- Support Commander Presets
     ['xsl0301_AdvancedCombat'] = "<LOC xsl0301_AdvancedCombat_help> Support Armored Command Unit. Enhanced during construction with the enhanced sensor system, nano-repair system and overcharge enhancements.",
@@ -513,6 +517,8 @@ Description = {
     ['xsl0301_NanoCombat'] = "<LOC xsl0301_NanoCombat_help> Support Armored Command Unit. Enhanced during construction with the enhanced sensor system and nano-repair system enhancements.",
     ['xsl0301_Rambo'] = "<LOC xsl0301_Rambo_help> Support Armored Command Unit. Enhanced during construction with the personal shield generator, nano-repair system and overcharge enhancements.",
 
+
+    
     -- SERAPHIM -- Land Units
     ['xsl0101'] = "<LOC Unit_Description_0337> Light, fast mobile reconnaissance unit. When stationary, deploys cloaking and stealth fields.",
     ['xsl0201'] = "<LOC Unit_Description_0338> Lightly armored tank. Armed with a single cannon.",
