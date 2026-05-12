@@ -32,7 +32,7 @@ Description = {
     ['uel0301-rj'] = "<LOC Unit_Description_0020> Radar Jammer creates false radar images. Countered by Omni sensors.",
     ['uel0301-isb'] = "<LOC Unit_Description_0021> Increases SACU's resource generation.",
     ['uel0301-sre'] = "<LOC Unit_Description_0022> Greatly expands the range of the standard on-board SACU sensor systems.",
-    ['uel0301-acu'] = "<LOC Unit_Description_0023> Rapidly cools any weapon mounted onto the SACU. Increases rate of fire.",
+    ['uel0301-col'] = "<LOC Unit_Description_0023> Rapidly cools any weapon mounted onto the SACU. Increases rate of fire.",
     ['uel0301-heo'] = "<LOC Unit_Description_0024> Equips the standard SACU Heavy plasma cannon with area-of-effect damage.",
 
     -- UEF -- Support Commander Presets
@@ -185,6 +185,8 @@ Description = {
     ['url0301-ses'] = "<LOC Unit_Description_0121> Speeds up all engineering-related functions.",
     ['url0301-srs'] = "<LOC Unit_Description_0122> Greatly increases the speed at which the SACU repairs itself.",
     ['url0301-sfs'] = "<LOC Unit_Description_0123> Hides the SACU from radar. Requires Energy to run.",
+    ['url0301-saa'] = "<LOC Unit_Description_0002_gaf> The main gun cooling module allows the SACU's primary weapon to fire twice as often.",
+    ['url0301-rads'] = "<LOC Unit_Description_0007_gaf> Adds a personal sensor system for the SACU.",
 
     -- CYBRAN -- Support Commander Presets
     ['url0301_AntiAir'] = "<LOC url0301_AntiAir_help> Support Armored Command Unit. Enhanced during construction with the nanite missile system enhancement.",
@@ -357,6 +359,7 @@ Description = {
     ['ual0301-ss'] = "<LOC Unit_Description_0173> Equips the standard SACU's Reacton cannon with area-of-effect damage.",
     ['ual0301-sic'] = "<LOC Unit_Description_0174> Greatly increases the speed at which the SACU repairs itself.",
     ['ual0301-pqt'] = "<LOC Unit_Description_0175> Adds teleporter. Requires considerable Energy to activate.",
+    ['ual0301-rads'] = "<LOC Unit_Description_0008_gaf> Adds a personal sensor system for the SACU.",
 
     -- AEON -- Support Commander Presets
     ['ual0301_Engineer']     = "<LOC ual0301_Engineer_help> Support Armored Command Unit. Enhanced during construction with rapid fabrication enhancement.",
@@ -364,7 +367,7 @@ Description = {
     ['ual0301_Rambo'] = "<LOC ual0301_Rambo_help> Support Armored Command Unit. Enhanced during construction with a heavy personal shield and the reacton refractor enhancements.",
     ['ual0301_RAS'] = "<LOC ual0301_RAS_help> Support Armored Command Unit. Enhanced during construction with a Resource Allocation System.",
     ['ual0301_ShieldCombat'] = "<LOC ual0301_ShieldCombat_help> Support Armored Command Unit. Enhanced during construction with a personal shield and the reacton refractor enhancements.",
-    ['ual0301_SimpleCombat'] = "<LOC ual0301_SimpleCombat_help> Support Armored Command Unit. Enhanced during construction with the reacton refractor enhancement.",
+    ['ual0301_Support'] = "<LOC ual0301_Support_help> Support Armored Command Unit. Enhanced during construction with the reacton refractor enhancement.",
 
     -- AEON -- Land Units
     ['ual0101'] = "<LOC Unit_Description_0223> Fast, lightly armored reconnaissance vehicle. Armed with a laser and a state-of-the-art sensor suite.",
@@ -499,20 +502,24 @@ Description = {
     ['xsl0301'] = "<LOC Unit_Description_0433> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
     ['xsl0301-tmu'] = "<LOC Unit_Description_0434> Mounts a tactical cruise missile launcher onto the back of the SACU.",
     ['xsl0301-dss'] = "<LOC Unit_Description_0435> Increases the speed at which the SACU repairs itself. Also increases hit points.",
-    ['xsl0301-sre'] = "<LOC Unit_Description_0436> Greatly expands the range of the standard on-board SACU sensor systems, including Omni.",
+    ['xsl0301-sre'] = "<LOC Unit_Description_0436> Significantly expands the capabilities of standard onboard SACU sensor systems: Radar, Omni, Vision.",
     ['xsl0301-efm'] = "<LOC Unit_Description_0437> Speeds up all engineering-related functions.",
     ['xsl0301-sp'] = "<LOC Unit_Description_0438> Adds a personal shield generator to the SACU.",
     ['xsl0301-pqt'] = "<LOC Unit_Description_0439> Adds teleporter. Requires considerable Energy to activate.",
     ['xsl0301-oc'] = "<LOC Unit_Description_0440> Single shot destroys most units. Consumes large amount of Energy.",
+    ['xsl0301-cba'] = "<LOC Unit_Description_0005_gaf> SACU main gun upgrade: increased firing speed, range. Added splash damage.",
+    ['xsl0301-ras'] = "<LOC Unit_Description_0006_gaf> Increases SACU's resource generation.",
 
     -- SERAPHIM -- Support Commander Presets
     ['xsl0301_AdvancedCombat'] = "<LOC xsl0301_AdvancedCombat_help> Support Armored Command Unit. Enhanced during construction with the enhanced sensor system, nano-repair system and overcharge enhancements.",
-    ['xsl0301_Combat'] = "<LOC xsl0301_Combat_help> Support Armored Command Unit. Enhanced during construction with the enhanced sensor system enhancement.",
+    ['xsl0301_Support'] = "<LOC xsl0301_Support_help> Support Armored Command Unit. The preset allows you to support combat units as well as experimental units on the battlefield.",
     ['xsl0301_Engineer'] = "<LOC xsl0301_Engineer_help> Support Armored Command Unit. Enhanced during construction with the rapid fabricator enhancement.",
     ['xsl0301_Missile'] = "<LOC xsl0301_Missile_help> Support Armored Command Unit. Enhanced during construction with the tactical missile launcher and rapid fabricator enhancements.",
     ['xsl0301_NanoCombat'] = "<LOC xsl0301_NanoCombat_help> Support Armored Command Unit. Enhanced during construction with the enhanced sensor system and nano-repair system enhancements.",
     ['xsl0301_Rambo'] = "<LOC xsl0301_Rambo_help> Support Armored Command Unit. Enhanced during construction with the personal shield generator, nano-repair system and overcharge enhancements.",
 
+
+    
     -- SERAPHIM -- Land Units
     ['xsl0101'] = "<LOC Unit_Description_0337> Light, fast mobile reconnaissance unit. When stationary, deploys cloaking and stealth fields.",
     ['xsl0201'] = "<LOC Unit_Description_0338> Lightly armored tank. Armed with a single cannon.",

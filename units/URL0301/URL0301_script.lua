@@ -39,7 +39,6 @@ URL0301 = ClassUnit(CCommandUnit) {
     Weapons = {
         DeathWeapon = ClassWeapon(SCUDeathWeapon) {},
         RightDisintegrator = ClassWeapon(CDFLaserDisintegratorWeapon) {},
-        Disintigrator = ClassWeapon(CDFLaserDisintegratorWeapon01) {},
         NMissile = ClassWeapon(CAAMissileNaniteWeapon) {},
     },
 
@@ -70,7 +69,6 @@ URL0301 = ClassUnit(CCommandUnit) {
     ---@param layer Layer
     OnStopBeingBuilt = function(self, builder, layer)
         CCommandUnit.OnStopBeingBuilt(self, builder, layer)
-        self:SetWeaponEnabledByLabel('Disintigrator', false)
         self:BuildManipulatorSetEnabled(false)
         self:SetMaintenanceConsumptionInactive()
         self:DisableUnitIntel('Enhancement', 'RadarStealth')
@@ -87,6 +85,16 @@ URL0301 = ClassUnit(CCommandUnit) {
     ---@param self URL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementCloakingGenerator = function (self, bp)
+
+        self:AddToggleCap('RULEUTC_StealthToggle')
+        if self.IntelEffectsBag then
+            EffectUtil.CleanupEffectBag(self, 'IntelEffectsBag')
+            self.IntelEffectsBag = nil
+        end
+        self.HasStealthEnh = true
+        self:EnableUnitIntel('Enhancement', 'RadarStealth')
+        self:EnableUnitIntel('Enhancement', 'SonarStealth')
+
         self:RemoveToggleCap('RULEUTC_StealthToggle')
         self:AddToggleCap('RULEUTC_CloakToggle')
         self.HasStealthEnh = false
@@ -111,13 +119,17 @@ URL0301 = ClassUnit(CCommandUnit) {
             Buff.RemoveBuff(self, 'CybranSCUCloakBonus')
         end
         Buff.ApplyBuff(self, 'CybranSCUCloakBonus')
-        self:RemoveCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(99)
     end,
 
     ---@param self URL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementCloakingGeneratorRemove = function (self, bp)
+
+        self:RemoveToggleCap('RULEUTC_StealthToggle')
+        self:DisableUnitIntel('Enhancement', 'RadarStealth')
+        self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        self.HasStealthEnh = false
+
         -- remove prerequisites
         self:RemoveToggleCap('RULEUTC_StealthToggle')
         self:DisableUnitIntel('Enhancement', 'RadarStealth')
@@ -130,8 +142,6 @@ URL0301 = ClassUnit(CCommandUnit) {
         if Buff.HasBuff(self, 'CybranSCUCloakBonus') then
             Buff.RemoveBuff(self, 'CybranSCUCloakBonus')
         end
-        self:AddCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(self.Blueprint.Transport.TransportClass)
     end,
 
     ---@param self URL0301
@@ -197,8 +207,6 @@ URL0301 = ClassUnit(CCommandUnit) {
             Buff.RemoveBuff(self, 'CybranSCURegenerateBonus')
         end
         Buff.ApplyBuff(self, 'CybranSCURegenerateBonus')
-        self:RemoveCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(99)
     end,
 
     ---@param self URL0301
@@ -207,8 +215,6 @@ URL0301 = ClassUnit(CCommandUnit) {
         if Buff.HasBuff(self, 'CybranSCURegenerateBonus') then
             Buff.RemoveBuff(self, 'CybranSCURegenerateBonus')
         end
-        self:AddCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(self.Blueprint.Transport.TransportClass)
     end,
 
     ---@param self URL0301
@@ -260,60 +266,8 @@ URL0301 = ClassUnit(CCommandUnit) {
 
     ---@param self URL0301
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementDisintigratorGun = function(self, bp)
-        local wep = self:GetWeaponByLabel('Disintigrator')
-        self:ShowBone('Barrel_L', true)
-        self:HideBone('Engineering_Arm', true)
-        self:SetWeaponEnabledByLabel('Disintigrator', true)
-        self:RemoveCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(99)
-        self:RemoveCommandCap('RULEUCC_Repair')
-        self:RemoveCommandCap('RULEUCC_Capture')
-        self:RemoveCommandCap('RULEUCC_Reclaim')
-        if not Buffs['ZeroBP'] then
-            BuffBlueprint {
-                Name = 'ZeroBP',
-                DisplayName = 'ZeroBP',
-                BuffType = 'SCUBUILDRATE',
-                Stacks = 'REPLACE',
-                Duration = -1,
-                Affects = {
-                    BuildRate = {
-                        Mult = 0.01,
-                    },
-                },
-            }
-        end
-        Buff.ApplyBuff(self, 'ZeroBP')
-        self:AddBuildRestriction(categories.ALLUNITS)
-        self:RequestRefreshUI()
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementDisintigratorGunRemove = function(self, bp)
-        local wep = self:GetWeaponByLabel('Disintigrator')
-        self:HideBone('Barrel_L', true)
-        self:ShowBone('Engineering_Arm', true)
-        self:SetWeaponEnabledByLabel('Disintigrator', false)
-        self:AddCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(self.Blueprint.Transport.TransportClass)
-        self:AddCommandCap('RULEUCC_Repair')
-        self:AddCommandCap('RULEUCC_Capture')
-        self:AddCommandCap('RULEUCC_Reclaim')
-        if Buff.HasBuff(self, 'ZeroBP') then
-            Buff.RemoveBuff(self, 'ZeroBP')
-        end
-        self:RestoreBuildRestrictions()
-        self:RequestRefreshUI()
-    end,
-
-    ---@param self URL0301
-    ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementFocusConvertor = function(self, bp)
         local wep = self:GetWeaponByLabel('RightDisintegrator')
-        wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
-        local wep = self:GetWeaponByLabel('Disintigrator')
         wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
     end,
 
@@ -323,8 +277,6 @@ URL0301 = ClassUnit(CCommandUnit) {
         local wep = self:GetWeaponByLabel('RightDisintegrator')
         wep:AddDamageMod(-self.Blueprint.Enhancements['FocusConvertor'].NewDamageMod)
         wep:ChangeMaxRadius(self.Blueprint.Weapon[1].MaxRadius or 25)
-        local wep = self:GetWeaponByLabel('Disintigrator')
-        wep:ChangeMaxRadius(bp.MaxRadius or 25)
     end,
 
     ---@param self URL0301
@@ -339,6 +291,25 @@ URL0301 = ClassUnit(CCommandUnit) {
     ProcessEnhancementRapidFireRemove = function(self, bp)
         local wep = self:GetWeaponByLabel('RightDisintegrator')
         wep:ChangeRateOfFire(bp.RateOfFire or 1)
+    end,
+
+    ---@param self URL0301
+    ---@param bp UnitBlueprintEnhancement
+    ProcessEnhancementSensorRangeEnhancer = function(self, bp)
+        self:SetIntelRadius('Vision', bp.NewVisionRadius or 30)
+        self:SetIntelRadius('Omni', bp.NewOmniRadius or 55)
+        self:SetIntelRadius('Radar', bp.NewRadarRadius or 90)
+        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        self:SetMaintenanceConsumptionActive()
+    end,
+
+    ---@param self URL0301
+    ---@param bp UnitBlueprintEnhancement unused
+    ProcessEnhancementSensorRangeEnhancerRemove = function(self, bp)
+        local bpIntel = self.Blueprint.Intel
+        self:SetIntelRadius('Vision', bpIntel.VisionRadius or 26)
+        self:SetIntelRadius('Omni', bpIntel.OmniRadius or 26)
+        self:SetIntelRadius('Radar', bp.RadarRadius or 0)
     end,
 
     ---@param self URL0301
