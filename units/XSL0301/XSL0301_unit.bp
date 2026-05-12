@@ -710,7 +710,7 @@ UnitBlueprint{
             UseFiringSolutionInsteadOfAimBone = true,
             WeaponCategory = "Direct Fire",
         },
-        {
+       {
             AboveWaterFireOnly = true,
             AboveWaterTargetsOnly = true,
             Audio = {
@@ -718,13 +718,13 @@ UnitBlueprint{
             },
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
-            Damage = 8000,
+            Damage = 15000,
             DamageFriendly = false,
             DamageRadius = 2.5,
             DamageType = "Overcharge",
             DisplayName = "Light Overcharge Cannon",
             EnabledByEnhancement = "Overcharge",
-            EnergyRequired = 4000,
+            EnergyRequired = 7500,
             FireTargetLayerCapsTable = {
                 Land = "Land|Water|Seabed",
                 Seabed = "Land|Water|Seabed",
@@ -741,7 +741,7 @@ UnitBlueprint{
             Overcharge = {
                 commandDamage = 400,
                 energyMult = 0.9,
-                maxDamage = 8000,
+                maxDamage = 15000,
                 minDamage = 1250,
                 structureDamage = 800,
             },
@@ -761,7 +761,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_DirectFire",
-            RateOfFire = 10/60, --10/integer interval in ticks
+            RateOfFire = 10/53, --10/integer interval in ticks
             SlavedToBody = false,
             TargetPriorities = {
                 "MOBILE EXPERIMENTAL",
@@ -777,11 +777,11 @@ UnitBlueprint{
             TurretBoneYaw = "Torso",
             TurretDualManipulators = false,
             TurretPitch = 0,
-            TurretPitchRange = 160,
-            TurretPitchSpeed = 90,
+            TurretPitchRange = 60,
+            TurretPitchSpeed = 30,
             TurretYaw = 0,
             TurretYawRange = 180,
-            TurretYawSpeed = 90,
+            TurretYawSpeed = 110,
             Turreted = true,
             UseFiringSolutionInsteadOfAimBone = true,
             WeaponCategory = "Direct Fire",
@@ -796,13 +796,13 @@ UnitBlueprint{
             },
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
-            Damage = 8000,
+            Damage = 15000,
             DamageFriendly = false,
             DamageRadius = 2.5,
             DamageType = "Overcharge",
             DisplayName = "Light AutoOvercharge Cannon",
             EnabledByEnhancement = "Overcharge",
-            EnergyRequired = 4000,
+            EnergyRequired = 7500,
             FireTargetLayerCapsTable = {
                 Land = "Land|Water|Seabed",
                 Seabed = "Land|Water|Seabed",
@@ -817,7 +817,7 @@ UnitBlueprint{
             Overcharge = {
                 commandDamage = 400,
                 energyMult = 0.9,
-                maxDamage = 8000,
+                maxDamage = 15000,
                 minDamage = 1250,
                 structureDamage = 800,
             },
@@ -857,7 +857,7 @@ UnitBlueprint{
             TurretPitchSpeed = 30,
             TurretYaw = 0,
             TurretYawRange = 180,
-            TurretYawSpeed = 90,
+            TurretYawSpeed = 110,
             Turreted = true,
             UseFiringSolutionInsteadOfAimBone = true,
             WeaponCategory = "Direct Fire",

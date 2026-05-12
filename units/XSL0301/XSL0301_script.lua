@@ -135,26 +135,6 @@ XSL0301 = ClassUnit(CommandUnit) {
         self:GetWeaponByLabel('AutoOverCharge').NeedsUpgrade = false
         local wep = self:GetWeaponByLabel('OverCharge')
         self:SetWeaponEnabledByLabel('OverCharge', true)
-        self:RemoveCommandCap('RULEUCC_Repair')
-        self:RemoveCommandCap('RULEUCC_Capture')
-        self:RemoveCommandCap('RULEUCC_Reclaim')
-        if not Buffs['ZeroBP'] then
-            BuffBlueprint {
-                Name = 'ZeroBP',
-                DisplayName = 'ZeroBP',
-                BuffType = 'SCUBUILDRATE',
-                Stacks = 'REPLACE',
-                Duration = -1,
-                Affects = {
-                    BuildRate = {
-                        Mult = 0.01,
-                    },
-                },
-            }
-        end
-        Buff.ApplyBuff(self, 'ZeroBP')
-        self:AddBuildRestriction(categories.ALLUNITS)
-        self:RequestRefreshUI()
     end,
 
     ---@param self XSL0301
@@ -167,14 +147,6 @@ XSL0301 = ClassUnit(CommandUnit) {
         self:GetWeaponByLabel('AutoOverCharge').NeedsUpgrade = true
         local wep = self:GetWeaponByLabel('OverCharge')
         self:SetWeaponEnabledByLabel('OverCharge', false)
-        self:AddCommandCap('RULEUCC_Repair')
-        self:AddCommandCap('RULEUCC_Capture')
-        self:AddCommandCap('RULEUCC_Reclaim')
-        if Buff.HasBuff(self, 'ZeroBP') then
-            Buff.RemoveBuff(self, 'ZeroBP')
-        end
-        self:RestoreBuildRestrictions()
-        self:RequestRefreshUI()
     end,
 
     ---@param self XSL0301

@@ -1950,7 +1950,7 @@ Unit_Description_0436="Averagely increases the range of SACU sensors: Radar, Omn
 Unit_Description_0437="Massively increases SACU build speed.\n\n+42 Buildpower"
 Unit_Description_0438="Creates a protective Personal Shield around the SACU. Requires energy to run.\nHP:5000\nShield Regen Rate = 20 HP/s\nShield Recharge Time = 60 seconds\nShield activation: 2 sec."
 Unit_Description_0439="Adds Teleportation capability. Requires considerable energy to activate."
-Unit_Description_0440="Expands the arsenal of the SACU with the Gun Overload function, similar to the ability of the ACU.\nDamage to units max: 10000. 6 batteries = 60000 energy.\nDamage to units min: 1600. 1 battery = 7500 energy.\nDamage to buildings (fixed): 800.\nDamage to commanders (fixed): 400.\nOvercharge recharge: 10 seconds.\nAUTO overcharge recharge: 12 seconds."
+Unit_Description_0440="Expands the arsenal of the SACU with the Gun Overload function, similar to the ability of the ACU.\n\nDamage to units max: 15000.\n(9 accumulators = 90000 energy).\n\nDamage to units min: 1250.\n(1 accumulators = 10000 energy).\nDamage to buildings (fixed): 800.\nDamage to commanders (fixed): 400.\nOvercharge recharge: 10 seconds.\nAUTO overcharge recharge: 12 seconds."
 Unit_Description_0004_gaf="Adds the Medusa machine gun with SACU homing projectiles.\nDPS = 1000"
 Unit_Description_0005_gaf="The weapon's firing range, speed, and area damage of the main gun of the SACU are significantly increased.\n\nFiring range: 25 --> 35.\nRate of fire: 1 --> 1,5.\nSplash: 0 --> 1,5. \n\nDPS: 300 --> 450."
 Unit_Description_0006_gaf="Increases SACU's resource generation by 10 mass per second and 1000 energy per second."
