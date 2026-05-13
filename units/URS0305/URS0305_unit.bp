@@ -92,7 +92,7 @@ UnitBlueprint{
         BuildCostEnergy = 14400,
         BuildCostMass = 1200,
         BuildTime = 1400,
-        MaintenanceConsumptionPerSecondEnergy = 600,
+        MaintenanceConsumptionPerSecondEnergy = 1200,
     },
     Footprint = {
         MinWaterDepth = 1.5,
@@ -119,11 +119,11 @@ UnitBlueprint{
         UpgradesFrom = "urb3202",
     },
     Intel = {
-        RadarStealthFieldRadius = 50,
+        RadarStealthFieldRadius = 52,
         ReactivateTime = 6,
         ShowIntelOnSelect = true,
         SonarRadius = 448,
-        SonarStealthFieldRadius = 50,
+        SonarStealthFieldRadius = 52,
         VisionRadius = 32,
         WaterVisionRadius = 24,
     },

@@ -29,7 +29,6 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "SILO",
-        "SNIPEMODE",
         "TECH3",
         "VISIBLETORECON",
     },

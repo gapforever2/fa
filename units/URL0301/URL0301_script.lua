@@ -85,6 +85,16 @@ URL0301 = ClassUnit(CCommandUnit) {
     ---@param self URL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementCloakingGenerator = function (self, bp)
+
+        self:AddToggleCap('RULEUTC_StealthToggle')
+        if self.IntelEffectsBag then
+            EffectUtil.CleanupEffectBag(self, 'IntelEffectsBag')
+            self.IntelEffectsBag = nil
+        end
+        self.HasStealthEnh = true
+        self:EnableUnitIntel('Enhancement', 'RadarStealth')
+        self:EnableUnitIntel('Enhancement', 'SonarStealth')
+
         self:RemoveToggleCap('RULEUTC_StealthToggle')
         self:AddToggleCap('RULEUTC_CloakToggle')
         self.HasStealthEnh = false
@@ -114,6 +124,12 @@ URL0301 = ClassUnit(CCommandUnit) {
     ---@param self URL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementCloakingGeneratorRemove = function (self, bp)
+
+        self:RemoveToggleCap('RULEUTC_StealthToggle')
+        self:DisableUnitIntel('Enhancement', 'RadarStealth')
+        self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        self.HasStealthEnh = false
+
         -- remove prerequisites
         self:RemoveToggleCap('RULEUTC_StealthToggle')
         self:DisableUnitIntel('Enhancement', 'RadarStealth')

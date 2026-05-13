@@ -49,7 +49,6 @@ UnitBlueprint{
         "PRODUCTFA",
         "RECLAIMABLE",
         "SELECTABLE",
-        "SNIPEMODE",
         "TECH1",
         "VISIBLETORECON",
     },

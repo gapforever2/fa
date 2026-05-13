@@ -23,7 +23,6 @@ UnitBlueprint{
         "SELECTABLE",
         "SHOWATTACKRETICLE",
         "SILO",
-        "SNIPEMODE",
         "TECH3",
         "UEF",
         "VISIBLETORECON",

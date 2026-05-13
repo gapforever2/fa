@@ -36,7 +36,6 @@ UnitBlueprint{
         "PRODUCTSC1",
         "RECLAIMABLE",
         "SELECTABLE",
-        "SNIPEMODE",
         "TECH3",
         "VISIBLETORECON",
     },

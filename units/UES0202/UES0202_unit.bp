@@ -39,7 +39,6 @@ UnitBlueprint{
         "SELECTABLE",
         "SHOWATTACKRETICLE",
         "SILO",
-        "SNIPEMODE",
         "TECH2",
         "UEF",
         "VISIBLETORECON",
@@ -149,7 +148,7 @@ UnitBlueprint{
     Intel = {
         RadarRadius = 152,
         VisionRadius = 64,
-        WaterVisionRadius = 0,
+        WaterVisionRadius = 32,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 2.45,

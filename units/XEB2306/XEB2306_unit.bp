@@ -19,7 +19,6 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "SIZE4",
-        "SNIPEMODE",
         "SORTDEFENSE",
         "STRUCTURE",
         "TECH3",

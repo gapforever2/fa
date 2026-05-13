@@ -49,7 +49,6 @@ UnitBlueprint{
         "PRODUCTFA",
         "RECLAIMABLE",
         "SELECTABLE",
-        "SNIPEMODE",
         "TECH3",
         "VISIBLETORECON",
     },
@@ -153,7 +152,7 @@ UnitBlueprint{
     LifeBarOffset = 0.6,
     LifeBarSize = 1,
     Physics = {
-        Elevation = 10,
+        Elevation = 18,
         FuelRechargeRate = 15,
         FuelUseTime = 800,
         GroundCollisionOffset = 1.6,

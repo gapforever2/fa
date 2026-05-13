@@ -50,7 +50,6 @@ UnitBlueprint{
         "PRODUCTSC1",
         "RECLAIMABLE",
         "SELECTABLE",
-        "SNIPEMODE",
         "TECH2",
         "TRANSPORTATION",
         "TRANSPORTBUILTBYTIER2FACTORY",

@@ -13,9 +13,8 @@ local CDFHvyProtonCannonWeapon = CybranWeaponsFile.CDFHvyProtonCannonWeapon
 local CANNaniteTorpedoWeapon = CybranWeaponsFile.CANNaniteTorpedoWeapon
 local CIFSmartCharge = CybranWeaponsFile.CIFSmartCharge
 local CAABurstCloudFlakArtilleryWeapon = CybranWeaponsFile.CAABurstCloudFlakArtilleryWeapon
-local CDFBrackmanCrabHackPegLauncherWeapon = CybranWeaponsFile.CDFBrackmanCrabHackPegLauncherWeapon
 local TranslateInXZDirection = import("/lua/utilities.lua").TranslateInXZDirection
-
+local CIFArtilleryWeapon = import("/lua/cybranweapons.lua").CIFArtilleryWeapon
 
 local ExternalFactoryComponent = import("/lua/defaultcomponents.lua").ExternalFactoryComponent
 
@@ -35,7 +34,9 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
         Torpedo04 = ClassWeapon(CANNaniteTorpedoWeapon) {},
         AntiTorpedo = ClassWeapon(CIFSmartCharge) {},
         AAGun = ClassWeapon(CAABurstCloudFlakArtilleryWeapon) {},
-        HackPegLauncher = ClassWeapon(CDFBrackmanCrabHackPegLauncherWeapon) {},
+        HackPegLauncher = ClassWeapon(CIFArtilleryWeapon) {
+            FxMuzzleFlashScale = 1.2,
+		},
     },
 
     ---@param self XRL0403
@@ -44,7 +45,6 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
         self:SetWeaponEnabledByLabel('ParticleGunLeft', false)
         self:SetWeaponEnabledByLabel('AAGun', false)
         self:SetWeaponEnabledByLabel('Torpedo01', false)
-        self:ShowBone('Missile_Turret', true)
     end,
 
     ---@param self XRL0403
@@ -72,11 +72,6 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
     ---@param self XRL0403 |m
     OnCreate = function(self)
         CWalkingLandUnit.OnCreate(self)
-
-        self:SetWeaponEnabledByLabel('HackPegLauncher', false)
-        if self:IsValidBone('Missile_Turret') then
-            self:HideBone('Missile_Turret', true)
-        end
     end,
 
     ---@param self CConstructionUnit

@@ -26,8 +26,6 @@ local LandFactoryUnit = import('/lua/defaultunits.lua').LandFactoryUnit
 ---@class CConstructionEggUnit : CStructureUnit
 CConstructionEggUnit = ClassUnit(CStructureUnit) {
 	
-	TimeOpen = 30,
-	
 	OnCreate = function(self)
         CStructureUnit.OnCreate(self)
 
@@ -53,7 +51,9 @@ CConstructionEggUnit = ClassUnit(CStructureUnit) {
 
 	OpenEgg = function(self)
 		self:ForkThread(function()
-			WaitSeconds(self.TimeOpen)
+			local bp = self:GetBlueprint()
+			local TimerOpenUnit = bp.Timeropen
+			WaitSeconds(TimerOpenUnit)
             self:OpenEggAnimation()
         end
         )
@@ -69,12 +69,47 @@ CConstructionEggUnit = ClassUnit(CStructureUnit) {
         self.OpenAnimManip:PlayAnim(self:GetBlueprint().Display.AnimationOpen, false):SetRate(0.1)
         self:PlaySound(bp.Audio['EggOpen'])
 		local pos = self:GetPosition()
+		local ConUnits = bp.UnitsCol
+		if( ConUnits == 1) then
 		self.Spawn = CreateUnitHPR(
 			buildUnit,
 			aiBrain.Name,
 			pos[1], pos[2], pos[3],
 			0, 0, 0
 		)
+		elseif ConUnits == 2 then
+		self.Spawn = CreateUnitHPR(
+			buildUnit,
+			aiBrain.Name,
+			pos[1], pos[2], pos[3],
+			0, 0, 0
+		)
+		self.Spawn = CreateUnitHPR(
+			buildUnit,
+			aiBrain.Name,
+			pos[1], pos[2], pos[3],
+			0, 0, 0
+		)
+		elseif ConUnits == 3 then
+		self.Spawn = CreateUnitHPR(
+			buildUnit,
+			aiBrain.Name,
+			pos[1], pos[2], pos[3],
+			0, 0, 0
+		)
+		self.Spawn = CreateUnitHPR(
+			buildUnit,
+			aiBrain.Name,
+			pos[1], pos[2], pos[3],
+			0, 0, 0
+		)
+		self.Spawn = CreateUnitHPR(
+			buildUnit,
+			aiBrain.Name,
+			pos[1], pos[2], pos[3],
+			0, 0, 0
+		)
+		end
         WaitFor(self.OpenAnimManip)
 
         self.EggSlider = CreateSlider(self, 0, 0, -20, 0, 5)

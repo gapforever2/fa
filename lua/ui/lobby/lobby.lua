@@ -465,6 +465,11 @@ end
 --- Get a PlayerData object for the local player, configured using data from their profile.
 function GetLocalPlayerData()
     local version, gametype, commit = import("/lua/version.lua").GetVersionData()
+    local mean = argv.playerMean
+    local dev = argv.playerDeviation
+    local pl = playerRating
+    local numGames = argv.numGames
+
     return PlayerData(
         {
             PlayerName = localPlayerName,
@@ -485,7 +490,7 @@ function GetLocalPlayerData()
             GameType = gametype,
             Commit = commit,
         }
-)
+    )
 end
 
 --- Compute an estimation of the rating of the given AI. The values originate from 'aitypes.lua'
@@ -1087,13 +1092,6 @@ function SetSlotInfo(slotNum, playerInfo)
     end
 
     playerInfo.StartSpot = slotNum
-
-    -- For human players with fewer than 10 games, force a fixed rating of 100 +/- 0
-    if playerInfo.Human and type(playerInfo.NG) == 'number' and playerInfo.NG < 15 then
-        playerInfo.MEAN = 100
-        playerInfo.DEV = 15
-        playerInfo.PL = 100
-    end
 
     local slot = GUI.slots[slotNum]
     local isHost = lobbyComm:IsHost()

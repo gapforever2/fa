@@ -11,6 +11,8 @@ UnitBlueprint{
         UISelection    = Sound { Bank = 'Interface',  Cue = 'Cybran_Select_Factory',      LodCutoff = 'UnitMove_LodCutoff' },
     },
     AverageDensity = 10,
+	UnitsCol = 1,
+	Timeropen = 7,
     BuildIconSortPriority = 25,
     Categories = {
         "CONSTRUCTION",
@@ -30,8 +32,9 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Normal",
-        Health = 10,
-        MaxHealth = 10,
+        Health = 100,
+        MaxHealth = 100,
+		RegenRate = 2,
     },
     Display = {
         AnimationOpen = "/units/drlk005/drlk005_aopen.sca",
@@ -54,9 +57,9 @@ UnitBlueprint{
         UniformScale = 0.05,
     },
     Economy = {
-        BuildCostEnergy = 10000,
-        BuildCostMass = 800,
-        BuildTime = 2000,
+        BuildCostEnergy = 9600,
+        BuildCostMass = 720,
+        BuildTime = 1200,
         BuildUnit = "drlk001",
     },
     Footprint = {
@@ -67,6 +70,7 @@ UnitBlueprint{
         CommandCaps = { RULEUCC_Stop = true },
         FactionName = "Cybran",
         Icon = "land",
+		SelectionPriority = 7,
     },
     Intel = { VisionRadius = 4 },
     LifeBarHeight = 0.075,

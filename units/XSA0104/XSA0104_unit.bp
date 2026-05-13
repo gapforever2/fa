@@ -53,7 +53,6 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "SERAPHIM",
-        "SNIPEMODE",
         "TECH2",
         "TRANSPORTATION",
         "TRANSPORTBUILTBYTIER2FACTORY",

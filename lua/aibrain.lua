@@ -24,6 +24,105 @@ local JammerManagerBrainComponent = import("/lua/aibrains/components/jammermanag
 local StatManagerBrainComponent = import("/lua/aibrains/components/statmanagerbraincomponent.lua").StatManagerBrainComponent
 local EnergyManagerBrainComponent = import("/lua/aibrains/components/energymanagerbraincomponent.lua").EnergyManagerBrainComponent
 
+local CommanderSafeTime = import("/lua/simutils.lua").CommanderSafeTime
+
+-- minimum time before full-share kicks in when using delayed recall, matches FAF behaviour
+local MinimumShareTime = 3000
+
+--- Kills all units in the table if they are alive.
+---@param units Unit[]
+---@return Unit[] safeUnits  # always returns a table for convenience
+local function KillUnits(units)
+    if not units or table.empty(units) then
+        return {}
+    end
+
+    for _, unit in units do
+        if not unit.Dead then
+            unit:Kill()
+        end
+    end
+
+    return {}
+end
+
+--- Kills commanders that were damaged too recently, returns the "safe" ones (not recently damaged).
+---@param commanders Unit[]
+---@return Unit[]
+local function KillUnsafeCommanders(commanders)
+    local safeCommanders = {}
+
+    if not commanders or table.empty(commanders) then
+        return safeCommanders
+    end
+
+    local gameTick = GetGameTick()
+
+    for _, com in commanders do
+        if com.LastTickDamaged <= gameTick - CommanderSafeTime then
+            table.insert(safeCommanders, com)
+        else
+            com:Kill()
+        end
+    end
+
+    return safeCommanders
+end
+
+--- FAF-style handler for abandoned armies (disconnect logic).
+---@param self AIBrain
+---@param shareOption string
+---@param shareAcuOption string
+---@param victoryOption string
+local function KillAbandonedArmy(self, shareOption, shareAcuOption, victoryOption)
+    if shareOption == 'SameAsShare' then
+        shareOption = ScenarioInfo.Options.Share
+    end
+
+    -- Don't apply instant-effect disconnect rules for players/ACUs that might be defeated soon,
+    -- and might have intentionally disconnected.
+    if shareAcuOption == 'Explode' or shareAcuOption == 'Recall' then
+        local safeCommanders
+        local commanders = self:GetListOfUnits(categories.COMMAND, false)
+        if shareAcuOption == 'Recall' then
+            safeCommanders = KillUnsafeCommanders(commanders)
+        else
+            -- explode all the ACUs so they don't get shared
+            KillUnits(commanders)
+        end
+
+        -- Only handle Assassination victory, as in other settings the player is unlikely to be defeated soon
+        if victoryOption == 'demoralization' and table.empty(safeCommanders) then
+            shareOption = ScenarioInfo.Options.Share
+        end
+
+        -- non-assassination modes can have armies abandon without commanders
+        if shareAcuOption == 'Recall' and not table.empty(safeCommanders) then
+            -- note: this adds 3 seconds to the grace period
+            FakeTeleportUnits(safeCommanders, true)
+        end
+
+        KillArmy(self, shareOption)
+
+    elseif shareAcuOption == 'RecallDelayed' or shareAcuOption == 'Permanent' then
+
+        if victoryOption ~= 'demoralization' then
+            shareOption = 'FullShare'
+        end
+
+        if shareAcuOption == 'RecallDelayed' then
+            local shareTime = math.max(MinimumShareTime, GetGameTick() + CommanderSafeTime)
+            KillArmyOnDelayedRecall(self, shareOption, shareTime)
+        else
+            KillArmyOnACUDeath(self, shareOption)
+        end
+
+    else
+        WARN('Invalid disconnection ACU share condition was used for this game: `' .. (shareAcuOption or 'nil') .. '` Defaulting to exploding ACU.')
+        KillArmy(self, shareOption)
+    end
+end
+
 ---@class TriggerSpec
 ---@field Callback function
 ---@field ReconTypes ReconTypes
@@ -435,10 +534,12 @@ AIBrain = Class(FactoryManagerBrainComponent, StatManagerBrainComponent, JammerM
     SetDefeatStatus = function(self, status)
         self.Status = status
 
-        UpdateUnitCap(self.Army)
-        SimPingOnArmyDefeat(self.Army)
-        if status ~= "Recalled" then -- the recall logic takes care of itself
-            RecallOnArmyDefeat(self.Army)
+        local selfIndex = self.Army or self:GetArmyIndex()
+        UpdateUnitCap(selfIndex)
+        SimPingOnArmyDefeat(selfIndex)
+
+        if status ~= "Recalled" then
+            RecallOnArmyDefeat(selfIndex)
         end
 
         if self.BrainType == 'AI' then
@@ -499,8 +600,12 @@ AIBrain = Class(FactoryManagerBrainComponent, StatManagerBrainComponent, JammerM
             -- These indices in the function 'SetCommandSource' is 0-based instead of 1-based, hence we manually subtract 1 here
             SetCommandSource(armyIndex  - 1, sourceIndex - 1, true)
 
-            -- inform allied players that this happened.
-            SyncAIChat({sender=self.Nickname, group=sourceIndex, text="<LOC _AbandonedByPlayer>I disconnected, you and all other allies can now switch focus army to me via the scoreboard to issue commands."})
+            -- inform allied players that this happened (send as allies-group message so all allies see it)
+            SyncAIChat({
+                sender = self.Nickname,
+                group  = 'allies',
+                text   = "<LOC _AbandonedByPlayer>I disconnected, you and all other allies can now switch focus army to me via the scoreboard to issue commands."
+            })
 
             -- inform developers that this happened (we show 1-based index for armies here and a 0-based index for sources)
             SPEW(string.format("Army %d %s control shared with army %d %s (source index %d)", armyIndex, tostring(self.Nickname), i, tostring(brain.Nickname), sourceIndex - 1))
@@ -522,35 +627,18 @@ AIBrain = Class(FactoryManagerBrainComponent, StatManagerBrainComponent, JammerM
         self.AbandonedAt = GetGameTick()
         SPEW(string.format("Army %d %s has been abandoned by all players with command control", self:GetArmyIndex(), tostring(self.Nickname)))
 
-        if  ScenarioInfo.Options.CommonArmy == "UnionWhenDisconnected" and
-
-            -- do not trigger this behavior when this army is already defeated
-            (not self:IsDefeated())
-        then
-            -- attempt to share control of this army with remaining allied players
-            local succeeded = self:ShareControlWithAllies()
-            if succeeded then
-                return
-            end
-        end
-
-        self:SetDefeatStatus("Defeat")
-
-        if  ScenarioInfo.Options.CommonArmy == "UnionWhenDisconnected" and
-
-            -- do not trigger this behavior when this army is already defeated
-            (not self:IsDefeated())
-        then
-            -- attempt to share control of this army with remaining allied players
-            local succeeded = self:ShareControlWithAllies()
-            if succeeded then
-                return
-            end
-        end
-
-        self:SetDefeatStatus("Defeat")
-
         local opt = ScenarioInfo.Options
+
+        if opt.CommonArmy == "UnionWhenDisconnected" and not self:IsDefeated() then
+            -- attempt to share control of this army with remaining allied players
+            local succeeded = self:ShareControlWithAllies()
+            if succeeded then
+                return
+            end
+        end
+
+        self:SetDefeatStatus("Defeat")
+
         ForkThread(KillAbandonedArmy, self, opt.DisconnectShare, opt.DisconnectShareCommanders, opt.Victory)
 
         if self.Trash then
