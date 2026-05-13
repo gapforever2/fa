@@ -53,7 +53,6 @@ UnitBlueprint{
     BuildIconSortPriority = 10,
     Categories = {
         "AIR",
-        "ANTIAIR",
         "BOMBER",
         "BUILTBYTIER3COMMANDER",
         "BUILTBYTIER3ENGINEER",

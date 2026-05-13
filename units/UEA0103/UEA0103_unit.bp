@@ -56,7 +56,6 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "SHOWATTACKRETICLE",
-        "SNIPEMODE",
         "TECH1",
         "UEF",
         "VISIBLETORECON",

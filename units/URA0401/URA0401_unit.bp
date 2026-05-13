@@ -234,8 +234,8 @@ UnitBlueprint{
             DamageType = "Normal",
             DisplayName = "Iridium Rocket Pack",
             FireTargetLayerCapsTable = {
-                Air = "Land|Water|Seabed",
-                Land = "Land|Water|Seabed",
+                Air = "Air|Land|Water|Seabed",
+                Land = "Air|Land|Water|Seabed",
                 Water = "Air|Land|Water|Seabed",
             },
             FiringRandomness = 1,
@@ -299,8 +299,8 @@ UnitBlueprint{
             DamageType = "Normal",
             DisplayName = "Iridium Rocket Pack",
             FireTargetLayerCapsTable = {
-                Air = "Land|Water|Seabed",
-                Land = "Land|Water|Seabed",
+                Air = "Air|Land|Water|Seabed",
+                Land = "Air|Land|Water|Seabed",
                 Water = "Air|Land|Water|Seabed",
             },
             FiringRandomness = 1,
@@ -395,7 +395,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_AntiAir",
-            RateOfFire = 10/03, --10/integer interval in ticks
+            RateOfFire = 10/10, --10/integer interval in ticks
             SlavedToBody = false,
             TargetPriorities = {
                 "(AIR * MOBILE - INTELLIGENCE)",
@@ -460,7 +460,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_AntiAir",
-            RateOfFire = 10/03, --10/integer interval in ticks
+            RateOfFire = 10/10, --10/integer interval in ticks
             SlavedToBody = false,
             TargetPriorities = {
                 "(AIR * MOBILE - INTELLIGENCE)",
@@ -493,8 +493,8 @@ UnitBlueprint{
             DamageType = "Normal",
             DisplayName = "Heavy Electron Bolter",
             FireTargetLayerCapsTable = {
-                Air = "Land|Water|Seabed",
-                Land = "Land|Water|Seabed",
+                Air = "Air|Land|Water|Seabed",
+                Land = "Air|Land|Water|Seabed",
                 Water = "Air|Land|Water|Seabed",
             },
             FiringRandomness = 1,
@@ -560,8 +560,8 @@ UnitBlueprint{
             DamageType = "Normal",
             DisplayName = "Heavy Electron Bolter",
             FireTargetLayerCapsTable = {
-                Air = "Land|Water|Seabed",
-                Land = "Land|Water|Seabed",
+                Air = "Air|Land|Water|Seabed",
+                Land = "Air|Land|Water|Seabed",
                 Water = "Air|Land|Water|Seabed",
             },
             FiringRandomness = 1,

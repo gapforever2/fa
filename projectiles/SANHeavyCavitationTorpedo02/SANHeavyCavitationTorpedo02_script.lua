@@ -54,7 +54,7 @@ SANHeavyCavitationTorpedo02 = ClassProjectile(SHeavyCavitationTorpedo, SplitComp
         SHeavyCavitationTorpedoOnCreate(self, inWater)
 
         -- let gravity take over
-        self:TrackTarget(false)
+        self:TrackTarget(true)
     end,
 
     ---@param self SANHeavyCavitationTorpedo02
@@ -70,7 +70,7 @@ SANHeavyCavitationTorpedo02 = ClassProjectile(SHeavyCavitationTorpedo, SplitComp
         -- split damage over each child
         self.DamageData.DamageAmount = self.DamageData.DamageAmount / self.ChildCount
 
-        self:OnSplit(false)
+        self:OnSplit(true)
         self:Destroy()
     end,
 }

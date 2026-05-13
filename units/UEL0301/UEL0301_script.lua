@@ -33,9 +33,7 @@ UEL0301 = ClassUnit(CommandUnit) {
     },
 
     Weapons = {
-        TargetPainter = ClassWeapon(TargetingLaser) {},
         RightHeavyPlasmaCannon = ClassWeapon(TDFHeavyPlasmaCannonWeapon) {},
-        LeftHeavyPlasmaCannon = ClassWeapon(TDFHeavyPlasmaCannonWeapon) {},
         DeathWeapon = ClassWeapon(SCUDeathWeapon) {},
     },
 
@@ -44,7 +42,7 @@ UEL0301 = ClassUnit(CommandUnit) {
         CommandUnit.OnCreate(self)
         self:SetCapturable(false)
         self:ShowBone('Arm_Right_B03', true)
-        self:HideBone('Arm_Right_Barrel01', true)           
+        self:HideBone('Arm_Right_Barrel01', true)
         self:HideBone('Jetpack', true)
         self:HideBone('SAM', true)
         self:SetupBuildBones()
@@ -52,7 +50,7 @@ UEL0301 = ClassUnit(CommandUnit) {
 
     ---@param self UEL0301
     __init = function(self)
-        CommandUnit.__init(self, 'TargetPainter')
+        CommandUnit.__init(self, 'RightHeavyPlasmaCannon')
     end,
 
     ---@param self UEL0301
@@ -60,7 +58,7 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param layer Layer
     OnStopBeingBuilt = function(self, builder, layer)
         CommandUnit.OnStopBeingBuilt(self, builder, layer)
-        self:SetWeaponEnabledByLabel('LeftHeavyPlasmaCannon', false)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', true)
         -- Block Jammer until Enhancement is built
         self:DisableUnitIntel('Enhancement', 'Jammer')
     end,
@@ -81,6 +79,7 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param unitBeingBuilt Unit
     ---@param order string
     OnStartBuild = function(self, unitBeingBuilt, order)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', false)
         CommandUnit.OnStartBuild(self, unitBeingBuilt, order)
         self:RefreshPodFocus()
     end,
@@ -89,6 +88,7 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param unitBeingBuilt Unit
     ---@param order string
     OnStopBuild = function(self, unitBeingBuilt, order)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', true)
         CommandUnit.OnStopBuild(self, unitBeingBuilt, order)
         self:RefreshPodFocus()
     end,
@@ -96,6 +96,7 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param unitBeingRepaired Unit
     OnStartRepair = function(self, unitBeingRepaired)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', false)
         CommandUnit.OnStartRepair(self, unitBeingRepaired)
         self:RefreshPodFocus()
     end,
@@ -103,6 +104,7 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param unitBeingRepaired Unit
     OnStopRepair = function(self, unitBeingRepaired)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', true)
         CommandUnit.OnStopRepair(self, unitBeingRepaired)
         self:RefreshPodFocus()
     end,
@@ -110,6 +112,7 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param target Unit|Prop
     OnStartReclaim = function(self, target)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', false)
         CommandUnit.OnStartReclaim(self, target)
         self:RefreshPodFocus()
     end,
@@ -117,6 +120,7 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param target Unit|Prop
     OnStopReclaim = function(self, target)
+        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', true)
         CommandUnit.OnStopReclaim(self, target)
         self:RefreshPodFocus()
     end,
@@ -279,8 +283,11 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementSensorRangeEnhancer = function(self, bp)
-        self:SetIntelRadius('Vision', bp.NewVisionRadius or 104)
-        self:SetIntelRadius('Omni', bp.NewOmniRadius or 104)
+        self:SetIntelRadius('Vision', bp.NewVisionRadius or 40)
+        self:SetIntelRadius('Omni', bp.NewOmniRadius or 35)
+        self:SetIntelRadius('Radar', bp.NewRadarRadius or 120)
+        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        self:SetMaintenanceConsumptionActive()
     end,
 
     ---@param self UEL0301
@@ -289,6 +296,7 @@ UEL0301 = ClassUnit(CommandUnit) {
         local bpIntel = self.Blueprint.Intel
         self:SetIntelRadius('Vision', bpIntel.VisionRadius or 26)
         self:SetIntelRadius('Omni', bpIntel.OmniRadius or 26)
+        self:SetIntelRadius('Radar', bp.RadarRadius or 0)
     end,
 
     ---@param self UEL0301
@@ -324,67 +332,9 @@ UEL0301 = ClassUnit(CommandUnit) {
 
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement
-    ProcessEnhancementDoubleGun = function(self, bp)
-        local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
-        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', false)
-        self:ShowBone('Arm_Right_Barrel01', true)
-        self:HideBone('Arm_Right_B03', true)
-        local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
-        self:SetWeaponEnabledByLabel('LeftHeavyPlasmaCannon', true)
-        self:RemoveCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(99)
-        self:SetSpeedMult(0.9090)
-        if not Buffs['ZeroBP'] then
-            BuffBlueprint {
-                Name = 'ZeroBP',
-                DisplayName = 'ZeroBP',
-                BuffType = 'SCUBUILDRATE',
-                Stacks = 'REPLACE',
-                Duration = -1,
-                Affects = {
-                    BuildRate = {
-                        Mult = 0.01,
-                    },
-                },
-            }
-        end
-        Buff.ApplyBuff(self, 'ZeroBP')
-        self:RemoveCommandCap('RULEUCC_Repair')
-        self:RemoveCommandCap('RULEUCC_Capture')
-        self:RemoveCommandCap('RULEUCC_Reclaim')
-        self:AddBuildRestriction(categories.ALLUNITS)
-        self:RequestRefreshUI()
-    end,
-
-    ---@param self UEL0301
-    ---@param bp UnitBlueprintEnhancement unused
-    ProcessEnhancementDoubleGunRemove = function(self, bp)
-        local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
-        self:SetWeaponEnabledByLabel('RightHeavyPlasmaCannon', true)
-        self:ShowBone('Arm_Right_B03', true) 
-        self:HideBone('Arm_Right_Barrel01', true)  
-        local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
-        self:SetWeaponEnabledByLabel('LeftHeavyPlasmaCannon', false)
-        self:AddCommandCap('RULEUCC_CallTransport')
-        self:SetTransportClass(self.Blueprint.Transport.TransportClass)
-        self:SetSpeedMult(1)
-        if Buff.HasBuff(self, 'ZeroBP') then
-            Buff.RemoveBuff(self, 'ZeroBP')
-        end
-        self:AddCommandCap('RULEUCC_Repair')
-        self:AddCommandCap('RULEUCC_Capture')
-        self:AddCommandCap('RULEUCC_Reclaim')
-        self:RestoreBuildRestrictions()
-        self:RequestRefreshUI()
-    end,
-
-    ---@param self UEL0301
-    ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementAdvancedCoolingUpgrade = function(self, bp)
         local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
         wep:ChangeRateOfFire(bp.NewRateOfFire)
-        local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
-        wep:ChangeRateOfFire(bp.NewRateOfFireDubleGun)
     end,
 
     ---@param self UEL0301
@@ -392,8 +342,6 @@ UEL0301 = ClassUnit(CommandUnit) {
     ProcessEnhancementAdvancedCoolingUpgradeRemove = function(self, bp)
         local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
         wep:ChangeRateOfFire(self.Blueprint.Weapon[1].RateOfFire or 1)
-        local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
-        wep:ChangeRateOfFire(self.Blueprint.Weapon[2].RateOfFire or 1)
     end,
 
     ---@param self UEL0301
@@ -401,11 +349,6 @@ UEL0301 = ClassUnit(CommandUnit) {
     ProcessEnhancementHighExplosiveOrdnance = function(self, bp)
         local wep = self:GetWeaponByLabel('RightHeavyPlasmaCannon')
         wep:AddDamageRadiusMod(bp.NewDamageRadius)
-        wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
-        local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
-        wep:AddDamageRadiusMod(bp.NewDamageRadius)
-        wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
-        local wep = self:GetWeaponByLabel('TargetPainter')
         wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
     end,
 
@@ -416,12 +359,7 @@ UEL0301 = ClassUnit(CommandUnit) {
         wep:AddDamageRadiusMod(bp.NewDamageRadius)
         wep:ChangeMaxRadius(bp.NewMaxRadius or 25)
         wep:ChangeRateOfFire(self.Blueprint.Weapon[1].RateOfFire or 1)
-        local wep = self:GetWeaponByLabel('LeftHeavyPlasmaCannon')
-        wep:AddDamageRadiusMod(bp.NewDamageRadius)
-        wep:ChangeMaxRadius(bp.NewMaxRadius or 25)
         wep:ChangeRateOfFire(self.Blueprint.Weapon[1].RateOfFire or 1)
-        local wep = self:GetWeaponByLabel('TargetPainter')
-        wep:ChangeMaxRadius(bp.NewMaxRadius or 25)
     end,
 
     ---@param self UEL0301

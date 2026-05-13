@@ -56,7 +56,6 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "SHIELD",
-        "SNIPEMODE",
         "TECH3",
         "TRANSPORTATION",
         "TRANSPORTBUILTBYTIER3FACTORY",

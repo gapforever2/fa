@@ -30,7 +30,6 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "SIZE4",
-        "SNIPEMODE",
         "SORTDEFENSE",
         "STEALTH",
         "STRUCTURE",
@@ -105,8 +104,8 @@ UnitBlueprint{
     },
     Intel = {
         SonarRadius = 60,
-        VisionRadius = 20,
-        WaterVisionRadius = 45,
+        VisionRadius = 22,
+        WaterVisionRadius = 44,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.6,

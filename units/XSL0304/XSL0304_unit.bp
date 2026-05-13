@@ -25,7 +25,6 @@ UnitBlueprint{
         "SELECTABLE",
         "SERAPHIM",
         "SHOWATTACKRETICLE",
-        "SNIPEMODE",
         "TECH3",
         "VISIBLETORECON",
     },

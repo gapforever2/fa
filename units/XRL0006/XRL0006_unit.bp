@@ -1,5 +1,5 @@
 UnitBlueprint{
-    Description = "Яйцо краба (Жулик)",
+    Description = "<LOC xrl0006_desc>Crab Egg",
     Audio = {
         Construct      = Sound { Bank = 'URB',        Cue = 'URB0101_Construct_Start',    LodCutoff = 'UnitMove_LodCutoff' },
         ConstructLoop  = Sound { Bank = 'URB',        Cue = 'URB0101_Construct_Loop',     LodCutoff = 'UnitMove_LodCutoff' },
@@ -12,6 +12,8 @@ UnitBlueprint{
     },
     AverageDensity = 10,
     BuildIconSortPriority = 30,
+	UnitsCol = 2,
+	Timeropen = 9,
     Categories = {
         "CONSTRUCTION",
         "CRABEGG",
@@ -30,8 +32,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Normal",
-        Health = 10,
-        MaxHealth = 10,
+        Health = 100,
+        MaxHealth = 100,
     },
     Display = {
         AnimationOpen = "/units/xrl0006/xrl0006_aopen.sca",
@@ -54,9 +56,9 @@ UnitBlueprint{
         UniformScale = 0.05,
     },
     Economy = {
-        BuildCostEnergy = 1600,
-        BuildCostMass = 160,
-        BuildTime = 500,
+        BuildCostEnergy = 3200,
+        BuildCostMass = 320,
+        BuildTime = 900,
         BuildUnit = "url0306",
     },
     Footprint = {
@@ -67,6 +69,7 @@ UnitBlueprint{
         CommandCaps = { RULEUCC_Stop = true },
         FactionName = "Cybran",
         Icon = "land",
+		SelectionPriority = 7,
     },
     Intel = { VisionRadius = 4 },
     LifeBarHeight = 0.075,

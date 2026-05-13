@@ -314,6 +314,7 @@ keyDescriptions = {
     ['select_inview_idle_mex'] = '<LOC key_desc_0217>Select onscreen idle mass extractors.',
     ['select_all_mex'] = '<LOC key_desc_0218>Select all mass extractors.',
     ['select_nearest_idle_lt_mex'] = '<LOC key_desc_0219>Select nearest onscreen lowest tech idle mass extractor.',
+    ['select_nearest_lowest_mex_add_to_group'] = '<LOC key_desc_0409>Select the nearest Matter Extractor of the lowest level that is not being upgraded and add it to the group.',
 
     ['acu_select_cg'] = '<LOC key_desc_0220>Select ACU (double tap to zoom)',
     ['acu_append_cg'] = '<LOC key_desc_0221>Append ACU to selection (double tap to zoom)',

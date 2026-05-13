@@ -1,4 +1,4 @@
-ProjectileBlueprint {
+	ProjectileBlueprint {
     Audio = {
         Impact        = Sound { Bank = 'Impacts', Cue = 'UEF_Expl_Med_Impact', LodCutoff = 'Weapon_LodCutoff' },
         ImpactTerrain = Sound { Bank = 'Impacts', Cue = 'Impact_Land_Gen_UEF', LodCutoff = 'Weapon_LodCutoff' },
@@ -13,8 +13,8 @@ ProjectileBlueprint {
         "UEF",
     },
     Defense = {
-        Health = 1,
-        MaxHealth = 1,
+        Health = 2,
+        MaxHealth = 2,
     },
     DesiredShooterCap = 2,
     Display = {
@@ -45,7 +45,7 @@ ProjectileBlueprint {
         InitialSpeed = 3,
         LifeTime = 30,
         MaxSpeed = 16,
-        MaxZigZag = 10,
+        MaxZigZag = 1,
         RotationalVelocity = 0,
         RotationalVelocityRange = 0,
         TrackTarget = true,
@@ -53,6 +53,6 @@ ProjectileBlueprint {
         TurnRate = 0,
         UseGravity = false,
         VelocityAlign = true,
-        ZigZagFrequency = 8,
+        ZigZagFrequency = 2,
     },
 }

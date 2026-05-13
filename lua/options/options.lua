@@ -898,16 +898,16 @@ options = {
         title = "<LOC OPTIONS_0164>Interface",
         key = 'ui',
         items = {
-            {
-                title = "<LOC OPTIONS_0006>Language",
-                key = 'selectedlanguage',
-                type = 'toggle',
-                restart = true,
-                default = __language,
-                custom = {
-                    states = __installedlanguages,
-                },
-            },
+            --{
+            --    title = "<LOC OPTIONS_0006>Language",
+            --    key = 'selectedlanguage',
+            --   type = 'toggle',
+            --    restart = true,
+            --    default = __language,
+            --    custom = {
+            --        states = __installedlanguages,
+            --    },
+            --},
             {
                 title = "<LOC OPTIONS_0151>Display Subtitles",
                 key = 'subtitles',

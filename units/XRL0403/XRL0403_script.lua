@@ -13,8 +13,8 @@ local CDFHvyProtonCannonWeapon = CybranWeaponsFile.CDFHvyProtonCannonWeapon
 local CANNaniteTorpedoWeapon = CybranWeaponsFile.CANNaniteTorpedoWeapon
 local CIFSmartCharge = CybranWeaponsFile.CIFSmartCharge
 local CAABurstCloudFlakArtilleryWeapon = CybranWeaponsFile.CAABurstCloudFlakArtilleryWeapon
-local CDFBrackmanCrabHackPegLauncherWeapon = CybranWeaponsFile.CDFBrackmanCrabHackPegLauncherWeapon
 local TranslateInXZDirection = import("/lua/utilities.lua").TranslateInXZDirection
+local CIFArtilleryWeapon = import("/lua/cybranweapons.lua").CIFArtilleryWeapon
 
 local ExternalFactoryComponent = import("/lua/defaultcomponents.lua").ExternalFactoryComponent
 
@@ -34,7 +34,9 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
         Torpedo04 = ClassWeapon(CANNaniteTorpedoWeapon) {},
         AntiTorpedo = ClassWeapon(CIFSmartCharge) {},
         AAGun = ClassWeapon(CAABurstCloudFlakArtilleryWeapon) {},
-        HackPegLauncher = ClassWeapon(CDFBrackmanCrabHackPegLauncherWeapon) {},
+        HackPegLauncher = ClassWeapon(CIFArtilleryWeapon) {
+            FxMuzzleFlashScale = 1.2,
+		},
     },
 
     ---@param self XRL0403
@@ -43,7 +45,6 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
         self:SetWeaponEnabledByLabel('ParticleGunLeft', false)
         self:SetWeaponEnabledByLabel('AAGun', false)
         self:SetWeaponEnabledByLabel('Torpedo01', false)
-        self:ShowBone('Missile_Turret', true)
     end,
 
     ---@param self XRL0403
@@ -71,11 +72,6 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
     ---@param self XRL0403 |m
     OnCreate = function(self)
         CWalkingLandUnit.OnCreate(self)
-
-        self:SetWeaponEnabledByLabel('HackPegLauncher', false)
-		if self:IsValidBone('Missile_Turret') then
-			self:HideBone('Missile_Turret', true)
-		end
     end,
 
     ---@param self CConstructionUnit
@@ -113,6 +109,8 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
     OnStopBeingBuilt = function(self, builder, layer)
         CWalkingLandUnit.OnStopBeingBuilt(self, builder, layer)
 		ExternalFactoryComponent.OnStopBeingBuilt(self, builder, layer)
+		self.AnimationManipulator = CreateAnimator(self)
+        self.AnimationManipulator:PlayAnim(self:GetBlueprint().Display.AnimationOpen, false):SetRate(0)
         ChangeState(self, self.IdleState)
     end,
 	
@@ -176,12 +174,15 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
         OnStartBuild = function(self, unitBuilding, order)
             CWalkingLandUnit.OnStartBuild(self, unitBuilding, order)
             self.UnitBeingBuilt = unitBuilding
+			
+			
             ChangeState(self, self.BuildingState)
         end,
     },
 
     BuildingState = State {
         Main = function(self)
+
             local unitBuilding = self.UnitBeingBuilt
             self:SetBusy(true)
             local bone = self.BuildAttachBone
@@ -189,11 +190,44 @@ XRL0403 = ClassUnit(CWalkingLandUnit, ExternalFactoryComponent) {
             unitBuilding:AttachTo(self, bone)
             unitBuilding:HideBone(0, true)
             self.UnitDoneBeingBuilt = false
+			
+			if EntityCategoryContains(categories.CRABEGG, unitBuilding) then
+                 unitBuilding.IsAutoOpen = false
+            end
+			
         end,
 
         OnStopBuild = function(self, unitBeingBuilt)
             CWalkingLandUnit.OnStopBuild(self, unitBeingBuilt)
-            ExternalFactoryComponent.OnStopBuildWithStorage(self, unitBeingBuilt)
+			ExternalFactoryComponent.OnStopBuildWithStorage(self, unitBeingBuilt)
+			
+			ChangeState(self, self.RollingOffState)
+        end,
+    },
+	
+	RollingOffState = State {
+        ---@param self UEL0401
+        Main = function(self)
+            local unitBuilding = self.UnitBeingBuilt
+			local bone = self.BuildAttachBone
+            self:DetachAll(bone)
+            unitBuilding:AttachTo(self, bone)
+			if not unitBuilding.Dead then
+                unitBuilding:ShowBone(0, true)
+            end
+			
+			self.AnimationManipulator:SetRate(0.5)
+            WaitFor(self.AnimationManipulator)
+					
+			if EntityCategoryContains(categories.CRABEGG, unitBuilding) then
+				unitBuilding:OpenEgg()
+			end
+			self:DetachAll(self.BuildAttachBone)
+			
+			self.AnimationManipulator:SetRate(-0.5)
+			WaitFor(self.AnimationManipulator)
+			
+            ChangeState(self, self.IdleState)
         end,
     },
 

@@ -49,7 +49,6 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "SHOWATTACKRETICLE",
-        "SNIPEMODE",
         "TECH2",
         "VISIBLETORECON",
     },
@@ -175,7 +174,7 @@ UnitBlueprint{
     LifeBarOffset = 0.45,
     LifeBarSize = 1,
     Physics = {
-        Elevation = 10,
+        Elevation = 18,
         FuelRechargeRate = 5,
         FuelUseTime = 400,
         GroundCollisionOffset = 1.6,

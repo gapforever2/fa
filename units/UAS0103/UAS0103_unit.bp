@@ -40,7 +40,6 @@ UnitBlueprint{
         "RADAR",
         "RECLAIMABLE",
         "SELECTABLE",
-        "SNIPEMODE",
         "SONAR",
         "TECH1",
         "VISIBLETORECON",

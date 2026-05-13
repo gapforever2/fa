@@ -26,7 +26,6 @@ UnitBlueprint{
         "RECLAIMABLE",
         "SELECTABLE",
         "SIZE4",
-        "SNIPEMODE",
         "SORTDEFENSE",
         "STEALTH",
         "STRUCTURE",
@@ -35,8 +34,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Structure",
-        Health = 5600,
-        MaxHealth = 5600,
+        Health = 5800,
+        MaxHealth = 5800,
         SubThreatLevel = 23,
     },
     Display = {
@@ -101,8 +100,8 @@ UnitBlueprint{
         UnitName = "<LOC urb2205_name>Nanite Torpedo Array",
     },
     Intel = {
-        SonarRadius = 36,
-        VisionRadius = 20,
+        SonarRadius = 60,
+        VisionRadius = 22,
         WaterVisionRadius = 44,
     },
     LifeBarHeight = 0.075,
