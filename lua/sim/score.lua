@@ -340,11 +340,31 @@ local function GameOverScore()
     end
 end
 
+local scoreDataSynced = false
+
 function init()
     ForkThread(ScoreThread)
     table.insert(GameOverListeners, function()
+        -- GameOverListeners can be fired more than once (e.g. by both the victory
+        -- condition thread and the GameOverListenerThread in simInit). Make sure we
+        -- only collect and sync the final score data a single time.
+        if scoreDataSynced then
+            return
+        end
+        scoreDataSynced = true
         GameIsOver = true
-        GameOverScore()
+
+        -- GameOverScore() reads per-unit/blueprint stats and can throw on edge cases
+        -- (e.g. coop, brains without initialized score data). The victory condition
+        -- calls these listeners inside a pcall, so any error here would be silently
+        -- swallowed and the score data would never reach the UI. The UI then waits
+        -- forever for the data, leaving the game frozen on the end screen with no way
+        -- to exit. Guard the call so the score data is always synced regardless.
+        local ok, err = pcall(GameOverScore)
+        if not ok then
+            WARN("GameOverScore failed at game end, syncing partial score data: " .. tostring(err))
+        end
+
         Sync.ScoreAccum = scoreData
         Sync.StatsToSend = ArmyScore
     end)

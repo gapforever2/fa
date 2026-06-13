@@ -227,7 +227,9 @@ function UpdateData()
         if not armyInfo.civilian and armyInfo.showScore then
             -- set basic info from armies table
             curInfo[index] = {}
-            curInfo[index].name = hotstats.scoreData.current[i].name
+            curInfo[index].name = (hotstats.scoreData and hotstats.scoreData.current
+                and hotstats.scoreData.current[i] and hotstats.scoreData.current[i].name)
+                or armyInfo.nickname or ''
             curInfo[index].faction = armyInfo.faction
             curInfo[index].color = armyInfo.color
             --curInfo[index].teamName = index --TODO we need to get team data in here
@@ -249,8 +251,19 @@ function CreateDialog(victory, showCampaign, operationVictoryTable, midGame)
     DisableWorldSounds()
     StopAllSounds()
     ForkThread(function()
+        -- Wait for the score data to be synced from the sim. We cap the wait so that,
+        -- even if the data never arrives (a sim-side failure while collecting scores),
+        -- the score screen and its exit button still appear and the player is never
+        -- left stuck on a frozen end screen with no way to quit.
+        local waited = 0
+        local maxWait = 15
         while not(hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history) do
             WaitSeconds(0.5)
+            waited = waited + 0.5
+            if waited >= maxWait then
+                WARN("Score data was not received within " .. maxWait .. "s; showing score screen with available data.")
+                break
+            end
         end
         CreateDialog2(victory, showCampaign, operationVictoryTable, midGame)
     end)
@@ -259,7 +272,12 @@ end
 function CreateDialog2(victory, showCampaign, operationVictoryTable, midGame)
     UpdateData()
 
-    campaignScore = tostring(curInfo.scoreData.current[1].general.score)
+    local firstPlayer = curInfo.scoreData and curInfo.scoreData.current and curInfo.scoreData.current[1]
+    if firstPlayer and firstPlayer.general then
+        campaignScore = tostring(firstPlayer.general.score)
+    else
+        campaignScore = '0'
+    end
 
     if showCampaign then
         Prefs.SetToCurrentProfile('last_faction', operationVictoryTable.faction)
