@@ -8,10 +8,10 @@
 --**  Copyright © 2005 Gas Powered Games, Inc.  All rights reserved.
 --****************************************************************************
 
-local CSonarUnit = import("/lua/cybranunits.lua").CSonarUnit
+local MobileSonarUnit = import("/lua/sim/units/mobilesonarunit.lua").MobileSonarUnit
 
----@class URB3202 : CSonarUnit
-URB3202 = ClassUnit(CSonarUnit) {
+---@class URB3202 : MobileSonarUnit
+URB3202 = ClassUnit(MobileSonarUnit) {
     TimedSonarTTIdleEffects = {
         {
             Bones = {

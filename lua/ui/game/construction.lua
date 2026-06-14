@@ -2049,6 +2049,9 @@ function FormatData(unitData, type)
         -- looks up, stores, and executes the upgrade chain. This needs doing for 3654.
         local unitSelected = sortedOptions.selection[1]
         local isStructure = EntityCategoryContains(categories.STRUCTURE - (categories.FACTORY + categories.EXTERNALFACTORY), unitSelected)
+        -- Mobile sonars upgrade in place like a structure (T2 -> T3), so show their
+        -- upgrade arrows / chain on the command card as well.
+        local showUpgradeArrows = isStructure or EntityCategoryContains(categories.MOBILE * categories.SONAR, unitSelected)
 
         for i, units in sortedUnits do
             table.sort(units, SortFunc)
@@ -2064,7 +2067,7 @@ function FormatData(unitData, type)
                     if not IsRestricted(unit, GetFocusArmy()) then
                         local bp = __blueprints[unit]
                         -- Check if upgradeable structure
-                        if isStructure and
+                        if showUpgradeArrows and
                                 bp and bp.General and
                                 bp.General.UpgradesFrom and
                                 bp.General.UpgradesFrom ~= 'none' then
