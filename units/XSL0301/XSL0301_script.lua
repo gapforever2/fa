@@ -64,6 +64,15 @@ XSL0301 = ClassUnit(CommandUnit) {
         self:GetWeaponByLabel('AutoOverCharge').NeedsUpgrade = true
     end,
 
+    -- Re-hide bones that get reset to visible by the teleport mesh recreation.
+    -- Without this, the hidden 'Turret' bone reappears after teleporting.
+    ---@param self XSL0301
+    PlayTeleportInEffects = function(self)
+        CommandUnit.PlayTeleportInEffects(self)
+        self:HideBone('Back_Upgrade', true)
+        self:HideBone('Turret', true)
+    end,
+
     ---@param self XSL0301
     ---@param builder Unit
     ---@param layer Layer
