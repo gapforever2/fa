@@ -248,6 +248,7 @@ UnitBlueprint{
                 "ALLUNITS",
             },
             TargetRestrictDisallow = "UNTARGETABLE",
+            RenderFireClock = true,
             WeaponCategory = "Bomb",
         },
         {

@@ -253,6 +253,7 @@ UnitBlueprint{
             TurretYawRange = 0,
             TurretYawSpeed = 0,
             Turreted = false,
+            RenderFireClock = true,
             WeaponCategory = "Bomb",
         },
         {
