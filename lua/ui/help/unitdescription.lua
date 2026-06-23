@@ -16,6 +16,7 @@ Description = {
     ['uel0001-dsu'] = "<LOC Unit_Description_0006> Greatly increases the speed at which the ACU repairs itself.",
     ['uel0001-ees'] = "<LOC Unit_Description_0007> Replaces the Tech 2 Engineering Suite. Expands the number of available schematics and further increases the ACU's build speed and maximum health.",
     ['uel0001-hamc'] = "<LOC Unit_Description_0008> Increases main cannon's damage output by several factors. Also increases range of main cannon and Overcharge.",
+    ['uel0001-hamc2'] = "<LOC Unit_Description_Frostmourne> Upgrades the main cannon to a level comparable to Tech 3. The weapon and projectile cooling system lets it fire cold, powerful plasma and sustain continuous fire on the enemy.",
     ['uel0001-srtn'] = "<LOC Unit_Description_0009> Adds a short-range tactical nuke.",
     ['uel0001-pqt'] = "<LOC Unit_Description_0010> Adds teleporter. Requires considerable Energy to activate.",
     ['uel0001-sgf'] = "<LOC Unit_Description_0011> Expands the radius of the ACU's personal shield. Requires Energy to run.",
@@ -174,6 +175,7 @@ Description = {
     ['url0001-acu'] = "<LOC Unit_Description_0112> Increases main cannon's rate of fire and range. Also increases range of the Molecular Ripper and Overcharge.",
     ['url0001-mlg'] = "<LOC Unit_Description_0113> ACU can generate a beam laser that sweeps over enemy units. Range of the beam increases with Gun Range.",
     ['url0001-ntt'] = "<LOC Unit_Description_0114> Equips the ACU with a standard Cybran Nanite torpedo tube and sonar.",
+    ['url0001-exbbat1'] = "<LOC Unit_Description_CybranStealthField>Generates a stealth field that hides nearby allied units from enemy radar and sonar. Does not stealth the ACU itself.",
 
     -- CYBRAN -- Support Commander Units/Upgrades
     ['url0301'] = "<LOC Unit_Description_0115> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
@@ -340,6 +342,7 @@ Description = {
     ['ual0001-cd'] = "<LOC Unit_Description_0157> Creates a Quantum Stasis Field around the ACU. Immobilizes enemy units within the ACU's main cannon range. Multiple Quantum Stasis Fields interfere with each other, having a limited effect.",
     ['ual0001-cba'] = "<LOC Unit_Description_0158>Increases the range of the ACU's main cannon and that of Overcharge.",
     ['ual0001-ecba'] = "<LOC Unit_Description_0466_faf>Massively increases the range of the ACU's main cannon and that of Overcharge.",
+    ['ual0001-ecba2'] = "<LOC Unit_Description_0467_gaf>Apollo's Bow.",
     ['ual0001-ess'] = "<LOC Unit_Description_0159> Greatly expands the range of the standard on-board ACU sensor systems.",
     ['ual0001-ees'] = "<LOC Unit_Description_0160> Replaces the Tech 2 Engineering Suite. Expands the number of available schematics and further increases the ACU's build speed and maximum health.",
     ['ual0001-hsa'] = "<LOC Unit_Description_0161> Rapidly cools the Quantum Disruptor beam. Increases rate of fire.",

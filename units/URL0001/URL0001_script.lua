@@ -106,6 +106,8 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         self:SetMaintenanceConsumptionInactive()
         self:DisableUnitIntel('Enhancement', 'RadarStealth')
         self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        self:DisableUnitIntel('Enhancement', 'RadarStealthField')
+        self:DisableUnitIntel('Enhancement', 'SonarStealthField')
         self:DisableUnitIntel('Enhancement', 'Cloak')
         self:DisableUnitIntel('Enhancement', 'Sonar')
         self:HideBone('Back_Upgrade', true)
@@ -182,6 +184,23 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         if Buff.HasBuff(self, 'CybranACUStealthBonus') then
             Buff.RemoveBuff(self, 'CybranACUStealthBonus')
         end
+    end,
+
+    ---@param self URL0001
+    ---@param bp UnitBlueprintEnhancement
+    ProcessEnhancementStealthFieldGeneratorCybran = function(self, bp)
+        self:AddToggleCap('RULEUTC_StealthToggle')
+        self:EnableUnitIntel('Enhancement', 'RadarStealthField')
+        self:EnableUnitIntel('Enhancement', 'SonarStealthField')
+        self:SetMaintenanceConsumptionActive()
+    end,
+
+    ---@param self URL0001
+    ---@param bp UnitBlueprintEnhancement
+    ProcessEnhancementStealthFieldGeneratorCybranRemove = function(self, bp)
+        self:RemoveToggleCap('RULEUTC_StealthToggle')
+        self:DisableUnitIntel('Enhancement', 'RadarStealthField')
+        self:DisableUnitIntel('Enhancement', 'SonarStealthField')
     end,
 
     ---@param self URL0001

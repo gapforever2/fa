@@ -284,10 +284,13 @@ UAL0001 = ClassUnit(ACUUnit) {
         elseif enh == 'EnhancedSensorsAeon' then
             self:SetIntelRadius('Vision', bp.NewVisionRadius or 104)
             self:SetIntelRadius('Omni', bp.NewOmniRadius or 104)
+            self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
+            self:SetMaintenanceConsumptionActive()
         elseif enh == 'EnhancedSensorsAeonRemove' then
             local bpIntel = self:GetBlueprint().Intel
             self:SetIntelRadius('Vision', bpIntel.VisionRadius or 26)
             self:SetIntelRadius('Omni', bpIntel.OmniRadius or 26)
+            self:SetMaintenanceConsumptionInactive()
       end
     end,
 

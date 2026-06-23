@@ -183,6 +183,8 @@ XSL0001 = ClassUnit(ACUUnit) {
         end
 
         self.RegenThreadHandle = self:ForkThread(self.RegenBuffThread, "RegenAura", "RegenAuraSeraphim")
+        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        self:SetMaintenanceConsumptionActive()
     end,
 
     ---@param self XSL0001
@@ -200,6 +202,8 @@ XSL0001 = ClassUnit(ACUUnit) {
         if Buff.HasBuff(self, 'SeraphimACURegenAuraSelfBuff') then
             Buff.RemoveBuff(self, 'SeraphimACURegenAuraSelfBuff')
         end
+        self:SetEnergyMaintenanceConsumptionOverride(0)
+        self:SetMaintenanceConsumptionInactive()
     end,
 
     ---@param self XSL0001
@@ -265,6 +269,8 @@ XSL0001 = ClassUnit(ACUUnit) {
         end
 
         self.RegenThreadHandle = self:ForkThread(self.RegenBuffThread, "AdvancedRegenAura", "AdvancedRegenAuraSeraphim")
+        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        self:SetMaintenanceConsumptionActive()
     end,
 
     ---@param self XSL0001
@@ -281,6 +287,8 @@ XSL0001 = ClassUnit(ACUUnit) {
         if Buff.HasBuff(self, 'SeraphimACUAdvancedRegenAuraSelfBuff') then
             Buff.RemoveBuff(self, 'SeraphimACUAdvancedRegenAuraSelfBuff')
         end
+        self:SetEnergyMaintenanceConsumptionOverride(0)
+        self:SetMaintenanceConsumptionInactive()
     end,
 
     ---@param self XSL0001
