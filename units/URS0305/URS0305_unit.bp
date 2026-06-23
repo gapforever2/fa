@@ -40,6 +40,8 @@ UnitBlueprint{
         Abilities = {
             "<LOC ability_sonar>Sonar",
             "<LOC ability_stealthfield>Stealth Field",
+            "<LOC urs0305_upkeep_sonar>Sonar consumption: 400 (Energy/sec)",
+            "<LOC urs0305_upkeep_stealth>Stealth field consumption: 200 (Energy/sec)",
         },
         AnimationDeath = {
             {
@@ -113,8 +115,15 @@ UnitBlueprint{
                 bitmapId = "sonar",
                 helpText = "toggle_sonar",
             },
+            RULEUTC_StealthToggle = {
+                bitmapId = "stealth",
+                helpText = "toggle_stealth_field",
+            },
         },
-        ToggleCaps = { RULEUTC_IntelToggle = true },
+        ToggleCaps = {
+            RULEUTC_IntelToggle = true,
+            RULEUTC_StealthToggle = true,
+        },
         UnitName = "<LOC urs0305_name>Flood XR",
         UpgradesFrom = "urb3202",
     },

@@ -49,6 +49,8 @@ UnitBlueprint{
             "<LOC ability_sonar>Sonar",
             "<LOC ability_torpedo>Torpedoes",
             "<LOC ability_jamming>Jamming",
+            "<LOC ues0305_upkeep_sonar>Sonar consumption: 400 (Energy/sec)",
+            "<LOC ues0305_upkeep_jammer>Jammer consumption: 100 (Energy/sec)",
         },
         IdleEffects = {
             Water = {
@@ -114,10 +116,17 @@ UnitBlueprint{
         OrderOverrides = {
             RULEUTC_IntelToggle = {
                 bitmapId = "sonar",
-                helpText = "Toggle Sonar and Jamming on/off",
+                helpText = "toggle_sonar",
+            },
+            RULEUTC_JammingToggle = {
+                bitmapId = "jamming",
+                helpText = "toggle_jamming",
             },
         },
-        ToggleCaps = { RULEUTC_IntelToggle = true },
+        ToggleCaps = {
+            RULEUTC_IntelToggle = true,
+            RULEUTC_JammingToggle = true,
+        },
         UnitName = "<LOC ues0305_name>SP3 - 3000",
         UpgradesFrom = "ueb3202",
     },

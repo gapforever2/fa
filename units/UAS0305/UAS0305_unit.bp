@@ -91,7 +91,7 @@ UnitBlueprint{
         BuildCostEnergy = 12000,
         BuildCostMass = 1000,
         BuildTime = 1200,
-        MaintenanceConsumptionPerSecondEnergy = 500,
+        MaintenanceConsumptionPerSecondEnergy = 400,
     },
     Footprint = {
         MinWaterDepth = 1.5,
