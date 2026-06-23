@@ -108,6 +108,7 @@ UnitBlueprint{
         ShowIntelOnSelect = true,
         SonarRadius = 160,
         VisionRadius = 20,
+        WaterVisionRadius = 35,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.3,
