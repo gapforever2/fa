@@ -88,7 +88,10 @@ UnitBlueprint{
     },
     Footprint = { MinWaterDepth = 1.5 },
     General = {
-        CommandCaps = { RULEUCC_Pause = true },
+        CommandCaps = {
+            RULEUCC_Pause = true,
+            RULEUCC_Stop = true,
+        },
         FactionName = "Aeon",
         Icon = "sea",
         OrderOverrides = {

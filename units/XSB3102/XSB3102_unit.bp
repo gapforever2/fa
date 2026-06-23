@@ -84,7 +84,10 @@ UnitBlueprint{
     },
     Footprint = { MinWaterDepth = 0 },
     General = {
-        CommandCaps = { RULEUCC_Pause = true },
+        CommandCaps = {
+            RULEUCC_Pause = true,
+            RULEUCC_Stop = true,
+        },
         FactionName = "Seraphim",
         Icon = "sea",
         OrderOverrides = {
@@ -119,8 +122,8 @@ UnitBlueprint{
         MotionType = "RULEUMT_None",
         SkirtOffsetX = 0,
         SkirtOffsetZ = 0,
-        SkirtSizeX = 1.5,
-        SkirtSizeZ = 1.5,
+        SkirtSizeX = 1,
+        SkirtSizeZ = 1,
     },
     SelectionSizeX = 0.4,
     SelectionSizeZ = 0.4,
