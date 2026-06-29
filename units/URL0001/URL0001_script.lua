@@ -192,6 +192,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         self:AddToggleCap('RULEUTC_StealthToggle')
         self:EnableUnitIntel('Enhancement', 'RadarStealthField')
         self:EnableUnitIntel('Enhancement', 'SonarStealthField')
+        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
         self:SetMaintenanceConsumptionActive()
     end,
 
@@ -201,6 +202,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         self:RemoveToggleCap('RULEUTC_StealthToggle')
         self:DisableUnitIntel('Enhancement', 'RadarStealthField')
         self:DisableUnitIntel('Enhancement', 'SonarStealthField')
+        self:SetMaintenanceConsumptionInactive()
     end,
 
     ---@param self URL0001
@@ -464,7 +466,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementNaniteTorpedoTubeCybran = function(self, bp)
         self:SetWeaponEnabledByLabel('Torpedo', true)
-        self:SetIntelRadius('Sonar', bp.NewSonarRadius or 60)
+        self:SetIntelRadius('Sonar', bp.NewSonarRadius or 63)
         self:EnableUnitIntel('Enhancement', 'Sonar')
         if self.Layer == 'Seabed' then
             self:GetWeaponByLabel('DummyWeapon'):ChangeMaxRadius(self.torpRange)
@@ -474,10 +476,9 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementNaniteTorpedoTubeCybranRemove = function(self, bp)
-        local bpIntel = self.Blueprint.Intel
         self:SetWeaponEnabledByLabel('Torpedo', false)
-        self:SetIntelRadius('Sonar', bpIntel.SonarRadius or 26)
         self:DisableUnitIntel('Enhancement', 'Sonar')
+        self:SetIntelRadius('Sonar', 0)
         if self.Layer == 'Seabed' then
             self:GetWeaponByLabel('DummyWeapon'):ChangeMaxRadius(self.normalRange)
         end

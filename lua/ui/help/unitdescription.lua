@@ -34,6 +34,7 @@ Description = {
     ['uel0301-isb'] = "<LOC Unit_Description_0021> Increases SACU's resource generation.",
     ['uel0301-sre'] = "<LOC Unit_Description_0022> Greatly expands the range of the standard on-board SACU sensor systems.",
     ['uel0301-col'] = "<LOC Unit_Description_0023> Rapidly cools any weapon mounted onto the SACU. Increases rate of fire.",
+    ['uel0301-acu'] = "<LOC Unit_Description_0023> Rapidly cools any weapon mounted onto the SACU. Increases rate of fire.",
     ['uel0301-heo'] = "<LOC Unit_Description_0024> Equips the standard SACU Heavy plasma cannon with area-of-effect damage.",
 
     -- UEF -- Support Commander Presets
@@ -188,6 +189,8 @@ Description = {
     ['url0301-srs'] = "<LOC Unit_Description_0122> Greatly increases the speed at which the SACU repairs itself.",
     ['url0301-sfs'] = "<LOC Unit_Description_0123> Hides the SACU from radar. Requires Energy to run.",
     ['url0301-saa'] = "<LOC Unit_Description_0002_gaf> The main gun cooling module allows the SACU's primary weapon to fire twice as often.",
+    ['url0301-acu'] = "<LOC Unit_Description_0002_gaf> The main gun cooling module allows the SACU's primary weapon to fire twice as often.",
+    ['url0301-exbbat1'] = "<LOC url0301_speedaura_desc> Generates a field that accelerates nearby allied land units.",
     ['url0301-rads'] = "<LOC Unit_Description_0007_gaf> Adds a personal sensor system for the SACU.",
 
     -- CYBRAN -- Support Commander Presets
