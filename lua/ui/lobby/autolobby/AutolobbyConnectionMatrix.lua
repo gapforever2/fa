@@ -30,10 +30,12 @@ local AutolobbyConnectionMatrixDot = import("/lua/ui/lobby/autolobby/autolobbyco
 ---@class UIAutolobbyConnectionMatrix : Group
 ---@field PlayerCount number
 ---@field Elements UIAutolobbyConnectionMatrixDot[][]
+---@field NameLabels Text[]
 local AutolobbyConnectionMatrix = Class(Group) {
 
     ---@param self UIAutolobbyConnectionMatrix
     ---@param parent Control
+    ---@param playerCount number
     __init = function(self, parent, playerCount)
         Group.__init(self, parent, "AutolobbyConnectionMatrix")
 
@@ -50,28 +52,45 @@ local AutolobbyConnectionMatrix = Class(Group) {
                 self.Elements[y][x] = AutolobbyConnectionMatrixDot.Create(self)
             end
         end
+
+        self.NameLabels = {}
+        for y = 1, self.PlayerCount do
+            local label = UIUtil.CreateText(self, "", 11, UIUtil.bodyFont)
+            label:SetColor("FFFFFFFF")
+            label:SetDropShadow(true)
+            label:DisableHitTest(true)
+            label:Hide()
+            self.NameLabels[y] = label
+        end
     end,
 
     ---@param self UIAutolobbyConnectionMatrix
     ---@param parent Control
     __post_init = function(self, parent)
+        local nameColWidth = 120
+        local matrixSize = self.PlayerCount * 24
+
         LayoutHelpers.ReusedLayoutFor(self)
-            :Width(self.PlayerCount * 24)
-            :Height(self.PlayerCount * 24)
+            :Width(nameColWidth + matrixSize)
+            :Height(matrixSize)
             :End()
 
         LayoutHelpers.ReusedLayoutFor(self.Background)
             :Fill(self)
             :End()
 
-        -- layout the matrix
         for y = 1, self.PlayerCount do
             for x = 1, self.PlayerCount do
                 LayoutHelpers.ReusedLayoutFor(self.Elements[y][x])
                     :Width(22)
                     :Height(22)
-                    :AtLeftTopIn(self, 2 + 24 * (x - 1), 2 + 24 * (y - 1))
+                    :AtLeftTopIn(self, nameColWidth + 2 + 24 * (x - 1), 2 + 24 * (y - 1))
             end
+
+            local label = self.NameLabels[y]
+            LayoutHelpers.ReusedLayoutFor(label)
+                :AtVerticalCenterIn(self.Elements[y][1])
+                :LeftOf(self.Elements[y][1], 4)
         end
     end,
 
@@ -122,6 +141,28 @@ local AutolobbyConnectionMatrix = Class(Group) {
         local dot = self.Elements[id][id]
         if dot then
             dot:SetIsAliveTimestamp(GetSystemTimeSeconds())
+        end
+    end,
+
+    ---@param self UIAutolobbyConnectionMatrix
+    ---@param playerOptions UIAutolobbyPlayer[]
+    UpdatePlayerNames = function(self, playerOptions)
+        if not playerOptions then
+            return
+        end
+        for k = 1, self.PlayerCount do
+            local label = self.NameLabels[k]
+            if not label then
+                break
+            end
+            local opts = playerOptions[k]
+            local name = opts and opts.PlayerName or nil
+            if name and name ~= "" then
+                label:SetText(name)
+                label:Show()
+            else
+                label:Hide()
+            end
         end
     end,
 }

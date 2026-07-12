@@ -42,6 +42,7 @@ AutolobbyArgumentsComponent = ClassSimple {
         ["/aeon"] = true,
         ["/seraphim"] = true,
         ["/startspot"] = true,
+        ["/color"] = true,
 
         -- related to rating
         ["/deviation"] = true,
@@ -95,11 +96,18 @@ AutolobbyArgumentsComponent = ClassSimple {
     ---@return number
     GetCommandLineArgumentNumber = function(self, option, default)
         if not self:ValidCommandLineKey(option) then
+            if option == "/color" then
+                LOG("[GAF-COLOR] GetCommandLineArgumentNumber: /color rejected as unknown key — ArgumentKeys missing it?")
+            end
             return default
         end
 
         -- try to get the first argument and parse it as a number
         local arguments = GetCommandLineArg(option, 1)
+        if option == "/color" then
+            LOG("[GAF-COLOR] GetCommandLineArgumentNumber: /color valid=", tostring(self.ArgumentKeys[option]),
+                " raw args=", repr(arguments))
+        end
         if arguments and (not option[ arguments[1] ]) then
             local parsed = tonumber(arguments[1])
             if parsed then
