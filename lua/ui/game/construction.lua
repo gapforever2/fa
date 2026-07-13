@@ -463,9 +463,8 @@ function CreateTabs(type)
                         table.insert(sortedOptions[slotName], enhTable)
                     end
                 end
-                -- Сортируем улучшения по BuildIconSortPriority (по возрастанию = слева направо).
-                -- Приоритет можно задавать только тем улучшениям, которым нужно;
-                -- остальные получают детерминированный порядок по имени.
+
+
                 table.sort(sortedOptions[slotName], function(a, b)
                     local pa = a.BuildIconSortPriority or 99
                     local pb = b.BuildIconSortPriority or 99

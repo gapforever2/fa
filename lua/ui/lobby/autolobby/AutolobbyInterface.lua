@@ -133,6 +133,9 @@ local AutolobbyInterface = Class(Group) {
         self.State.PathToScenarioFile = pathToScenarioInfo
         self.State.PlayerOptions = playerOptions
 
+        self.ConnectionMatrix:Show()
+        self.ConnectionMatrix:UpdatePlayerNames(playerOptions)
+
         if pathToScenarioInfo and playerOptions then
             -- hide it for now until we have a better way to decipher its possible (negative) impact
             self.Preview:Show()

@@ -176,9 +176,20 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         info.Team = self:GetCommandLineArgumentNumber("/team", -1)
         info.StartSpot = self:GetCommandLineArgumentNumber("/startspot", -1)
 
-        -- determine army color based on start location
-        info.PlayerColor = GameColors.MapToWarmCold(info.StartSpot)
-        info.ArmyColor = GameColors.MapToWarmCold(info.StartSpot)
+        local rawColorArgs = GetCommandLineArg("/color", 1)
+        local colorArg = self:GetCommandLineArgumentNumber("/color", 0)
+        LOG("[GAF-COLOR] CreateLocalPlayer: raw /color args=", repr(rawColorArgs),
+            " parsed colorArg=", tostring(colorArg), " startspot=", tostring(info.StartSpot))
+        if colorArg and colorArg > 0 then
+            info.PlayerColor = colorArg
+            info.ArmyColor = colorArg
+            LOG("[GAF-COLOR] using player-chosen color index=", colorArg)
+        else
+            info.PlayerColor = GameColors.MapToWarmCold(info.StartSpot)
+            info.ArmyColor = GameColors.MapToWarmCold(info.StartSpot)
+            LOG("[GAF-COLOR] /color absent or <=0 — FALLBACK to MapToWarmCold(startspot)=",
+                tostring(info.PlayerColor))
+        end
 
         -- retrieve rating
         info.DEV = self:GetCommandLineArgumentNumber("/deviation", 500)
@@ -203,8 +214,9 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         ---@type UILobbyLaunchGameOptionsConfiguration
         local options = {
             Score = 'no',
-            TeamSpawn = 'fixed',
-            TeamLock = 'locked',
+            TeamSpawn = 'balanced_reveal_mirrored',
+            AutoTeams = 'none',
+            CommonArmy = 'UnionWhenDisconnected',
             Victory = 'demoralization',
             Timeouts = '3',
             CheatsEnabled = 'false',
@@ -586,6 +598,12 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
                         self:SendPlayerOptionToServer(ownerId, 'Army', armyIndex)
                         self:SendPlayerOptionToServer(ownerId, 'StartSpot', playerOptions.StartSpot)
                         self:SendPlayerOptionToServer(ownerId, 'Faction', playerOptions.Faction)
+                        LOG("[GAF-COLOR] LaunchThread slot=", slotIndex, " army=", armyIndex,
+                            " name=", tostring(playerOptions.PlayerName),
+                            " PlayerColor=", tostring(playerOptions.PlayerColor),
+                            " ArmyColor=", tostring(playerOptions.ArmyColor),
+                            " StartSpot=", tostring(playerOptions.StartSpot),
+                            " Team=", tostring(playerOptions.Team))
                     end
 
                     -- tuck them into the game options. By all means a hack, but
@@ -628,6 +646,12 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         ---@type UIAutolobbyPlayer
         local playerOptions = data.PlayerOptions
 
+        LOG("[GAF-COLOR] ProcessAddPlayerMessage: sender=", tostring(data.SenderID),
+            " name=", tostring(playerOptions.PlayerName),
+            " PlayerColor=", tostring(playerOptions.PlayerColor),
+            " ArmyColor=", tostring(playerOptions.ArmyColor),
+            " StartSpot=", tostring(playerOptions.StartSpot))
+
         -- override some data
         playerOptions.OwnerID = data.SenderID
         playerOptions.PlayerName = self:MakeValidPlayerName(playerOptions.OwnerID, playerOptions.PlayerName)
@@ -658,6 +682,14 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
     ---@param data UIAutolobbyUpdatePlayerOptionsMessage
     ProcessUpdatePlayerOptionsMessage = function(self, data)
         self.PlayerOptions = data.PlayerOptions
+
+        for slotIndex, opts in pairs(self.PlayerOptions) do
+            LOG("[GAF-COLOR] ProcessUpdatePlayerOptions: slot=", tostring(slotIndex),
+                " name=", tostring(opts.PlayerName),
+                " PlayerColor=", tostring(opts.PlayerColor),
+                " ArmyColor=", tostring(opts.ArmyColor),
+                " StartSpot=", tostring(opts.StartSpot))
+        end
 
         -- update UI for player options
         import("/lua/ui/lobby/autolobby/autolobbyinterface.lua").GetSingleton()
