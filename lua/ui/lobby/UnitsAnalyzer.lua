@@ -343,18 +343,12 @@ function GetImagePath(bp, faction)
     end
 
     local name = ''
-    -- bp.ID is always lower-cased by the blueprint loader, but many icon files are
-    -- stored with an upper-cased id (e.g. 'URL0107_icon.dds'). The packed file system
-    -- is case-sensitive, so we have to try both casings to find the icon.
-    local idVariants = { id, string.upper(id) }
     -- First check for icon in game textures
     for _, path in paths do
-        for _, idVariant in idVariants do
-            name = path .. idVariant .. '_icon.dds'
-            if DiskGetFileInfo(name) then
-                cached.Images[faction..id] = name
-                return name
-            end
+        name = path .. id .. '_icon.dds'
+        if DiskGetFileInfo(name) then
+            cached.Images[faction..id] = name
+            return name
         end
 
         name = path .. icon
@@ -372,12 +366,10 @@ function GetImagePath(bp, faction)
     if bp.Mod then
         root = bp.Mod.location
         for _,path in paths do
-            for _, idVariant in idVariants do
-                name = root .. path .. idVariant .. '_icon.dds'
-                if DiskGetFileInfo(name) then
-                    cached.Images[faction..id] = name
-                    return name
-                end
+            name = root .. path .. id .. '_icon.dds'
+            if DiskGetFileInfo(name) then
+                cached.Images[faction..id] = name
+                return name
             end
             name = root .. path .. icon
             if not string.find(icon,'.dds') then
