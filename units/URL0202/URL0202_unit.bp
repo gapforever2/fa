@@ -26,8 +26,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Normal",
-        Health = 1900,
-        MaxHealth = 1900,
+        Health = 2000,
+        MaxHealth = 2000,
         SurfaceThreatLevel = 8,
     },
     Display = {
@@ -77,8 +77,8 @@ UnitBlueprint{
     },
     Economy = {
         BuildCostEnergy = 1500,
-        BuildCostMass = 290,
-        BuildTime = 1040,
+        BuildCostMass = 300,
+        BuildTime = 1160,
         TeleportEnergyMod = 0.15,
         TeleportMassMod = 1,
         TeleportTimeMod = 0.01,
@@ -141,7 +141,7 @@ UnitBlueprint{
             },
             BallisticArc = "RULEUBA_LowArc",
             CollideFriendly = false,
-            Damage = 25,
+            Damage = 30,
             DamageType = "Normal",
             DisplayName = "Particle Cannon",
             FireTargetLayerCapsTable = {
