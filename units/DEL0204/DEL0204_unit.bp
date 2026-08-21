@@ -245,6 +245,8 @@ UnitBlueprint{
                 Fire = Sound { Bank = 'UELWeapon', Cue = 'UEB2304_Missile_Flayer', LodCutoff = 'Weapon_LodCutoff' },
             },
             BallisticArc = "RULEUBA_LowArc",
+            CameraLifetime = 5,
+            CameraVisionRadius = 5,
             CollideFriendly = false,
             Damage = 50,
             DamageRadius = 2,

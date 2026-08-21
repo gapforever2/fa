@@ -12,6 +12,7 @@
 DRL0204 = ClassUnit(import("/lua/cybranunits.lua").CWalkingLandUnit) {
     Weapons = {
         RocketBackpack = ClassWeapon(import("/lua/cybranweapons.lua").CDFRocketIridiumWeapon02) {},
+        RadoniumBackpack = ClassWeapon(import("/lua/cybranweapons.lua").CDFRocketIridiumWeapon02) {},
     },
 }
 TypeClass = DRL0204
