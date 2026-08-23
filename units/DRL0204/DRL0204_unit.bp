@@ -239,16 +239,6 @@ UnitBlueprint{
                 Fire = Sound { Bank = 'URLWeapon', Cue = 'URL0402_Missile_Nanite', LodCutoff = 'Weapon_LodCutoff' },
             },
             BallisticArc = "RULEUBA_LowArc",
-            Buffs = {
-                {
-                    Add = { OnImpact = true },
-                    AppliedToTarget = true,
-                    BuffType = "STUN",
-                    Duration = 1,
-                    Radius = 2,
-                    TargetDisallow = "WALL",
-                },
-            },
             CollideFriendly = false,
             Damage = 0,
             DamageRadius = 2,
