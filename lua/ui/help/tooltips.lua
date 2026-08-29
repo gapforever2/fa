@@ -2204,6 +2204,10 @@ Tooltips = {
         title = "<LOC tooltipui0595>Indirect Fire",
         description = "<LOC tooltipui0596>Toggle the range overlays of your artillery and missile weaponry",
     },
+    overlay_aura = {
+        title = "<LOC tooltipui0698>Aura Radius",
+        description = "<LOC tooltipui0699>Toggle showing the range of your auras",
+    },
     overlay_anti_air = {
         title = "<LOC tooltipui0597>Anti-Air",
         description = "<LOC tooltipui0598>Toggle the range overlays of your AA weaponry",

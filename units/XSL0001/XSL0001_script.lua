@@ -30,10 +30,41 @@ local ACUDeathWeapon = import("/lua/sim/defaultweapons.lua").ACUDeathWeapon
 local EffectUtil = import("/lua/effectutilities.lua")
 local SIFLaanseTacticalMissileLauncher = SWeapons.SIFLaanseTacticalMissileLauncher
 local AIUtils = import("/lua/ai/aiutilities.lua")
+local RegenAuraVisualId = 'SeraphimRegenAura'
+local RegenAuraEnhancement = 'RegenAuraSeraphim'
+local AdvancedRegenAuraEnhancement = 'AdvancedRegenAuraSeraphim'
 
 ---@class XSL0001 : ACUUnit
 ---@field ShieldEffectsBag moho.IEffect[] # stores the regen aura effects (level 1 has 1 effect, level 2 has 2 effects)
 XSL0001 = ClassUnit(ACUUnit) {
+    -- One visual entry follows both levels of the same gameplay aura.  The basic
+    -- enhancement displays its current blueprint radius; the advanced enhancement
+    -- replaces it with its own upgraded blueprint radius.
+    AuraVisuals = {
+        [RegenAuraVisualId] = {
+            IsActive = function(self)
+                return self:HasEnhancement(AdvancedRegenAuraEnhancement)
+                    or self:HasEnhancement(RegenAuraEnhancement)
+            end,
+            Color = 'ffd000ff',
+            Thickness = 0.12,
+            GetRadius = function(self)
+                local enhancements = self.Blueprint.Enhancements
+                if self:HasEnhancement(AdvancedRegenAuraEnhancement) then
+                    local advanced = enhancements[AdvancedRegenAuraEnhancement]
+                    return advanced and advanced.Radius or 0
+                end
+
+                if self:HasEnhancement(RegenAuraEnhancement) then
+                    local basic = enhancements[RegenAuraEnhancement]
+                    return basic and basic.Radius or 0
+                end
+
+                return 0
+            end,
+        },
+    },
+
     Weapons = {
         DeathWeapon = ClassWeapon(ACUDeathWeapon) {},
         ChronotronCannon = ClassWeapon(SDFChronotronCannonWeapon) {},

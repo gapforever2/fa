@@ -272,6 +272,7 @@ function CreateUI(isReplay)
 
     import("/lua/ui/game/worldview.lua").CreateMainWorldView(gameParent, mapGroup)
     import("/lua/ui/game/worldview.lua").LockInput()
+    import("/lua/ui/game/auraradius.lua").Initialize()
 
     import("/lua/ui/game/economy.lua").CreateEconomyBar(statusClusterGroup)
     import("/lua/ui/game/tabs.lua").Create(mapGroup)

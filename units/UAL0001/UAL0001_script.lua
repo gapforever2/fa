@@ -26,9 +26,24 @@ local EffectUtil = import("/lua/effectutilities.lua")
 local ADFOverchargeWeapon = AWeapons.ADFOverchargeWeapon
 local ADFChronoDampener = AWeapons.ADFChronoDampener
 local Buff = import("/lua/sim/buff.lua")
+local ChronoAuraId = 'ChronoDampenerAeon'
 
 ---@class UAL0001 : ACUUnit
 UAL0001 = ClassUnit(ACUUnit) {
+    -- Generic visual-only aura declaration.  The Unit base class publishes this to the UI;
+    -- it never creates Intel, damage, a projectile or a weapon overlay.
+    AuraVisuals = {
+        [ChronoAuraId] = {
+            EnabledByEnhancement = ChronoAuraId,
+            Color = 'ffd000ff',
+            Thickness = 0.12,
+            GetRadius = function(self)
+                local chrono = self:GetWeaponByLabel('ChronoDampener')
+                return chrono and chrono:GetMaxRadius() or 0
+            end,
+        },
+    },
+
     Weapons = {
         DeathWeapon = ClassWeapon(ACUDeathWeapon) {},
         RightDisruptor = ClassWeapon(ADFDisruptorCannonWeapon) {},
@@ -52,6 +67,7 @@ UAL0001 = ClassUnit(ACUUnit) {
         local bpDisrupt = self:GetBlueprint().Weapon[1].MaxRadius
         local cd = self:GetWeaponByLabel('ChronoDampener')
         cd:ChangeMaxRadius(bpDisrupt)
+        self:UpdateAuraVisualSync()
         -- Restrict what enhancements will enable later
         self:AddBuildRestriction(categories.AEON * (categories.BUILTBYTIER2COMMANDER + categories.BUILTBYTIER3COMMANDER))
     end,
@@ -60,6 +76,7 @@ UAL0001 = ClassUnit(ACUUnit) {
         ACUUnit.OnStopBeingBuilt(self, builder, layer)
         self:SetWeaponEnabledByLabel('RightDisruptor', true)
         self:SetWeaponEnabledByLabel('ChronoDampener', false)
+        self:UpdateAuraVisualSync()
         self:ForkThread(self.GiveInitialResources)
     end,
 
@@ -292,6 +309,8 @@ UAL0001 = ClassUnit(ACUUnit) {
             self:SetIntelRadius('Omni', bpIntel.OmniRadius or 26)
             self:SetMaintenanceConsumptionInactive()
       end
+
+        self:UpdateAuraVisualSync()
     end,
 
     CreateHeavyShield = function(self, bp)

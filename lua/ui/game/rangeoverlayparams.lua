@@ -45,6 +45,7 @@ local glowIntelOver = '10'
 ---@field Outer number[]
 ---@field Type number
 ---@field Combo? boolean
+---@field VisualOnly? boolean
 ---@field Tooltip string
 
 ---@type table<string, RangeOverlay>
@@ -121,6 +122,22 @@ RangeOverlayParams = {
         Outer = outerMilitary,
         Type = 1,
         Tooltip = "overlay_indirect_fire",
+    },
+
+    -- This is a menu entry only.  The native aura renderer consumes UnitData.AuraVisuals;
+    -- multifunction.lua deliberately does not pass this entry to SetOverlayFilter.
+    AuraRadius = {
+        key = 'auraradius',
+        Label = '<LOC range_0014>Aura Radius',
+        Categories = 0,
+        NormalColor = 'ffd000ff',
+        SelectColor = 'ffe040ff',
+        RolloverColor = 'fff060ff',
+        Inner = innerMilitary,
+        Outer = outerMilitary,
+        Type = 1,
+        VisualOnly = true,
+        Tooltip = "overlay_aura",
     },
 
     Miscellaneous = {

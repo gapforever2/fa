@@ -21,6 +21,12 @@ end
 ---@class UnitSyncData
 ---@field WepPriority? UnitSyncWepPriority
 ---@field Buffs? BuffName[] # Buffs affecting this unit
+---@field AuraVisuals? table<string, AuraVisualSyncData> # Visual-only aura geometry published by the unit
+
+---@class AuraVisualSyncData
+---@field Radius number # Current gameplay radius, in map units
+---@field Color? Color # Defaults to the shared purple aura color in the UI bridge
+---@field Thickness? number # World-space line thickness hint
 
 -- UnitData that has been synced. We keep a separate copy of this so when we change
 -- focus army we can resync the data.

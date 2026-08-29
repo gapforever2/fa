@@ -1301,6 +1301,20 @@ function UI_DrawCircle(pos, size, color, thickness)
 
 end
 
+--- Clears all dedicated aura circles from the native world renderer.
+function UI_ClearAuraRadii()
+end
+
+--- Adds or updates a dedicated aura circle for a unit. The circle is rendered
+--- from the unit's interpolated position alongside the original range rings.
+---@param unit UserUnit
+---@param auraId string
+---@param radius number
+---@param color Color
+---@param thickness? number
+function UI_SetAuraRadius(unit, auraId, radius, color, thickness)
+end
+
 --- Draws a rectangle in world. Must be called from `WorldView:OnRenderWorld` or it won't draw anything.
 ---@param pos Vector  # in world coordinates
 ---@param size number
