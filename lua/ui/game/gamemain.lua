@@ -65,7 +65,11 @@ GameHasAIs = false
 
 function KillWaitingDialog()
     if waitingDialog then
+        if rawget(_G, 'EndWaitingDialogNative') then
+            EndWaitingDialogNative()
+        end
         waitingDialog:Destroy()
+        waitingDialog = false
     end
 end
 
@@ -519,15 +523,145 @@ function CreateWldUIProvider()
     end
 
     provider.StartWaitingDialog = function(self)
-        if not waitingDialog then waitingDialog = UIUtil.ShowInfoDialog(GetFrame(0), "<LOC gamemain_0001>Waiting For Other Players...") end
+        if waitingDialog then return end
+
+        local frame = GetFrame(0)
+        local clients = GetSessionClients()
+        local dialog = Group(frame, "waitingDialogGroup")
+        dialog.Width:Set(400)
+        dialog.Height:Set(70 + table.getn(clients) * 22)
+        LayoutHelpers.AtCenterIn(dialog, frame)
+
+        local bg = Bitmap(dialog)
+        bg:SetSolidColor('CC101010')
+        LayoutHelpers.FillParent(bg, dialog)
+
+        local title = UIUtil.CreateText(dialog, LOC('<LOC gamemain_0001>Waiting For Other Players...'), 16, UIUtil.titleFont)
+        title:SetColor('FFCCCCCC')
+        LayoutHelpers.AtTopIn(title, dialog, 12)
+        LayoutHelpers.AtHorizontalCenterIn(title, dialog)
+
+        local elapsedLabel = UIUtil.CreateText(dialog, '', 12, UIUtil.bodyFont)
+        elapsedLabel:SetColor('FF888888')
+        LayoutHelpers.Below(elapsedLabel, title, 4)
+        LayoutHelpers.AtHorizontalCenterIn(elapsedLabel, dialog)
+
+        local beginWaitingNative = rawget(_G, 'BeginWaitingDialogNative')
+        local registerWaitingPlayerNative = rawget(_G, 'RegisterWaitingPlayerNative')
+        if beginWaitingNative then
+            beginWaitingNative(elapsedLabel)
+        end
+
+        local startTime = GetSystemTimeSeconds()
+        local lastRefreshTime = -1
+        local prev = elapsedLabel
+        local slots = {}
+
+        for i, client in clients do
+            local row = Group(dialog)
+            row.Width:Set(360)
+            row.Height:Set(18)
+
+            local indicator = Bitmap(row)
+            indicator.Width:Set(10)
+            indicator.Height:Set(10)
+            LayoutHelpers.AtLeftIn(indicator, row, 4)
+            LayoutHelpers.AtVerticalCenterIn(indicator, row)
+
+            local isLocal = client['local']
+            local clientName = client.name or ('Player ' .. i)
+            local displayName = isLocal and (clientName .. ' (You)') or clientName
+            local nameLabel = UIUtil.CreateText(row, displayName, 13, UIUtil.bodyFont)
+            nameLabel:SetColor('FFDDDDDD')
+            LayoutHelpers.RightOf(nameLabel, indicator, 6)
+            LayoutHelpers.AtVerticalCenterIn(nameLabel, row)
+
+            local statusLabel = UIUtil.CreateText(row, '', 12, UIUtil.bodyFont)
+            LayoutHelpers.AtRightIn(statusLabel, row, 4)
+            LayoutHelpers.AtVerticalCenterIn(statusLabel, row)
+
+            LayoutHelpers.Below(row, prev, 4)
+            LayoutHelpers.AtHorizontalCenterIn(row, dialog)
+            prev = row
+
+            slots[i] = { indicator = indicator, statusLabel = statusLabel, isLocal = isLocal }
+            if registerWaitingPlayerNative and client._nativePtrLo and client._nativePtrHi then
+                registerWaitingPlayerNative(
+                    client._nativePtrLo,
+                    client._nativePtrHi,
+                    indicator,
+                    statusLabel,
+                    isLocal
+                )
+            end
+        end
+
+        local function RefreshStatus(force)
+            local now = GetSystemTimeSeconds()
+            if not force and lastRefreshTime >= 0 and now - lastRefreshTime < 0.25 then
+                return
+            end
+            lastRefreshTime = now
+
+            local clients = GetSessionClients()
+            for i, client in clients do
+                if slots[i] then
+                    local pingText = (client.ping and client.ping > 0) and (math.floor(client.ping) .. 'ms ') or ''
+                    if client.connected == false then
+                        slots[i].indicator:SetSolidColor('FFCC0000')
+                        slots[i].statusLabel:SetText('disconnected')
+                        slots[i].statusLabel:SetColor('FFCC4444')
+                    elseif client.ready or slots[i].isLocal then
+                        slots[i].indicator:SetSolidColor('FF00CC00')
+                        slots[i].statusLabel:SetText(pingText .. 'ready')
+                        slots[i].statusLabel:SetColor('FF88CC88')
+                    else
+                        slots[i].indicator:SetSolidColor('FFCCAA00')
+                        slots[i].statusLabel:SetText(pingText .. 'waiting')
+                        slots[i].statusLabel:SetColor('FFCCAA44')
+                    end
+                end
+            end
+            local sec = math.floor(now - startTime)
+            elapsedLabel:SetText(math.floor(sec / 60) .. 'm ' .. math.mod(sec, 60) .. 's')
+        end
+
+        RefreshStatus(true)
+        dialog.Depth:Set(frame:GetTopmostDepth() + 100)
+
+        waitingDialog = dialog
+        waitingDialog._refreshStatus = RefreshStatus
+        waitingDialog._elapsedLabel = elapsedLabel
+
+        ForkThread(function()
+            while waitingDialog do
+                WaitSeconds(1)
+                if waitingDialog and waitingDialog._refreshStatus then
+                    local ok, err = pcall(waitingDialog._refreshStatus)
+                    if not ok then
+                        LOG('WAITDIALOG refresh error: ' .. tostring(err))
+                    end
+                end
+            end
+        end)
     end
 
     provider.UpdateWaitingDialog = function(self, elapsedTime)
-        -- currently no function, but could animate waiting dialog
+        if not waitingDialog then return end
+
+        if waitingDialog._refreshStatus then
+            local ok, err = pcall(waitingDialog._refreshStatus)
+            if not ok then
+                LOG('WAITDIALOG update error: ' .. tostring(err))
+            end
+        end
     end
 
     provider.StopWaitingDialog = function(self)
         if waitingDialog then
+            if rawget(_G, 'EndWaitingDialogNative') then
+                EndWaitingDialogNative()
+            end
             waitingDialog:Destroy()
             waitingDialog = false
         end
