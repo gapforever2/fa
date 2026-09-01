@@ -247,24 +247,29 @@ function CreateDialog(victory, showCampaign, operationVictoryTable, midGame)
         return
     end
     scoreScreenActive = true
-    SessionEndGame()
     DisableWorldSounds()
     StopAllSounds()
     ForkThread(function()
-        -- Wait for the score data to be synced from the sim. We cap the wait so that,
-        -- even if the data never arrives (a sim-side failure while collecting scores),
-        -- the score screen and its exit button still appear and the player is never
-        -- left stuck on a frozen end screen with no way to quit.
+        -- A victory result reaches the UI before the simulation actually calls EndGame.
+        -- Keep the session connected until then so that the final score sync cannot be
+        -- lost when other players leave or the score button is pressed immediately.
         local waited = 0
         local maxWait = 15
-        while not(hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history) do
+        local scoreDataReady = hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history
+        while not (SessionIsGameOver() and scoreDataReady) do
             WaitSeconds(0.5)
             waited = waited + 0.5
+            scoreDataReady = hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history
             if waited >= maxWait then
-                WARN("Score data was not received within " .. maxWait .. "s; showing score screen with available data.")
+                WARN("Game end or score data was not received within " .. maxWait .. "s; showing score screen with available data.")
                 break
             end
         end
+
+        -- Once EndGame has run, the native SessionEndGame implementation skips its
+        -- peer acknowledgement wait. Disconnecting here can therefore no longer be
+        -- held up by players who are already leaving the finished match.
+        SessionEndGame()
         CreateDialog2(victory, showCampaign, operationVictoryTable, midGame)
     end)
 end
