@@ -33,7 +33,9 @@ AutolobbyArgumentsComponent = ClassSimple {
         -- related to player info
         ["/clan"] = true,
         ["/country"] = true,
+        ["/group"] = true,
         ["/numgames"] = true,
+        ["/avatarurl"] = true,
 
         -- related to player settings
         ["/team"] = true,

@@ -27,6 +27,31 @@ local GameColors = import("/lua/gamecolors.lua")
 local NEW_PLAYER_GAMES_THRESHOLD = rawget(_G, 'NEW_PLAYER_GAMES_THRESHOLD') or 10
 local NEW_PLAYER_DISPLAY_RATING = rawget(_G, 'NEW_PLAYER_DISPLAY_RATING') or 100
 
+--- Decodes the server's ASCII-safe UTF-8 roster representation. Command-line
+--- parsing is allowed to alter backslashes, therefore the payload is plain hex.
+---@param playerName string
+---@return string
+local function DecodeExpectedPlayerName(playerName)
+    if string.sub(playerName, 1, 8) != "GAFUTF8_" then
+        return playerName
+    end
+
+    local encodedName = string.sub(playerName, 9)
+    if encodedName == "" or math.mod(string.len(encodedName), 2) != 0 then
+        return playerName
+    end
+
+    local bytes = {}
+    for index = 1, string.len(encodedName), 2 do
+        local byte = tonumber(string.sub(encodedName, index, index + 1), 16)
+        if not byte then
+            return playerName
+        end
+        table.insert(bytes, string.char(byte))
+    end
+    return table.concat(bytes)
+end
+
 local MohoLobbyMethods = moho.lobby_methods
 local DebugComponent = import("/lua/shared/components/debugcomponent.lua").DebugComponent
 local AutolobbyServerCommunicationsComponent = import("/lua/ui/lobby/autolobby/components/autolobbyservercommunicationscomponent.lua")
@@ -88,6 +113,8 @@ local AutolobbyEngineStrings = {
 ---@field SUBDIV Subdivision # Related to rating/divisions
 ---@field PL number     # Related to rating/divisions
 ---@field PlayerClan string
+---@field GroupRole string|boolean
+---@field Avatar string|boolean
 
 ---@alias UIAutolobbyConnections boolean[][]
 ---@alias UIAutolobbyStatus UIPeerLaunchStatus[]
@@ -123,6 +150,8 @@ local AutolobbyEngineStrings = {
 ---@field PlayerOptions UIAutolobbyPlayer[]                         # Is synced from the host via `SendData` or `BroadcastData`.
 ---@field ConnectionMatrix table<UILobbyPeerId, UILobbyPeerId[]>    # Is synced between players via `EstablishedPeers`
 ---@field LaunchStatutes table<UILobbyPeerId, UIPeerLaunchStatus>  # Is synced between players via `BroadcastData`
+---@field ConnectionTimeoutSeconds? number
+---@field IsGafAutohost boolean
 ---@field LobbyParameters? UIAutolobbyParameters                # Used for rejoining functionality
 ---@field HostParameters? UIAutolobbyHostParameters             # Used for rejoining functionality
 ---@field JoinParameters? UIAutolobbyJoinParameters             # Used for rejoining functionality
@@ -139,14 +168,59 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
 
         self.GameMods = {}
         self.GameOptions = self:CreateLocalGameOptions()
-        self.PlayerOptions = {}
+        self.IsGafAutohost = self.GameOptions.GAFExpectedPlayer1 != nil
+        self.ControlPrefix = self.GameOptions.GAFControlPrefix
+        self.GameOptions.GAFControlPrefix = nil
+        if self.ControlPrefix then
+            self.ControlPrefix = string.gsub(self.ControlPrefix, '%x%x', function(hex)
+                return string.char(tonumber(hex, 16))
+            end)
+        end
+        self.ConnectionTimeoutSeconds = tonumber(self.GameOptions.GAFAutolobbyConnectTimeout)
+            or (self.GameOptions.GAFExpectedPlayer1 and 90)
+        self.ConnectionDeadlineSeconds = self.ConnectionTimeoutSeconds
+            and (GetSystemTimeSeconds() + self.ConnectionTimeoutSeconds)
+        self.GameOptions.GAFAutolobbyConnectTimeout = nil
+        self.PlayerOptions = self:CreateExpectedPlayers(self.GameOptions)
         self.LaunchStatutes = {}
         self.ConnectionMatrix = {}
     end,
 
     ---@param self UIAutolobbyCommunications
     __post_init = function(self)
-
+        -- The server launch snapshot is available before ICE peers connect.
+        -- Render those names immediately so a missing client is visible instead
+        -- of looking like an empty row in the connection matrix.
+        local interface = import("/lua/ui/lobby/autolobby/autolobbyinterface.lua").GetSingleton()
+        interface:SetGafAutohostMode(self.IsGafAutohost)
+        interface:UpdateScenario(nil, self.PlayerOptions)
+        if self.ConnectionTimeoutSeconds then
+            interface:StartConnectionCountdown(self.ConnectionTimeoutSeconds)
+        end
+        if self.IsGafAutohost and self.ControlPrefix then
+            LOG('[GAF-AUTOLOBBY] control prefix=', self.ControlPrefix)
+            self.Trash:Add(ForkThread(function()
+                -- Native lobby creation has not finished during __post_init.
+                WaitSeconds(0.1)
+                while not IsDestroyed(self) do
+                    -- This file is created before FA starts, and contains only
+                    -- an integer written by the client after a server decision.
+                    local state = {}
+                    local ok = pcall(doscript, self.ControlPrefix .. 'state.lua', state)
+                    local spot = ok and tonumber(state.declinedSpot)
+                    if spot and self.PlayerOptions[spot] then
+                        local options = self.PlayerOptions[spot]
+                        self.ReturnDeclined = true
+                        LOG('[GAF-AUTOLOBBY] return declined, spot=', spot)
+                        options.ReturnDeclined = true
+                        interface:UpdateScenario(self.GameOptions.ScenarioFile, self.PlayerOptions)
+                        interface:StartConnectionCountdown(5)
+                        return
+                    end
+                    WaitSeconds(0.5)
+                end
+            end))
+        end
     end,
 
     --- Creates a table that represents the local player settings. This represents the initial player. It can be edited by the host accordingly.
@@ -165,10 +239,17 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         -- retrieve faction
         info.Faction = 1
         local factionData = import("/lua/factions.lua")
-        for index, tbl in factionData.Factions do
-            if HasCommandLineArg("/" .. tbl.Key) then
-                info.Faction = index
-                break
+        if HasCommandLineArg("/random") then
+            -- Resolve random as soon as this FA process joins the autolobby.
+            -- The host then broadcasts the concrete faction to every peer, so
+            -- the versus screen and the eventual game configuration agree.
+            info.Faction = Random(1, table.getn(factionData.Factions))
+        else
+            for index, tbl in factionData.Factions do
+                if HasCommandLineArg("/" .. tbl.Key) then
+                    info.Faction = index
+                    break
+                end
             end
         end
 
@@ -203,6 +284,24 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
             info.PL = NEW_PLAYER_DISPLAY_RATING
         end
         info.PlayerClan = self:GetCommandLineArgumentString("/clan", "")
+        if self.IsGafAutohost then
+            local avatar = self:GetCommandLineArgumentString("/avatarurl", "")
+            info.Avatar = avatar != "" and avatar or false
+            local expected = self.PlayerOptions[info.StartSpot]
+            if expected and expected.Avatar and (not info.Avatar or info.Avatar == 'none.png') then
+                info.Avatar = expected.Avatar
+            end
+        end
+
+        -- Preserve the role in the synchronized launch configuration. The SIM
+        -- uses this immutable match-start snapshot as a second authorization
+        -- barrier for privileged callbacks.
+        local groupRole = self:GetCommandLineArgumentString("/group", "")
+        if groupRole != "" then
+            info.GroupRole = string.lower(groupRole)
+        else
+            info.GroupRole = false
+        end
 
         return info
     end,
@@ -248,6 +347,55 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         end
 
         return options
+    end,
+
+    --- Builds temporary rows for every player selected by the server. A real
+    --- AddPlayer message replaces the row in the same start spot as soon as
+    --- that peer connects. The metadata is removed from GameOptions so it is
+    --- never copied into the final simulation configuration.
+    ---@param self UIAutolobbyCommunications
+    ---@param gameOptions UILobbyLaunchGameOptionsConfiguration
+    ---@return UIAutolobbyPlayer[]
+    CreateExpectedPlayers = function(self, gameOptions)
+        local players = {}
+
+        for spot = 1, self.PlayerCount do
+            local playerKey = "GAFExpectedPlayer" .. spot
+            local factionKey = "GAFExpectedFaction" .. spot
+            local teamKey = "GAFExpectedTeam" .. spot
+            local colorKey = "GAFExpectedColor" .. spot
+            local avatarKey = "GAFExpectedAvatar" .. spot
+            local playerName = gameOptions[playerKey]
+
+            if playerName and playerName ~= "" then
+                LOG("[GAF-AUTOLOBBY-ROSTER] spot=", tostring(spot),
+                    " encoded=", tostring(playerName))
+                playerName = DecodeExpectedPlayerName(playerName)
+                LOG("[GAF-AUTOLOBBY-ROSTER] spot=", tostring(spot),
+                    " decoded=", tostring(playerName))
+                local color = tonumber(gameOptions[colorKey]) or spot
+                players[spot] = {
+                    Human = true,
+                    Civilian = false,
+                    PlayerName = playerName,
+                    Faction = tonumber(gameOptions[factionKey]) or 1,
+                    Team = tonumber(gameOptions[teamKey]) or 1,
+                    StartSpot = spot,
+                    PlayerColor = color,
+                    ArmyColor = color,
+                    Avatar = gameOptions[avatarKey] or false,
+                    Expected = true,
+                }
+            end
+
+            gameOptions[playerKey] = nil
+            gameOptions[factionKey] = nil
+            gameOptions[teamKey] = nil
+            gameOptions[colorKey] = nil
+            gameOptions[avatarKey] = nil
+        end
+
+        return players
     end,
 
     ---------------------------------------------------------------------------
@@ -398,11 +546,46 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         return allClanTags
     end,
 
+    --- Creates the immutable SIM-side allowlist for the privileged AiBot
+    --- callback. Player names are unique in the launch configuration.
+    ---@param self UIAutolobbyCommunications
+    ---@param playerOptions UIAutolobbyPlayer[]
+    ---@return table<string, boolean>
+    CreateAiBotAdminPlayersTable = function(self, playerOptions)
+        local adminPlayers = {}
+
+        for _, options in pairs(playerOptions) do
+            if options.Human
+                and type(options.GroupRole) == 'string'
+                and string.lower(options.GroupRole) == 'admin'
+            then
+                adminPlayers[options.PlayerName] = true
+            end
+        end
+
+        return adminPlayers
+    end,
+
     --- Verifies whether we can launch the game.
     ---@param self UIAutolobbyCommunications
     ---@param peerStatus UIAutolobbyStatus
     ---@return boolean
     CanLaunch = function(self, peerStatus)
+        if self.ReturnDeclined then
+            return false
+        end
+        -- Placeholder rows make the complete roster visible, but they must
+        -- never be mistaken for peers that actually connected.
+        local connectedPlayerCount = 0
+        for _, playerOptions in pairs(self.PlayerOptions) do
+            if type(playerOptions.OwnerID) == 'string' then
+                connectedPlayerCount = connectedPlayerCount + 1
+            end
+        end
+        if connectedPlayerCount ~= self.PlayerCount then
+            return false
+        end
+
         -- check if we know of all peers
         if table.getsize(peerStatus) ~= self.PlayerCount then
             return false
@@ -469,6 +652,11 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
     ---@param lobbyParameters UIAutolobbyParameters
     ---@param joinParameters UIAutolobbyJoinParameters
     Rejoin = function(self, lobbyParameters, joinParameters)
+        if self.RejoinPending or self.ReturnDeclined then
+            return
+        end
+        self.RejoinPending = true
+        local deadline = self.ConnectionDeadlineSeconds
         local autolobbyModule = import("/lua/ui/lobby/autolobby.lua")
 
         -- start disposing threads to prevent race conditions
@@ -492,13 +680,28 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
 
                 -- prevent race conditions
                 WaitSeconds(1.0)
-                local newLobby = autolobbyModule.CreateLobby(
-                    lobbyParameters.Protocol,
-                    lobbyParameters.LocalPort,
-                    lobbyParameters.DesiredPlayerName,
-                    lobbyParameters.LocalPlayerPeerId,
-                    lobbyParameters.NatTraversalProvider
-                )
+                local newLobby
+                for attempt = 1, 5 do
+                    newLobby = autolobbyModule.CreateLobby(
+                        lobbyParameters.Protocol,
+                        lobbyParameters.LocalPort,
+                        lobbyParameters.DesiredPlayerName,
+                        lobbyParameters.LocalPlayerPeerId,
+                        lobbyParameters.NatTraversalProvider
+                    )
+                    if newLobby then
+                        break
+                    end
+                    WaitSeconds(1)
+                end
+                if not newLobby then
+                    return
+                end
+                if deadline then
+                    newLobby.ConnectionDeadlineSeconds = deadline
+                    import("/lua/ui/lobby/autolobby/autolobbyinterface.lua").GetSingleton()
+                        :StartConnectionCountdown(math.max(0.001, deadline - GetSystemTimeSeconds()))
+                end
 
                 -- wait a bit before we join
                 WaitSeconds(1.0)
@@ -509,7 +712,6 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
             end
         )
     end,
-
 
     ---------------------------------------------------------------------------
     --#region Threads
@@ -611,6 +813,7 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
                     self.GameOptions.Ratings = self:CreateRatingsTable(self.PlayerOptions)
                     self.GameOptions.Divisions = self:CreateDivisionsTable(self.PlayerOptions)
                     self.GameOptions.ClanTags = self:CreateClanTagsTable(self.PlayerOptions)
+                    self.GameOptions.AiBotAdminPlayers = self:CreateAiBotAdminPlayersTable(self.PlayerOptions)
 
                     -- create game configuration
                     local gameConfiguration = {
@@ -648,6 +851,8 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
 
         LOG("[GAF-COLOR] ProcessAddPlayerMessage: sender=", tostring(data.SenderID),
             " name=", tostring(playerOptions.PlayerName),
+            " Faction=", tostring(playerOptions.Faction),
+            " Avatar=", tostring(playerOptions.Avatar),
             " PlayerColor=", tostring(playerOptions.PlayerColor),
             " ArmyColor=", tostring(playerOptions.ArmyColor),
             " StartSpot=", tostring(playerOptions.StartSpot))
@@ -655,6 +860,12 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         -- override some data
         playerOptions.OwnerID = data.SenderID
         playerOptions.PlayerName = self:MakeValidPlayerName(playerOptions.OwnerID, playerOptions.PlayerName)
+
+        local expected = self.PlayerOptions[playerOptions.StartSpot]
+        if self.IsGafAutohost and expected and expected.Avatar and
+            (not playerOptions.Avatar or playerOptions.Avatar == 'none.png') then
+            playerOptions.Avatar = expected.Avatar
+        end
 
         -- TODO: verify that the StartSpot is not occupied
         -- put the player where it belongs
@@ -686,6 +897,8 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         for slotIndex, opts in pairs(self.PlayerOptions) do
             LOG("[GAF-COLOR] ProcessUpdatePlayerOptions: slot=", tostring(slotIndex),
                 " name=", tostring(opts.PlayerName),
+                " Faction=", tostring(opts.Faction),
+                " Avatar=", tostring(opts.Avatar),
                 " PlayerColor=", tostring(opts.PlayerColor),
                 " ArmyColor=", tostring(opts.ArmyColor),
                 " StartSpot=", tostring(opts.StartSpot))
@@ -1092,6 +1305,33 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
     PeerDisconnected = function(self, peerName, peerId)
         self:DebugSpew("PeerDisconnected", peerName, peerId)
         self:SendDisconnectedPeer(peerId)
+
+        if not self.IsGafAutohost then
+            return
+        end
+
+        -- Keep the server-selected roster row so a failed player remains
+        -- identifiable and can rejoin, but clear all peer-owned state. Without
+        -- this, the last received Ready value remained visible indefinitely.
+        local disconnectedSpot = self:PeerIdToIndex(self.PlayerOptions, peerId)
+        self.LaunchStatutes[peerId] = nil
+        self.ConnectionMatrix[peerId] = nil
+
+        if disconnectedSpot and self.PlayerOptions[disconnectedSpot] then
+            local playerOptions = self.PlayerOptions[disconnectedSpot]
+            playerOptions.OwnerID = nil
+            playerOptions.Expected = true
+        end
+
+        local interface = import("/lua/ui/lobby/autolobby/autolobbyinterface.lua").GetSingleton()
+        interface:UpdateScenario(self.GameOptions.ScenarioFile, self.PlayerOptions)
+        interface:UpdateLaunchStatuses(
+            self:CreateConnectionStatuses(self.PlayerOptions, self.LaunchStatutes)
+        )
+
+        if self:IsHost() then
+            self:BroadcastData({ Type = "UpdatePlayerOptions", PlayerOptions = self.PlayerOptions })
+        end
     end,
 
     --- Called by the engine when the game is launched.

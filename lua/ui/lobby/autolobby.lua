@@ -51,11 +51,19 @@ function CreateLobby(protocol, localPort, desiredPlayerName, localPlayerUID, nat
 
     -- create the lobby
     local maxConnections = 16
-    AutolobbyCommunicationsInstance = InternalCreateLobby(
+    local lobbyInstance = InternalCreateLobby(
         import("/lua/ui/lobby/autolobby/autolobbycontroller.lua").AutolobbyCommunications,
         protocol, localPort, maxConnections, desiredPlayerName,
         localPlayerUID, natTraversalProvider
     )
+
+    if not lobbyInstance then
+        WARN("[GAF-REJOIN] InternalCreateLobby returned nil")
+        AutolobbyCommunicationsInstance = false
+        return false
+    end
+
+    AutolobbyCommunicationsInstance = lobbyInstance
 
     AutolobbyCommunicationsInstance.LobbyParameters = AutolobbyCommunicationsInstance.LobbyParameters or {}
     AutolobbyCommunicationsInstance.LobbyParameters.Protocol = protocol
@@ -104,11 +112,20 @@ function JoinGame(address, asObserver, playerName, uid)
     LOG("JoinGame", address, asObserver, playerName, uid)
 
     if AutolobbyCommunicationsInstance then
-        AutolobbyCommunicationsInstance.JoinParameters = AutolobbyCommunicationsInstance.JoinParameters or {}
-        AutolobbyCommunicationsInstance.JoinParameters.Address = address
-        AutolobbyCommunicationsInstance.JoinParameters.AsObserver = asObserver
-        AutolobbyCommunicationsInstance.JoinParameters.DesiredPlayerName = playerName
-        AutolobbyCommunicationsInstance.JoinParameters.DesiredPeerId = uid
+        local joinParameters = {
+            Address = address,
+            AsObserver = asObserver,
+            DesiredPlayerName = playerName,
+            DesiredPeerId = uid,
+        }
+
+        if AutolobbyCommunicationsInstance.IsGafAutohost
+            and AutolobbyCommunicationsInstance.JoinParameters then
+            AutolobbyCommunicationsInstance:Rejoin(
+                AutolobbyCommunicationsInstance.LobbyParameters, joinParameters)
+            return
+        end
+        AutolobbyCommunicationsInstance.JoinParameters = joinParameters
         AutolobbyCommunicationsInstance:JoinGame(address, playerName, uid)
     end
 end
