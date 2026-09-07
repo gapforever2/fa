@@ -1,4 +1,4 @@
-﻿--****************************************************************************
+--****************************************************************************
 --*  File     :  lua/modules/ui/help/unitdescriptions.lua
 --*  Author(s):  Ted Snook
 --*
@@ -340,7 +340,7 @@ Description = {
     ['urb3104'] = "<LOC Unit_Description_0222> High-end intelligence system. Provides maximum radar and sonar coverage. Counters enemy intelligence systems.",
 
     -- AEON -- Armored Commander Unit/Upgrades
-    ['ual0001'] = "<LOC Unit_Description_0305> Armored Commander is a combination of barracks and command center. Contains all the blueprints necessary to build a basic army from scratch. Upgradeable with combat enhancements, advanced engineering suits, resource allocation system, and teleporting.",
+    ['ual0001'] = "<LOC Unit_Description_0305> Armored Commander is a combination of barracks and command center. Contains all the blueprints necessary to build a basic army from scratch. Upgradeable with combat enhancements, advanced engineering suits, resource allocation system, and teleporting.\n\nShield health boost from the \"Shield Amplifier\" aura: +2000 (light) / +5000 (heavy).",
     ['ual0001-aes'] = "<LOC Unit_Description_0156> Expands the number of available schematics and increases the ACU's build speed and maximum health.",
     ['ual0001-cd'] = "<LOC Unit_Description_0157> Creates a Quantum Stasis Field around the ACU. Immobilizes enemy units within the ACU's main cannon range. Multiple Quantum Stasis Fields interfere with each other, having a limited effect.",
     ['ual0001-cba'] = "<LOC Unit_Description_0158>Increases the range of the ACU's main cannon and that of Overcharge.",
@@ -356,7 +356,7 @@ Description = {
     ['ual0001-pqt'] = "<LOC Unit_Description_0166> Adds teleporter. Requires considerable Energy to activate.",
 
     -- AEON -- Support Commander Units/Upgrades
-    ['ual0301'] = "<LOC Unit_Description_0167> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
+    ['ual0301'] = "<LOC Unit_Description_0167> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.\n\nShield health boost from the \"Shield Amplifier\" aura: +2500 (light) / +5000 (heavy).",
     ['ual0301-efm'] = "<LOC Unit_Description_0168> Speeds up all engineering-related functions.",
     ['ual0301-ras'] = "<LOC Unit_Description_0169> Increases SACU's resource generation.",
     ['ual0301-sp'] = "<LOC Unit_Description_0170> SACU is sacrificed and its Mass is added to a structure. This destroys the SACU.",
@@ -369,11 +369,9 @@ Description = {
 
     -- AEON -- Support Commander Presets
     ['ual0301_Engineer']     = "<LOC ual0301_Engineer_help> Support Armored Command Unit. Enhanced during construction with rapid fabrication enhancement.",
-    ['ual0301_NanoCombat'] = "<LOC ual0301_NanoCombat_help> Support Armored Command Unit. Enhanced during construction with the reacton refractor and nano-repair system enhancements.",
     ['ual0301_Rambo'] = "<LOC ual0301_Rambo_help> Support Armored Command Unit. Enhanced during construction with a heavy personal shield and the reacton refractor enhancements.",
     ['ual0301_RAS'] = "<LOC ual0301_RAS_help> Support Armored Command Unit. Enhanced during construction with a Resource Allocation System.",
     ['ual0301_ShieldCombat'] = "<LOC ual0301_ShieldCombat_help> Support Armored Command Unit. Enhanced during construction with a personal shield and the reacton refractor enhancements.",
-    ['ual0301_Support'] = "<LOC ual0301_Support_help> Support Armored Command Unit. Enhanced during construction with the reacton refractor enhancement.",
 
     -- AEON -- Land Units
     ['ual0101'] = "<LOC Unit_Description_0223> Fast, lightly armored reconnaissance vehicle. Armed with a laser and a state-of-the-art sensor suite.",
@@ -381,11 +379,11 @@ Description = {
     ['ual0201'] = "<LOC Unit_Description_0225> Amphibious light tank. Armed with a single cannon.",
     ['ual0103'] = "<LOC Unit_Description_0226> Mobile light artillery. Designed to engage enemy units at long range.",
     ['ual0104'] = "<LOC Unit_Description_0227> Mobile anti-air unit. Effective against low-end enemy air units.",
-    ['ual0202'] = "<LOC Unit_Description_0228> Heavy tank. Equipped with a single cannon and a shield generator.",
+    ['ual0202'] = "<LOC Unit_Description_0228> Heavy tank. Equipped with a single cannon and a shield generator.\n\nShield health boost from the \"Shield Amplifier\" aura: +250.",
     ['ual0111'] = "<LOC Unit_Description_0229> Mobile tactical missile launcher. Missile has medium range and inflicts light damage.",
     ['ual0205'] = "<LOC Unit_Description_0230> Mobile AA unit. Armed with a temporal AA Fizz launcher.",
-    ['ual0307'] = "<LOC Unit_Description_0231> Mobile shield generator.",
-    ['ual0303'] = "<LOC Unit_Description_0232> Shielded Siege assault bot. Armed with a high-intensity laser. Can repair and reclaim Mass.",
+    ['ual0307'] = "<LOC Unit_Description_0231> Mobile shield generator.\n\nShield health boost from the \"Shield Amplifier\" aura: +500.",
+    ['ual0303'] = "<LOC Unit_Description_0232> Shielded Siege assault bot. Armed with a high-intensity laser. Can repair and reclaim Mass.\n\nShield health boost from the \"Shield Amplifier\" aura: +1200.",
     ['ual0304'] = "<LOC Unit_Description_0233> Slow-moving heavy artillery. Must be stationary to fire.",
     ['ual0401'] = "<LOC Unit_Description_0234> Sacred assault bot. Incinerates enemy units and structures with Phason laser. Also equipped with tractor beam. Pulls in and crushes mobile enemy units.",
     ['xal0203'] = "<LOC Unit_Description_0327> Fast, lightly armored tank. Armed with dual, rapid-fire autoguns.",
@@ -646,4 +644,9 @@ Description = {
     ['dslk004'] = "<LOC Unit_Description_0464> Mobile Anti-Air unit. Armed with a long-range lasers, excellent against enemy gunships or air-fighters. Capable of switching weapon to anti-land attack but with smaller damage.",
     ['srl0310'] = "<LOC Unit_Description_srl0310> Mobile support unit. Designed to attack and destroy enemy shields. Weapon system only very briefly stuns enemy units.",
 
+    ['ual0301-cd'] = "<LOC ual0301_regendampener_desc> Entropy Field.",
+    ['ual0301-ptsg'] = "<LOC ual0301_shieldamplifier_desc> Shield Amplifier.",
+    ['ual0301_Defiler'] = "<LOC ual0301_Defiler_help> Support Armored Command Unit. Enhanced during construction with Entropy Field, Personal Shield and Enhanced Sensor System.",
+    ['ual0301_Aegis'] = "<LOC ual0301_Aegis_help> Support Armored Command Unit. Enhanced during construction with Shield Amplifier, Nano-Repair System and Enhanced Sensor System.",
+    ['ual0301_Heretic'] = "<LOC ual0301_Heretic_help> Support Armored Command Unit. Enhanced during construction with Entropy Field, Shield Amplifier, Nano-Repair System and Enhanced Sensor System.",
 }

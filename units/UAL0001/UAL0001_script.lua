@@ -114,7 +114,9 @@ UAL0001 = ClassUnit(ACUUnit) {
             self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
             self:SetMaintenanceConsumptionActive()
             self:CreateShield(bp)
+            self:RefreshShieldAmplifierBuff()
         elseif enh == 'ShieldAeonRemove' then
+            self:AeonShieldAmpRemove()
             self:DestroyShield()
             self:SetMaintenanceConsumptionInactive()
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
@@ -122,6 +124,7 @@ UAL0001 = ClassUnit(ACUUnit) {
             self:AddToggleCap('RULEUTC_ShieldToggle')
             self:ForkThread(self.CreateHeavyShield, bp)
         elseif enh == 'ShieldHeavyAeonRemove' then
+            self:AeonShieldAmpRemove()
             self:DestroyShield()
             self:SetMaintenanceConsumptionInactive()
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
@@ -314,11 +317,76 @@ UAL0001 = ClassUnit(ACUUnit) {
     end,
 
     CreateHeavyShield = function(self, bp)
-        WaitTicks(1)
+        -- Strip the aura bonus before swapping shields so the new shield is
+        -- created clean and then re-boosted with the correct multiplier.
+        local savedBonus = self.AeonShieldAmpBonus
+        local savedMult = self.AeonShieldAmpMult
+        if savedBonus then
+            self:AeonShieldAmpRemove()
+        end
         self:CreateShield(bp)
         self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
         self:SetMaintenanceConsumptionActive()
-    end
+        if savedBonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+            self:AeonShieldAmpApply(nil, savedMult or 1)
+        end
+    end,
+
+    --- Called by the Aeon SACU Shield Amplifier aura when this ACU enters its field.
+    --- The ACU's shields are enhancement-based (ShieldAeon / ShieldHeavyAeon), not a
+    --- Defense.Shield entry, so the base spec is taken from the current enhancement.
+    ---@param self UAL0001
+    ---@param instigator Unit
+    ---@param mult number|table # multiplier, or { ShieldAeon = n, ShieldHeavyAeon = n }
+    AeonShieldAmpApply = function(self, instigator, mult)
+        if self.Dead then
+            return
+        end
+        if self.AeonShieldAmpBonus then
+            return
+        end
+        local shield = self.MyShield
+        if not shield or shield:BeenDestroyed() then
+            return
+        end
+        local enhBp = self:GetBlueprint().Enhancements
+        local baseBp = self:HasEnhancement('ShieldHeavyAeon') and enhBp.ShieldHeavyAeon
+            or (self:HasEnhancement('ShieldAeon') and enhBp.ShieldAeon or nil)
+        if not baseBp then
+            return
+        end
+
+        local resolvedMult = mult
+        if type(mult) == 'table' then
+            resolvedMult = self:HasEnhancement('ShieldHeavyAeon') and mult.ShieldHeavyAeon or mult.ShieldAeon or 1
+        end
+        local baseMax = baseBp.ShieldMaxHealth or 0
+        local bonus = math.floor(baseMax * ((resolvedMult or 1) - 1) + 0.5)
+        if bonus <= 0 then
+            return
+        end
+
+        self:AeonShieldAmpApplyBonus(bonus, mult)
+    end,
+
+    --- Called when the ACU leaves the aura field (or the enhancement is removed):
+    --- immediately subtracts the bonus from both current and max HP.
+    ---@param self UAL0001
+    AeonShieldAmpRemove = function(self)
+        self:AeonShieldAmpRemoveBonus()
+    end,
+
+    --- Re-applies the shield amplifier boost after the ACU switches shield
+    --- enhancements (ShieldAeon -> ShieldHeavyAeon) while standing inside the aura.
+    --- The new shield is created from its base spec first, then boosted again.
+    ---@param self UAL0001
+    RefreshShieldAmplifierBuff = function(self)
+        local mult = self:AeonShieldAmpGetSourceMult() or self.AeonShieldAmpMult
+        if mult and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+            self:AeonShieldAmpRemove()
+            self:AeonShieldAmpApply(nil, mult)
+        end
+    end,
 }
 
 TypeClass = UAL0001
