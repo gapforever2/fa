@@ -167,7 +167,7 @@ Description = {
     -- CYBRAN -- Armored Commander Unit/Upgrades
     ['url0001'] = "<LOC Unit_Description_0304> Armored Commander is a combination of barracks and command center. Contains all the blueprints necessary to build a basic army from scratch. Upgradeable with combat enhancements, advanced engineering suits, resource allocation system, and teleporting.",
     ['url0001-ras'] = "<LOC Unit_Description_0106> Increases ACU's resource generation.",
-    ['url0001-pcg'] = "<LOC Unit_Description_0107> Cloaks the ACU from optical sensors and increases maximum health. Can be detected by Omni Sensors. Requires Energy to run.",
+    ['url0001-pcg'] = "<LOC Unit_Description_0107> Cloaks the ACU from optical sensors and increases maximum health. Does not provide radar or sonar stealth. Can be detected by Omni Sensors. Requires Energy to run.",
     ['url0001-srs'] = "<LOC Unit_Description_0465_faf>Massively increases the rate at which the ACU repairs its armour.",
     ['url0001-psg'] = "<LOC Unit_Description_0108> Hides the ACU from radar. Requires Energy to run.",
     ['url0001-pqt'] = "<LOC Unit_Description_0109> Adds teleporter. Requires considerable Energy to activate.",
@@ -176,13 +176,13 @@ Description = {
     ['url0001-acu'] = "<LOC Unit_Description_0112> Increases main cannon's rate of fire and range. Also increases range of the Molecular Ripper and Overcharge.",
     ['url0001-mlg'] = "<LOC Unit_Description_0113> ACU can generate a beam laser that sweeps over enemy units. Range of the beam increases with Gun Range.",
     ['url0001-ntt'] = "<LOC Unit_Description_0114> Equips the ACU with a standard Cybran Nanite torpedo tube and sonar.",
-    ['url0001-exbbat1'] = "<LOC Unit_Description_CybranStealthField>Generates a stealth field that hides nearby allied units from enemy radar and sonar. Does not stealth the ACU itself.",
+    ['url0001-exbbat1'] = "<LOC Unit_Description_CybranStealthField>Generates a stealth field that hides the ACU and nearby allied units from enemy radar and sonar.",
 
     -- CYBRAN -- Support Commander Units/Upgrades
     ['url0301'] = "<LOC Unit_Description_0115> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
     ['url0301-cfs'] = "<LOC Unit_Description_0116> Cloaks the SACU from optical sensors. Can be detected by Omni Sensors. Requires Energy to run.",
     ['url0301-emp'] = "<LOC Unit_Description_0117> EMP burst effectively disables enemy units for a few seconds.",
-    ['url0301-fc'] = "<LOC Unit_Description_0118> Greatly enhances the pulse laser's cohesion, almost doubling its damage output.",
+    ['url0301-fc'] = "<LOC Unit_Description_0118> Adds EMI and EMP ammunition to the main gun, stunning targets, damaging shields and increasing firing range.",
     ['url0301-nms'] = "<LOC Unit_Description_0119> Adds AA defensive system.",
     ['url0301-ras'] = "<LOC Unit_Description_0120> Increases SACU's resource generation.",
     ['url0301-ses'] = "<LOC Unit_Description_0121> Speeds up all engineering-related functions.",
@@ -190,7 +190,7 @@ Description = {
     ['url0301-sfs'] = "<LOC Unit_Description_0123> Hides the SACU from radar. Requires Energy to run.",
     ['url0301-saa'] = "<LOC Unit_Description_0002_gaf> The main gun cooling module allows the SACU's primary weapon to fire twice as often.",
     ['url0301-acu'] = "<LOC Unit_Description_0002_gaf> The main gun cooling module allows the SACU's primary weapon to fire twice as often.",
-    ['url0301-exbbat1'] = "<LOC url0301_speedaura_desc> Generates a field that accelerates nearby allied land units.",
+    ['url0301-exbbat1'] = "<LOC url0301_stealthfield_desc> Generates a stealth field that hides the SACU and nearby allied units from enemy radar and sonar.",
     ['url0301-rads'] = "<LOC Unit_Description_0007_gaf> Adds a personal sensor system for the SACU.",
 
     -- CYBRAN -- Support Commander Presets
@@ -650,4 +650,5 @@ Description = {
     ['ual0301_Aegis'] = "<LOC ual0301_Aegis_help> Support Armored Command Unit. Enhanced during construction with Shield Amplifier, Nano-Repair System and Enhanced Sensor System.",
     ['ual0301_Heretic'] = "<LOC ual0301_Heretic_help> Support Armored Command Unit. Enhanced during construction with Entropy Field, Shield Amplifier, Nano-Repair System and Enhanced Sensor System.",
     ['uel0301-sgf-support'] = "<LOC uel0301_support_shield_desc> Creates a light Support Bubble Shield around the SACU. Requires Energy to run.",
+    ['url0301-exbbat2'] = "<LOC url0301_speedaura_desc> Generates a field that accelerates nearby allied land units.",
 }

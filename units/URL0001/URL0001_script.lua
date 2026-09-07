@@ -29,13 +29,30 @@ local ACUDeathWeapon = import("/lua/sim/defaultweapons.lua").ACUDeathWeapon
 local CDFHeavyMicrowaveLaserGeneratorCom = CWeapons.CDFHeavyMicrowaveLaserGeneratorCom
 local CDFOverchargeWeapon = CWeapons.CDFOverchargeWeapon
 local CANTorpedoLauncherWeapon = CWeapons.CANTorpedoLauncherWeapon
+local StealthFieldAuraVisualId = 'StealthFieldCybranACU'
 
 ---@class URL0001 : ACUUnit, CCommandUnit
 ---@field HasStealthEnh? true
+---@field HasStealthFieldEnh? true
 ---@field HasCloakEnh? true
 ---@field normalRange number # caches gun range to adjust the unit AI controller dummy weapon's range on layer change depending on active enhancements
 ---@field torpRange number # caches torpedo range to adjust the unit AI controller dummy weapon's range on layer change depending on active enhancements
 URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
+    AuraVisuals = {
+        [StealthFieldAuraVisualId] = {
+            IsActive = function(self)
+                return self.HasStealthFieldEnh == true
+                    and self:IsIntelEnabled('RadarStealthField')
+                    and self:IsIntelEnabled('SonarStealthField')
+            end,
+            Color = 'ff804516',
+            Thickness = 0.12,
+            GetRadius = function(self)
+                return self:GetIntelRadius('RadarStealthField') or 0
+            end,
+        },
+    },
+
     Weapons = {
         DeathWeapon = ClassWeapon(ACUDeathWeapon) {},
         RightRipper = ClassWeapon(CCannonMolecularWeapon) {},
@@ -68,6 +85,54 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
     ---@param self URL0001
     __init = function(self)
         ACUUnit.__init(self, 'RightRipper')
+    end,
+
+    --- Recalculates upkeep for every installed and currently active stealth
+    --- system. The ACU can use its right-arm field together with either the
+    --- personal stealth generator or the personal cloaking generator.
+    ---@param self URL0001
+    RefreshStealthMaintenanceConsumption = function(self)
+        local enhancements = self.Blueprint.Enhancements
+        local upkeep = 0
+
+        if self.HasStealthEnh
+            and self:IsIntelEnabled('RadarStealth')
+            and self:IsIntelEnabled('SonarStealth')
+        then
+            upkeep = upkeep
+                + (enhancements.StealthGeneratorCybran.MaintenanceConsumptionPerSecondEnergy or 0)
+        end
+
+        if self.HasStealthFieldEnh
+            and self:IsIntelEnabled('RadarStealthField')
+            and self:IsIntelEnabled('SonarStealthField')
+        then
+            upkeep = upkeep
+                + (enhancements.StealthFieldGeneratorCybran.MaintenanceConsumptionPerSecondEnergy or 0)
+        end
+
+        if self.HasCloakEnh and self:IsIntelEnabled('Cloak') then
+            upkeep = upkeep
+                + (enhancements.CloakingGeneratorCybran.MaintenanceConsumptionPerSecondEnergy or 0)
+        end
+
+        self:SetEnergyMaintenanceConsumptionOverride(upkeep)
+        if upkeep > 0 then
+            self:SetMaintenanceConsumptionActive()
+        else
+            self:SetMaintenanceConsumptionInactive()
+        end
+    end,
+
+    --- Applies the torpedo system's movement bonus exclusively on the seabed.
+    ---@param self URL0001
+    ---@param enabled boolean
+    SetTorpedoUnderwaterSpeed = function(self, enabled)
+        local blueprint = self.Blueprint or self:GetBlueprint()
+        local baseSpeed = blueprint.Physics.MaxSpeed or 1.7
+        local enhancement = blueprint.Enhancements.NaniteTorpedoTubeCybran
+        local underwaterSpeed = enhancement.NewUnderwaterSpeed or 2.2
+        self:SetSpeedMult(enabled and underwaterSpeed / baseSpeed or 1)
     end,
 
     ---@param self URL0001
@@ -103,12 +168,14 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         self:SetWeaponEnabledByLabel('RightRipper', true)
         self:SetWeaponEnabledByLabel('MLG', false)
         self:SetWeaponEnabledByLabel('Torpedo', false)
+        self:SetTorpedoUnderwaterSpeed(false)
         self:SetMaintenanceConsumptionInactive()
         self:DisableUnitIntel('Enhancement', 'RadarStealth')
         self:DisableUnitIntel('Enhancement', 'SonarStealth')
         self:DisableUnitIntel('Enhancement', 'RadarStealthField')
         self:DisableUnitIntel('Enhancement', 'SonarStealthField')
         self:DisableUnitIntel('Enhancement', 'Cloak')
+        self:SetIntelRadius('Sonar', 0)
         self:DisableUnitIntel('Enhancement', 'Sonar')
         self:HideBone('Back_Upgrade', true)
         self:HideBone('Right_Upgrade', true)
@@ -172,37 +239,53 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         if not Buff.HasBuff(self, 'CybranACUStealthBonus') then
             Buff.ApplyBuff(self, 'CybranACUStealthBonus')
         end
+        self:RefreshStealthMaintenanceConsumption()
     end,
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementStealthGeneratorCybranRemove = function(self, bp)
-        self:RemoveToggleCap('RULEUTC_StealthToggle')
-        self:DisableUnitIntel('Enhancement', 'RadarStealth')
-        self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        if not self.HasStealthFieldEnh then
+            self:RemoveToggleCap('RULEUTC_StealthToggle')
+            self:DisableUnitIntel('Enhancement', 'RadarStealth')
+            self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        end
         self.HasStealthEnh = nil
         if Buff.HasBuff(self, 'CybranACUStealthBonus') then
             Buff.RemoveBuff(self, 'CybranACUStealthBonus')
         end
+        self:RefreshStealthMaintenanceConsumption()
     end,
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementStealthFieldGeneratorCybran = function(self, bp)
         self:AddToggleCap('RULEUTC_StealthToggle')
+        self.HasStealthFieldEnh = true
+        -- The field conceals both nearby allies and its carrier.
+        self:EnableUnitIntel('Enhancement', 'RadarStealth')
+        self:EnableUnitIntel('Enhancement', 'SonarStealth')
         self:EnableUnitIntel('Enhancement', 'RadarStealthField')
         self:EnableUnitIntel('Enhancement', 'SonarStealthField')
-        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        self:SetMaintenanceConsumptionActive()
+        self:RefreshStealthMaintenanceConsumption()
     end,
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementStealthFieldGeneratorCybranRemove = function(self, bp)
-        self:RemoveToggleCap('RULEUTC_StealthToggle')
+        self.HasStealthFieldEnh = nil
         self:DisableUnitIntel('Enhancement', 'RadarStealthField')
         self:DisableUnitIntel('Enhancement', 'SonarStealthField')
-        self:SetMaintenanceConsumptionInactive()
+        if self.HasCloakEnh then
+            self:RemoveToggleCap('RULEUTC_StealthToggle')
+            self:DisableUnitIntel('Enhancement', 'RadarStealth')
+            self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        elseif not self.HasStealthEnh then
+            self:RemoveToggleCap('RULEUTC_StealthToggle')
+            self:DisableUnitIntel('Enhancement', 'RadarStealth')
+            self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        end
+        self:RefreshStealthMaintenanceConsumption()
     end,
 
     ---@param self URL0001
@@ -236,9 +319,11 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementGAP_SelfRepairSystemCybranRemove = function(self, bp)
         -- remove prerequisites
-        self:RemoveToggleCap('RULEUTC_StealthToggle')
-        self:DisableUnitIntel('Enhancement', 'RadarStealth')
-        self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        if not self.HasStealthFieldEnh then
+            self:RemoveToggleCap('RULEUTC_StealthToggle')
+            self:DisableUnitIntel('Enhancement', 'RadarStealth')
+            self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        end
         self.HasStealthEnh = nil
         if Buff.HasBuff(self, 'CybranACUStealthBonus') then
             Buff.RemoveBuff(self, 'CybranACUStealthBonus')
@@ -248,12 +333,17 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         if Buff.HasBuff(self, 'CybranACURegenerateBonus') then
             Buff.RemoveBuff(self, 'CybranACURegenerateBonus')
         end
+        self:RefreshStealthMaintenanceConsumption()
     end,
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementCloakingGeneratorCybran = function(self, bp)
-        self:RemoveToggleCap('RULEUTC_StealthToggle')
+        if not self.HasStealthFieldEnh then
+            self:RemoveToggleCap('RULEUTC_StealthToggle')
+            self:DisableUnitIntel('Enhancement', 'RadarStealth')
+            self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        end
         self:AddToggleCap('RULEUTC_CloakToggle')
         self.HasStealthEnh = nil
         self.HasCloakEnh = true
@@ -276,15 +366,19 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         if not Buff.HasBuff(self, 'CybranACUCloakBonus') then
             Buff.ApplyBuff(self, 'CybranACUCloakBonus')
         end
+        self:RefreshStealthMaintenanceConsumption()
     end,
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementCloakingGeneratorCybranRemove = function(self, bp)
-        -- remove prerequisites
+        -- remove the prerequisite stealth and nano-repair enhancements
         self:RemoveToggleCap('RULEUTC_CloakToggle')
-        self:DisableUnitIntel('Enhancement', 'RadarStealth')
-        self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        if not self.HasStealthFieldEnh then
+            self:RemoveToggleCap('RULEUTC_StealthToggle')
+            self:DisableUnitIntel('Enhancement', 'RadarStealth')
+            self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        end
         self.HasStealthEnh = nil
         if Buff.HasBuff(self, 'CybranACUStealthBonus') then
             Buff.RemoveBuff(self, 'CybranACUStealthBonus')
@@ -294,12 +388,18 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         end
 
         -- remove cloak
-        self:RemoveToggleCap('RULEUTC_CloakToggle')
         self:DisableUnitIntel('Enhancement', 'Cloak')
         self.HasCloakEnh = nil
         if Buff.HasBuff(self, 'CybranACUCloakBonus') then
             Buff.RemoveBuff(self, 'CybranACUCloakBonus')
         end
+
+        if not self.HasStealthFieldEnh and not self.HasStealthEnh then
+            self:DisableUnitIntel('Enhancement', 'RadarStealth')
+            self:DisableUnitIntel('Enhancement', 'SonarStealth')
+            self:RemoveToggleCap('RULEUTC_StealthToggle')
+        end
+        self:RefreshStealthMaintenanceConsumption()
     end,
 
     ---@param self URL0001
@@ -466,8 +566,9 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementNaniteTorpedoTubeCybran = function(self, bp)
         self:SetWeaponEnabledByLabel('Torpedo', true)
-        self:SetIntelRadius('Sonar', bp.NewSonarRadius or 63)
+        self:SetIntelRadius('Sonar', bp.NewSonarRadius or 65)
         self:EnableUnitIntel('Enhancement', 'Sonar')
+        self:SetTorpedoUnderwaterSpeed(self.Layer == 'Seabed')
         if self.Layer == 'Seabed' then
             self:GetWeaponByLabel('DummyWeapon'):ChangeMaxRadius(self.torpRange)
         end
@@ -479,6 +580,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         self:SetWeaponEnabledByLabel('Torpedo', false)
         self:DisableUnitIntel('Enhancement', 'Sonar')
         self:SetIntelRadius('Sonar', 0)
+        self:SetTorpedoUnderwaterSpeed(false)
         if self.Layer == 'Seabed' then
             self:GetWeaponByLabel('DummyWeapon'):ChangeMaxRadius(self.normalRange)
         end
@@ -554,18 +656,21 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
     ---@param intel? IntelType
     OnIntelEnabled = function(self, intel)
         ACUUnit.OnIntelEnabled(self, intel)
+        self:RefreshStealthMaintenanceConsumption()
         if self.HasCloakEnh and self:IsIntelEnabled('Cloak') then
-            self:SetEnergyMaintenanceConsumptionOverride(self.Blueprint.Enhancements['CloakingGeneratorCybran'].MaintenanceConsumptionPerSecondEnergy
-                or 0)
-            self:SetMaintenanceConsumptionActive()
             if not self.IntelEffectsBag then
                 self.IntelEffectsBag = {}
                 self:CreateTerrainTypeEffects(self.IntelEffects.Cloak, 'FXIdle', self.Layer, nil, self.IntelEffectsBag)
             end
+        elseif self.HasStealthFieldEnh
+            and self:IsIntelEnabled('RadarStealthField')
+            and self:IsIntelEnabled('SonarStealthField')
+        then
+            if not self.IntelEffectsBag then
+                self.IntelEffectsBag = {}
+                self:CreateTerrainTypeEffects(self.IntelEffects.Field, 'FXIdle', self.Layer, nil, self.IntelEffectsBag)
+            end
         elseif self.HasStealthEnh and self:IsIntelEnabled('RadarStealth') and self:IsIntelEnabled('SonarStealth') then
-            self:SetEnergyMaintenanceConsumptionOverride(self.Blueprint.Enhancements['StealthGeneratorCybran'].MaintenanceConsumptionPerSecondEnergy
-                or 0)
-            self:SetMaintenanceConsumptionActive()
             if not self.IntelEffectsBag then
                 self.IntelEffectsBag = {}
                 self:CreateTerrainTypeEffects(self.IntelEffects.Field, 'FXIdle', self.Layer, nil, self.IntelEffectsBag)
@@ -581,11 +686,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
             EffectUtil.CleanupEffectBag(self, 'IntelEffectsBag')
             self.IntelEffectsBag = nil
         end
-        if self.HasCloakEnh and not self:IsIntelEnabled('Cloak') then
-            self:SetMaintenanceConsumptionInactive()
-        elseif self.HasStealthEnh and not self:IsIntelEnabled('RadarStealth') and not self:IsIntelEnabled('SonarStealth') then
-            self:SetMaintenanceConsumptionInactive()
-        end
+        self:RefreshStealthMaintenanceConsumption()
     end,
 
     --- Makes sure the ACU walks into the correct range for the target when it has/doesn't have the torpedo enhancement.
@@ -594,8 +695,10 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
     ---@param old any
     OnLayerChange = function(self, new, old)
         ACUUnit.OnLayerChange(self, new, old)
+        local hasTorpedoSystem = self:HasEnhancement('NaniteTorpedoTubeCybran')
+        self:SetTorpedoUnderwaterSpeed(new == 'Seabed' and hasTorpedoSystem)
         if self:GetWeaponByLabel('DummyWeapon') == nil then return end
-        if new == "Seabed" and self:HasEnhancement('NaniteTorpedoTubeCybran') then
+        if new == "Seabed" and hasTorpedoSystem then
             self:GetWeaponByLabel('DummyWeapon'):ChangeMaxRadius(self.torpRange or 60)
         else
             self:GetWeaponByLabel('DummyWeapon'):ChangeMaxRadius(self.normalRange or 22)

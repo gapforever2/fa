@@ -9,11 +9,13 @@
 ---| "SCUBUILDRATE"
 ---| "SCUCLOAKBONUS"
 ---| "SCUREGENERATEBONUS"
+---| "SCUSTEALTHBONUS"
 
 ---@alias CybranSCUEnhancementBuffName        # BuffType
 ---| "CybranSCUBuildRate"                     # SCUBUILDRATE
 ---| "CybranSCUCloakBonus"                    # SCUCLOAKBONUS
 ---| "CybranSCURegenerateBonus"               # SCUREGENERATEBONUS
+---| "CybranSCUStealthBonus"                  # SCUSTEALTHBONUS
 
 
 local CybranUnits = import("/lua/cybranunits.lua")
@@ -27,6 +29,7 @@ local CDFLaserDisintegratorWeapon01 = CWeapons.CDFLaserDisintegratorWeapon01
 local SCUDeathWeapon = import("/lua/sim/defaultweapons.lua").SCUDeathWeapon
 local CStructureUnit = import('/lua/cybranunits.lua').CStructureUnit
 local CDFParticleCannonWeapon = import('/lua/cybranweapons.lua').CDFParticleCannonWeapon
+local StealthFieldAuraVisualId = 'StealthFieldCybranSCU'
 
 
 ---@class URL0301 : CCommandUnit
@@ -36,9 +39,51 @@ URL0301 = ClassUnit(CCommandUnit) {
     LeftFoot = 'Left_Foot02',
     RightFoot = 'Right_Foot02',
 
+    -- Match the stock counter-intelligence overlay color while keeping the
+    -- ring visible independently of selection. The radius follows the same
+    -- live provider that configures RadarStealthField and SonarStealthField.
+    AuraVisuals = {
+        [StealthFieldAuraVisualId] = {
+            IsActive = function(self)
+                return self.HasStealthFieldEnh == true
+                    and self.StealthFieldEnabled == true
+                    and self:IsIntelEnabled('RadarStealthField')
+                    and self:IsIntelEnabled('SonarStealthField')
+            end,
+            Color = 'ff804516',
+            Thickness = 0.12,
+            GetRadius = function(self)
+                return self:GetEnhancementAuraRadius('StealthField')
+            end,
+        },
+    },
+
     Weapons = {
         DeathWeapon = ClassWeapon(SCUDeathWeapon) {},
-        RightDisintegrator = ClassWeapon(CDFLaserDisintegratorWeapon) {},
+        RightDisintegrator = ClassWeapon(CDFLaserDisintegratorWeapon) {
+            OnCreate = function(self)
+                CDFLaserDisintegratorWeapon.OnCreate(self)
+                self:DisableBuff('STUN')
+            end,
+
+            ---@param self Weapon
+            ---@param damage number|nil
+            ---@param radius number|nil
+            SetEMPShieldDamage = function(self, damage, radius)
+                self.EMPShieldDamage = damage
+                self.EMPShieldDamageRadius = radius
+                self.damageTableCacheValid = false
+            end,
+
+            ---@param self Weapon
+            ---@return WeaponDamageTable
+            GetUpdatedDamageTable = function(self)
+                local damageTable = CDFLaserDisintegratorWeapon.GetUpdatedDamageTable(self)
+                damageTable.EMPShieldDamage = self.EMPShieldDamage
+                damageTable.EMPShieldDamageRadius = self.EMPShieldDamageRadius
+                return damageTable
+            end,
+        },
         NMissile = ClassWeapon(CAAMissileNaniteWeapon) {},
     },
 
@@ -64,6 +109,33 @@ URL0301 = ClassUnit(CCommandUnit) {
         CCommandUnit.__init(self, 'RightDisintegrator')
     end,
 
+    --- Aggregates concurrently active enhancement upkeep instead of allowing
+    --- stealth, sensors and the speed aura to overwrite the same engine value.
+    ---@param self URL0301
+    ---@param key string
+    ---@param value number|nil
+    ApplyEnhancementUpkeep = function(self, key, value)
+        local upkeep = self.EnhancementUpkeep
+        if not upkeep then
+            upkeep = {}
+            self.EnhancementUpkeep = upkeep
+        end
+
+        upkeep[key] = value and value > 0 and value or nil
+
+        local total = 0
+        for _, amount in upkeep do
+            total = total + amount
+        end
+
+        self:SetEnergyMaintenanceConsumptionOverride(total)
+        if total > 0 then
+            self:SetMaintenanceConsumptionActive()
+        else
+            self:SetMaintenanceConsumptionInactive()
+        end
+    end,
+
     ---@param self URL0301
     ---@param builder Unit
     ---@param layer Layer
@@ -74,6 +146,8 @@ URL0301 = ClassUnit(CCommandUnit) {
         self:DisableUnitIntel('Enhancement', 'RadarStealth')
         self:DisableUnitIntel('Enhancement', 'SonarStealth')
         self:DisableUnitIntel('Enhancement', 'Cloak')
+        self:DisableUnitIntel('Enhancement', 'RadarStealthField')
+        self:DisableUnitIntel('Enhancement', 'SonarStealthField')
         self.LeftArmUpgrade = 'EngineeringArm'
         self.RightArmUpgrade = 'Disintegrator'
     end,
@@ -100,6 +174,7 @@ URL0301 = ClassUnit(CCommandUnit) {
         self.HasStealthEnh = false
         self.HasCloakEnh = true
         self:EnableUnitIntel('Enhancement', 'Cloak')
+        self:ApplyEnhancementUpkeep('StealthSystem', bp.MaintenanceConsumptionPerSecondEnergy or 0)
         if not Buffs['CybranSCUCloakBonus'] then
             BuffBlueprint {
                 Name = 'CybranSCUCloakBonus',
@@ -138,6 +213,7 @@ URL0301 = ClassUnit(CCommandUnit) {
         -- remove cloak
         self:DisableUnitIntel('Enhancement', 'Cloak')
         self.HasCloakEnh = false
+        self:ApplyEnhancementUpkeep('StealthSystem', nil)
         self:RemoveToggleCap('RULEUTC_CloakToggle')
         if Buff.HasBuff(self, 'CybranSCUCloakBonus') then
             Buff.RemoveBuff(self, 'CybranSCUCloakBonus')
@@ -147,23 +223,132 @@ URL0301 = ClassUnit(CCommandUnit) {
     ---@param self URL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementStealthGenerator = function (self, bp)
+        if self.StealthFieldInstalled then
+            self:SetStealthFieldEnabled(false)
+            self.StealthFieldInstalled = false
+            self.HasStealthFieldEnh = false
+            self:RemoveToggleCap('RULEUTC_WeaponToggle')
+        end
+
+        self.PersonalStealthInstalled = true
         self:AddToggleCap('RULEUTC_StealthToggle')
         if self.IntelEffectsBag then
             EffectUtil.CleanupEffectBag(self, 'IntelEffectsBag')
             self.IntelEffectsBag = nil
         end
         self.HasStealthEnh = true
+        self:EnableUnitIntel('StealthFieldStage', 'RadarStealth')
+        self:EnableUnitIntel('StealthFieldStage', 'SonarStealth')
         self:EnableUnitIntel('Enhancement', 'RadarStealth')
         self:EnableUnitIntel('Enhancement', 'SonarStealth')
+        self:ApplyEnhancementUpkeep('StealthSystem', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        if not Buffs['CybranSCUStealthBonus'] then
+            BuffBlueprint {
+                Name = 'CybranSCUStealthBonus',
+                DisplayName = 'CybranSCUStealthBonus',
+                BuffType = 'SCUSTEALTHBONUS',
+                Stacks = 'REPLACE',
+                Duration = -1,
+                Affects = {
+                    MaxHealth = {
+                        Add = bp.NewHealth or 2500,
+                        Mult = 1.0,
+                    },
+                },
+            }
+        end
+        if Buff.HasBuff(self, 'CybranSCUStealthBonus') then
+            Buff.RemoveBuff(self, 'CybranSCUStealthBonus')
+        end
+        Buff.ApplyBuff(self, 'CybranSCUStealthBonus')
+        self:SetScriptBit('RULEUTC_StealthToggle', false)
     end,
 
     ---@param self URL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementStealthGeneratorRemove = function (self, bp)
+        if self.StealthFieldInstalled then
+            self:SetStealthFieldEnabled(false)
+            self.StealthFieldInstalled = false
+            self.HasStealthFieldEnh = false
+            self:RemoveToggleCap('RULEUTC_WeaponToggle')
+        end
         self:RemoveToggleCap('RULEUTC_StealthToggle')
+        self:DisableUnitIntel('StealthFieldStage', 'RadarStealth')
+        self:DisableUnitIntel('StealthFieldStage', 'SonarStealth')
         self:DisableUnitIntel('Enhancement', 'RadarStealth')
         self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        self.PersonalStealthInstalled = false
         self.HasStealthEnh = false
+        self:ApplyEnhancementUpkeep('StealthSystem', nil)
+        if Buff.HasBuff(self, 'CybranSCUStealthBonus') then
+            Buff.RemoveBuff(self, 'CybranSCUStealthBonus')
+        end
+    end,
+
+    ---@param self URL0301
+    ---@param bp UnitBlueprintEnhancement
+    ProcessEnhancementStealthField = function (self, bp)
+        -- This is the next stage of the same slot. Area stealth replaces the
+        -- personal stealth Intel, toggle and health bonus instead of stacking.
+        self:RemoveToggleCap('RULEUTC_StealthToggle')
+        self:DisableUnitIntel('StealthFieldStage', 'RadarStealth')
+        self:DisableUnitIntel('StealthFieldStage', 'SonarStealth')
+        self:DisableUnitIntel('Enhancement', 'RadarStealth')
+        self:DisableUnitIntel('Enhancement', 'SonarStealth')
+        self.PersonalStealthInstalled = false
+        self.HasStealthEnh = false
+        if Buff.HasBuff(self, 'CybranSCUStealthBonus') then
+            Buff.RemoveBuff(self, 'CybranSCUStealthBonus')
+        end
+
+        self.HasStealthFieldEnh = true
+        self.StealthFieldInstalled = true
+        self.StealthFieldEnabled = true
+        self:UpdateStealthFieldRadius()
+        self:EnableUnitIntel('Enhancement', 'RadarStealthField')
+        self:EnableUnitIntel('Enhancement', 'SonarStealthField')
+        self:ApplyEnhancementUpkeep('StealthSystem', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        self:AddToggleCap('RULEUTC_WeaponToggle')
+        self:SetScriptBit('RULEUTC_WeaponToggle', false)
+    end,
+
+    ---@param self URL0301
+    ---@param bp UnitBlueprintEnhancement
+    ProcessEnhancementStealthFieldRemove = function (self, bp)
+        self:SetStealthFieldEnabled(false)
+        self.HasStealthFieldEnh = false
+        self.StealthFieldInstalled = false
+        self:RemoveToggleCap('RULEUTC_WeaponToggle')
+        self:ApplyEnhancementUpkeep('StealthSystem', nil)
+    end,
+
+    --- Enables or disables the installed area stealth field.
+    ---@param self URL0301
+    ---@param enabled boolean
+    SetStealthFieldEnabled = function(self, enabled)
+        if enabled and not self.StealthFieldInstalled then
+            return
+        end
+
+        self.StealthFieldEnabled = enabled
+        if enabled then
+            self:EnableUnitIntel('ToggleBit1', 'RadarStealthField')
+            self:EnableUnitIntel('ToggleBit1', 'SonarStealthField')
+            local bp = self.Blueprint.Enhancements.StealthField
+            self:ApplyEnhancementUpkeep('StealthSystem', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        else
+            self:DisableUnitIntel('ToggleBit1', 'RadarStealthField')
+            self:DisableUnitIntel('ToggleBit1', 'SonarStealthField')
+            local personal = self.Blueprint.Enhancements.StealthGenerator
+            local personalEnabled = self.HasStealthEnh
+                and self:IsIntelEnabled('RadarStealth')
+                and self:IsIntelEnabled('SonarStealth')
+            self:ApplyEnhancementUpkeep(
+                'StealthSystem',
+                personalEnabled and personal.MaintenanceConsumptionPerSecondEnergy or nil
+            )
+        end
     end,
 
     ---@param self URL0301
@@ -268,6 +453,8 @@ URL0301 = ClassUnit(CCommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementFocusConvertor = function(self, bp)
         local wep = self:GetWeaponByLabel('RightDisintegrator')
+        wep:ReEnableBuff('STUN')
+        wep:SetEMPShieldDamage(bp.EMPShieldDamage or 300, bp.EMPShieldDamageRadius or 3)
         wep:ChangeMaxRadius(bp.NewMaxRadius or 35)
     end,
 
@@ -275,8 +462,9 @@ URL0301 = ClassUnit(CCommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementFocusConvertorRemove = function(self, bp)
         local wep = self:GetWeaponByLabel('RightDisintegrator')
-        wep:AddDamageMod(-self.Blueprint.Enhancements['FocusConvertor'].NewDamageMod)
-        wep:ChangeMaxRadius(self.Blueprint.Weapon[1].MaxRadius or 25)
+        wep:DisableBuff('STUN')
+        wep:SetEMPShieldDamage(nil, nil)
+        wep:ChangeMaxRadius(wep:GetBlueprint().MaxRadius or 25)
     end,
 
     ---@param self URL0301
@@ -296,20 +484,245 @@ URL0301 = ClassUnit(CCommandUnit) {
     ---@param self URL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementSensorRangeEnhancer = function(self, bp)
+        self.SensorRangeEnhancerInstalled = true
+        self.SensorRangeEnhancerEnabled = true
         self:SetIntelRadius('Vision', bp.NewVisionRadius or 30)
         self:SetIntelRadius('Omni', bp.NewOmniRadius or 55)
         self:SetIntelRadius('Radar', bp.NewRadarRadius or 90)
-        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        self:SetMaintenanceConsumptionActive()
+        self:EnableUnitIntel('Enhancement', 'Omni')
+        self:EnableUnitIntel('Enhancement', 'Radar')
+        self:UpdateStealthFieldRadius()
+        self:ApplyEnhancementUpkeep('SensorRangeEnhancer', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        self:AddToggleCap('RULEUTC_IntelToggle')
+        self:SetScriptBit('RULEUTC_IntelToggle', false)
     end,
 
     ---@param self URL0301
     ---@param bp UnitBlueprintEnhancement unused
     ProcessEnhancementSensorRangeEnhancerRemove = function(self, bp)
+        self.SensorRangeEnhancerEnabled = false
+        self.SensorRangeEnhancerInstalled = false
+        self:DisableUnitIntel('Enhancement', 'Omni')
+        self:DisableUnitIntel('Enhancement', 'Radar')
+        self:RemoveToggleCap('RULEUTC_IntelToggle')
         local bpIntel = self.Blueprint.Intel
         self:SetIntelRadius('Vision', bpIntel.VisionRadius or 26)
         self:SetIntelRadius('Omni', bpIntel.OmniRadius or 26)
-        self:SetIntelRadius('Radar', bp.RadarRadius or 0)
+        self:SetIntelRadius('Radar', bpIntel.RadarRadius or 0)
+        self:UpdateStealthFieldRadius()
+        self:ApplyEnhancementUpkeep('SensorRangeEnhancer', nil)
+    end,
+
+    --- Returns the live radius of an enhancement aura. The sensor upgrade
+    --- adds its explicit bonus to the base radius of each supported aura.
+    ---@param self URL0301
+    ---@param enhancementName string
+    ---@return number
+    GetEnhancementAuraRadius = function(self, enhancementName)
+        local enhancement = self.Blueprint.Enhancements[enhancementName]
+        local radius = enhancement and enhancement.Radius or 0
+        if self:HasEnhancement('SensorRangeEnhancer') then
+            radius = radius + (enhancement and enhancement.SensorRangeBonus or 0)
+        end
+        return radius
+    end,
+
+    --- Keeps the engine's stealth-field Intel radius in sync with the aura
+    --- radius, including the sensor upgrade's bonus.
+    ---@param self URL0301
+    UpdateStealthFieldRadius = function(self)
+        local radius = self:GetEnhancementAuraRadius('StealthField')
+        self:SetIntelRadius('RadarStealthField', radius)
+        self:SetIntelRadius('SonarStealthField', radius)
+    end,
+
+    -- Аура скорости: бафает наземных союзников в радиусе, бонус зависит от уровня.
+    -- Категории-исключения: воздух, флот/подлодки, постройки, БМК, эксперименталки.
+    SpeedAuraBuffs = {
+        CybranSpeedAuraT1  = 1.35,
+        CybranSpeedAuraT2  = 1.20,
+        CybranSpeedAuraT3  = 1.15,
+        CybranSpeedAuraSCU = 1.35,
+    },
+
+    ---@param self URL0301
+    SpeedAuraThread = function(self)
+        local brain = self:GetAIBrain()
+        local cat = categories.MOBILE
+            - categories.AIR
+            - categories.NAVAL
+            - categories.STRUCTURE
+            - categories.COMMAND
+            - categories.EXPERIMENTAL
+
+        while not self.Dead do
+            -- The carrier is guaranteed to receive the SACU multiplier even if
+            -- GetUnitsAroundPoint does not include the source unit.
+            Buff.ApplyBuff(self, 'CybranSpeedAuraSCU')
+
+            local radius = self:GetEnhancementAuraRadius('SpeedAura')
+            local units = brain:GetUnitsAroundPoint(cat, self:GetPosition(), radius, 'Ally')
+            for _, u in units do
+                if u ~= self and not u.Dead and not u:IsBeingBuilt() then
+                    local buffName
+                    if EntityCategoryContains(categories.SUBCOMMANDER, u) then
+                        buffName = 'CybranSpeedAuraSCU'
+                    elseif EntityCategoryContains(categories.TECH3, u) then
+                        buffName = 'CybranSpeedAuraT3'
+                    elseif EntityCategoryContains(categories.TECH2, u) then
+                        buffName = 'CybranSpeedAuraT2'
+                    elseif EntityCategoryContains(categories.TECH1, u) then
+                        buffName = 'CybranSpeedAuraT1'
+                    end
+                    if buffName then
+                        Buff.ApplyBuff(u, buffName)
+                    end
+                end
+            end
+            WaitTicks(11)
+        end
+    end,
+
+    ---@param self URL0301
+    ---@param bp UnitBlueprintEnhancement
+    ProcessEnhancementSpeedAura = function(self, bp)
+        self.SpeedAuraInstalled = true
+        for name, mult in self.SpeedAuraBuffs do
+            if not Buffs[name] then
+                BuffBlueprint {
+                    Name = name,
+                    DisplayName = name,
+                    BuffType = 'CYBRANSCUSPEEDAURA',
+                    Stacks = 'REPLACE',
+                    Duration = 2,
+                    Affects = {
+                        MoveMult = {
+                            Mult = mult,
+                        },
+                    },
+                }
+            end
+        end
+        self:GetWeaponByLabel('RightDisintegrator'):AddDamageMod(bp.NewDamageMod or -200)
+        if not Buffs['CybranSpeedAuraSelfDebuff'] then
+            BuffBlueprint {
+                Name = 'CybranSpeedAuraSelfDebuff',
+                DisplayName = 'CybranSpeedAuraSelfDebuff',
+                BuffType = 'CYBRANSCUSPEEDAURADEBUFF',
+                Stacks = 'REPLACE',
+                Duration = -1,
+                Affects = {
+                    MaxHealth = {
+                        Add = bp.ACUAddHealth or -4500,
+                        Mult = 1.0,
+                    },
+                },
+            }
+        end
+        if Buff.HasBuff(self, 'CybranSpeedAuraSelfDebuff') then
+            Buff.RemoveBuff(self, 'CybranSpeedAuraSelfDebuff')
+        end
+        Buff.ApplyBuff(self, 'CybranSpeedAuraSelfDebuff')
+        self:AddToggleCap('RULEUTC_SpecialToggle')
+        self:SetSpeedAuraEnabled(true)
+        self:SetScriptBit('RULEUTC_SpecialToggle', false)
+    end,
+
+    --- Starts or stops the kinetic acceleration aura without uninstalling it.
+    ---@param self URL0301
+    ---@param enabled boolean
+    SetSpeedAuraEnabled = function(self, enabled)
+        if enabled and not self.SpeedAuraInstalled then
+            return
+        end
+
+        self.SpeedAuraEnabled = enabled
+        if enabled then
+            local bp = self.Blueprint.Enhancements.SpeedAura
+            self:ApplyEnhancementUpkeep('SpeedAura', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+            if not self.SpeedAuraThreadHandle then
+                self.SpeedAuraThreadHandle = self:ForkThread(self.SpeedAuraThread)
+            end
+        else
+            if self.SpeedAuraThreadHandle then
+                KillThread(self.SpeedAuraThreadHandle)
+                self.SpeedAuraThreadHandle = nil
+            end
+            self:ApplyEnhancementUpkeep('SpeedAura', nil)
+        end
+    end,
+
+    ---@param self URL0301
+    ---@param bp UnitBlueprintEnhancement unused
+    ProcessEnhancementSpeedAuraRemove = function(self, bp)
+        self:SetSpeedAuraEnabled(false)
+        self.SpeedAuraInstalled = false
+        self:RemoveToggleCap('RULEUTC_SpecialToggle')
+        self:GetWeaponByLabel('RightDisintegrator'):AddDamageMod(
+            -(self.Blueprint.Enhancements.SpeedAura.NewDamageMod or -200)
+        )
+        if Buff.HasBuff(self, 'CybranSpeedAuraSelfDebuff') then
+            Buff.RemoveBuff(self, 'CybranSpeedAuraSelfDebuff')
+        end
+    end,
+
+    --- Keep radar, area stealth, personal stealth and acceleration independent.
+    ---@param self URL0301
+    ---@param bit number
+    OnScriptBitSet = function(self, bit)
+        if bit == 1 then
+            self:SetStealthFieldEnabled(false)
+        elseif bit == 3 then
+            self.SensorRangeEnhancerEnabled = false
+            self:DisableUnitIntel('ToggleBit3', 'Radar')
+            self:DisableUnitIntel('ToggleBit3', 'Omni')
+            self:ApplyEnhancementUpkeep('SensorRangeEnhancer', nil)
+        elseif bit == 5 then
+            self:DisableUnitIntel('ToggleBit5', 'RadarStealth')
+            self:DisableUnitIntel('ToggleBit5', 'SonarStealth')
+            local field = self.Blueprint.Enhancements.StealthField
+            self:ApplyEnhancementUpkeep(
+                'StealthSystem',
+                self.StealthFieldEnabled and field.MaintenanceConsumptionPerSecondEnergy or nil
+            )
+        elseif bit == 7 then
+            self:SetSpeedAuraEnabled(false)
+        else
+            CCommandUnit.OnScriptBitSet(self, bit)
+        end
+    end,
+
+    ---@param self URL0301
+    ---@param bit number
+    OnScriptBitClear = function(self, bit)
+        if bit == 1 then
+            self:SetStealthFieldEnabled(true)
+        elseif bit == 3 then
+            if self.SensorRangeEnhancerInstalled then
+                self.SensorRangeEnhancerEnabled = true
+                self:EnableUnitIntel('ToggleBit3', 'Radar')
+                self:EnableUnitIntel('ToggleBit3', 'Omni')
+                local bp = self.Blueprint.Enhancements.SensorRangeEnhancer
+                self:ApplyEnhancementUpkeep('SensorRangeEnhancer', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+            end
+        elseif bit == 5 then
+            if self.HasStealthEnh then
+                self:EnableUnitIntel('ToggleBit5', 'RadarStealth')
+                self:EnableUnitIntel('ToggleBit5', 'SonarStealth')
+                local field = self.Blueprint.Enhancements.StealthField
+                local personal = self.Blueprint.Enhancements.StealthGenerator
+                self:ApplyEnhancementUpkeep(
+                    'StealthSystem',
+                    (self.StealthFieldEnabled and field.MaintenanceConsumptionPerSecondEnergy)
+                        or personal.MaintenanceConsumptionPerSecondEnergy
+                        or 0
+                )
+            end
+        elseif bit == 7 then
+            self:SetSpeedAuraEnabled(true)
+        else
+            CCommandUnit.OnScriptBitClear(self, bit)
+        end
     end,
 
     ---@param self URL0301
@@ -379,17 +792,31 @@ URL0301 = ClassUnit(CCommandUnit) {
     OnIntelEnabled = function(self, intel)
         CCommandUnit.OnIntelEnabled(self, intel)
         if self.HasCloakEnh and self:IsIntelEnabled('Cloak') then
-            self:SetEnergyMaintenanceConsumptionOverride(self.Blueprint.Enhancements['CloakingGenerator'].MaintenanceConsumptionPerSecondEnergy
-                or 0)
-            self:SetMaintenanceConsumptionActive()
+            self:ApplyEnhancementUpkeep(
+                'StealthSystem',
+                self.Blueprint.Enhancements.CloakingGenerator.MaintenanceConsumptionPerSecondEnergy or 0
+            )
             if not self.IntelEffectsBag then
                 self.IntelEffectsBag = {}
                 self:CreateTerrainTypeEffects(self.IntelEffects.Cloak, 'FXIdle', self.Layer, nil, self.IntelEffectsBag)
             end
+        elseif self.HasStealthFieldEnh
+            and self:IsIntelEnabled('RadarStealthField')
+            and self:IsIntelEnabled('SonarStealthField')
+        then
+            self:ApplyEnhancementUpkeep(
+                'StealthSystem',
+                self.Blueprint.Enhancements.StealthField.MaintenanceConsumptionPerSecondEnergy or 0
+            )
+            if not self.IntelEffectsBag then
+                self.IntelEffectsBag = {}
+                self:CreateTerrainTypeEffects(self.IntelEffects.Field, 'FXIdle', self.Layer, nil, self.IntelEffectsBag)
+            end
         elseif self.HasStealthEnh and self:IsIntelEnabled('RadarStealth') and self:IsIntelEnabled('SonarStealth') then
-            self:SetEnergyMaintenanceConsumptionOverride(self.Blueprint.Enhancements['StealthGenerator'].MaintenanceConsumptionPerSecondEnergy
-                or 0)
-            self:SetMaintenanceConsumptionActive()
+            self:ApplyEnhancementUpkeep(
+                'StealthSystem',
+                self.Blueprint.Enhancements.StealthGenerator.MaintenanceConsumptionPerSecondEnergy or 0
+            )
             if not self.IntelEffectsBag then
                 self.IntelEffectsBag = {}
                 self:CreateTerrainTypeEffects(self.IntelEffects.Field, 'FXIdle', self.Layer, nil, self.IntelEffectsBag)
@@ -406,9 +833,14 @@ URL0301 = ClassUnit(CCommandUnit) {
             self.IntelEffectsBag = nil
         end
         if self.HasCloakEnh and not self:IsIntelEnabled('Cloak') then
-            self:SetMaintenanceConsumptionInactive()
+            self:ApplyEnhancementUpkeep('StealthSystem', nil)
+        elseif self.HasStealthFieldEnh
+            and not self:IsIntelEnabled('RadarStealthField')
+            and not self:IsIntelEnabled('SonarStealthField')
+        then
+            self:ApplyEnhancementUpkeep('StealthSystem', nil)
         elseif self.HasStealthEnh and not self:IsIntelEnabled('RadarStealth') and not self:IsIntelEnabled('SonarStealth') then
-            self:SetMaintenanceConsumptionInactive()
+            self:ApplyEnhancementUpkeep('StealthSystem', nil)
         end
     end,
 }
