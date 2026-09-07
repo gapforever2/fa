@@ -35,6 +35,7 @@ local Group = import("/lua/maui/group.lua").Group
 local AutolobbyMapPreview = import("/lua/ui/lobby/autolobby/autolobbymappreview.lua")
 local AutolobbyConnectionMatrix = import("/lua/ui/lobby/autolobby/autolobbyconnectionmatrix.lua")
 local AutolobbyTeamDisplay = import("/lua/ui/lobby/autolobby/autolobbyteamdisplay.lua")
+local AutohostBackgroundTexture = "/textures/ui/common/autolobby/battlefield_background.dds"
 
 ---@class UIAutolobbyInterfaceState
 ---@field PlayerCount number
@@ -76,6 +77,7 @@ local AutolobbyInterface = Class(Group) {
         }
 
         local backgroundTexture = self.BackgroundTextures[math.random(1, 5)] --[[@as FileName]]
+        self.DefaultBackgroundTexture = UIUtil.UIFile(backgroundTexture)
         self.Background = UIUtil.CreateBitmap(self, backgroundTexture)
         self.Preview = AutolobbyMapPreview.GetInstance(self)
         self.ConnectionMatrix = AutolobbyConnectionMatrix.Create(self, playerCount)
@@ -131,17 +133,23 @@ local AutolobbyInterface = Class(Group) {
         self.State.IsGafAutohost = enabled
 
         if enabled then
+            -- Keep the stock background if a partial installation lacks the asset.
+            if DiskGetFileInfo(AutohostBackgroundTexture) then
+                self.Background:SetTexture(AutohostBackgroundTexture)
+            end
             self.ConnectionMatrix:Hide()
             self.TeamDisplay:Show()
             LayoutHelpers.ReusedLayoutFor(self.Preview)
-                :AtCenterIn(self, 0, -8)
+                :AtCenterIn(self, 0, 0)
                 :Width(400)
                 :Height(400)
                 :End()
+            self.TeamDisplay:AnchorToPreview(self.Preview)
             LayoutHelpers.ReusedLayoutFor(self.TimeoutLabel)
                 :CenteredBelow(self.Preview, 14)
                 :End()
         else
+            self.Background:SetTexture(self.DefaultBackgroundTexture)
             self.TeamDisplay:Hide()
             LayoutHelpers.ReusedLayoutFor(self.Preview)
                 :AtCenterIn(self, -100, 0)

@@ -322,6 +322,15 @@ local AutolobbyTeamDisplay = Class(Group) {
         end
     end,
 
+    --- Anchor both teams to the same map bounds, including UI scaling.
+    ---@param self UIAutolobbyTeamDisplay
+    ---@param preview UIAutolobbyMapPreview
+    AnchorToPreview = function(self, preview)
+        LayoutHelpers.CenteredLeftOf(self.LeftPanel, preview, 38)
+        LayoutHelpers.CenteredRightOf(self.RightPanel, preview, 38)
+        LayoutHelpers.AtHorizontalCenterIn(self.VersusLabel, preview)
+    end,
+
     ---@param self UIAutolobbyTeamDisplay
     ---@param rows UIAutolobbyTeamPlayerRow[]
     ResetRows = function(self, rows)
