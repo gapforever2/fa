@@ -139,7 +139,8 @@ function ShowEnhancement(bp, bpID, iconID, iconPrefix, userUnit)
         if string.find(bpID, '_') then
             bpID = string.sub(bpID, 1, string.find(bpID, "_[^_]*$")-1)
         end
-        WrapAndPlaceText(nil, nil, bpID.."-"..iconID, View.Description)
+        local descriptionKey = bp.DescriptionKey or bpID.."-"..iconID
+        WrapAndPlaceText(nil, nil, descriptionKey, View.Description)
     end
 
     local showShield = false

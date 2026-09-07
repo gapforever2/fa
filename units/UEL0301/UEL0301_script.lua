@@ -53,6 +53,34 @@ UEL0301 = ClassUnit(CommandUnit) {
         CommandUnit.__init(self, 'RightHeavyPlasmaCannon')
     end,
 
+    --- Aggregates upkeep from independently toggled SACU systems.
+    ---@param self UEL0301
+    ---@param key string
+    ---@param value number|nil
+    ApplyEnhancementUpkeep = function(self, key, value)
+        self.EnhancementUpkeep = self.EnhancementUpkeep or {}
+        self.EnhancementUpkeep[key] = value and value > 0 and value or nil
+
+        local total = 0
+        for _, amount in self.EnhancementUpkeep do
+            total = total + amount
+        end
+        self:SetEnergyMaintenanceConsumptionOverride(total)
+        if total > 0 then
+            self:SetMaintenanceConsumptionActive()
+        else
+            self:SetMaintenanceConsumptionInactive()
+        end
+    end,
+
+    ---@param self UEL0301
+    ---@return number
+    GetActiveShieldUpkeep = function(self)
+        local name = self.ActiveShieldEnhancement
+        local bp = name and self.Blueprint.Enhancements[name]
+        return bp and bp.MaintenanceConsumptionPerSecondEnergy or 0
+    end,
+
     ---@param self UEL0301
     ---@param builder Unit
     ---@param layer Layer
@@ -194,6 +222,48 @@ UEL0301 = ClassUnit(CommandUnit) {
     -- ============================================================================================================================================================
     -- ENHANCEMENTS
 
+    --- Returns the live radius of the light support bubble shield.
+    --- The heavy bubble deliberately does not use this bonus.
+    ---@param self UEL0301
+    ---@return number
+    GetSupportShieldRadius = function(self)
+        local shieldBp = self.Blueprint.Enhancements.ShieldGeneratorFieldSupport
+        local radius = shieldBp and shieldBp.ShieldSize or 0
+        if self:HasEnhancement('SensorRangeEnhancer') then
+            radius = radius + (shieldBp and shieldBp.SensorRangeBonus or 0)
+        end
+        return radius
+    end,
+
+    --- Applies the radar bonus to the currently active light bubble shield.
+    --- The heavy bubble is checked first because it keeps the light shield as
+    --- a prerequisite in the enhancement list.
+    ---@param self UEL0301
+    UpdateSupportShieldRadius = function(self)
+        if self:HasEnhancement('ShieldGeneratorField')
+            or not self:HasEnhancement('ShieldGeneratorFieldSupport') then
+            return
+        end
+
+        local shield = self.MyShield
+        if not shield or shield:BeenDestroyed() then
+            return
+        end
+
+        local radius = self:GetSupportShieldRadius()
+        if shield.Size == radius then
+            return
+        end
+
+        shield:SetSize(radius)
+        if shield:IsUp() then
+            -- Rebuild the active mesh and collision sphere without recreating
+            -- the shield entity or resetting its current health.
+            shield:RemoveShield()
+            shield:CreateShieldMesh()
+        end
+    end,
+
     --- Drone Upgrade
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement unused
@@ -230,37 +300,84 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementShield = function (self, bp)
         self:AddToggleCap('RULEUTC_ShieldToggle')
-        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        self:SetMaintenanceConsumptionActive()
+        self.ActiveShieldEnhancement = 'Shield'
+        local savedBonus = self.AeonShieldAmpBonus
+        local savedMult = self.AeonShieldAmpMult
+        if savedBonus then
+            self:AeonShieldAmpRemove()
+        end
+        self:ApplyEnhancementUpkeep('Shield', bp.MaintenanceConsumptionPerSecondEnergy or 0)
         self:CreateShield(bp)
+        if savedBonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+            self:AeonShieldAmpApply(nil, savedMult or 1)
+        end
     end,
 
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement unused
     ProcessEnhancementShieldRemove = function (self, bp)
         RemoveUnitEnhancement(self, 'Shield')
+        self:AeonShieldAmpRemove()
         self:DestroyShield()
-        self:SetMaintenanceConsumptionInactive()
+        self.ActiveShieldEnhancement = nil
+        self:ApplyEnhancementUpkeep('Shield', nil)
         self:RemoveToggleCap('RULEUTC_ShieldToggle')
     end,
 
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementShieldGeneratorField = function(self, bp)
+        self:AddToggleCap('RULEUTC_ShieldToggle')
+        self.ActiveShieldEnhancement = 'ShieldGeneratorField'
+        local savedBonus = self.AeonShieldAmpBonus
+        local savedMult = self.AeonShieldAmpMult
+        if savedBonus then
+            self:AeonShieldAmpRemove()
+        end
         self:DestroyShield()
-        self:ForkThread(function()
-            WaitTicks(1)
-            self:CreateShield(bp)
-            self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-            self:SetMaintenanceConsumptionActive()
-        end)
+        self:CreateShield(bp)
+        self:ApplyEnhancementUpkeep('Shield', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        if savedBonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+            self:AeonShieldAmpApply(nil, savedMult or 1)
+        end
     end,
 
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement unused
     ProcessEnhancementShieldGeneratorFieldRemove = function(self, bp)
+        self:AeonShieldAmpRemove()
         self:DestroyShield()
-        self:SetMaintenanceConsumptionInactive()
+        self.ActiveShieldEnhancement = nil
+        self:ApplyEnhancementUpkeep('Shield', nil)
+        self:RemoveToggleCap('RULEUTC_ShieldToggle')
+    end,
+
+    ---@param self UEL0301
+    ---@param bp UnitBlueprintEnhancement
+    ProcessEnhancementShieldGeneratorFieldSupport = function(self, bp)
+        self:AddToggleCap('RULEUTC_ShieldToggle')
+        self.ActiveShieldEnhancement = 'ShieldGeneratorFieldSupport'
+        local savedBonus = self.AeonShieldAmpBonus
+        local savedMult = self.AeonShieldAmpMult
+        if savedBonus then
+            self:AeonShieldAmpRemove()
+        end
+        self:DestroyShield()
+        self:CreateShield(bp)
+        self:ApplyEnhancementUpkeep('Shield', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        self:UpdateSupportShieldRadius()
+        if savedBonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+            self:AeonShieldAmpApply(nil, savedMult or 1)
+        end
+    end,
+
+    ---@param self UEL0301
+    ---@param bp UnitBlueprintEnhancement unused
+    ProcessEnhancementShieldGeneratorFieldSupportRemove = function(self, bp)
+        self:AeonShieldAmpRemove()
+        self:DestroyShield()
+        self.ActiveShieldEnhancement = nil
+        self:ApplyEnhancementUpkeep('Shield', nil)
         self:RemoveToggleCap('RULEUTC_ShieldToggle')
     end,
 
@@ -283,36 +400,68 @@ UEL0301 = ClassUnit(CommandUnit) {
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementSensorRangeEnhancer = function(self, bp)
+        self.SensorRangeEnhancerInstalled = true
+        self.SensorRangeEnhancerEnabled = true
         self:SetIntelRadius('Vision', bp.NewVisionRadius or 40)
         self:SetIntelRadius('Omni', bp.NewOmniRadius or 35)
         self:SetIntelRadius('Radar', bp.NewRadarRadius or 120)
-        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        self:SetMaintenanceConsumptionActive()
+        self:EnableUnitIntel('Enhancement', 'Omni')
+        self:EnableUnitIntel('Enhancement', 'Radar')
+        self:UpdateSupportShieldRadius()
+        self:ApplyEnhancementUpkeep('SensorRangeEnhancer', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        self:AddToggleCap('RULEUTC_IntelToggle')
+        self:SetScriptBit('RULEUTC_IntelToggle', false)
     end,
 
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement unused
     ProcessEnhancementSensorRangeEnhancerRemove = function(self, bp)
+        self.SensorRangeEnhancerEnabled = false
+        self.SensorRangeEnhancerInstalled = false
+        self:DisableUnitIntel('Enhancement', 'Omni')
+        self:DisableUnitIntel('Enhancement', 'Radar')
+        self:RemoveToggleCap('RULEUTC_IntelToggle')
         local bpIntel = self.Blueprint.Intel
         self:SetIntelRadius('Vision', bpIntel.VisionRadius or 26)
         self:SetIntelRadius('Omni', bpIntel.OmniRadius or 26)
-        self:SetIntelRadius('Radar', bp.RadarRadius or 0)
+        self:SetIntelRadius('Radar', bpIntel.RadarRadius or 0)
+        self:UpdateSupportShieldRadius()
+        self:ApplyEnhancementUpkeep('SensorRangeEnhancer', nil)
     end,
 
     ---@param self UEL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementRadarJammer = function(self, bp)
+        self.RadarJammerEnh = true
         self:SetIntelRadius('Jammer', bp.NewJammerRadius or 26)
         self:EnableUnitIntel('Enhancement', 'Jammer')
         self:AddToggleCap('RULEUTC_JammingToggle')
-        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        self:SetMaintenanceConsumptionActive()
+        self:ApplyEnhancementUpkeep('RadarJammer', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+
+        -- Бонус здоровья за джаммер
+        if bp.ACUAddHealth and bp.ACUAddHealth > 0 then
+            if not Buffs['UEL0301JammerHealth'] then
+                BuffBlueprint {
+                    Name = 'UEL0301JammerHealth',
+                    DisplayName = 'UEL0301JammerHealth',
+                    BuffType = 'SCUBUFF',
+                    Stacks = 'REPLACE',
+                    Duration = -1,
+                    Affects = {
+                        MaxHealth = {
+                            Add = bp.ACUAddHealth,
+                            Mult = 1.0,
+                        },
+                    },
+                }
+            end
+            Buff.ApplyBuff(self, 'UEL0301JammerHealth')
+        end
 
         if self.IntelEffects then
             self.IntelEffectsBag = {}
             self:CreateTerrainTypeEffects(self.IntelEffects, 'FXIdle',  self.Layer, nil, self.IntelEffectsBag)
         end
-
     end,
 
     ---@param self UEL0301
@@ -322,12 +471,16 @@ UEL0301 = ClassUnit(CommandUnit) {
         self:SetIntelRadius('Jammer', 0)
         self:DisableUnitIntel('Enhancement', 'Jammer')
         self:RemoveToggleCap('RULEUTC_JammingToggle')
-        self:SetMaintenanceConsumptionInactive()
+        self:ApplyEnhancementUpkeep('RadarJammer', nil)
+
+        -- Снимаем бонус здоровья
+        if Buff.HasBuff(self, 'UEL0301JammerHealth') then
+            Buff.RemoveBuff(self, 'UEL0301JammerHealth')
+        end
 
         if self.IntelEffectsBag then
             EffectUtil.CleanupEffectBag(self, 'IntelEffectsBag')
         end
-        
     end,
 
     ---@param self UEL0301
@@ -362,6 +515,51 @@ UEL0301 = ClassUnit(CommandUnit) {
         wep:ChangeRateOfFire(self.Blueprint.Weapon[1].RateOfFire or 1)
     end,
 
+    --- Keep the dome shield, jammer and radar independently switchable.
+    ---@param self UEL0301
+    ---@param bit number
+    OnScriptBitSet = function(self, bit)
+        if bit == 0 then
+            self:EnableShield()
+            self:ApplyEnhancementUpkeep('Shield', self:GetActiveShieldUpkeep())
+        elseif bit == 2 then
+            self:DisableUnitIntel('ToggleBit2', 'Jammer')
+            self:ApplyEnhancementUpkeep('RadarJammer', nil)
+        elseif bit == 3 then
+            self.SensorRangeEnhancerEnabled = false
+            self:DisableUnitIntel('ToggleBit3', 'Radar')
+            self:DisableUnitIntel('ToggleBit3', 'Omni')
+            self:ApplyEnhancementUpkeep('SensorRangeEnhancer', nil)
+        else
+            CommandUnit.OnScriptBitSet(self, bit)
+        end
+    end,
+
+    ---@param self UEL0301
+    ---@param bit number
+    OnScriptBitClear = function(self, bit)
+        if bit == 0 then
+            self:DisableShield()
+            self:ApplyEnhancementUpkeep('Shield', nil)
+        elseif bit == 2 then
+            if self.RadarJammerEnh then
+                self:EnableUnitIntel('ToggleBit2', 'Jammer')
+                local bp = self.Blueprint.Enhancements.RadarJammer
+                self:ApplyEnhancementUpkeep('RadarJammer', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+            end
+        elseif bit == 3 then
+            if self.SensorRangeEnhancerInstalled then
+                self.SensorRangeEnhancerEnabled = true
+                self:EnableUnitIntel('ToggleBit3', 'Radar')
+                self:EnableUnitIntel('ToggleBit3', 'Omni')
+                local bp = self.Blueprint.Enhancements.SensorRangeEnhancer
+                self:ApplyEnhancementUpkeep('SensorRangeEnhancer', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+            end
+        else
+            CommandUnit.OnScriptBitClear(self, bit)
+        end
+    end,
+
     ---@param self UEL0301
     ---@param enh Enhancement
     CreateEnhancement = function(self, enh)
@@ -387,8 +585,10 @@ UEL0301 = ClassUnit(CommandUnit) {
                 self.IntelEffectsBag = {}
                 self:CreateTerrainTypeEffects(self.IntelEffects, 'FXIdle',  self.Layer, nil, self.IntelEffectsBag)
             end
-            self:SetEnergyMaintenanceConsumptionOverride(self.Blueprint.Enhancements['RadarJammer'].MaintenanceConsumptionPerSecondEnergy or 0)
-            self:SetMaintenanceConsumptionActive()
+            self:ApplyEnhancementUpkeep(
+                'RadarJammer',
+                self.Blueprint.Enhancements.RadarJammer.MaintenanceConsumptionPerSecondEnergy or 0
+            )
         end
     end,
 
@@ -397,10 +597,71 @@ UEL0301 = ClassUnit(CommandUnit) {
     OnIntelDisabled = function(self, intel)
         CommandUnit.OnIntelDisabled(self, intel)
         if self.RadarJammerEnh and not self:IsIntelEnabled('Jammer') then
-            self:SetMaintenanceConsumptionInactive()
+            self:ApplyEnhancementUpkeep('RadarJammer', nil)
             if self.IntelEffectsBag then
                 EffectUtil.CleanupEffectBag(self, 'IntelEffectsBag')
             end
+        end
+    end,
+
+    --- Called by the Aeon SACU Shield Amplifier aura when this SACU enters its field.
+    --- The SACU's shields are enhancement-based (Shield / ShieldGeneratorFieldSupport
+    --- / ShieldGeneratorField), not a Defense.Shield entry, so the base spec is taken
+    --- from the current enhancement instead of the blueprint. Applies a fixed
+    --- multiplier to the shield max (a number for all shields, or a table with
+    --- per-enhancement values).
+    ---@param self UEL0301
+    ---@param instigator Unit
+    ---@param mult number|table # multiplier, or { Shield = n, ShieldGeneratorFieldSupport = n, ShieldGeneratorField = n }
+    AeonShieldAmpApply = function(self, instigator, mult)
+        if self.Dead then
+            return
+        end
+        if self.AeonShieldAmpBonus then
+            return
+        end
+        local shield = self.MyShield
+        if not shield or shield:BeenDestroyed() then
+            return
+        end
+        local enhBp = self:GetBlueprint().Enhancements
+        local baseBp = self:HasEnhancement('ShieldGeneratorField') and enhBp.ShieldGeneratorField
+            or (self:HasEnhancement('ShieldGeneratorFieldSupport') and enhBp.ShieldGeneratorFieldSupport or nil)
+            or (self:HasEnhancement('Shield') and enhBp.Shield or nil)
+        if not baseBp then
+            return
+        end
+
+        local resolvedMult = mult
+        if type(mult) == 'table' then
+            resolvedMult = self:HasEnhancement('ShieldGeneratorField') and mult.ShieldGeneratorField
+                or (self:HasEnhancement('ShieldGeneratorFieldSupport') and mult.ShieldGeneratorFieldSupport or nil)
+                or mult.Shield or 1
+        end
+        local baseMax = baseBp.ShieldMaxHealth or 0
+        local bonus = math.floor(baseMax * ((resolvedMult or 1) - 1) + 0.5)
+        if bonus <= 0 then
+            return
+        end
+
+        self:AeonShieldAmpApplyBonus(bonus, mult)
+    end,
+
+    --- Called when the SACU leaves the aura field (or the enhancement is removed):
+    --- immediately subtracts the bonus from both current and max HP.
+    ---@param self UEL0301
+    AeonShieldAmpRemove = function(self)
+        self:AeonShieldAmpRemoveBonus()
+    end,
+
+    --- Re-applies the shield amplifier boost after the SACU switches shield
+    --- enhancements while standing inside the aura.
+    ---@param self UEL0301
+    RefreshShieldAmplifierBuff = function(self)
+        local mult = self:AeonShieldAmpGetSourceMult() or self.AeonShieldAmpMult
+        if mult and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+            self:AeonShieldAmpRemove()
+            self:AeonShieldAmpApply(nil, mult)
         end
     end,
 }

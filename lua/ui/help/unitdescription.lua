@@ -10,7 +10,7 @@
 Description = {
 
     -- UEF -- Armored Commander Unit/Upgrades
-    ['uel0001'] = "<LOC Unit_Description_0303> Armored Commander is a combination of barracks and command center. Contains all the blueprints necessary to build a basic army from scratch. Upgradeable with combat enhancements, advanced engineering suits, resource allocation system, and teleporting.",
+    ['uel0001'] = "<LOC Unit_Description_0303> Armored Commander is a combination of barracks and command center. Contains all the blueprints necessary to build a basic army from scratch. Upgradeable with combat enhancements, advanced engineering suits, resource allocation system, and teleporting.\n\nShield health boost from the \"Shield Amplifier\" aura: +3000 (personal) / +8000 (bubble).",
     ['uel0001-tm'] = "<LOC Unit_Description_0004> Mounts a tactical cruise missile launcher onto the back of the ACU.",
     ['uel0001-aes'] = "<LOC Unit_Description_0005> Expands the number of available schematics and increases the ACU's build speed and maximum health.",
     ['uel0001-dsu'] = "<LOC Unit_Description_0006> Greatly increases the speed at which the ACU repairs itself.",
@@ -26,7 +26,7 @@ Description = {
     ['uel0001-red'] = "<LOC Unit_Description_0015> Adds a second Engineering Drone. Requires an initial Engineering Drone.",
 
     -- UEF -- Support Commander Units/Upgrades
-    ['uel0301'] = "<LOC Unit_Description_0016> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer. ",
+    ['uel0301'] = "<LOC Unit_Description_0016> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer. \n\nShield health boost from the \"Shield Amplifier\" aura: +2000 (personal) / +1000 (light bubble) / +2000 (heavy bubble).",
     ['uel0301-ed'] = "<LOC Unit_Description_0017> Engineering Drone acts as a secondary Engineer. Assists the SACU where applicable.",
     ['uel0301-psg'] = "<LOC Unit_Description_0018> Creates a protective shield around the SACU. Requires Energy to run.",
     ['uel0301-sgf'] = "<LOC Unit_Description_0019> Expands the radius of the SACU's personal shield. Requires Energy to run.",
@@ -55,10 +55,10 @@ Description = {
     ['uel0203'] = "<LOC Unit_Description_0031> Amphibious tank. Provides direct-fire support with two riot guns.",
     ['uel0111'] = "<LOC Unit_Description_0032> Heavily armored, mobile tactical missile launcher. Designed to attack at long range.",
     ['uel0205'] = "<LOC Unit_Description_0033> Mobile AA unit. Armed with flak artillery.",
-    ['uel0307'] = "<LOC Unit_Description_0034> Mobile shield generator.",
+    ['uel0307'] = "<LOC Unit_Description_0034> Mobile shield generator.\n\nShield health boost from the \"Shield Amplifier\" aura: +750.",
     ['uel0303'] = "<LOC Unit_Description_0035> Shielded heavy assault bot. Armed with two cannons and tactical rocket launcher.",
     ['uel0304'] = "<LOC Unit_Description_0036> Slow-moving heavy artillery. Must be stationary to fire.",
-    ['uel0401'] = "<LOC Unit_Description_0037> Experimental, amphibious mobile factory. Equipped with battleship-level weapons and armor. Its shield consumes Energy.",
+    ['uel0401'] = "<LOC Unit_Description_0037> Experimental, amphibious mobile factory. Equipped with battleship-level weapons and armor. Its shield consumes Energy.\n\nShield health boost from the \"Shield Amplifier\" aura: +2500.",
     ['xel0305'] = "<LOC Unit_Description_0307> Slow-moving, heavily armored assault bot. Designed to engage base defenses and structures.",
     ['xel0306'] = "<LOC Unit_Description_0308> Mobile missile launcher. Long reload time. Designed to overwhelm enemy shields and tactical missile defenses with large salvos.",
 
@@ -649,4 +649,5 @@ Description = {
     ['ual0301_Defiler'] = "<LOC ual0301_Defiler_help> Support Armored Command Unit. Enhanced during construction with Entropy Field, Personal Shield and Enhanced Sensor System.",
     ['ual0301_Aegis'] = "<LOC ual0301_Aegis_help> Support Armored Command Unit. Enhanced during construction with Shield Amplifier, Nano-Repair System and Enhanced Sensor System.",
     ['ual0301_Heretic'] = "<LOC ual0301_Heretic_help> Support Armored Command Unit. Enhanced during construction with Entropy Field, Shield Amplifier, Nano-Repair System and Enhanced Sensor System.",
+    ['uel0301-sgf-support'] = "<LOC uel0301_support_shield_desc> Creates a light Support Bubble Shield around the SACU. Requires Energy to run.",
 }
