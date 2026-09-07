@@ -83,6 +83,16 @@ XSL0001 = ClassUnit(ACUUnit) {
         ACUUnit.__init(self, 'ChronotronCannon')
     end,
 
+    --- Keeps the indirect-fire overlay hidden until the missile enhancement exists.
+    ---@param self XSL0001
+    ---@param enabled boolean
+    SetMissileOverlayRange = function(self, enabled)
+        local missile = self:GetWeaponByLabel('Missile')
+        local missileBlueprint = missile:GetBlueprint()
+        missile:ChangeMinRadius(enabled and (missileBlueprint.MinRadius or 0) or 0)
+        missile:ChangeMaxRadius(enabled and (missileBlueprint.MaxRadius or 0) or 0)
+    end,
+
     ---@param self XSL0001
     OnCreate = function(self)
         ACUUnit.OnCreate(self)
@@ -101,6 +111,7 @@ XSL0001 = ClassUnit(ACUUnit) {
     OnStopBeingBuilt = function(self, builder, layer)
         ACUUnit.OnStopBeingBuilt(self, builder, layer)
         self:SetWeaponEnabledByLabel('ChronotronCannon', true)
+        self:SetMissileOverlayRange(false)
         self.Trash:Add(ForkThread(self.GiveInitialResources, self))
         self.ShieldEffectsBag = {}
     end,
@@ -450,6 +461,7 @@ XSL0001 = ClassUnit(ACUUnit) {
         self:AddCommandCap('RULEUCC_Tactical')
         self:AddCommandCap('RULEUCC_SiloBuildTactical')
         self:SetWeaponEnabledByLabel('Missile', true)
+        self:SetMissileOverlayRange(true)
     end,
 
     ---@param self XSL0001
@@ -458,6 +470,7 @@ XSL0001 = ClassUnit(ACUUnit) {
         self:RemoveCommandCap('RULEUCC_Tactical')
         self:RemoveCommandCap('RULEUCC_SiloBuildTactical')
         self:SetWeaponEnabledByLabel('Missile', false)
+        self:SetMissileOverlayRange(false)
     end,
 
     ---@param self XSL0001
@@ -556,6 +569,24 @@ XSL0001 = ClassUnit(ACUUnit) {
         local wep = self:GetWeaponByLabel('ChronotronCannon')
         wep:AddDamageRadiusMod(bp.NewDamageRadius or 5)
         wep:AddDamageMod(bp.AdditionalDamage)
+
+        if not Buffs['SeraphimACUBlastAttackSpeed'] then
+            BuffBlueprint {
+                Name = 'SeraphimACUBlastAttackSpeed',
+                DisplayName = 'SeraphimACUBlastAttackSpeed',
+                BuffType = 'ACUBLASTATTACKSPEED',
+                Stacks = 'REPLACE',
+                Duration = -1,
+                Affects = {
+                    MoveMult = {
+                        Mult = (bp.NewMaxSpeed or 1.9) / (self.Blueprint.Physics.MaxSpeed or 1.7),
+                    },
+                },
+            }
+        end
+        if not Buff.HasBuff(self, 'SeraphimACUBlastAttackSpeed') then
+            Buff.ApplyBuff(self, 'SeraphimACUBlastAttackSpeed')
+        end
     end,
 
     ---@param self XSL0001
@@ -564,6 +595,9 @@ XSL0001 = ClassUnit(ACUUnit) {
         local wep = self:GetWeaponByLabel('ChronotronCannon')
         wep:AddDamageRadiusMod(-self.Blueprint.Enhancements['BlastAttackSeraphim'].NewDamageRadius) -- unlimited AOE bug fix by brute51 [117]
         wep:AddDamageMod(-self.Blueprint.Enhancements['BlastAttackSeraphim'].AdditionalDamage)
+        if Buff.HasBuff(self, 'SeraphimACUBlastAttackSpeed') then
+            Buff.RemoveBuff(self, 'SeraphimACUBlastAttackSpeed')
+        end
     end,
 
     ---@param self XSL0001

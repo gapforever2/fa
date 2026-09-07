@@ -496,14 +496,14 @@ Description = {
     ['xsl0001-eras'] = "<LOC Unit_Description_0425> Requires Resource Allocation System. Further increases ACU's resource generation.",
     ['xsl0001-aes'] = "<LOC Unit_Description_0426> Expands the number of available schematics and increases the ACU's build speed and maximum health.",
     ['xsl0001-ees'] = "<LOC Unit_Description_0427> Replaces the Tech 2 Engineering Suite. Expands the number of available schematics and further increases the ACU's build speed and maximum health.",
-    ['xsl0001-cba'] = "<LOC Unit_Description_0428> Increases the damage inflicted by ACU's primary weapon. Adds area-of-effect damage.",
+    ['xsl0001-cba'] = "<LOC Unit_Description_0428> Increases the damage inflicted by ACU's primary weapon, adds area-of-effect damage and increases movement speed.",
     ['xsl0001-nrf'] = "<LOC Unit_Description_0429> Automatically speeds up the repair speed of nearby units.",
     ['xsl0001-anrf'] = "<LOC Unit_Description_0430> Further speeds up the repair speed of nearby units. Increases maximum health of nearby units.",
     ['xsl0001-hsa'] = "<LOC Unit_Description_0431> Increases main cannon's rate of fire and range. Also increases range of Overcharge.",
     ['xsl0001-tml'] = "<LOC Unit_Description_0432> Mounts a tactical cruise missile launcher onto the back of the ACU.",
 
     -- SERAPHIM -- Support Commander Units/Upgrades
-    ['xsl0301'] = "<LOC Unit_Description_0433> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
+    ['xsl0301'] = "<LOC Unit_Description_0433> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.\n\nShield health boost from the \"Shield Amplifier\" aura: +1000.",
     ['xsl0301-tmu'] = "<LOC Unit_Description_0434> Mounts a tactical cruise missile launcher onto the back of the SACU.",
     ['xsl0301-dss'] = "<LOC Unit_Description_0435> Increases the speed at which the SACU repairs itself. Also increases hit points.",
     ['xsl0301-sre'] = "<LOC Unit_Description_0436> Significantly expands the capabilities of standard onboard SACU sensor systems: Radar, Omni, Vision.",
@@ -536,7 +536,7 @@ Description = {
     ['xsl0303'] = "<LOC Unit_Description_0345> Amphibious siege tank that is armed with a slow-firing Thau cannon. Also armed with bolters and a single torpedo launcher.",
     ['xsl0305'] = "<LOC Unit_Description_0346> Lightly armored, fast sniper bot. Armed with an extremely powerful energy rifle.",
     ['xsl0304'] = "<LOC Unit_Description_0347> Mobile heavy artillery. Ordinance inflicts moderate damage upon impact.",
-    ['xsl0307'] = "<LOC Unit_Description_0348> High-end mobile shield generator.",
+    ['xsl0307'] = "<LOC Unit_Description_0348> High-end mobile shield generator.\n\nShield health boost from the \"Shield Amplifier\" aura: +2500.",
     ['xsl0401'] = "<LOC Unit_Description_0349> A two-stage weapon. In its initial form, it fires an extremely destructive Phason laser. When the primary unit is destroyed, it unleashes a ferocious Quantum energy being.",
 
     -- SERAPHIM -- Air Units
@@ -651,4 +651,6 @@ Description = {
     ['ual0301_Heretic'] = "<LOC ual0301_Heretic_help> Support Armored Command Unit. Enhanced during construction with Entropy Field, Shield Amplifier, Nano-Repair System and Enhanced Sensor System.",
     ['uel0301-sgf-support'] = "<LOC uel0301_support_shield_desc> Creates a light Support Bubble Shield around the SACU. Requires Energy to run.",
     ['url0301-exbbat2'] = "<LOC url0301_speedaura_desc> Generates a field that accelerates nearby allied land units.",
+    ['xsl0301-anrf'] = "<LOC xsl0301_regenfield_desc> Emits a restoration field that regenerates nearby allied ground units.",
+    ['xsl0301-nrf'] = "<LOC xsl0301_healthfield_desc> Emits a vitality field that increases the maximum health of nearby allied ground units by 15%.",
 }
