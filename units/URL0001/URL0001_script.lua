@@ -8,12 +8,14 @@
 ---@alias CybranACUEnhancementBuffType
 ---| "ACUCLOAKBONUS"
 ---| "ACUSTEALTHBONUS"
+---| "ACUSTEALTHFIELDBONUS"
 ---| "ACUBUILDRATE"
 ---| "ACUUPGRADEDMG"
 
 ---@alias CybranACUEnhancementBuffName        # BuffType
 ---| "CybranACUCloakBonus"                    # ACUCLOAKBONUS
 ---| "CybranACUStealthBonus"                  # ACUSTEALTHBONUS
+---| "CybranACUStealthFieldBonus"             # ACUSTEALTHFIELDBONUS
 ---| "CybranACUT2BuildRate"                   # ACUBUILDRATE
 ---| "CybranACUT3BuildRate"                   # ACUBUILDRATE
 ---| "CybranACUNanoBonus"                     # ACUREGENRATE
@@ -91,7 +93,7 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
     --- system. The ACU can use its right-arm field together with either the
     --- personal stealth generator or the personal cloaking generator.
     ---@param self URL0001
-    RefreshStealthMaintenanceConsumption = function(self)
+    RefreshStealthMaintenanceConsumption = function(self, forceStealthField)
         local enhancements = self.Blueprint.Enhancements
         local upkeep = 0
 
@@ -104,8 +106,13 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         end
 
         if self.HasStealthFieldEnh
-            and self:IsIntelEnabled('RadarStealthField')
-            and self:IsIntelEnabled('SonarStealthField')
+            and (
+                forceStealthField
+                or (
+                    self:IsIntelEnabled('RadarStealthField')
+                    and self:IsIntelEnabled('SonarStealthField')
+                )
+            )
         then
             upkeep = upkeep
                 + (enhancements.StealthFieldGeneratorCybran.MaintenanceConsumptionPerSecondEnergy or 0)
@@ -174,6 +181,8 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
         self:DisableUnitIntel('Enhancement', 'SonarStealth')
         self:DisableUnitIntel('Enhancement', 'RadarStealthField')
         self:DisableUnitIntel('Enhancement', 'SonarStealthField')
+        self:SetIntelRadius('RadarStealthField', 0)
+        self:SetIntelRadius('SonarStealthField', 0)
         self:DisableUnitIntel('Enhancement', 'Cloak')
         self:SetIntelRadius('Sonar', 0)
         self:DisableUnitIntel('Enhancement', 'Sonar')
@@ -262,18 +271,47 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
     ProcessEnhancementStealthFieldGeneratorCybran = function(self, bp)
         self:AddToggleCap('RULEUTC_StealthToggle')
         self.HasStealthFieldEnh = true
+        local radius = bp.Radius or 24
+        self:SetIntelRadius('RadarStealthField', radius)
+        self:SetIntelRadius('SonarStealthField', radius)
+        if not Buffs['CybranACUStealthFieldBonus'] then
+            BuffBlueprint {
+                Name = 'CybranACUStealthFieldBonus',
+                DisplayName = 'CybranACUStealthFieldBonus',
+                BuffType = 'ACUSTEALTHFIELDBONUS',
+                Stacks = 'ALWAYS',
+                Duration = -1,
+                Affects = {
+                    MaxHealth = {
+                        Add = bp.NewHealth or 1750,
+                        Mult = 1.0,
+                    },
+                },
+            }
+        end
+        if not Buff.HasBuff(self, 'CybranACUStealthFieldBonus') then
+            Buff.ApplyBuff(self, 'CybranACUStealthFieldBonus')
+        end
         -- The field conceals both nearby allies and its carrier.
         self:EnableUnitIntel('Enhancement', 'RadarStealth')
         self:EnableUnitIntel('Enhancement', 'SonarStealth')
         self:EnableUnitIntel('Enhancement', 'RadarStealthField')
         self:EnableUnitIntel('Enhancement', 'SonarStealthField')
-        self:RefreshStealthMaintenanceConsumption()
+        -- A toggle cap added at runtime can retain the disabled script-bit
+        -- state. Explicitly start the newly installed field enabled.
+        self:SetScriptBit('RULEUTC_StealthToggle', false)
+        self:RefreshStealthMaintenanceConsumption(true)
     end,
 
     ---@param self URL0001
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementStealthFieldGeneratorCybranRemove = function(self, bp)
         self.HasStealthFieldEnh = nil
+        if Buff.HasBuff(self, 'CybranACUStealthFieldBonus') then
+            Buff.RemoveBuff(self, 'CybranACUStealthFieldBonus')
+        end
+        self:SetIntelRadius('RadarStealthField', 0)
+        self:SetIntelRadius('SonarStealthField', 0)
         self:DisableUnitIntel('Enhancement', 'RadarStealthField')
         self:DisableUnitIntel('Enhancement', 'SonarStealthField')
         if self.HasCloakEnh then

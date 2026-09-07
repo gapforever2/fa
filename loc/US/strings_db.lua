@@ -1612,7 +1612,7 @@ Unit_Description_0111="Grants Tech 3 and Experimental schematic access and furth
 Unit_Description_0112="Doubles the main cannon's rate of fire, and increases its range and that of Overcharge. Increases the range of the Microwave Laser if present.\n\nRate of fire: 1 --> 2\nRange: 22 --> 30\n\nDamage per second (DPS): 100 --> 200"
 Unit_Description_0113="Enhances the ACU with a Microwave Laser weapon with unbelievable firepower.\n\nDamage per second (DPS): 3000\nSplash: 0.5\nRange without upgrade: 22\nRange with main cannon upgrade: 30"
 Unit_Description_0114="Kraken-class weapon.\nEquips the ACU with a long-range torpedo tube, radar and sonar sensors.\n\nTorpedo damage: 300\nReload between salvos: 4 sec\nReload between shots: 0.8 sec\nRange: 60\nSplash: 0.1\nRadar radius: 65\nSonar radius: 65\nUnderwater speed: 1.7 --> 2.2\nTorpedoes can be intercepted by anti-torpedo defenses."
-Unit_Description_CybranStealthField="Generates a stealth field that conceals the ACU and nearby allied units from enemy radar and sonar. Requires energy to run.\n\nRadar stealth radius: 24\nSonar stealth radius: 24\nEnergy upkeep: 170/s"
+Unit_Description_CybranStealthField="Generates a stealth field that conceals the ACU and nearby allied units from enemy radar and sonar. Requires energy to run.\n\nAdditional health: +1750\n\nRadar stealth radius: 26\nSonar stealth radius: 26\nEnergy upkeep: 170/s"
 Unit_Description_0465_faf="Massively increases the rate at which the ACU repairs its armour.\n\nAdditional health: +1500\nAdditional health regen: +60"
 
 -- CYBRAN -- Support Commander Units/Upgrades
