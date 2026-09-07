@@ -25,15 +25,20 @@ local AArtilleryProjectileOnImpact = AArtilleryProjectile.OnImpact
 
 local EffectTemplate = import("/lua/effecttemplates.lua")
 
+-- Lingering green Miasma-style cloud (same look as the Aeon T2 artillery), tuned to last
+-- about as long as this projectile's damage cloud (DoT) and to cover its splash radius.
+local SonanceMiasmaCloud = { '/effects/emitters/miasma_cloud_sonance_01_emit.bp' }
+local SonanceImpactLand = table.concatenate(EffectTemplate.ASonanceWeaponHit02, SonanceMiasmaCloud)
+
 --- Aeon T3 Mobile Artillery Projectile : ual0304
 ---@class AIFSonanceShell01 : AArtilleryProjectile
 AIFSonanceShell01 = ClassProjectile(AArtilleryProjectile) {
 
     PolyTrail = '/effects/emitters/aeon_sonicgun_trail_emit.bp',
     FxTrails = EffectTemplate.ASonanceWeaponFXTrail01,
-    FxImpactUnit =  EffectTemplate.ASonanceWeaponHit02,
-    FxImpactProp =  EffectTemplate.ASonanceWeaponHit02,
-    FxImpactLand =  EffectTemplate.ASonanceWeaponHit02,
+    FxImpactUnit =  SonanceImpactLand,
+    FxImpactProp =  SonanceImpactLand,
+    FxImpactLand =  SonanceImpactLand,
 
     ---@param self AIFSonanceShell01
     ---@param targetType string
