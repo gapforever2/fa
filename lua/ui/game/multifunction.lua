@@ -1219,6 +1219,12 @@ local function calculateTeamColors()
     local focusArmy = GetFocusArmy()
     local colorsTbl = {}
     local tblSize
+
+    -- Replays can initialize this UI before a focus army exists. Calling
+    -- IsNeutral / IsAlly with the temporary -1 army index throws an exception.
+    if not focusArmy or focusArmy < 1 or not armies[focusArmy] then
+        return false
+    end
     
     colorsTbl[focusArmy] = teamColorSettings.colors.Player[1]
     
@@ -1424,8 +1430,11 @@ function TeamColorHandler(self, modifiers)
                 changeScoreboardColors()
             end      
         else
-            TeamColorMode(calculateTeamColors())
-            TeamColorMode(true)
+            local colors = calculateTeamColors()
+            if colors then
+                TeamColorMode(colors)
+                TeamColorMode(true)
+            end
         end    
     end
 end
@@ -1439,8 +1448,11 @@ end)
 function TeamColorSettingStartup()
     WaitSeconds(0.5 - --[[has already occured]]0.1)
     if teamColorSettings.autoEnable then
-        TeamColorMode(calculateTeamColors())
-        TeamColorMode(true)
-        GetButton('teamcolor'):ToggleCheck()
+        local colors = calculateTeamColors()
+        if colors then
+            TeamColorMode(colors)
+            TeamColorMode(true)
+            GetButton('teamcolor'):ToggleCheck()
+        end
     end
 end
