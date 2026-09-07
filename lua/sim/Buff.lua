@@ -48,6 +48,35 @@
 
 --#region Buff stacking calculations
 
+-- Seraphim regeneration auras form one three-step progression.  The SACU has
+-- separate regeneration and vitality enhancements, so priority is resolved per
+-- affected stat: advanced ACU (3) > SACU (2) > basic ACU (1).
+local SeraphimAuraPriorities = {
+    SeraphimACURegenAura = 1,
+    SeraphimSCURegenField = 2,
+    SeraphimSCUHealthField = 2,
+    SeraphimACUAdvancedRegenAura = 3,
+}
+
+---@param affects table
+---@param buffName string
+---@return boolean
+local function IsWeakerSeraphimAuraAffect(affects, buffName)
+    local priority = SeraphimAuraPriorities[buffName]
+    if not priority then
+        return false
+    end
+
+    for otherName in affects do
+        local otherPriority = SeraphimAuraPriorities[otherName]
+        if otherPriority and otherPriority > priority then
+            return true
+        end
+    end
+
+    return false
+end
+
 --- Seraphim regen field buff computations
 ---@param unit Unit
 ---@param buffName string
@@ -79,62 +108,68 @@ local BuffRegenFieldCalculate = function(unit, buffName, affectType, initialVal,
         SUBCOMMANDER = 15
     }
 
-    if not unit.Buffs.Affects[affectType] then return initialVal, bool end
+    local affects = unit.Buffs.Affects[affectType]
+    if not affects then return initialVal, bool end
 
-    for k, v in unit.Buffs.Affects[affectType] do
-        if v.Add and v.Add ~= 0 then
-            adds = adds + (v.Add * v.Count)
-        end
-
-        -- Take regen values from bp, keys have to match techCategory options
-
-        if v.BPCeilings then
-            for k_, v_ in ceilings do
-                if v.BPCeilings[k_] then
-                    ceilings[k_] = v.BPCeilings[k_]
-                end
+    for k, v in affects do
+        -- Keep weaker aura buffs registered so they become active immediately
+        -- when a stronger field disappears, but exclude them from the numeric
+        -- calculation while the stronger field is present.
+        if not IsWeakerSeraphimAuraAffect(affects, k) then
+            if v.Add and v.Add ~= 0 then
+                adds = adds + (v.Add * v.Count)
             end
-        end
 
-        if v.BPFloors then
-            for k_, v_ in floors do
-                if v.BPFloors[k_] then
-                    floors[k_] = v.BPFloors[k_]
-                end
-            end
-            floor = floors[unit.Blueprint.TechCategory] or 0
-        elseif v.Floor then
-            floor = v.Floor
-        end
+            -- Take regen values from bp, keys have to match techCategory options
 
-        ceil = ceilings[unit.Blueprint.TechCategory] or 99999
-
-        if v.Mult then
-            if affectType == 'Regen' then
-                -- Regen mults use MaxHp as base, so should always be <1
-
-                -- If >1 it's probably deliberate, but silly, so let's bail. If it's THAT deliberate
-                -- they will remove this
-                if v.Mult > 1 then WARN('Regen mult too high, should be <1, for unit ' .. unit.UnitId .. ' and buff ' .. buffName) return initialVal, bool end
-
-                -- GPG default for mult is 1. To avoid changing loads of scripts for now, let's do this
-                if v.Mult ~= 1 then
-                    local maxHealth = unit:GetBlueprint().Defense.MaxHealth
-                    for i = 1, v.Count do
-                        multsTotal = multsTotal + math.min((v.Mult * maxHealth), ceil)
+            if v.BPCeilings then
+                for k_, v_ in ceilings do
+                    if v.BPCeilings[k_] then
+                        ceilings[k_] = v.BPCeilings[k_]
                     end
                 end
-            else
-                for i = 1, v.Count do
-                    mults = mults * v.Mult
+            end
+
+            if v.BPFloors then
+                for k_, v_ in floors do
+                    if v.BPFloors[k_] then
+                        floors[k_] = v.BPFloors[k_]
+                    end
+                end
+                floor = floors[unit.Blueprint.TechCategory] or 0
+            elseif v.Floor then
+                floor = v.Floor
+            end
+
+            ceil = ceilings[unit.Blueprint.TechCategory] or 99999
+
+            if v.Mult then
+                if affectType == 'Regen' then
+                    -- Regen mults use MaxHp as base, so should always be <1
+
+                    -- If >1 it's probably deliberate, but silly, so let's bail. If it's THAT deliberate
+                    -- they will remove this
+                    if v.Mult > 1 then WARN('Regen mult too high, should be <1, for unit ' .. unit.UnitId .. ' and buff ' .. buffName) return initialVal, bool end
+
+                    -- GPG default for mult is 1. To avoid changing loads of scripts for now, let's do this
+                    if v.Mult ~= 1 then
+                        local maxHealth = unit:GetBlueprint().Defense.MaxHealth
+                        for i = 1, v.Count do
+                            multsTotal = multsTotal + math.min((v.Mult * maxHealth), ceil)
+                        end
+                    end
+                else
+                    for i = 1, v.Count do
+                        mults = mults * v.Mult
+                    end
                 end
             end
-        end
 
-        if not v.Bool then
-            bool = false
-        else
-            bool = true
+            if not v.Bool then
+                bool = false
+            else
+                bool = true
+            end
         end
     end
 
@@ -148,6 +183,8 @@ end
 local UniqueBuffs = {}
 UniqueBuffs['SeraphimACURegenAura'] = BuffRegenFieldCalculate
 UniqueBuffs['SeraphimACUAdvancedRegenAura'] = BuffRegenFieldCalculate
+UniqueBuffs['SeraphimSCURegenField'] = BuffRegenFieldCalculate
+UniqueBuffs['SeraphimSCUHealthField'] = BuffRegenFieldCalculate
 
 --- Calculates the buff from all the buffs of the same time the unit has.
 ---@param unit Unit
@@ -184,52 +221,57 @@ function BuffCalculate(unit, buffName, affectType, initialVal, initialBool)
 
     if not unit.Buffs.Affects[affectType] then return initialVal, bool end
 
-    for k, v in unit.Buffs.Affects[affectType] do
-        if v.Add and v.Add ~= 0 then
-            adds = adds + (v.Add * v.Count)
-        end
-
-        if v.Floor then
-            floor = v.Floor
-        end
-
-        -- Take regen values from bp, keys have to match techCategory options
-        if v.BPCeilings then
-            for k_, v_ in ceilings do
-                if v.BPCeilings[k_] then
-                    ceilings[k_] = v.BPCeilings[k_]
-                end
+    local affects = unit.Buffs.Affects[affectType]
+    for k, v in affects do
+        -- This path is also used when regeneration is recalculated by unrelated
+        -- buffs, so enforce the same strongest-only Seraphim aura rule here.
+        if not IsWeakerSeraphimAuraAffect(affects, k) then
+            if v.Add and v.Add ~= 0 then
+                adds = adds + (v.Add * v.Count)
             end
-        end
 
-        ceil = ceilings[unit.Blueprint.TechCategory]
+            if v.Floor then
+                floor = v.Floor
+            end
 
-        if v.Mult then
-            if affectType == 'Regen' then
-                -- Regen mults use MaxHp as base, so should always be <1
-
-                -- If >1 it's probably deliberate, but silly, so let's bail. If it's THAT deliberate
-                -- they will remove this
-                if v.Mult > 1 then WARN('Regen mult too high, should be <1, for unit ' .. unit.UnitId .. ' and buff ' .. buffName) return initialVal, bool end
-
-                -- GPG default for mult is 1. To avoid changing loads of scripts for now, let's do this
-                if v.Mult ~= 1 then
-                    local maxHealth = unit:GetBlueprint().Defense.MaxHealth
-                    for i = 1, v.Count do
-                        multsTotal = multsTotal + math.min((v.Mult * maxHealth), ceil or 99999)
+            -- Take regen values from bp, keys have to match techCategory options
+            if v.BPCeilings then
+                for k_, v_ in ceilings do
+                    if v.BPCeilings[k_] then
+                        ceilings[k_] = v.BPCeilings[k_]
                     end
                 end
-            else
-                for i = 1, v.Count do
-                    mults = mults * v.Mult
+            end
+
+            ceil = ceilings[unit.Blueprint.TechCategory]
+
+            if v.Mult then
+                if affectType == 'Regen' then
+                    -- Regen mults use MaxHp as base, so should always be <1
+
+                    -- If >1 it's probably deliberate, but silly, so let's bail. If it's THAT deliberate
+                    -- they will remove this
+                    if v.Mult > 1 then WARN('Regen mult too high, should be <1, for unit ' .. unit.UnitId .. ' and buff ' .. buffName) return initialVal, bool end
+
+                    -- GPG default for mult is 1. To avoid changing loads of scripts for now, let's do this
+                    if v.Mult ~= 1 then
+                        local maxHealth = unit:GetBlueprint().Defense.MaxHealth
+                        for i = 1, v.Count do
+                            multsTotal = multsTotal + math.min((v.Mult * maxHealth), ceil or 99999)
+                        end
+                    end
+                else
+                    for i = 1, v.Count do
+                        mults = mults * v.Mult
+                    end
                 end
             end
-        end
 
-        if not v.Bool then
-            bool = false
-        else
-            bool = true
+            if not v.Bool then
+                bool = false
+            else
+                bool = true
+            end
         end
     end
 
@@ -237,6 +279,23 @@ function BuffCalculate(unit, buffName, affectType, initialVal, initialBool)
     local returnVal = math.max((initialVal + adds + multsTotal) * mults, floor)
 
     return returnVal, bool
+end
+
+--- Recomputes a unit's health regen from ALL its sources (blueprint base, veterancy,
+--- upgrades, auras) and then applies the Entropy Field percentage debuff if active
+--- (unit.EntropyRegenMult, e.g. 0.2 = 80% reduction of the final regen).
+---@param unit Unit
+function RecalculateRegenWithEntropy(unit)
+    local bpRegen = unit:GetBlueprint().Defense.RegenRate or 0
+    local val = BuffCalculate(unit, nil, 'Regen', bpRegen)
+    if unit.EntropyRegenMult then
+        val = val * unit.EntropyRegenMult
+    end
+    -- UEL0303 entropy rocket: stacking final-regen multiplier, same "re-apply on every recalc" idea.
+    if unit.UEL0303EntropyMult then
+        val = val * unit.UEL0303EntropyMult
+    end
+    unit:SetRegen(val)
 end
 
 --#endregion
@@ -315,11 +374,67 @@ BuffEffects = {
     ---@param buffValues BlueprintBuffAffect
     ---@param unit Unit
     ---@param buffName BuffName
+    ---@param instigator Unit
+    ---@param afterRemove boolean
+    ShieldMaxHealth = function(buffDefinition, buffValues, unit, buffName, instigator, afterRemove)
+        -- Boosts the max health of an EXISTING shield only; it never grants a shield to
+        -- a unit that has none. The unbuffed base max is captured on the shield entity so
+        -- re-applications and shield recreations (enhancement changes) stay correct. The
+        -- missing-health (damage) amount is preserved, matching the MaxHealth buff.
+        local shield = unit.MyShield
+        if not shield or shield:BeenDestroyed() then
+            return
+        end
+
+        local mult = buffValues.Mult or 1
+
+        if afterRemove then
+            -- Restore the captured base. If the shield was recreated meanwhile there is
+            -- nothing to restore and the new shield already has its own base max.
+            local base = shield.AeonShieldAmpBaseMax
+            if base then
+                local oldMax = shield:GetMaxHealth()
+                local damage = oldMax - shield:GetHealth()
+                shield:SetMaxHealth(base)
+                shield:SetHealth(shield, math.max(base - damage, 0))
+                shield:UpdateShieldRatio(shield:GetHealth() / shield:GetMaxHealth())
+                shield.AeonShieldAmpBaseMax = nil
+            end
+            return
+        end
+
+        -- Capture the base max health the first time this buff lands on the shield.
+        if not shield.AeonShieldAmpBaseMax then
+            shield.AeonShieldAmpBaseMax = shield:GetMaxHealth()
+        end
+
+        local newMax = math.floor(shield.AeonShieldAmpBaseMax * mult + 0.5)
+        local oldMax = shield:GetMaxHealth()
+        local damage = oldMax - shield:GetHealth()
+        shield:SetMaxHealth(newMax)
+        shield:SetHealth(shield, math.max(newMax - damage, 0))
+        shield:UpdateShieldRatio(shield:GetHealth() / shield:GetMaxHealth())
+    end,
+
+    ---@param buffDefinition BlueprintBuff
+    ---@param buffValues BlueprintBuffAffect
+    ---@param unit Unit
+    ---@param buffName BuffName
     Regen = function(buffDefinition, buffValues, unit, buffName)
         -- Adjusted to use a special case of adding mults and calculating the final value
         -- in BuffCalculate to fix bugs where adds and mults would clash or cancel
         local bpRegen = unit:GetBlueprint().Defense.RegenRate or 0
         local val = BuffCalculate(unit, nil, 'Regen', bpRegen)
+
+        -- Entropy Field debuff: percentage reduction applied to the final regen (so it also
+        -- scales down nano-repair / regen-aura contributions). Re-applied on every recalc.
+        if unit.EntropyRegenMult then
+            val = val * unit.EntropyRegenMult
+        end
+        -- UEL0303 entropy rocket: stacking final-regen multiplier, re-applied on every recalc.
+        if unit.UEL0303EntropyMult then
+            val = val * unit.UEL0303EntropyMult
+        end
 
         unit:SetRegen(val)
     end,
@@ -831,7 +946,8 @@ function HasBuff(unit, buffName)
     if not def then
         return false
     end
-    return unit.Buffs.BuffTable[def.BuffType][buffName] ~= nil
+    local buffType = unit.Buffs.BuffTable[def.BuffType]
+    return buffType ~= nil and buffType[buffName] ~= nil
 end
 
 --#endregion

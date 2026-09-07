@@ -789,7 +789,9 @@ function UpdateWindow(info)
                         end
                     end
                 end
-                local shieldMaxHealth, shieldRegenRate = shield.ShieldMaxHealth or 0, shield.ShieldRegenRate or 0
+                local unitData = UnitData[info.entityId]
+                local shieldMaxHealth = (unitData and unitData.ShieldMaxHealth) or shield.ShieldMaxHealth or 0
+                local shieldRegenRate = shield.ShieldRegenRate or 0
                 if shieldMaxHealth > 0 then
                     local shieldHealth = math.floor(shieldMaxHealth * info.shieldRatio)
                     local shieldText = string.format("%d / %d", shieldHealth, shieldMaxHealth)
