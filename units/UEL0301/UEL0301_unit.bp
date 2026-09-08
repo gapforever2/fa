@@ -194,7 +194,7 @@ UnitBlueprint{
     EnhancementPresets = {
         LastBastion = {
             Description = "<LOC uel0301_LastBastion_desc>SACU (Last Bastion preset)",
-            BuildIconSortPriority = 50,
+            BuildIconSortPriority = 51,
             Enhancements = {
                 "RadarJammer",
                 "ShieldGeneratorField",
@@ -206,7 +206,7 @@ UnitBlueprint{
         },
         Mountain = {
             Description = "<LOC uel0301_Mountain_desc>SACU (Mountain preset)",
-            BuildIconSortPriority = 51,
+            BuildIconSortPriority = 50,
             Enhancements = {
                 "SensorRangeEnhancer",
                 "RadarJammer",
@@ -482,7 +482,7 @@ UnitBlueprint{
             BuildCostEnergy = 150000,
             BuildCostMass = 3500,
             BuildTime = 10080,
-            Icon = "sgf",
+            Icon = "HeavyShield",
             ImpactEffects = "UEFShieldHit01",
             ImpactMesh = "/effects/entities/ShieldSection01/ShieldSection01_mesh",
             MaintenanceConsumptionPerSecondEnergy = 1220,
@@ -507,7 +507,7 @@ UnitBlueprint{
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Jetpack" },
-            Icon = "sgf",
+            Icon = "HeavyShield",
             Name = "<LOC enhancements_0075>Remove Shields",
             Prerequisite = "ShieldGeneratorField",
             RemoveEnhancements = {
@@ -523,7 +523,7 @@ UnitBlueprint{
             BuildCostMass = 2250,
             BuildTime = 6000,
             DescriptionKey = "uel0301-sgf-support",
-            Icon = "sgf",
+            Icon = "LightShield",
             ImpactEffects = "UEFShieldHit01",
             ImpactMesh = "/effects/entities/ShieldSection01/ShieldSection01_mesh",
             MaintenanceConsumptionPerSecondEnergy = 720,
@@ -548,7 +548,7 @@ UnitBlueprint{
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Jetpack" },
-            Icon = "sgf",
+            Icon = "LightShield",
             Name = "<LOC enhancements_0075>Remove Shields",
             Prerequisite = "ShieldGeneratorFieldSupport",
             RemoveEnhancements = {
