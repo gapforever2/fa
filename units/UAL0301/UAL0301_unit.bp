@@ -807,7 +807,7 @@ UnitBlueprint{
             EnergyChargeForFirstShot = false,
             EnergyDrainPerSecond = 500,
             EnergyRequired = 500,
-            AuraShieldDamage = 2500,
+            AuraShieldDamage = 500,
             FireTargetLayerCapsTable = {
                 Land = "Land|Water|Sub|Seabed",
                 Seabed = "Land|Water|Sub|Seabed",

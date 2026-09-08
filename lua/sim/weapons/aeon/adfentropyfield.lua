@@ -3,9 +3,9 @@
 --**
 --** Based on the Aeon Chrono Dampener: it reuses the same expanding-wave firing and
 --** targeting. Instead of slowing enemies, its wave:
---**   * reduces the health regeneration of nearby land units by 80% (percentage, so it
+--**   * reduces the health regeneration of nearby land units by 65% (percentage, so it
 --**     also cuts nano-repair and regen auras), for 15s, and
---**   * deals 2500 damage to enemy shields within a fixed radius (no health damage).
+--**   * deals 500 damage to enemy shields within a fixed radius (no health damage).
 --** Visual is the Chrono Dampener's, recoloured to acid-swamp green. Does not affect the caster.
 --**********************************************************************************
 
@@ -14,12 +14,12 @@ local Utilities = import("/lua/utilities.lua")
 local Buff = import("/lua/sim/buff.lua")
 local GetClosestVisualBone = import("/lua/sim/aura/visualbones.lua").GetClosestVisualBone
 
-local ENTROPY_REGEN_MULT = 0.2     -- regen multiplier while debuffed (0.2 = 80% reduction)
+local ENTROPY_REGEN_MULT = 0.35    -- regen multiplier while debuffed (0.35 = 65% reduction)
 local ENTROPY_REGEN_DURATION = 150 -- debuff duration in ticks (15 s)
 
---- Reduces a target's TOTAL health regeneration by 80% for 15 s. The reduction is applied
+--- Reduces a target's TOTAL health regeneration by 65% for 15 s. The reduction is applied
 --- as a multiplier on the final regen value (computed from all the unit's sources: blueprint
---- base, veterancy, upgrades, auras), so it correctly cuts 80% off whatever the unit actually
+--- base, veterancy, upgrades, auras), so it correctly cuts 65% off whatever the unit actually
 --- regenerates. The Buff.lua Regen affect keeps the multiplier applied on every recalc, so it
 --- stays correct even while regen auras / nano keep reapplying. Re-applying refreshes the timer.
 ---@param target Unit
