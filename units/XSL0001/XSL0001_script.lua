@@ -30,10 +30,41 @@ local ACUDeathWeapon = import("/lua/sim/defaultweapons.lua").ACUDeathWeapon
 local EffectUtil = import("/lua/effectutilities.lua")
 local SIFLaanseTacticalMissileLauncher = SWeapons.SIFLaanseTacticalMissileLauncher
 local AIUtils = import("/lua/ai/aiutilities.lua")
+local RegenAuraVisualId = 'SeraphimRegenAura'
+local RegenAuraEnhancement = 'RegenAuraSeraphim'
+local AdvancedRegenAuraEnhancement = 'AdvancedRegenAuraSeraphim'
 
 ---@class XSL0001 : ACUUnit
 ---@field ShieldEffectsBag moho.IEffect[] # stores the regen aura effects (level 1 has 1 effect, level 2 has 2 effects)
 XSL0001 = ClassUnit(ACUUnit) {
+    -- One visual entry follows both levels of the same gameplay aura.  The basic
+    -- enhancement displays its current blueprint radius; the advanced enhancement
+    -- replaces it with its own upgraded blueprint radius.
+    AuraVisuals = {
+        [RegenAuraVisualId] = {
+            IsActive = function(self)
+                return self:HasEnhancement(AdvancedRegenAuraEnhancement)
+                    or self:HasEnhancement(RegenAuraEnhancement)
+            end,
+            Color = 'ffd000ff',
+            Thickness = 0.12,
+            GetRadius = function(self)
+                local enhancements = self.Blueprint.Enhancements
+                if self:HasEnhancement(AdvancedRegenAuraEnhancement) then
+                    local advanced = enhancements[AdvancedRegenAuraEnhancement]
+                    return advanced and advanced.Radius or 0
+                end
+
+                if self:HasEnhancement(RegenAuraEnhancement) then
+                    local basic = enhancements[RegenAuraEnhancement]
+                    return basic and basic.Radius or 0
+                end
+
+                return 0
+            end,
+        },
+    },
+
     Weapons = {
         DeathWeapon = ClassWeapon(ACUDeathWeapon) {},
         ChronotronCannon = ClassWeapon(SDFChronotronCannonWeapon) {},
@@ -50,6 +81,16 @@ XSL0001 = ClassUnit(ACUUnit) {
     ---@param self XSL0001
     __init = function(self)
         ACUUnit.__init(self, 'ChronotronCannon')
+    end,
+
+    --- Keeps the indirect-fire overlay hidden until the missile enhancement exists.
+    ---@param self XSL0001
+    ---@param enabled boolean
+    SetMissileOverlayRange = function(self, enabled)
+        local missile = self:GetWeaponByLabel('Missile')
+        local missileBlueprint = missile:GetBlueprint()
+        missile:ChangeMinRadius(enabled and (missileBlueprint.MinRadius or 0) or 0)
+        missile:ChangeMaxRadius(enabled and (missileBlueprint.MaxRadius or 0) or 0)
     end,
 
     ---@param self XSL0001
@@ -70,6 +111,7 @@ XSL0001 = ClassUnit(ACUUnit) {
     OnStopBeingBuilt = function(self, builder, layer)
         ACUUnit.OnStopBeingBuilt(self, builder, layer)
         self:SetWeaponEnabledByLabel('ChronotronCannon', true)
+        self:SetMissileOverlayRange(false)
         self.Trash:Add(ForkThread(self.GiveInitialResources, self))
         self.ShieldEffectsBag = {}
     end,
@@ -183,6 +225,8 @@ XSL0001 = ClassUnit(ACUUnit) {
         end
 
         self.RegenThreadHandle = self:ForkThread(self.RegenBuffThread, "RegenAura", "RegenAuraSeraphim")
+        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        self:SetMaintenanceConsumptionActive()
     end,
 
     ---@param self XSL0001
@@ -200,6 +244,8 @@ XSL0001 = ClassUnit(ACUUnit) {
         if Buff.HasBuff(self, 'SeraphimACURegenAuraSelfBuff') then
             Buff.RemoveBuff(self, 'SeraphimACURegenAuraSelfBuff')
         end
+        self:SetEnergyMaintenanceConsumptionOverride(0)
+        self:SetMaintenanceConsumptionInactive()
     end,
 
     ---@param self XSL0001
@@ -265,6 +311,8 @@ XSL0001 = ClassUnit(ACUUnit) {
         end
 
         self.RegenThreadHandle = self:ForkThread(self.RegenBuffThread, "AdvancedRegenAura", "AdvancedRegenAuraSeraphim")
+        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        self:SetMaintenanceConsumptionActive()
     end,
 
     ---@param self XSL0001
@@ -281,6 +329,8 @@ XSL0001 = ClassUnit(ACUUnit) {
         if Buff.HasBuff(self, 'SeraphimACUAdvancedRegenAuraSelfBuff') then
             Buff.RemoveBuff(self, 'SeraphimACUAdvancedRegenAuraSelfBuff')
         end
+        self:SetEnergyMaintenanceConsumptionOverride(0)
+        self:SetMaintenanceConsumptionInactive()
     end,
 
     ---@param self XSL0001
@@ -411,6 +461,7 @@ XSL0001 = ClassUnit(ACUUnit) {
         self:AddCommandCap('RULEUCC_Tactical')
         self:AddCommandCap('RULEUCC_SiloBuildTactical')
         self:SetWeaponEnabledByLabel('Missile', true)
+        self:SetMissileOverlayRange(true)
     end,
 
     ---@param self XSL0001
@@ -419,6 +470,7 @@ XSL0001 = ClassUnit(ACUUnit) {
         self:RemoveCommandCap('RULEUCC_Tactical')
         self:RemoveCommandCap('RULEUCC_SiloBuildTactical')
         self:SetWeaponEnabledByLabel('Missile', false)
+        self:SetMissileOverlayRange(false)
     end,
 
     ---@param self XSL0001
@@ -517,6 +569,24 @@ XSL0001 = ClassUnit(ACUUnit) {
         local wep = self:GetWeaponByLabel('ChronotronCannon')
         wep:AddDamageRadiusMod(bp.NewDamageRadius or 5)
         wep:AddDamageMod(bp.AdditionalDamage)
+
+        if not Buffs['SeraphimACUBlastAttackSpeed'] then
+            BuffBlueprint {
+                Name = 'SeraphimACUBlastAttackSpeed',
+                DisplayName = 'SeraphimACUBlastAttackSpeed',
+                BuffType = 'ACUBLASTATTACKSPEED',
+                Stacks = 'REPLACE',
+                Duration = -1,
+                Affects = {
+                    MoveMult = {
+                        Mult = (bp.NewMaxSpeed or 1.9) / (self.Blueprint.Physics.MaxSpeed or 1.7),
+                    },
+                },
+            }
+        end
+        if not Buff.HasBuff(self, 'SeraphimACUBlastAttackSpeed') then
+            Buff.ApplyBuff(self, 'SeraphimACUBlastAttackSpeed')
+        end
     end,
 
     ---@param self XSL0001
@@ -525,6 +595,9 @@ XSL0001 = ClassUnit(ACUUnit) {
         local wep = self:GetWeaponByLabel('ChronotronCannon')
         wep:AddDamageRadiusMod(-self.Blueprint.Enhancements['BlastAttackSeraphim'].NewDamageRadius) -- unlimited AOE bug fix by brute51 [117]
         wep:AddDamageMod(-self.Blueprint.Enhancements['BlastAttackSeraphim'].AdditionalDamage)
+        if Buff.HasBuff(self, 'SeraphimACUBlastAttackSpeed') then
+            Buff.RemoveBuff(self, 'SeraphimACUBlastAttackSpeed')
+        end
     end,
 
     ---@param self XSL0001

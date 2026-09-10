@@ -279,7 +279,7 @@ Changelog = ClassUI(Group) {
     PopulatePatchList = function(self)
         self.ContentPatchesList:DeleteAllItems()
         for k, patch in data.gamePatches do
-            self.ContentPatchesList:AddItem(patch.version .. LOC("<LOC lobui_0009_gaf> - GAF Balance"))
+            self.ContentPatchesList:AddItem(patch.version .. LOC("<LOC lobui_0009_gaf> - GAP Balance"))
         end
     end,
 

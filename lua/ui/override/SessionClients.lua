@@ -28,6 +28,7 @@
 ---@field name string
 ---@field ping number
 ---@field quiet number
+---@field ready boolean
 ---@field uid string
 
 local Prefs = import("/lua/user/prefs.lua")

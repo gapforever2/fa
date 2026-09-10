@@ -190,7 +190,7 @@ gamePatches = {
     },
     {
         version = 2,
-        name = "GAF Balance",
+        name = "GAP Balance",
         hasPrettyGithubRelease = true,
         description = {
             "# Баланс-патч 1.1 (26 января 2025)",
@@ -204,7 +204,7 @@ gamePatches = {
     },
     {
         version = 1,
-        name = "GAF Balance",
+        name = "GAP Balance",
         hasPrettyGithubRelease = true,
         description = {
             "# Баланс-патч 1.0 (20 января 2025)",

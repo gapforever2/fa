@@ -26,9 +26,24 @@ local EffectUtil = import("/lua/effectutilities.lua")
 local ADFOverchargeWeapon = AWeapons.ADFOverchargeWeapon
 local ADFChronoDampener = AWeapons.ADFChronoDampener
 local Buff = import("/lua/sim/buff.lua")
+local ChronoAuraId = 'ChronoDampenerAeon'
 
 ---@class UAL0001 : ACUUnit
 UAL0001 = ClassUnit(ACUUnit) {
+    -- Generic visual-only aura declaration.  The Unit base class publishes this to the UI;
+    -- it never creates Intel, damage, a projectile or a weapon overlay.
+    AuraVisuals = {
+        [ChronoAuraId] = {
+            EnabledByEnhancement = ChronoAuraId,
+            Color = 'ffd000ff',
+            Thickness = 0.12,
+            GetRadius = function(self)
+                local chrono = self:GetWeaponByLabel('ChronoDampener')
+                return chrono and chrono:GetMaxRadius() or 0
+            end,
+        },
+    },
+
     Weapons = {
         DeathWeapon = ClassWeapon(ACUDeathWeapon) {},
         RightDisruptor = ClassWeapon(ADFDisruptorCannonWeapon) {},
@@ -52,6 +67,7 @@ UAL0001 = ClassUnit(ACUUnit) {
         local bpDisrupt = self:GetBlueprint().Weapon[1].MaxRadius
         local cd = self:GetWeaponByLabel('ChronoDampener')
         cd:ChangeMaxRadius(bpDisrupt)
+        self:UpdateAuraVisualSync()
         -- Restrict what enhancements will enable later
         self:AddBuildRestriction(categories.AEON * (categories.BUILTBYTIER2COMMANDER + categories.BUILTBYTIER3COMMANDER))
     end,
@@ -60,6 +76,7 @@ UAL0001 = ClassUnit(ACUUnit) {
         ACUUnit.OnStopBeingBuilt(self, builder, layer)
         self:SetWeaponEnabledByLabel('RightDisruptor', true)
         self:SetWeaponEnabledByLabel('ChronoDampener', false)
+        self:UpdateAuraVisualSync()
         self:ForkThread(self.GiveInitialResources)
     end,
 
@@ -97,7 +114,9 @@ UAL0001 = ClassUnit(ACUUnit) {
             self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
             self:SetMaintenanceConsumptionActive()
             self:CreateShield(bp)
+            self:RefreshShieldAmplifierBuff()
         elseif enh == 'ShieldAeonRemove' then
+            self:AeonShieldAmpRemove()
             self:DestroyShield()
             self:SetMaintenanceConsumptionInactive()
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
@@ -105,6 +124,7 @@ UAL0001 = ClassUnit(ACUUnit) {
             self:AddToggleCap('RULEUTC_ShieldToggle')
             self:ForkThread(self.CreateHeavyShield, bp)
         elseif enh == 'ShieldHeavyAeonRemove' then
+            self:AeonShieldAmpRemove()
             self:DestroyShield()
             self:SetMaintenanceConsumptionInactive()
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
@@ -284,19 +304,89 @@ UAL0001 = ClassUnit(ACUUnit) {
         elseif enh == 'EnhancedSensorsAeon' then
             self:SetIntelRadius('Vision', bp.NewVisionRadius or 104)
             self:SetIntelRadius('Omni', bp.NewOmniRadius or 104)
+            self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
+            self:SetMaintenanceConsumptionActive()
         elseif enh == 'EnhancedSensorsAeonRemove' then
             local bpIntel = self:GetBlueprint().Intel
             self:SetIntelRadius('Vision', bpIntel.VisionRadius or 26)
             self:SetIntelRadius('Omni', bpIntel.OmniRadius or 26)
+            self:SetMaintenanceConsumptionInactive()
       end
+
+        self:UpdateAuraVisualSync()
     end,
 
     CreateHeavyShield = function(self, bp)
-        WaitTicks(1)
+        -- Strip the aura bonus before swapping shields so the new shield is
+        -- created clean and then re-boosted with the correct multiplier.
+        local savedBonus = self.AeonShieldAmpBonus
+        local savedMult = self.AeonShieldAmpMult
+        if savedBonus then
+            self:AeonShieldAmpRemove()
+        end
         self:CreateShield(bp)
         self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
         self:SetMaintenanceConsumptionActive()
-    end
+        if savedBonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+            self:AeonShieldAmpApply(nil, savedMult or 1)
+        end
+    end,
+
+    --- Called by the Aeon SACU Shield Amplifier aura when this ACU enters its field.
+    --- The ACU's shields are enhancement-based (ShieldAeon / ShieldHeavyAeon), not a
+    --- Defense.Shield entry, so the base spec is taken from the current enhancement.
+    ---@param self UAL0001
+    ---@param instigator Unit
+    ---@param mult number|table # multiplier, or { ShieldAeon = n, ShieldHeavyAeon = n }
+    AeonShieldAmpApply = function(self, instigator, mult)
+        if self.Dead then
+            return
+        end
+        if self.AeonShieldAmpBonus then
+            return
+        end
+        local shield = self.MyShield
+        if not shield or shield:BeenDestroyed() then
+            return
+        end
+        local enhBp = self:GetBlueprint().Enhancements
+        local baseBp = self:HasEnhancement('ShieldHeavyAeon') and enhBp.ShieldHeavyAeon
+            or (self:HasEnhancement('ShieldAeon') and enhBp.ShieldAeon or nil)
+        if not baseBp then
+            return
+        end
+
+        local resolvedMult = mult
+        if type(mult) == 'table' then
+            resolvedMult = self:HasEnhancement('ShieldHeavyAeon') and mult.ShieldHeavyAeon or mult.ShieldAeon or 1
+        end
+        local baseMax = baseBp.ShieldMaxHealth or 0
+        local bonus = math.floor(baseMax * ((resolvedMult or 1) - 1) + 0.5)
+        if bonus <= 0 then
+            return
+        end
+
+        self:AeonShieldAmpApplyBonus(bonus, mult)
+    end,
+
+    --- Called when the ACU leaves the aura field (or the enhancement is removed):
+    --- immediately subtracts the bonus from both current and max HP.
+    ---@param self UAL0001
+    AeonShieldAmpRemove = function(self)
+        self:AeonShieldAmpRemoveBonus()
+    end,
+
+    --- Re-applies the shield amplifier boost after the ACU switches shield
+    --- enhancements (ShieldAeon -> ShieldHeavyAeon) while standing inside the aura.
+    --- The new shield is created from its base spec first, then boosted again.
+    ---@param self UAL0001
+    RefreshShieldAmplifierBuff = function(self)
+        local mult = self:AeonShieldAmpGetSourceMult() or self.AeonShieldAmpMult
+        if mult and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+            self:AeonShieldAmpRemove()
+            self:AeonShieldAmpApply(nil, mult)
+        end
+    end,
 }
 
 TypeClass = UAL0001

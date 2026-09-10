@@ -189,7 +189,25 @@ local function CreateDialog(clients)
     end
 end
 
+local gameEnded = false
+
+--- Stops disconnect notifications from taking over the finalized result UI.
+function OnGameEnded()
+    gameEnded = true
+
+    if parent then
+        DestroyDialog()
+    end
+end
+
 function Update()
+    if gameEnded then
+        if parent then
+            DestroyDialog()
+        end
+        return
+    end
+
     local needDialog = false
     local clients = GetSessionClients()
     local stillin = {}

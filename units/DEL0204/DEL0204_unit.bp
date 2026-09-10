@@ -113,7 +113,7 @@ UnitBlueprint{
     Economy = {
         BuildCostEnergy = 1000,
         BuildCostMass = 200,
-        BuildTime = 1000,
+        BuildTime = 800,
         TeleportEnergyMod = 0.15,
         TeleportMassMod = 1,
         TeleportTimeMod = 0.01,
@@ -245,6 +245,8 @@ UnitBlueprint{
                 Fire = Sound { Bank = 'UELWeapon', Cue = 'UEB2304_Missile_Flayer', LodCutoff = 'Weapon_LodCutoff' },
             },
             BallisticArc = "RULEUBA_LowArc",
+            CameraLifetime = 5,
+            CameraVisionRadius = 5,
             CollideFriendly = false,
             Damage = 50,
             DamageRadius = 2,

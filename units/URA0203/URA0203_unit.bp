@@ -18,7 +18,7 @@ UnitBlueprint{
         KTurn = 0.8,
         KTurnDamping = 1.5,
         LiftFactor = 7,
-        MaxAirspeed = 12,
+        MaxAirspeed = 15,
         MinAirspeed = 3,
         StartTurnDistance = 5,
         Winged = false,
@@ -54,8 +54,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Light",
-        Health = 832,
-        MaxHealth = 832,
+        Health = 830,
+        MaxHealth = 830,
         SurfaceThreatLevel = 6,
     },
     Display = {
@@ -174,7 +174,7 @@ UnitBlueprint{
     LifeBarOffset = 0.45,
     LifeBarSize = 1,
     Physics = {
-        Elevation = 18,
+        Elevation = 12,
         FuelRechargeRate = 5,
         FuelUseTime = 400,
         GroundCollisionOffset = 1.6,

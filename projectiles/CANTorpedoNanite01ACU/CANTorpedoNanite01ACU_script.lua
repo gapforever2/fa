@@ -1,0 +1,29 @@
+local CTorpedoSubProjectile = import("/lua/cybranprojectiles.lua").CTorpedoSubProjectile
+
+-- Cybran ACU Nanite Torpedo Script
+---@class CANTorpedoNanite01ACU : CTorpedoSubProjectile
+CANTorpedoNanite01ACU = ClassProjectile(CTorpedoSubProjectile) {
+
+    ---@param self CANTorpedoNanite01ACU
+    ---@param inWater boolean
+	OnCreate = function(self, inWater)
+        CTorpedoSubProjectile.OnCreate(self, inWater)
+        if inWater then
+            self:SetBallisticAcceleration(0)
+        else
+            self:SetBallisticAcceleration(-20)
+            self:TrackTarget(false)
+            self:SetTurnRate(0)
+        end
+    end,
+
+    ---@param self CANTorpedoNanite01ACU
+    OnEnterWater = function(self)
+        CTorpedoSubProjectile.OnEnterWater(self)
+        self:SetBallisticAcceleration(0)
+        self:SetTurnRate(120)
+        self:TrackTarget(true)
+    end,
+}
+
+TypeClass = CANTorpedoNanite01ACU

@@ -43,7 +43,8 @@ AbstractVictoryCondition = Class(DebugComponent) {
     --- An attempt to end the game. The monitoring thread continues to catch draws. It will take this many seconds to declare victory and start the end game procedure.
     DelayBeforeVictory = 5,
 
-    --- Once the game is guaranteed to end, it will take this many seconds to end the game.
+    --- Campaign and coop operations need this time to finish their end sequence.
+    --- Regular skirmish games end immediately once the result is final.
     DelayBeforeGameEnds = 3,
 
     ---@param self AbstractVictoryCondition
@@ -286,7 +287,13 @@ AbstractVictoryCondition = Class(DebugComponent) {
     --- Ends the game.
     ---@param self AbstractVictoryCondition
     EndGameThread = function(self)
-        WaitSeconds(self.DelayBeforeGameEnds)
+        -- End regular multiplayer games immediately. Keeping the simulation alive
+        -- after victory leaves all peers connected, allowing disconnects and pauses
+        -- to interfere with the score screen even though the result is already final.
+        -- Campaign and coop still need the grace period for EndOperation.
+        if ScenarioInfo.type ~= 'skirmish' then
+            WaitSeconds(self.DelayBeforeGameEnds)
+        end
 
         for _, v in GameOverListeners do
             pcall(v)

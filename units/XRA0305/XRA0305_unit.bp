@@ -17,7 +17,7 @@ UnitBlueprint{
         KTurn = 1,
         KTurnDamping = 2.3,
         LiftFactor = 7,
-        MaxAirspeed = 10,
+        MaxAirspeed = 15,
         MinAirspeed = 3,
         StartTurnDistance = 5,
     },
@@ -174,7 +174,7 @@ UnitBlueprint{
     LifeBarSize = 1.5,
     Physics = {
         BankingSlope = 0.5,
-        Elevation = 18,
+        Elevation = 12,
         FuelRechargeRate = 15,
         FuelUseTime = 800,
         GroundCollisionOffset = 1.6,

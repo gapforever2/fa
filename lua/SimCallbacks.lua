@@ -109,6 +109,56 @@ end
 Callbacks.EmptyCallback = function(data, units)
 end
 
+---@param data { minX: number, maxX: number, minZ: number, maxZ: number }
+---@param units Unit[]
+Callbacks.MexRebuildHotkeyCancelBuilds = function(data, units)
+    if not data then
+        return
+    end
+    local minX, maxX, minZ, maxZ = data.minX, data.maxX, data.minZ, data.maxZ
+    if not (minX and maxX and minZ and maxZ) then
+        return
+    end
+
+    local cancelled = 0
+    local processed = 0
+
+    for _, unit in SecureUnits(units) do
+        if not unit.Dead then
+            local queue = unit:GetCommandQueue()
+            if queue then
+                local keep = {}
+                local boxed = 0
+                local blocked = false
+
+                for _, cmd in queue do
+                    if cmd.blueprintId and cmd.commandType == 8 then -- 8 == BuildMobile
+                        local x, z = cmd.x, cmd.z
+                        if x and z and x >= minX and x <= maxX and z >= minZ and z <= maxZ then
+                            boxed = boxed + 1
+                        else
+                            TableInsert(keep, { cmd.x, cmd.y, cmd.z, cmd.blueprintId })
+                        end
+                    else
+                        blocked = true
+                    end
+                end
+
+                if boxed > 0 and not blocked then
+                    IssueClearCommands({ unit })
+                    for _, k in keep do
+                        IssueBuildMobile({ unit }, { k[1], k[2], k[3] }, k[4], {})
+                    end
+                    cancelled = cancelled + boxed
+                    processed = processed + 1
+                end
+            end
+        end
+    end
+
+    SPEW(string.format('[MexCancel] cancelled %d build order(s) across %d engineer(s)', cancelled, processed))
+end
+
 --- Callback takes a boolean and toggles a stat on given units between 0 and 1
 ---@param data table<string, boolean>
 Callbacks.SetStatByCallback = function(data, units)

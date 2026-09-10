@@ -179,6 +179,10 @@ Unit = ClassUnit(moho.unit_methods, IntelComponent, VeterancyComponent, DebugUni
 
     IsUnit = true,
     Weapons = {},
+    -- Optional declarative visual-only aura definitions.  Unit scripts may override this
+    -- with entries containing EnabledByEnhancement/IsActive, GetRadius/Radius, Color and
+    -- Thickness.  The data is mirrored to UnitData; it never enables Intel or a weapon.
+    AuraVisuals = false,
 
     -- FX Damage tables. A random damage effect table of emitters is chosen out of this table
     FxDamage1 = {EffectTemplate.DamageSmoke01, EffectTemplate.DamageSparks01},
@@ -217,6 +221,133 @@ Unit = ClassUnit(moho.unit_methods, IntelComponent, VeterancyComponent, DebugUni
             Sync.UnitData[self.EntityId] = {}
         end
         return Sync.UnitData[self.EntityId]
+    end,
+
+    --- Rebuilds this unit's visual-only aura state when a definition or its live radius changes.
+    --- The UI consumes only the resulting UnitData.AuraVisuals table.
+    ---@param self Unit
+    UpdateAuraVisualSync = function(self)
+        local definitions = self.AuraVisuals
+        if not definitions then
+            return
+        end
+
+        local visuals = {}
+        local state = {}
+        local oldState = self.AuraVisualSyncState or {}
+
+        for auraId, definition in definitions do
+            if type(definition) == 'table' then
+                local active = true
+                if definition.IsActive then
+                    local ok, result = pcall(definition.IsActive, self)
+                    if not ok then
+                        if not self.AuraVisualSyncWarnings then
+                            self.AuraVisualSyncWarnings = {}
+                        end
+                        if not self.AuraVisualSyncWarnings[auraId] then
+                            WARN('Aura visual IsActive failed for ' .. tostring(auraId) .. ': ' .. tostring(result))
+                            self.AuraVisualSyncWarnings[auraId] = true
+                        end
+                        active = false
+                    else
+                        active = result == true
+                    end
+                elseif definition.EnabledByEnhancement then
+                    local ok, result = pcall(self.HasEnhancement, self, definition.EnabledByEnhancement)
+                    if not ok then
+                        active = false
+                    else
+                        active = result == true
+                    end
+                elseif definition.Active ~= nil then
+                    active = definition.Active == true
+                end
+
+                if active then
+                    local radius
+                    if definition.GetRadius then
+                        local ok, result = pcall(definition.GetRadius, self)
+                        if ok then
+                            radius = result
+                        else
+                            radius = 0
+                            if not self.AuraVisualSyncWarnings then
+                                self.AuraVisualSyncWarnings = {}
+                            end
+                            if not self.AuraVisualSyncWarnings[auraId] then
+                                WARN('Aura visual GetRadius failed for ' .. tostring(auraId) .. ': ' .. tostring(result))
+                                self.AuraVisualSyncWarnings[auraId] = true
+                            end
+                        end
+                    elseif type(definition.Radius) == 'function' then
+                        local ok, result = pcall(definition.Radius, self)
+                        if ok then
+                            radius = result
+                        else
+                            radius = 0
+                            if not self.AuraVisualSyncWarnings then
+                                self.AuraVisualSyncWarnings = {}
+                            end
+                            if not self.AuraVisualSyncWarnings[auraId] then
+                                WARN('Aura visual Radius failed for ' .. tostring(auraId) .. ': ' .. tostring(result))
+                                self.AuraVisualSyncWarnings[auraId] = true
+                            end
+                        end
+                    else
+                        radius = definition.Radius
+                    end
+
+                    if type(radius) == 'number' and radius > 0 then
+                        local color = definition.Color
+                        local thickness = definition.Thickness
+                        visuals[auraId] = {
+                            Radius = radius,
+                            Color = color,
+                            Thickness = thickness,
+                        }
+                        state[auraId] = {
+                            Radius = radius,
+                            Color = color,
+                            Thickness = thickness,
+                        }
+                    end
+                end
+            end
+        end
+
+        local changed = false
+        for auraId, current in state do
+            local previous = oldState[auraId]
+            if not previous or previous.Radius ~= current.Radius or
+                previous.Color ~= current.Color or previous.Thickness ~= current.Thickness then
+                changed = true
+                break
+            end
+        end
+        if not changed then
+            for auraId in oldState do
+                if not state[auraId] then
+                    changed = true
+                    break
+                end
+            end
+        end
+
+        if changed or not self.AuraVisualSyncState then
+            self.AuraVisualSyncState = state
+            -- Use the unit's normal SyncMeta path.  Writing directly to Sync.UnitData
+            -- only affects the current beat and is lost by ResetSyncTable; self.Sync
+            -- also updates the persistent UnitData copy used for focus-army changes.
+            self.Sync.AuraVisuals = next(visuals) and visuals or false
+        end
+    end,
+
+    AuraVisualSyncThread = function(self)
+        while not self.Dead do
+            self:UpdateAuraVisualSync()
+            WaitTicks(1)
+        end
     end,
 
     -- The original builder of this unit, set by OnStartBeingBuilt. Used for calculating differential
@@ -278,6 +409,12 @@ Unit = ClassUnit(moho.unit_methods, IntelComponent, VeterancyComponent, DebugUni
         self.Army = self:GetArmy()
         self.UnitId = self:GetUnitId()
         self.Brain = self:GetAIBrain()
+
+        -- Only units that declare AuraVisuals get a watcher.  Future aura integrations
+        -- therefore remain Lua-only and do not add another executable patch.
+        if self.AuraVisuals then
+            self:ForkThread(self.AuraVisualSyncThread)
+        end
     end,
 
     ---@param self Unit

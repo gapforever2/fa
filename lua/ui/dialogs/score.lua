@@ -227,7 +227,9 @@ function UpdateData()
         if not armyInfo.civilian and armyInfo.showScore then
             -- set basic info from armies table
             curInfo[index] = {}
-            curInfo[index].name = hotstats.scoreData.current[i].name
+            curInfo[index].name = (hotstats.scoreData and hotstats.scoreData.current
+                and hotstats.scoreData.current[i] and hotstats.scoreData.current[i].name)
+                or armyInfo.nickname or ''
             curInfo[index].faction = armyInfo.faction
             curInfo[index].color = armyInfo.color
             --curInfo[index].teamName = index --TODO we need to get team data in here
@@ -245,13 +247,31 @@ function CreateDialog(victory, showCampaign, operationVictoryTable, midGame)
         return
     end
     scoreScreenActive = true
-    SessionEndGame()
     DisableWorldSounds()
     StopAllSounds()
     ForkThread(function()
-        while not(hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history) do
+        -- A victory result reaches the UI before the simulation actually calls EndGame.
+        -- Keep the session connected until then so that the final score sync cannot be
+        -- lost when other players leave or the score button is pressed immediately.
+        local waited = 0
+        local maxWait = 15
+        local sessionFinished = not SessionIsActive() or SessionIsGameOver()
+        local scoreDataReady = hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history
+        while not (sessionFinished and scoreDataReady) do
             WaitSeconds(0.5)
+            waited = waited + 0.5
+            sessionFinished = not SessionIsActive() or SessionIsGameOver()
+            scoreDataReady = hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history
+            if waited >= maxWait then
+                WARN("Game end or score data was not received within " .. maxWait .. "s; showing score screen with available data.")
+                break
+            end
         end
+
+        if SessionIsActive() and not SessionIsMultiplayer() then
+            SessionEndGame()
+        end
+        LOG("Score data ready; displaying score screen")
         CreateDialog2(victory, showCampaign, operationVictoryTable, midGame)
     end)
 end
@@ -259,7 +279,12 @@ end
 function CreateDialog2(victory, showCampaign, operationVictoryTable, midGame)
     UpdateData()
 
-    campaignScore = tostring(curInfo.scoreData.current[1].general.score)
+    local firstPlayer = curInfo.scoreData and curInfo.scoreData.current and curInfo.scoreData.current[1]
+    if firstPlayer and firstPlayer.general then
+        campaignScore = tostring(firstPlayer.general.score)
+    else
+        campaignScore = '0'
+    end
 
     if showCampaign then
         Prefs.SetToCurrentProfile('last_faction', operationVictoryTable.faction)

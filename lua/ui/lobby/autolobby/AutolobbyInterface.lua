@@ -34,6 +34,8 @@ local LayoutHelpers = import("/lua/maui/layouthelpers.lua")
 local Group = import("/lua/maui/group.lua").Group
 local AutolobbyMapPreview = import("/lua/ui/lobby/autolobby/autolobbymappreview.lua")
 local AutolobbyConnectionMatrix = import("/lua/ui/lobby/autolobby/autolobbyconnectionmatrix.lua")
+local AutolobbyTeamDisplay = import("/lua/ui/lobby/autolobby/autolobbyteamdisplay.lua")
+local AutohostBackgroundTexture = "/textures/ui/common/autolobby/battlefield_background.dds"
 
 ---@class UIAutolobbyInterfaceState
 ---@field PlayerCount number
@@ -42,6 +44,8 @@ local AutolobbyConnectionMatrix = import("/lua/ui/lobby/autolobby/autolobbyconne
 ---@field GameOptions? UILobbyLaunchGameOptionsConfiguration
 ---@field Connections? UIAutolobbyConnections
 ---@field Statuses? UIAutolobbyStatus
+---@field ConnectionTimeoutSeconds? number
+---@field IsGafAutohost? boolean
 
 ---@class UIAutolobbyInterface : Group
 ---@field State UIAutolobbyInterfaceState
@@ -49,6 +53,9 @@ local AutolobbyConnectionMatrix = import("/lua/ui/lobby/autolobby/autolobbyconne
 ---@field Background Bitmap
 ---@field Preview UIAutolobbyMapPreview
 ---@field ConnectionMatrix UIAutolobbyConnectionMatrix
+---@field TeamDisplay UIAutolobbyTeamDisplay
+---@field TimeoutLabel Text
+---@field TimeoutThread? thread
 local AutolobbyInterface = Class(Group) {
 
     BackgroundTextures = {
@@ -70,9 +77,17 @@ local AutolobbyInterface = Class(Group) {
         }
 
         local backgroundTexture = self.BackgroundTextures[math.random(1, 5)] --[[@as FileName]]
+        self.DefaultBackgroundTexture = UIUtil.UIFile(backgroundTexture)
         self.Background = UIUtil.CreateBitmap(self, backgroundTexture)
         self.Preview = AutolobbyMapPreview.GetInstance(self)
         self.ConnectionMatrix = AutolobbyConnectionMatrix.Create(self, playerCount)
+        self.TeamDisplay = AutolobbyTeamDisplay.Create(self, playerCount)
+        self.TimeoutLabel = UIUtil.CreateText(self, "", 16, UIUtil.bodyFont)
+        self.TimeoutLabel:SetColor("FFFFCC00")
+        self.TimeoutLabel:SetDropShadow(true)
+        self.TimeoutLabel:DisableHitTest(true)
+        self.TimeoutLabel:Hide()
+        self.TimeoutThread = nil
     end,
 
     ---@param self UIAutolobbyInterface
@@ -97,6 +112,57 @@ local AutolobbyInterface = Class(Group) {
             :CenteredBelow(self.Preview, 20)
             :Hide()
             :End()
+
+        LayoutHelpers.ReusedLayoutFor(self.TeamDisplay)
+            :Fill(self)
+            :Hide()
+            :End()
+
+        LayoutHelpers.ReusedLayoutFor(self.TimeoutLabel)
+            :CenteredBelow(self.ConnectionMatrix, 10)
+            :Hide()
+            :End()
+    end,
+
+    --- Switches to the GAF permanent-autohost presentation. Matchmaking and
+    --- regular client lobbies retain the original connection matrix.
+    ---@param self UIAutolobbyInterface
+    ---@param enabled boolean
+    SetGafAutohostMode = function(self, enabled)
+        enabled = enabled == true
+        self.State.IsGafAutohost = enabled
+
+        if enabled then
+            -- Keep the stock background if a partial installation lacks the asset.
+            if DiskGetFileInfo(AutohostBackgroundTexture) then
+                self.Background:SetTexture(AutohostBackgroundTexture)
+            end
+            self.ConnectionMatrix:Hide()
+            self.TeamDisplay:Show()
+            LayoutHelpers.ReusedLayoutFor(self.Preview)
+                :AtCenterIn(self, 0, 0)
+                :Width(400)
+                :Height(400)
+                :End()
+            self.TeamDisplay:AnchorToPreview(self.Preview)
+            LayoutHelpers.ReusedLayoutFor(self.TimeoutLabel)
+                :CenteredBelow(self.Preview, 14)
+                :End()
+        else
+            self.Background:SetTexture(self.DefaultBackgroundTexture)
+            self.TeamDisplay:Hide()
+            LayoutHelpers.ReusedLayoutFor(self.Preview)
+                :AtCenterIn(self, -100, 0)
+                :Width(400)
+                :Height(400)
+                :End()
+            LayoutHelpers.ReusedLayoutFor(self.ConnectionMatrix)
+                :CenteredBelow(self.Preview, 20)
+                :End()
+            LayoutHelpers.ReusedLayoutFor(self.TimeoutLabel)
+                :CenteredBelow(self.ConnectionMatrix, 10)
+                :End()
+        end
     end,
 
     ---@param self UIAutolobbyInterface
@@ -104,8 +170,10 @@ local AutolobbyInterface = Class(Group) {
     UpdateOwnership = function(self, ownership)
         self.State.OwnerShip = ownership
 
-        self.ConnectionMatrix:Show()
-        self.ConnectionMatrix:UpdateOwnership(ownership)
+        if not self.State.IsGafAutohost then
+            self.ConnectionMatrix:Show()
+            self.ConnectionMatrix:UpdateOwnership(ownership)
+        end
     end,
 
     ---@param self UIAutolobbyInterface
@@ -113,8 +181,10 @@ local AutolobbyInterface = Class(Group) {
     UpdateConnections = function(self, connections)
         self.State.Connections = connections
 
-        self.ConnectionMatrix:Show()
-        self.ConnectionMatrix:UpdateConnections(connections)
+        if not self.State.IsGafAutohost then
+            self.ConnectionMatrix:Show()
+            self.ConnectionMatrix:UpdateConnections(connections)
+        end
     end,
 
     ---@param self UIAutolobbyInterface
@@ -122,8 +192,12 @@ local AutolobbyInterface = Class(Group) {
     UpdateLaunchStatuses = function(self, statuses)
         self.State.Statuses = statuses
 
-        self.ConnectionMatrix:Show()
-        self.ConnectionMatrix:UpdateStatuses(statuses)
+        if self.State.IsGafAutohost then
+            self.TeamDisplay:UpdateStatuses(statuses)
+        else
+            self.ConnectionMatrix:Show()
+            self.ConnectionMatrix:UpdateStatuses(statuses)
+        end
     end,
 
     ---@param self UIAutolobbyInterface
@@ -132,6 +206,14 @@ local AutolobbyInterface = Class(Group) {
     UpdateScenario = function(self, pathToScenarioInfo, playerOptions)
         self.State.PathToScenarioFile = pathToScenarioInfo
         self.State.PlayerOptions = playerOptions
+
+        if self.State.IsGafAutohost then
+            self.ConnectionMatrix:Hide()
+            self.TeamDisplay:UpdatePlayers(playerOptions)
+        else
+            self.ConnectionMatrix:Show()
+            self.ConnectionMatrix:UpdatePlayerNames(playerOptions)
+        end
 
         if pathToScenarioInfo and playerOptions then
             -- hide it for now until we have a better way to decipher its possible (negative) impact
@@ -143,7 +225,62 @@ local AutolobbyInterface = Class(Group) {
     ---@param self UIAutolobbyInterface
     ---@param id number
     UpdateIsAliveStamp = function(self, id)
-        self.ConnectionMatrix:UpdateIsAliveTimestamp(id)
+        if not self.State.IsGafAutohost then
+            self.ConnectionMatrix:UpdateIsAliveTimestamp(id)
+        end
+    end,
+
+    --- Shows the server-provided time remaining for peers to connect.
+    ---@param self UIAutolobbyInterface
+    ---@param timeoutSeconds number
+    StartConnectionCountdown = function(self, timeoutSeconds)
+        if self.TimeoutThread then
+            KillThread(self.TimeoutThread)
+            self.TimeoutThread = nil
+        end
+
+        timeoutSeconds = math.max(0, tonumber(timeoutSeconds) or 0)
+        if timeoutSeconds <= 0 then
+            self.TimeoutLabel:Hide()
+            return
+        end
+
+        local deadline = GetSystemTimeSeconds() + timeoutSeconds
+        -- Rebuilding the view must never grant a new connection window.
+        if self.State.ConnectionDeadlineSeconds then
+            deadline = math.min(deadline, self.State.ConnectionDeadlineSeconds)
+        end
+        self.State.ConnectionDeadlineSeconds = deadline
+        self.TimeoutLabel:Show()
+        self.TimeoutThread = ForkThread(function()
+            while not IsDestroyed(self) do
+                local remaining = math.max(0, math.ceil(deadline - GetSystemTimeSeconds()))
+                local minutes = math.floor(remaining / 60)
+                local seconds = math.mod(remaining, 60)
+                local clock = string.format("%02d:%02d", minutes, seconds)
+                self.TimeoutLabel:SetText(string.format(
+                    LOC("<LOC gaf_autolobby_connect_timeout>Waiting for players: %s"),
+                    clock
+                ))
+                if remaining <= 0 then
+                    self.TimeoutThread = nil
+                    -- No more peers may join after the server deadline. Closing
+                    -- this stalled auto-lobby also lets the Java client present
+                    -- the final timeout state instead of leaving FA open forever.
+                    ExitApplication()
+                    return
+                end
+                WaitSeconds(1)
+            end
+        end)
+    end,
+
+    OnDestroy = function(self)
+        if self.TimeoutThread then
+            KillThread(self.TimeoutThread)
+            self.TimeoutThread = nil
+        end
+        Group.OnDestroy(self)
     end,
 
     --#region Debugging
@@ -152,6 +289,7 @@ local AutolobbyInterface = Class(Group) {
     ---@param state UIAutolobbyInterfaceState
     RestoreState = function(self, state)
         self.State = state
+        self:SetGafAutohostMode(state.IsGafAutohost)
 
         if state.PathToScenarioFile and state.PlayerOptions then
             local ok, msg = pcall(self.UpdateScenario, self, state.PathToScenarioFile, state.PlayerOptions)
@@ -172,6 +310,11 @@ local AutolobbyInterface = Class(Group) {
             if not ok then
                 WARN(msg)
             end
+        end
+
+        if state.ConnectionDeadlineSeconds then
+            self:StartConnectionCountdown(math.max(0.001,
+                state.ConnectionDeadlineSeconds - GetSystemTimeSeconds()))
         end
     end,
 

@@ -87,7 +87,10 @@ UnitBlueprint{
     },
     Footprint = { MinWaterDepth = 1.5 },
     General = {
-        CommandCaps = { RULEUCC_Pause = true },
+        CommandCaps = {
+            RULEUCC_Pause = true,
+            RULEUCC_Stop = true,
+        },
         FactionName = "Cybran",
         Icon = "sea",
         OrderOverrides = {
@@ -106,6 +109,7 @@ UnitBlueprint{
         ShowIntelOnSelect = true,
         SonarRadius = 160,
         VisionRadius = 20,
+        WaterVisionRadius = 35,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.2,

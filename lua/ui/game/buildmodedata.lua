@@ -592,8 +592,22 @@ buildModeKeys = {
         [3] = AeonT3Eng,
         [4] = AeonT4Eng,
     },
-    -- subcommander - nano combatant preset
-    ['ual0301_nanocombat'] = {
+    -- subcommander - Defiler preset
+    ['ual0301_defiler'] = {
+        [1] = AeonT1Eng,
+        [2] = AeonT2Eng,
+        [3] = AeonT3Eng,
+        [4] = AeonT4Eng,
+    },
+    -- subcommander - Aegis preset
+    ['ual0301_aegis'] = {
+        [1] = AeonT1Eng,
+        [2] = AeonT2Eng,
+        [3] = AeonT3Eng,
+        [4] = AeonT4Eng,
+    },
+    -- subcommander - Heretic preset
+    ['ual0301_heretic'] = {
         [1] = AeonT1Eng,
         [2] = AeonT2Eng,
         [3] = AeonT3Eng,
@@ -723,7 +737,9 @@ buildModeKeys = {
             ['F'] = 'ual0301_ras',
             ['T'] = 'ual0301_simplecombat',
             ['E'] = 'ual0301_engineer',
-            ['N'] = 'ual0301_nanocombat',
+            ['D'] = 'ual0301_defiler',
+            ['A'] = 'ual0301_aegis',
+            ['H'] = 'ual0301_heretic',
             ['S'] = 'ual0301_shieldcombat',
             ['R'] = 'ual0301_rambo',
         },
@@ -811,20 +827,6 @@ buildModeKeys = {
     },
     -- subcommander - rambo preset
     ['uel0301_rambo'] = {
-        [1] = UEFT1Eng,
-        [2] = UEFT2Eng,
-        [3] = UEFT3Eng,
-        [4] = UEFT4Eng,
-    },
-    -- subcommander - shield preset
-    ['uel0301_bubbleshield'] = {
-        [1] = UEFT1Eng,
-        [2] = UEFT2Eng,
-        [3] = UEFT3Eng,
-        [4] = UEFT4Eng,
-    },
-    -- subcommander - intel jammer preset
-    ['uel0301_inteljammer'] = {
         [1] = UEFT1Eng,
         [2] = UEFT2Eng,
         [3] = UEFT3Eng,
@@ -946,9 +948,6 @@ buildModeKeys = {
             ['T'] = 'uel0301_combat',
             ['E'] = 'uel0301_engineer',
             ['R'] = 'uel0301_rambo',
-            ['S'] = 'uel0301_bubbleshield',
-            ['J'] = 'uel0301_inteljammer',
-
         },
     },
     -- T1 Mass Extractor
@@ -1265,13 +1264,6 @@ buildModeKeys = {
         [3] = SeraphimT3Eng,
         [4] = SeraphimT4Eng,
     },
-    -- subcommander - rambo preset
-    ['xsl0301_rambo'] = {
-        [1] = SeraphimT1Eng,
-        [2] = SeraphimT2Eng,
-        [3] = SeraphimT3Eng,
-        [4] = SeraphimT4Eng,
-    },
     -- subcommander - missile preset
     ['xsl0301_missile'] = {
         [1] = SeraphimT1Eng,
@@ -1390,7 +1382,6 @@ buildModeKeys = {
             ['E'] = 'xsl0301_engineer',
             ['N'] = 'xsl0301_nanocombat',
             ['A'] = 'xsl0301_advancedcombat',
-            ['R'] = 'xsl0301_rambo',
             ['M'] = 'xsl0301_missile',
         },
     },

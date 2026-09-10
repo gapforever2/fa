@@ -26,6 +26,29 @@ local luft = require "./tests/packages/luft"
 ---@type UnitBlueprint[]
 local BlueprintUnits = {}
 
+---@type table<string, boolean> set of every <LOC ...> key referenced by a unit blueprint
+local UsedLocKeys = {}
+
+--- Recursively collects every <LOC key> referenced in a blueprint table so the
+--- localization coverage can be validated afterwards.
+---@param value any
+---@param seen table
+local function collectLocKeys(value, seen)
+    if type(value) ~= "table" or seen[value] then
+        return
+    end
+    seen[value] = true
+    for _, nested in pairs(value) do
+        if type(nested) == "string" then
+            for key in string.gfind(nested, "<LOC ([a-zA-Z0-9_]+)>") do
+                UsedLocKeys[key] = true
+            end
+        elseif type(nested) == "table" then
+            collectLocKeys(nested, seen)
+        end
+    end
+end
+
 -------------------------------------------------------------------------------
 --#region Mock constructors
 
@@ -46,6 +69,17 @@ function UnitBlueprint(bp)
     if bp.Description then
         BlueprintUnits[bp.Description] = bp
     end
+    collectLocKeys(bp, {})
+    return bp
+end
+
+local LastEmitterBlueprint
+
+---@param t table
+---@return table
+function EmitterBlueprint(t)
+    LastEmitterBlueprint = t
+    return t
 end
 
 ---@param bp MeshBlueprint
@@ -374,3 +408,538 @@ luft.describe(
         )
     end
 )
+
+-- The game's `LOC()` function silently falls back to the English text that
+-- follows the tag when a key is missing, which makes missing localization
+-- entries easy to miss. This test guarantees that every key referenced by a
+-- unit blueprint exists in the two loc files the mod maintains (US and RU).
+luft.describe('Localization', function()
+    ---@param file string
+    ---@return string
+    local function readLocFile(file)
+        local handle = io.open(file, "rb")
+        if not handle then
+            error("Could not open " .. file)
+        end
+        local content = handle:read("*a")
+        handle:close()
+        return content
+    end
+
+    local usLoc = readLocFile("./loc/US/strings_db.lua")
+    local ruLoc = readLocFile("./loc/RU/strings_db.lua")
+
+    ---@param content string
+    ---@param key string
+    ---@return boolean
+    local function hasKey(content, key)
+        -- loc entries are written as `key="..."` at the start of a line
+        return content:find("\n" .. key .. "=", 1, true) ~= nil
+    end
+
+    for key in pairs(UsedLocKeys) do
+        luft.test(
+            "Loc key " .. key .. " exists in US and RU",
+            function()
+                luft.expect(hasKey(usLoc, key)).to.equal(true)
+                luft.expect(hasKey(ruLoc, key)).to.equal(true)
+            end
+        )
+    end
+end)
+
+-- The Aeon SACU's Shield Amplifier enhancement boosts the live current/max health
+-- of explicitly supported allied shields. It also reinforces the SACU's own personal
+-- shield (fixed 7/6 multiplier: 15000 -> 17500, 30000 -> 35000, non-stacking) while
+-- cutting the SACU's own max health by 5500. The Entropy Field instead carries the
+-- cannon-power penalty: the main cannon damage drops from 300 to 100 while it is
+-- installed. The sim scripts that drive these cannot be executed by this harness,
+-- so besides the blueprint values we guard the script and effect invariants whose
+-- regression would silently break the buff at runtime.
+luft.describe('Aeon Shield Amplifier', function()
+    ---@param file string
+    ---@return string
+    local function readFile(file)
+        local handle = io.open(file, "rb")
+        if not handle then
+            error("Could not open " .. file)
+        end
+        local content = handle:read("*a")
+        handle:close()
+        return content
+    end
+
+    dofile("./lua/sim/aura/shieldamplifiermath.lua")
+
+    luft.describe('Live shield state transitions', function()
+        luft.test("Active 500/1000 enters as 1700/2200 and leaves as 500/1000", function()
+            local current, maximum = ShieldAmplifierApplyValues(500, 1000, 1200, true)
+            luft.expect(current).to.equal(1700)
+            luft.expect(maximum).to.equal(2200)
+
+            local collapse
+            current, maximum, collapse = ShieldAmplifierRemoveValues(current, maximum, 1200, true)
+            luft.expect(current).to.equal(500)
+            luft.expect(maximum).to.equal(1000)
+            luft.expect(collapse).to.equal(false)
+        end)
+
+        luft.test("Full 1000/1000 enters as 2200/2200", function()
+            local current, maximum = ShieldAmplifierApplyValues(1000, 1000, 1200, true)
+            luft.expect(current).to.equal(2200)
+            luft.expect(maximum).to.equal(2200)
+        end)
+
+        luft.test("Collapsed shield gains and loses maximum HP only", function()
+            local current, maximum = ShieldAmplifierApplyValues(0, 1000, 1200, false)
+            luft.expect(current).to.equal(0)
+            luft.expect(maximum).to.equal(2200)
+
+            local collapse
+            current, maximum, collapse = ShieldAmplifierRemoveValues(current, maximum, 1200, false)
+            luft.expect(current).to.equal(0)
+            luft.expect(maximum).to.equal(1000)
+            luft.expect(collapse).to.equal(false)
+        end)
+
+        luft.test("Leaving at 700/2200 collapses to 0/1000", function()
+            local current, maximum, collapse = ShieldAmplifierRemoveValues(700, 2200, 1200, true)
+            luft.expect(current).to.equal(0)
+            luft.expect(maximum).to.equal(1000)
+            luft.expect(collapse).to.equal(true)
+        end)
+
+        luft.test("Recharge completes against the live maximum inside and outside the field", function()
+            local current, maximum = ShieldAmplifierApplyValues(0, 1000, 1200, false)
+            current = maximum
+            luft.expect(current).to.equal(2200)
+            luft.expect(maximum).to.equal(2200)
+
+            local collapse
+            current, maximum, collapse = ShieldAmplifierRemoveValues(current, maximum, 1200, true)
+            luft.expect(current).to.equal(1000)
+            luft.expect(maximum).to.equal(1000)
+            luft.expect(collapse).to.equal(false)
+        end)
+    end)
+
+    ---@type UnitBlueprint?
+    local ual0301
+    for _, bp in pairs(BlueprintUnits) do
+        if bp.Description and bp.Description:find("ual0301_desc", 1, true) then
+            ual0301 = bp
+            break
+        end
+    end
+
+    luft.describe('Blueprint', function()
+        luft.test("UAL0301 defines the ShieldAmplifier enhancement", function()
+            luft.expect(ual0301).to.be.an("table")
+            luft.expect(ual0301.Enhancements.ShieldAmplifier).to.be.an("table")
+        end)
+
+        luft.test("ShieldAmplifier has a radius of 30 and no blueprint multiplier fields", function()
+            local enh = ual0301.Enhancements.ShieldAmplifier
+            luft.expect(enh.Radius).to.equal(30)
+            luft.expect(enh.ShieldHealthMult).to.equal(nil)
+            luft.expect(enh.ShieldHealthMultT2).to.equal(nil)
+            luft.expect(enh.ShieldHealthMultACU).to.equal(nil)
+            luft.expect(enh.MaintenanceConsumptionPerSecondEnergy).to.equal(500)
+        end)
+
+        luft.test("Entropy Field diverts cannon power: 300 -> 100 damage", function()
+            local enh = ual0301.Enhancements.RegenDampener
+            luft.expect(enh.NewDamageMod).to.equal(-200)
+        end)
+
+        luft.test("ShieldAmplifier debuffs the SACU by -5500 max health", function()
+            luft.expect(ual0301.Enhancements.ShieldAmplifier.ACUAddHealth).to.equal(-5500)
+        end)
+
+        luft.test("ShieldAmplifier sits on the back, Entropy Field on the right arm (RCH)", function()
+            luft.expect(ual0301.Enhancements.ShieldAmplifier.Slot).to.equal("Back")
+            luft.expect(ual0301.Enhancements.ShieldAmplifierRemove.Slot).to.equal("Back")
+            luft.expect(ual0301.Enhancements.RegenDampener.Slot).to.equal("RCH")
+            luft.expect(ual0301.Enhancements.RegenDampenerRemove.Slot).to.equal("RCH")
+            luft.expect(ual0301.Enhancements.SensorRangeEnhancer.Slot).to.equal("LCH")
+            luft.expect(ual0301.Enhancements.SensorRangeEnhancerRemove.Slot).to.equal("LCH")
+        end)
+
+        luft.test("Right arm enhancements display left to right in the intended order", function()
+            local expected = { "StabilitySuppressant", "RegenDampener", "EngineeringFocusingModule", "Sacrifice" }
+            local enh = ual0301.Enhancements
+            local rch = {}
+            for name, tbl in pairs(enh) do
+                if tbl.Slot == "RCH" and not string.find(name, "Remove", 1, true) then
+                    table.insert(rch, name)
+                end
+            end
+            table.sort(rch, function(a, b)
+                local pa = enh[a].BuildIconSortPriority or 99
+                local pb = enh[b].BuildIconSortPriority or 99
+                if pa == pb then
+                    return a < b
+                end
+                return pa < pb
+            end)
+            luft.expect(rch).to.equal(expected)
+        end)
+
+        luft.test("Nano-Repair System requires the Shield Amplifier first", function()
+            luft.expect(ual0301.Enhancements.SystemIntegrityCompensator.Prerequisite).to.equal("ShieldAmplifier")
+        end)
+
+        luft.test("ShieldAmplifier does not carry the cannon damage penalty anymore", function()
+            luft.expect(ual0301.Enhancements.ShieldAmplifier.NewDamageMod).to.equal(nil)
+        end)
+
+        luft.test("ShieldAmplifierRemove drops the ShieldAmplifier", function()
+            local remove = ual0301.Enhancements.ShieldAmplifierRemove
+            luft.expect(remove).to.be.an("table")
+            luft.expect(remove.RemoveEnhancements).to.have("ShieldAmplifier")
+        end)
+    end)
+
+    luft.describe('Aura emitter', function()
+        LastEmitterBlueprint = nil
+        dofile("./effects/emitters/aeon_shield_amplifier_aura_02_emit.bp")
+        local emitter = LastEmitterBlueprint
+
+        luft.test("Emitter is the shield amplifier aura", function()
+            luft.expect(emitter.BlueprintId).to.equal("aeon_shield_amplifier_aura_02")
+        end)
+
+        luft.test("Emitter loops indefinitely", function()
+            -- A finite Lifetime would make the permanent buff's visual fade out once
+            -- the emitter expires, looking as if the buff stopped working.
+            luft.expect(emitter.Lifetime).to.equal(-1)
+        end)
+    end)
+
+    luft.describe('UAL0301_script.lua', function()
+        local script = readFile("./units/UAL0301/UAL0301_script.lua")
+        local mobile = readFile("./lua/sim/units/MobileUnit.lua")
+        local entropy = readFile("./lua/sim/weapons/aeon/adfentropyfield.lua")
+
+        luft.test("Registers a permanent visual buff", function()
+            -- The buff itself only carries the aura emitter; live shield HP transitions
+            -- are handled independently by MobileUnit.
+            luft.expect(script:find("BuffType = 'AEONSCUSHIELDAURA'", 1, true)).to.be.an("number")
+            luft.expect(script:find("Duration = -1", 1, true)).to.be.an("number")
+            luft.expect(script:find("Affects = {},", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Changes live current/max HP without recreating the shield", function()
+            luft.expect(mobile:find("AeonShieldAmpApplyBonus", 1, true)).to.be.an("number")
+            luft.expect(mobile:find("AeonShieldAmpRemoveBonus", 1, true)).to.be.an("number")
+            luft.expect(mobile:find("EntitySetMaxHealth(shield, newMax)", 1, true)).to.be.an("number")
+            luft.expect(mobile:find("ChangeState(shield, shield.DamageDrainedState)", 1, true)).to.be.an("number")
+            luft.expect(mobile:find("CreateShield", 1, true)).to.equal(nil)
+            luft.expect(script:find("ShieldHealthMult", 1, true)).to.equal(nil)
+        end)
+
+        luft.test("Tracks overlapping sources without stacking or emitter churn", function()
+            luft.expect(mobile:find("AeonShieldAmpRegisterSource", 1, true)).to.be.an("number")
+            luft.expect(mobile:find("AeonShieldAmpUnregisterSource", 1, true)).to.be.an("number")
+            luft.expect(script:find("if not Buff.HasBuff(u, 'AeonShieldAmplifier') then", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Entropy keeps one target marker attached to a central model bone", function()
+            luft.expect(entropy:find("GetClosestVisualBone", 1, true)).to.be.an("number")
+            luft.expect(entropy:find("CreateAttachedEmitter(target, bone", 1, true)).to.be.an("number")
+            luft.expect(entropy:find("weapon.FxUnitStun[1]", 1, true)).to.be.an("number")
+            luft.expect(entropy:find("CreateEmitterAtBone(target", 1, true)).to.equal(nil)
+            luft.expect(entropy:find("aeon_regen_dampener_charge_02_emit.bp", 1, true)).to.equal(nil)
+        end)
+
+        luft.test("Publishes two terrain-aware purple aura visuals with live radii", function()
+            luft.expect(script:find("AuraVisuals = {", 1, true)).to.be.an("number")
+            luft.expect(script:find("[EntropyAuraVisualId]", 1, true)).to.be.an("number")
+            luft.expect(script:find("[ShieldAmplifierAuraVisualId]", 1, true)).to.be.an("number")
+            luft.expect(script:find("Color = 'ffd000ff'", 1, true)).to.be.an("number")
+            luft.expect(script:find("Thickness = 0.12", 1, true)).to.be.an("number")
+            luft.expect(script:find("weapon:GetMaxRadius()", 1, true)).to.be.an("number")
+            luft.expect(script:find("self:GetShieldAmplifierRadius()", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Applies the buff immediately without an entry window", function()
+            -- The old delayed-entry implementation kept a ShieldAmplifierEntry state
+            -- table; the buff is now applied as soon as a unit enters the field.
+            luft.expect(script:find("ShieldAmplifierEntry", 1, true)).to.equal(nil)
+            luft.expect(script:find("ShieldAmplifierThread", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Restricts the aura to the twelve shield units", function()
+            -- The amplifier no longer affects other factions or any other ground unit:
+            -- only Obsidian, the T2 mobile shield, the Harbinger, the ACU, SACUs
+            -- carrying a personal shield, the Seraphim SACU and the Athanah, plus the
+            -- UEF T2 mobile shield, the Titan, the Fatboy, the UEF ACU and the UEF SACU.
+            luft.expect(script:find("AeonShieldAmpTargets", 1, true)).to.be.an("number")
+            luft.expect(script:find("ual0202", 1, true)).to.be.an("number")
+            luft.expect(script:find("ual0307", 1, true)).to.be.an("number")
+            luft.expect(script:find("ual0303", 1, true)).to.be.an("number")
+            luft.expect(script:find("ual0001", 1, true)).to.be.an("number")
+            luft.expect(script:find("ual0301", 1, true)).to.be.an("number")
+            luft.expect(script:find("xsl0301 = 1.2", 1, true)).to.be.an("number")
+            luft.expect(script:find("xsl0307 = 1.25", 1, true)).to.be.an("number")
+            luft.expect(script:find("uel0307 = 1.25", 1, true)).to.be.an("number")
+            luft.expect(script:find("uel0303 = 2.142857", 1, true)).to.be.an("number")
+            luft.expect(script:find("uel0401 = 1.125", 1, true)).to.be.an("number")
+            luft.expect(script:find("uel0001 = {", 1, true)).to.be.an("number")
+            luft.expect(script:find("uel0301 = {", 1, true)).to.be.an("number")
+            for _, cat in ipairs({ "categories.AIR", "categories.NAVAL", "categories.STRUCTURE" }) do
+                luft.expect(script:find("- " .. cat, 1, true)).to.be.an("number")
+            end
+            -- The Fatboy is an experimental, so the scan cannot subtract EXPERIMENTAL.
+            luft.expect(script:find("- categories.EXPERIMENTAL", 1, true)).to.equal(nil)
+        end)
+
+        luft.test("ACU gets a x1.25 light / x1.2 heavy multiplier in the targets table", function()
+            -- The ACU's shields (ShieldAeon / ShieldHeavyAeon) are enhancement-based,
+            -- so each shield gets its own fixed multiplier in a nested table:
+            -- 8000 -> 10000 and 25000 -> 30000.
+            luft.expect(script:find("ual0001 = {", 1, true)).to.be.an("number")
+            luft.expect(script:find("ShieldAeon = 1.25", 1, true)).to.be.an("number")
+            luft.expect(script:find("ShieldHeavyAeon = 1.2", 1, true)).to.be.an("number")
+            luft.expect(script:find("ShieldHealthMultACU", 1, true)).to.equal(nil)
+        end)
+
+        luft.test("Aura scan does not exclude command units", function()
+            -- A dedicated amplifier SACU must be able to reinforce the personal shield
+            -- of another friendly SACU standing inside the field, so the scan cannot
+            -- subtract COMMAND (the SACU is a command unit).
+            luft.expect(script:find("categories.MOBILE", 1, true)).to.be.an("number")
+            luft.expect(script:find("- categories.COMMAND", 1, true)).to.equal(nil)
+        end)
+
+        luft.test("Boosts the SACU's own shield by a fixed 7/6 multiplier", function()
+            -- Non-stacking: a single multiplier for both shield stages,
+            -- 15000 -> 17500 (+2500) and 30000 -> 35000 (+5000).
+            luft.expect(script:find("ShieldAmplifierSelfMult", 1, true)).to.be.an("number")
+            luft.expect(script:find("ShieldAmplifierApplySelf", 1, true)).to.be.an("number")
+            luft.expect(script:find("return 1.166667", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Entropy Field cuts the main cannon damage while installed", function()
+            -- The cannon-power penalty moved from the Shield Amplifier to the Entropy
+            -- Field: its handler adds -200 and the remove handler restores it.
+            luft.expect(script:find("AddDamageMod(bp.NewDamageMod or -200)", 1, true)).to.be.an("number")
+            luft.expect(script:find("NewDamageMod or -200", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Shield Amplifier debuffs the SACU with a -5500 max health buff", function()
+            luft.expect(script:find("AeonShieldAmpSelfDebuff", 1, true)).to.be.an("number")
+            luft.expect(script:find("ACUAddHealth or -5500", 1, true)).to.be.an("number")
+            -- The amplifier no longer touches the main cannon damage.
+            luft.expect(script:find("wep:AddDamageMod", 1, true)).to.equal(nil)
+        end)
+
+        luft.test("Eligibility requires an existing, non-destroyed shield", function()
+            luft.expect(script:find("u.MyShield", 1, true)).to.be.an("number")
+            luft.expect(script:find("BeenDestroyed", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Applies per-unit multipliers (x1.142857 Obsidian/Asylum, x2.2 Harbinger)", function()
+            -- No category tiers; each shielded unit carries its own fixed multiplier
+            -- in the targets table, derived from base + bonus.
+            luft.expect(script:find("ual0202 = 1.142857", 1, true)).to.be.an("number")
+            luft.expect(script:find("ual0307 = 1.142857", 1, true)).to.be.an("number")
+            luft.expect(script:find("ual0303 = 2.2", 1, true)).to.be.an("number")
+            luft.expect(script:find("ShieldHealthMultT2", 1, true)).to.equal(nil)
+            luft.expect(script:find("type(targetMult) == 'number'", 1, true)).to.equal(nil)
+        end)
+    end)
+
+    luft.describe('UAL0001_script.lua', function()
+        local script = readFile("./units/UAL0001/UAL0001_script.lua")
+
+        luft.test("Boosts both enhancement-based shields via the aura's apply path", function()
+            -- The ACU's shields are Enhancements.ShieldAeon / ShieldHeavyAeon, not a
+            -- Defense.Shield entry, so the base spec comes from the active enhancement.
+            luft.expect(script:find("AeonShieldAmpApply", 1, true)).to.be.an("number")
+            luft.expect(script:find("AeonShieldAmpRemove", 1, true)).to.be.an("number")
+            luft.expect(script:find("HasEnhancement('ShieldHeavyAeon')", 1, true)).to.be.an("number")
+            luft.expect(script:find("HasEnhancement('ShieldAeon')", 1, true)).to.be.an("number")
+            luft.expect(script:find("type(mult) == 'table'", 1, true)).to.be.an("number")
+            luft.expect(script:find("AeonShieldAmpApplyBonus", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Re-applies the boost when the shield is upgraded mid-aura", function()
+            -- Upgrading ShieldAeon -> ShieldHeavyAeon while inside the field must keep
+            -- the boosted capacity on the new shield.
+            luft.expect(script:find("RefreshShieldAmplifierBuff", 1, true)).to.be.an("number")
+            luft.expect(script:find("AeonShieldAmpGetSourceMult", 1, true)).to.be.an("number")
+            luft.expect(script:find("AeonShieldAmpApply(nil, mult)", 1, true)).to.be.an("number")
+        end)
+    end)
+
+    luft.describe('lua/sim/Buff.lua', function()
+        local buff = readFile("./lua/sim/Buff.lua")
+
+        luft.test("ShieldMaxHealth effect uses shield methods, not undefined globals", function()
+            -- The previous implementation called EntityGet* globals that do not exist
+            -- in Buff.lua and crashed the effect, so the boost was never applied.
+            luft.expect(buff:find("EntityGetMaxHealth", 1, true)).to.equal(nil)
+            luft.expect(buff:find("EntitySetMaxHealth", 1, true)).to.equal(nil)
+            luft.expect(buff:find("shield:GetMaxHealth()", 1, true)).to.be.an("number")
+            luft.expect(buff:find("shield:SetMaxHealth(", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Effect captures and restores the unbuffed shield base", function()
+            luft.expect(buff:find("AeonShieldAmpBaseMax", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("HasBuff is nil-safe when the buff type is absent", function()
+            luft.expect(buff:find("buffType ~= nil", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Seraphim ACU and SACU auras use strongest-only priority", function()
+            luft.expect(buff:find("SeraphimAuraPriorities", 1, true)).to.be.an("number")
+            luft.expect(buff:find("SeraphimACURegenAura = 1", 1, true)).to.be.an("number")
+            luft.expect(buff:find("SeraphimSCURegenField = 2", 1, true)).to.be.an("number")
+            luft.expect(buff:find("SeraphimSCUHealthField = 2", 1, true)).to.be.an("number")
+            luft.expect(buff:find("SeraphimACUAdvancedRegenAura = 3", 1, true)).to.be.an("number")
+            luft.expect(buff:find("IsWeakerSeraphimAuraAffect", 1, true)).to.be.an("number")
+        end)
+    end)
+
+    ---@type UnitBlueprint?
+    local xsl0301
+    for _, bp in pairs(BlueprintUnits) do
+        if bp.Description and bp.Description:find("xsl0301_desc", 1, true) then
+            xsl0301 = bp
+            break
+        end
+    end
+
+    luft.describe('XSL0301', function()
+        luft.test("Restoration Field defines midpoint percentage regen and corrected caps", function()
+            luft.expect(xsl0301).to.be.an("table")
+            local enh = xsl0301.Enhancements.RegenField
+            luft.expect(enh).to.be.an("table")
+            luft.expect(enh.RegenPerSecond).to.equal(0.0275)
+            luft.expect(enh.RegenFloor).to.equal(9)
+            luft.expect(enh.RegenCeilingT1).to.equal(15)
+            luft.expect(enh.RegenCeilingT2).to.equal(30)
+            luft.expect(enh.RegenCeilingT3).to.equal(70)
+            luft.expect(enh.RegenCeilingSCU).to.equal(20)
+            luft.expect(enh.RegenCeilingT4).to.equal(90)
+            luft.expect(enh.Radius).to.equal(25)
+        end)
+
+        luft.test("Both fields target ground units including SACUs and exclude ACUs, air, navy and structures", function()
+            local cat = xsl0301.Enhancements.RegenField.UnitCategory
+            luft.expect(cat).to.be.an("string")
+            luft.expect(cat:find("LAND", 1, true)).to.be.an("number")
+            luft.expect(cat:find("HOVER", 1, true)).to.be.an("number")
+            luft.expect(cat:find("AMPHIBIOUS", 1, true)).to.be.an("number")
+            luft.expect(cat:find("- AIR", 1, true)).to.be.an("number")
+            luft.expect(cat:find("- NAVAL", 1, true)).to.be.an("number")
+            luft.expect(cat:find("- STRUCTURE", 1, true)).to.be.an("number")
+            luft.expect(cat:find("- COMMAND", 1, true)).to.be.an("number")
+            luft.expect(cat:find("- ENGINEER", 1, true)).to.equal(nil)
+
+            local healthCat = xsl0301.Enhancements.HealthField.UnitCategory
+            luft.expect(healthCat).to.equal(cat)
+        end)
+
+        luft.test("Script registers one percentage-based non-stacking regen buff", function()
+            local script = readFile("./units/XSL0301/XSL0301_script.lua")
+            luft.expect(script:find("local RegenFieldBuffName = 'SeraphimSCURegenField'", 1, true)).to.be.an("number")
+            luft.expect(script:find("Mult = bp.RegenPerSecond or 0.0275", 1, true)).to.be.an("number")
+            luft.expect(script:find("BPCeilings", 1, true)).to.be.an("number")
+            luft.expect(script:find("Stacks = 'IGNORE'", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Restoration and Vitality affect every allied faction including engineers", function()
+            local script = readFile("./units/XSL0301/XSL0301_script.lua")
+            local targetStart = script:find("GetUnitsToBuff = function", 1, true)
+            local targetEnd = script:find("RegenFieldRegisterTarget = function", targetStart, true)
+            local auraTargets = script:sub(targetStart, targetEnd)
+            luft.expect(auraTargets:find("categories.SERAPHIM", 1, true)).to.equal(nil)
+            luft.expect(auraTargets:find("categories.ENGINEER", 1, true)).to.equal(nil)
+            luft.expect(auraTargets:find("categories.COMMAND", 1, true)).to.be.an("number")
+            luft.expect(auraTargets:find("categories.LAND", 1, true)).to.be.an("number")
+            luft.expect(auraTargets:find("'Ally'", 1, true)).to.be.an("number")
+            luft.expect(auraTargets:find("ParseEntityCategory", 1, true)).to.equal(nil)
+        end)
+
+        luft.test("Restoration regen persists continuously until the target exits", function()
+            local script = readFile("./units/XSL0301/XSL0301_script.lua")
+            luft.expect(script:find("RegenFieldRegisterTarget", 1, true)).to.be.an("number")
+            luft.expect(script:find("RegenFieldUnregisterTarget", 1, true)).to.be.an("number")
+            luft.expect(script:find("RegenFieldRemoveAll", 1, true)).to.be.an("number")
+            luft.expect(script:find("SeraphimRegenFieldSources", 1, true)).to.be.an("number")
+            luft.expect(script:find("Duration = -1", 1, true)).to.be.an("number")
+            luft.expect(script:find("WaitTicks(50)", 1, true)).to.equal(nil)
+            luft.expect(script:find("while not self.Dead and self.RegenFieldEnabled do", 1, true)).to.be.an("number")
+            luft.expect(script:find("while not self.Dead and self.HealthFieldEnabled do", 1, true)).to.be.an("number")
+            luft.expect(script:find("source.RegenFieldEnabled", 1, true)).to.be.an("number")
+            luft.expect(script:find("source.HealthFieldEnabled", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Vitality Field grants +15 percent maximum HP without filling it", function()
+            local enh = xsl0301.Enhancements.HealthField
+            luft.expect(enh.MaxHealthFactor).to.equal(1.15)
+            luft.expect(enh.HealthBonus).to.equal(nil)
+            local script = readFile("./units/XSL0301/XSL0301_script.lua")
+            luft.expect(script:find("Mult = factor", 1, true)).to.be.an("number")
+            luft.expect(script:find("DoNotFill = true", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Vitality tracks entries, exits and source death without obsolete lethal handling", function()
+            local script = readFile("./units/XSL0301/XSL0301_script.lua")
+            local descriptions = readFile("./lua/ui/help/unitdescription.lua")
+            luft.expect(script:find("HealthFieldRegisterTarget", 1, true)).to.be.an("number")
+            luft.expect(script:find("HealthFieldUnregisterTarget", 1, true)).to.be.an("number")
+            luft.expect(script:find("HealthFieldRemoveAll", 1, true)).to.be.an("number")
+            luft.expect(script:find("VitalityFieldIsLethal", 1, true)).to.equal(nil)
+            luft.expect(script:find("unit:Kill(self, 'VitalityField', 0)", 1, true)).to.equal(nil)
+            luft.expect(script:find("seraphim_vitality_warning_01_emit.bp", 1, true)).to.equal(nil)
+            luft.expect(descriptions:find("['xsl0301-nrf']", 1, true)).to.be.an("number")
+            luft.expect(descriptions:find("<LOC xsl0301_healthfield_desc>", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Vitality Field no longer debuffs the SACU", function()
+            luft.expect(xsl0301.Enhancements.HealthField.ACUAddHealth).to.equal(nil)
+        end)
+
+        luft.test("Restoration Field carries the SACU self debuff of -7000 HP", function()
+            local enh = xsl0301.Enhancements.RegenField
+            luft.expect(enh.ACUAddHealth).to.equal(-7000)
+            local script = readFile("./units/XSL0301/XSL0301_script.lua")
+            luft.expect(script:find("SeraphimSCURegenFieldSelf", 1, true)).to.be.an("number")
+            luft.expect(script:find("ACUAddHealth or -7000", 1, true)).to.be.an("number")
+            -- The old HealthField self debuff buff is gone from the script.
+            luft.expect(script:find("SeraphimSCUHealthFieldSelf", 1, true)).to.equal(nil)
+        end)
+
+        luft.test("Personal Shield requires the Restoration Field first", function()
+            luft.expect(xsl0301.Enhancements.Shield.Prerequisite).to.equal("RegenField")
+            -- The Seth-Iyah preset installs the shield, so it must also install the
+            -- prerequisite field for the enhancement chain to stay consistent.
+            local preset = xsl0301.EnhancementPresets.SethIyah.Enhancements
+            luft.expect(preset).to.have("RegenField")
+            luft.expect(preset).to.have("Shield")
+        end)
+
+        luft.test("Personal Shield debuffs the SACU by -5000 HP", function()
+            luft.expect(xsl0301.Enhancements.Shield.ACUAddHealth).to.equal(-5000)
+            local script = readFile("./units/XSL0301/XSL0301_script.lua")
+            luft.expect(script:find("SeraphimSCUShieldSelf", 1, true)).to.be.an("number")
+            luft.expect(script:find("ACUAddHealth or -5000", 1, true)).to.be.an("number")
+            luft.expect(script:find("COMMANDERAURAFORSELF_SCUShield", 1, true)).to.be.an("number")
+        end)
+
+        luft.test("Aeon Shield Amplifier aura boosts the personal shield to 6000 (x1.2)", function()
+            -- The Seraphim SACU's shield is enhancement-based (5000 base), so the
+            -- amplifier applies the fixed x1.2 multiplier from the UAL0301 targets
+            -- table through the same live shield-state path as the other shield units.
+            luft.expect(xsl0301.Enhancements.Shield.ShieldMaxHealth).to.equal(5000)
+            local script = readFile("./units/XSL0301/XSL0301_script.lua")
+            luft.expect(script:find("AeonShieldAmpApply", 1, true)).to.be.an("number")
+            luft.expect(script:find("AeonShieldAmpRemove", 1, true)).to.be.an("number")
+            luft.expect(script:find("RefreshShieldAmplifierBuff", 1, true)).to.be.an("number")
+        end)
+    end)
+end)

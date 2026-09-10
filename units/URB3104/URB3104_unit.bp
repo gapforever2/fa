@@ -92,6 +92,7 @@ UnitBlueprint{
         SizeZ = 1,
     },
     General = {
+        CommandCaps = { RULEUCC_Stop = true },
         FactionName = "Cybran",
         Icon = "land",
         OrderOverrides = {

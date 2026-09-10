@@ -109,6 +109,22 @@ UEL0001 = ClassUnit(ACUUnit) {
         ACUUnit.__init(self, 'RightZephyr')
     end,
 
+    --- Keeps the indirect-fire overlay in sync with the installed launcher.
+    ---@param self UEL0001
+    ---@param tacticalEnabled boolean
+    ---@param billyEnabled boolean
+    SetMissileOverlayRanges = function(self, tacticalEnabled, billyEnabled)
+        local tactical = self:GetWeaponByLabel('TacMissile')
+        local tacticalBlueprint = tactical:GetBlueprint()
+        tactical:ChangeMinRadius(tacticalEnabled and (tacticalBlueprint.MinRadius or 0) or 0)
+        tactical:ChangeMaxRadius(tacticalEnabled and (tacticalBlueprint.MaxRadius or 0) or 0)
+
+        local billy = self:GetWeaponByLabel('TacNukeMissile')
+        local billyBlueprint = billy:GetBlueprint()
+        billy:ChangeMinRadius(billyEnabled and (billyBlueprint.MinRadius or 0) or 0)
+        billy:ChangeMaxRadius(billyEnabled and (billyBlueprint.MaxRadius or 0) or 0)
+    end,
+
     ---@param self UEL0001
     OnCreate = function(self)
         ACUUnit.OnCreate(self)
@@ -143,6 +159,7 @@ UEL0001 = ClassUnit(ACUUnit) {
         self:SetWeaponEnabledByLabel('RightZephyr', true)
         self:SetWeaponEnabledByLabel('TacMissile', false)
         self:SetWeaponEnabledByLabel('TacNukeMissile', false)
+        self:SetMissileOverlayRanges(false, false)
         self:ForkThread(self.GiveInitialResources)
     end,
 
@@ -360,23 +377,29 @@ UEL0001 = ClassUnit(ACUUnit) {
             self:CreateShield(bp)
             self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
             self:SetMaintenanceConsumptionActive()
+            self:RefreshShieldAmplifierBuff()
         elseif enh == 'ShieldUEFRemove' then
+            self:AeonShieldAmpRemove()
             self:DestroyShield()
             self:SetMaintenanceConsumptionInactive()
             RemoveUnitEnhancement(self, 'ShieldRemove')
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
         elseif enh == 'ShieldGeneratorFieldUEF' then
             self:AddToggleCap('RULEUTC_ShieldToggle')
+            local savedBonus = self.AeonShieldAmpBonus
+            local savedMult = self.AeonShieldAmpMult
+            if savedBonus then
+                self:AeonShieldAmpRemove()
+            end
             self:DestroyShield()
-            self:ForkThread(
-                function()
-                    WaitTicks(1)
-                    self:CreateShield(bp)
-                    self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-                    self:SetMaintenanceConsumptionActive()
-                end
-            )
+            self:CreateShield(bp)
+            self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
+            self:SetMaintenanceConsumptionActive()
+            if savedBonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+                self:AeonShieldAmpApply(nil, savedMult or 1)
+            end
         elseif enh == 'ShieldGeneratorFieldUEFRemove' then
+            self:AeonShieldAmpRemove()
             self:DestroyShield()
             self:SetMaintenanceConsumptionInactive()
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
@@ -534,6 +557,7 @@ UEL0001 = ClassUnit(ACUUnit) {
             self:AddCommandCap('RULEUCC_Tactical')
             self:AddCommandCap('RULEUCC_SiloBuildTactical')
             self:SetWeaponEnabledByLabel('TacMissile', true)
+            self:SetMissileOverlayRanges(true, false)
         elseif enh == 'TacticalNukeMissileUEF' then
             self:RemoveCommandCap('RULEUCC_Tactical')
             self:RemoveCommandCap('RULEUCC_SiloBuildTactical')
@@ -541,6 +565,7 @@ UEL0001 = ClassUnit(ACUUnit) {
             self:AddCommandCap('RULEUCC_SiloBuildNuke')
             self:SetWeaponEnabledByLabel('TacMissile', false)
             self:SetWeaponEnabledByLabel('TacNukeMissile', true)
+            self:SetMissileOverlayRanges(false, true)
             local amt = self:GetTacticalSiloAmmoCount()
             self:RemoveTacticalSiloAmmo(amt or 0)
             self:StopSiloBuild()
@@ -551,11 +576,69 @@ UEL0001 = ClassUnit(ACUUnit) {
             self:RemoveCommandCap('RULEUCC_SiloBuildTactical')
             self:SetWeaponEnabledByLabel('TacMissile', false)
             self:SetWeaponEnabledByLabel('TacNukeMissile', false)
+            self:SetMissileOverlayRanges(false, false)
             local amt = self:GetTacticalSiloAmmoCount()
             self:RemoveTacticalSiloAmmo(amt or 0)
             local amt = self:GetNukeSiloAmmoCount()
             self:RemoveNukeSiloAmmo(amt or 0)
             self:StopSiloBuild()
+        end
+    end,
+
+    --- Called by the Aeon SACU Shield Amplifier aura when this ACU enters its field.
+    --- The ACU's shields are enhancement-based (ShieldUEF / ShieldGeneratorFieldUEF),
+    --- not a Defense.Shield entry, so the base spec is taken from the current
+    --- enhancement instead of the blueprint. Applies a fixed multiplier to the shield
+    --- max (a number for all shields, or a table with per-enhancement values).
+    ---@param self UEL0001
+    ---@param instigator Unit
+    ---@param mult number|table # multiplier, or { ShieldUEF = n, ShieldGeneratorFieldUEF = n }
+    AeonShieldAmpApply = function(self, instigator, mult)
+        if self.Dead then
+            return
+        end
+        if self.AeonShieldAmpBonus then
+            return
+        end
+        local shield = self.MyShield
+        if not shield or shield:BeenDestroyed() then
+            return
+        end
+        local enhBp = self:GetBlueprint().Enhancements
+        local baseBp = self:HasEnhancement('ShieldGeneratorFieldUEF') and enhBp.ShieldGeneratorFieldUEF
+            or (self:HasEnhancement('ShieldUEF') and enhBp.ShieldUEF or nil)
+        if not baseBp then
+            return
+        end
+
+        local resolvedMult = mult
+        if type(mult) == 'table' then
+            resolvedMult = self:HasEnhancement('ShieldGeneratorFieldUEF') and mult.ShieldGeneratorFieldUEF or mult.ShieldUEF or 1
+        end
+        local baseMax = baseBp.ShieldMaxHealth or 0
+        local bonus = math.floor(baseMax * ((resolvedMult or 1) - 1) + 0.5)
+        if bonus <= 0 then
+            return
+        end
+
+        self:AeonShieldAmpApplyBonus(bonus, mult)
+    end,
+
+    --- Called when the ACU leaves the aura field (or the enhancement is removed):
+    --- immediately subtracts the bonus from both current and max HP.
+    ---@param self UEL0001
+    AeonShieldAmpRemove = function(self)
+        self:AeonShieldAmpRemoveBonus()
+    end,
+
+    --- Re-applies the shield amplifier boost after the ACU switches shield
+    --- enhancements while standing inside the aura.
+    ---@param self UEL0001
+    RefreshShieldAmplifierBuff = function(self)
+        local mult = self:AeonShieldAmpGetSourceMult() or self.AeonShieldAmpMult
+        if mult and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+            self:AeonShieldAmpRemove()
+            self:AeonShieldAmpApply(nil, mult)
         end
     end,
 }

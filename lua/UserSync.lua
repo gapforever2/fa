@@ -123,6 +123,10 @@ function OnSync()
         -- Informs the server that the game has ended
         if Sync.GameEnded then
             GpgNetSend('GameEnded')
+            if SessionIsMultiplayer() then
+                import("/lua/ui/game/pause.lua").OnGameEnded()
+                import("/lua/ui/dialogs/disconnect.lua").OnGameEnded()
+            end
         end
 
         -- Informs moderators that the focus army has changed for the local player
@@ -543,7 +547,13 @@ function OnSync()
         import("/lua/ui/game/gamemain.lua").SimChangeCameraZoom(Sync.ChangeCameraZoom)
     end
 
-    if Sync.ScoreAccum and not table.empty(Sync.ScoreAccum) then
+    if Sync.ScoreAccum and Sync.ScoreAccum.current then
+        -- NOTE: do not gate this on `table.empty(Sync.ScoreAccum)`. `Sync.ScoreAccum`
+        -- only ever contains string keys (interval/current/history/focusArmyIndex), and
+        -- since #6537 (Nov 2024) `table.empty` may resolve to an engine implementation
+        -- that does not report string-keyed tables as non-empty. That silently dropped
+        -- the score data here and left the end-game score screen hanging forever.
+        -- Check a field the UI actually consumes instead.
         LOG("Score data received!")
         import("/lua/ui/dialogs/hotstats.lua").scoreData = Sync.ScoreAccum
     end

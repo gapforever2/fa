@@ -218,6 +218,30 @@ Tooltips = {
         title = "<LOC tooltipui0488>Radar Toggle",
         description = "<LOC tooltipui0489>Turn the selection units radar on/off",
     },
+    toggle_sacu_radar = {
+        title = "<LOC sacu_toggle_radar_title>SACU Radar Toggle",
+        description = "<LOC sacu_toggle_radar_desc>Turn this SACU's enhanced radar and omni sensors on/off",
+    },
+    toggle_sacu_speed_aura = {
+        title = "<LOC sacu_toggle_speed_title>Kinetic Acceleration Field Toggle",
+        description = "<LOC sacu_toggle_speed_desc>Turn the allied movement-speed aura on/off",
+    },
+    toggle_sacu_entropy_aura = {
+        title = "<LOC sacu_toggle_entropy_title>Entropy Field Toggle",
+        description = "<LOC sacu_toggle_entropy_desc>Turn entropy field waves on/off",
+    },
+    toggle_sacu_shield_aura = {
+        title = "<LOC sacu_toggle_shield_aura_title>Shield Amplifier Toggle",
+        description = "<LOC sacu_toggle_shield_aura_desc>Turn the allied shield-amplifier aura on/off",
+    },
+    toggle_sacu_vitality_aura = {
+        title = "<LOC sacu_toggle_vitality_title>Vitality Field Toggle",
+        description = "<LOC sacu_toggle_vitality_desc>Turn the allied maximum-health aura on/off",
+    },
+    toggle_sacu_restoration_aura = {
+        title = "<LOC sacu_toggle_restoration_title>Restoration Field Toggle",
+        description = "<LOC sacu_toggle_restoration_desc>Turn the allied regeneration aura on/off",
+    },
     toggle_sonar = {
         title = "<LOC tooltipui0490>Sonar Toggle",
         description = "<LOC tooltipui0491>Turn the selection units sonar on/off",
@@ -2203,6 +2227,10 @@ Tooltips = {
     overlay_indirect_fire = {
         title = "<LOC tooltipui0595>Indirect Fire",
         description = "<LOC tooltipui0596>Toggle the range overlays of your artillery and missile weaponry",
+    },
+    overlay_aura = {
+        title = "<LOC tooltipui0698>Aura Radius",
+        description = "<LOC tooltipui0699>Toggle showing the range of your auras",
     },
     overlay_anti_air = {
         title = "<LOC tooltipui0597>Anti-Air",

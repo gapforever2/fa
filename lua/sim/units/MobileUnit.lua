@@ -31,6 +31,15 @@ local UnitOnStopBeingBuilt = Unit.OnStopBeingBuilt
 local UnitOnLayerChange = Unit.OnLayerChange
 local UnitOnDetachedFromTransport = Unit.OnDetachedFromTransport
 
+local ShieldAmplifierMath = import('/lua/sim/aura/shieldamplifiermath.lua')
+local ShieldAmplifierApplyValues = ShieldAmplifierMath.ShieldAmplifierApplyValues
+local ShieldAmplifierRemoveValues = ShieldAmplifierMath.ShieldAmplifierRemoveValues
+
+local EntitySetHealth = _G.moho.entity_methods.SetHealth
+local EntitySetMaxHealth = _G.moho.entity_methods.SetMaxHealth
+local ChangeState = ChangeState
+local LOG = LOG
+
 local TreadComponent = import("/lua/defaultcomponents.lua").TreadComponent
 local TreadComponentOnCreate = TreadComponent.OnCreate
 local TreadComponentCreateMovementEffects = TreadComponent.CreateMovementEffects
@@ -163,5 +172,193 @@ MobileUnit = ClassUnit(Unit, TreadComponent) {
             self:SetImmobile(true)
             self.transportDrop = true
         end
+    end,
+
+    --- Applies a calculated Shield Amplifier bonus to the live shield entity.
+    --- An active shield gains the bonus in both current and maximum HP immediately.
+    --- A depleted, disabled or recharging shield changes maximum HP only; damage
+    --- recharge will fill it to that live maximum when the normal timer completes.
+    ---@param self MobileUnit
+    ---@param bonus number
+    ---@param mult number|table
+    ---@return boolean
+    AeonShieldAmpApplyBonus = function(self, bonus, mult)
+        if self.Dead or self.AeonShieldAmpBonus or bonus <= 0 then
+            return false
+        end
+
+        local shield = self.MyShield
+        if not shield or shield:BeenDestroyed() then
+            return false
+        end
+
+        local currentMax = shield:GetMaxHealth()
+        local currentHP = shield:GetHealth()
+        local shieldIsUp = shield:IsUp()
+        local newHP, newMax = ShieldAmplifierApplyValues(currentHP, currentMax, bonus, shieldIsUp)
+
+        EntitySetMaxHealth(shield, newMax)
+        if shieldIsUp then
+            EntitySetHealth(shield, self, newHP)
+            shield:UpdateShieldRatio(newHP / newMax)
+        end
+
+        self.Sync.ShieldMaxHealth = newMax
+        self.AeonShieldAmpBonus = bonus
+        self.AeonShieldAmpMult = mult
+        LOG('[AURA][SHIELD] applied unit=', self.UnitId or self:GetUnitId(),
+            ' current=', currentHP, '/', currentMax, ' -> ', newHP, '/', newMax,
+            ' up=', shieldIsUp)
+        return true
+    end,
+
+    --- Removes the currently applied Shield Amplifier bonus. If subtracting the
+    --- bonus consumes the remaining active shield HP, enter the engine's regular
+    --- damage-recharge state. A shield already recharging remains at zero HP and
+    --- keeps its existing recharge timer while only its maximum changes.
+    ---@param self MobileUnit
+    ---@return boolean
+    AeonShieldAmpRemoveBonus = function(self)
+        local bonus = self.AeonShieldAmpBonus
+        if not bonus then
+            return false
+        end
+
+        self.AeonShieldAmpBonus = nil
+        self.AeonShieldAmpMult = nil
+
+        local shield = self.MyShield
+        if not shield or shield:BeenDestroyed() then
+            return false
+        end
+
+        local currentMax = shield:GetMaxHealth()
+        local currentHP = shield:GetHealth()
+        local shieldIsUp = shield:IsUp()
+        local newHP, newMax, collapse = ShieldAmplifierRemoveValues(currentHP, currentMax, bonus, shieldIsUp)
+
+        EntitySetMaxHealth(shield, newMax)
+        if shieldIsUp then
+            EntitySetHealth(shield, self, newHP)
+            shield:UpdateShieldRatio(newMax > 0 and newHP / newMax or 0)
+        end
+        self.Sync.ShieldMaxHealth = newMax
+
+        if collapse then
+            shield.DisallowCollisions = true
+            ChangeState(shield, shield.DamageDrainedState)
+        end
+
+        LOG('[AURA][SHIELD] removed unit=', self.UnitId or self:GetUnitId(),
+            ' current=', currentHP, '/', currentMax, ' -> ', newHP, '/', newMax,
+            ' up=', shieldIsUp, ' collapse=', collapse)
+
+        return true
+    end,
+
+    --- Registers one amplifier source. Sources never stack the bonus, but every
+    --- source is retained so leaving one overlapping field does not remove a bonus
+    --- still supplied by another field.
+    ---@param self MobileUnit
+    ---@param source Unit
+    ---@param mult number|table
+    ---@return boolean
+    AeonShieldAmpRegisterSource = function(self, source, mult)
+        if self.Dead or not source or IsDestroyed(source) then
+            return false
+        end
+
+        local sources = self.AeonShieldAmpSources
+        if not sources then
+            sources = {}
+            self.AeonShieldAmpSources = sources
+        end
+        sources[source] = mult
+
+        if not self.AeonShieldAmpBonus then
+            self:AeonShieldAmpApply(source, mult)
+        end
+
+        return self.AeonShieldAmpBonus ~= nil
+    end,
+
+    ---@param self MobileUnit
+    ---@return number|table|nil
+    AeonShieldAmpGetSourceMult = function(self)
+        local sources = self.AeonShieldAmpSources
+        if not sources then
+            return nil
+        end
+
+        for source, mult in sources do
+            if source and not IsDestroyed(source) and not source.Dead then
+                return mult
+            end
+            sources[source] = nil
+        end
+
+        self.AeonShieldAmpSources = nil
+        return nil
+    end,
+
+    ---@param self MobileUnit
+    ---@param source Unit
+    ---@return boolean lastSourceRemoved
+    AeonShieldAmpUnregisterSource = function(self, source)
+        local sources = self.AeonShieldAmpSources
+        if not sources then
+            return true
+        end
+
+        sources[source] = nil
+        if self:AeonShieldAmpGetSourceMult() then
+            return false
+        end
+
+        self:AeonShieldAmpRemove()
+        return true
+    end,
+
+    --- Called by the Aeon SACU Shield Amplifier aura when this unit enters its field.
+    ---@param self MobileUnit
+    ---@param instigator Unit
+    ---@param mult number # multiplier applied to the shield max
+    AeonShieldAmpApply = function(self, instigator, mult)
+        if self.Dead then
+            return
+        end
+        -- Enhancement-specific shields pass a lookup table and resolve it in
+        -- their unit class. The generic implementation cannot choose a value
+        -- safely, so ignore an unresolved value instead of throwing every aura
+        -- update tick.
+        if type(mult) ~= 'number' then
+            return
+        end
+        if self.AeonShieldAmpBonus then
+            return
+        end
+        local shield = self.MyShield
+        if not shield or shield:BeenDestroyed() then
+            return
+        end
+        local baseBp = self:GetBlueprint().Defense.Shield
+        if not baseBp then
+            return
+        end
+        local baseMax = baseBp.ShieldMaxHealth or 0
+        local bonus = math.floor(baseMax * ((mult or 1) - 1) + 0.5)
+        if bonus <= 0 then
+            return
+        end
+
+        self:AeonShieldAmpApplyBonus(bonus, mult)
+    end,
+
+    --- Called when this unit leaves the aura field (or the enhancement is removed):
+    --- immediately subtracts the bonus from both current and max HP. If current goes
+    --- to zero the shield enters recharge.
+    ---@param self MobileUnit
+    AeonShieldAmpRemove = function(self)
+        self:AeonShieldAmpRemoveBonus()
     end,
 }

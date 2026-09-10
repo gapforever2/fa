@@ -111,7 +111,7 @@ UnitBlueprint{
     Economy = {
         BuildCostEnergy = 5250,
         BuildCostMass = 480,
-        BuildTime = 2400,
+        BuildTime = 2250,
         TeleportEnergyMod = 0.15,
         TeleportMassMod = 1,
         TeleportTimeMod = 0.01,
@@ -142,7 +142,7 @@ UnitBlueprint{
         ChargeAccMult = 2,
         ChargeSpeedMult = 1.75,
         DragCoefficient = 0.2,
-        MaxAcceleration = 4.2,
+        MaxAcceleration = 5,
         MaxBrake = 3.8,
         MaxSpeed = 3.8,
         MaxSpeedReverse = 0,

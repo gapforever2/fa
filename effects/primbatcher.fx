@@ -60,6 +60,22 @@ VS_OUTPUT PrimBatcherVS(
     return Out;
 }
 
+// Terrain-following aura rings need depth testing so that a real foreground
+// ridge can occlude them.  At distant terrain LODs the rendered terrain mesh
+// no longer exactly matches the full-resolution height map used by the ring,
+// so apply a small clip-space bias towards the camera to prevent the surface
+// from consuming coplanar ring pixels.  A genuinely closer ridge still wins
+// the depth test.
+VS_OUTPUT AuraTerrainVS(
+    float3 Pos  : POSITION,
+    float4 Color : COLOR0,
+    float2 Tex  : TEXCOORD0 )
+{
+    VS_OUTPUT Out = PrimBatcherVS(Pos, Color, Tex);
+    Out.Pos.z -= 0.0001f * Out.Pos.w;
+    return Out;
+}
+
 
 float4 PrimBatcherPS(
     float4 Pos : POSITION,
@@ -266,6 +282,24 @@ technique TAlphaBlendLinearSample
         AlphaFunc = Greater;
 #endif
         VertexShader = compile vs_1_1 PrimBatcherVS();
+        PixelShader = compile ps_2_0 PrimBatcherPS(LinearSampler);
+    }
+}
+
+technique TAuraTerrain
+{
+    pass P0
+    {
+        AlphaState( AlphaBlend_SrcAlpha_InvSrcAlpha_Write_RGB )
+        DepthState( Depth_Enable_LessEqual_Write_None )
+        RasterizerState( Rasterizer_Cull_None )
+
+#ifndef DIRECT3D10
+        AlphaTestEnable = true;
+        AlphaRef = 0;
+        AlphaFunc = Greater;
+#endif
+        VertexShader = compile vs_1_1 AuraTerrainVS();
         PixelShader = compile ps_2_0 PrimBatcherPS(LinearSampler);
     }
 }
