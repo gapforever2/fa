@@ -123,6 +123,10 @@ function OnSync()
         -- Informs the server that the game has ended
         if Sync.GameEnded then
             GpgNetSend('GameEnded')
+            if SessionIsMultiplayer() then
+                import("/lua/ui/game/pause.lua").OnGameEnded()
+                import("/lua/ui/dialogs/disconnect.lua").OnGameEnded()
+            end
         end
 
         -- Informs moderators that the focus army has changed for the local player

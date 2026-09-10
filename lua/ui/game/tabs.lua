@@ -23,6 +23,10 @@ if SessionIsActive() and SessionIsMultiplayer() then
 end
 
 function CanUserPause()
+    if gameOver then
+        return false
+    end
+
     if timeoutsRemaining == false or timeoutsRemaining == -1 or timeoutsRemaining > 0 then
         return true
     else

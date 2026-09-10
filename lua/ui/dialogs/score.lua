@@ -255,10 +255,12 @@ function CreateDialog(victory, showCampaign, operationVictoryTable, midGame)
         -- lost when other players leave or the score button is pressed immediately.
         local waited = 0
         local maxWait = 15
+        local sessionFinished = not SessionIsActive() or SessionIsGameOver()
         local scoreDataReady = hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history
-        while not (SessionIsGameOver() and scoreDataReady) do
+        while not (sessionFinished and scoreDataReady) do
             WaitSeconds(0.5)
             waited = waited + 0.5
+            sessionFinished = not SessionIsActive() or SessionIsGameOver()
             scoreDataReady = hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history
             if waited >= maxWait then
                 WARN("Game end or score data was not received within " .. maxWait .. "s; showing score screen with available data.")
@@ -266,10 +268,10 @@ function CreateDialog(victory, showCampaign, operationVictoryTable, midGame)
             end
         end
 
-        -- Once EndGame has run, the native SessionEndGame implementation skips its
-        -- peer acknowledgement wait. Disconnecting here can therefore no longer be
-        -- held up by players who are already leaving the finished match.
-        SessionEndGame()
+        if SessionIsActive() and not SessionIsMultiplayer() then
+            SessionEndGame()
+        end
+        LOG("Score data ready; displaying score screen")
         CreateDialog2(victory, showCampaign, operationVictoryTable, midGame)
     end)
 end
