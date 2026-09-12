@@ -30,6 +30,7 @@ local SCUDeathWeapon = import("/lua/sim/defaultweapons.lua").SCUDeathWeapon
 local CStructureUnit = import('/lua/cybranunits.lua').CStructureUnit
 local CDFParticleCannonWeapon = import('/lua/cybranweapons.lua').CDFParticleCannonWeapon
 local StealthFieldAuraVisualId = 'StealthFieldCybranSCU'
+local SpeedAuraVisualId = 'SpeedAuraCybranSCU'
 
 
 ---@class URL0301 : CCommandUnit
@@ -54,6 +55,17 @@ URL0301 = ClassUnit(CCommandUnit) {
             Thickness = 0.12,
             GetRadius = function(self)
                 return self:GetEnhancementAuraRadius('StealthField')
+            end,
+        },
+        [SpeedAuraVisualId] = {
+            IsActive = function(self)
+                return self.SpeedAuraInstalled == true
+                    and self.SpeedAuraEnabled == true
+            end,
+            Color = 'ffd000ff',
+            Thickness = 0.12,
+            GetRadius = function(self)
+                return self:GetEnhancementAuraRadius('SpeedAura')
             end,
         },
     },

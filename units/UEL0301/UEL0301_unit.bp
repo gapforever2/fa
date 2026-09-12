@@ -357,7 +357,8 @@ UnitBlueprint{
             BuildCostEnergy = 8000,
             BuildCostMass = 300,
             BuildTime = 1120,
-            Icon = "rj",
+            DescriptionKey = "uel0301-rj",
+            Icon = "jammer",
             MaintenanceConsumptionPerSecondEnergy = 20,
             Name = "<LOC enhancements_0067>Radar Jammer",
             NewJammerRadius = 26,
@@ -371,7 +372,7 @@ UnitBlueprint{
             BuildCostMass = 1,
             BuildTime = 0.1,
             HideBones = { "Jetpack" },
-            Icon = "rj",
+            Icon = "jammer",
             Name = "<LOC enhancements_0068>Remove Radar Jammer",
             Prerequisite = "RadarJammer",
             RemoveEnhancements = {
