@@ -450,7 +450,7 @@ end)
 
 -- The Aeon SACU's Shield Amplifier enhancement boosts the live current/max health
 -- of explicitly supported allied shields. It also reinforces the SACU's own personal
--- shield (fixed 7/6 multiplier: 15000 -> 17500, 30000 -> 35000, non-stacking) while
+-- shield (fixed +2500 / +5000 HP, non-stacking) while
 -- cutting the SACU's own max health by 5500. The Entropy Field instead carries the
 -- cannon-power penalty: the main cannon damage drops from 300 to 100 while it is
 -- installed. The sim scripts that drive these cannot be executed by this harness,
@@ -545,6 +545,14 @@ luft.describe('Aeon Shield Amplifier', function()
             luft.expect(enh.ShieldHealthMultT2).to.equal(nil)
             luft.expect(enh.ShieldHealthMultACU).to.equal(nil)
             luft.expect(enh.MaintenanceConsumptionPerSecondEnergy).to.equal(500)
+        end)
+
+        luft.test("Sensor upgrade uses the configured 30 / 100 / 45 ranges and 38 aura radius", function()
+            local sensor = ual0301.Enhancements.SensorRangeEnhancer
+            luft.expect(sensor.NewVisionRadius).to.equal(30)
+            luft.expect(sensor.NewRadarRadius).to.equal(100)
+            luft.expect(sensor.NewOmniRadius).to.equal(45)
+            luft.expect(sensor.NewAuraRadius).to.equal(38)
         end)
 
         luft.test("Entropy Field diverts cannon power: 300 -> 100 damage", function()
@@ -680,11 +688,11 @@ luft.describe('Aeon Shield Amplifier', function()
             luft.expect(script:find("ual0303", 1, true)).to.be.an("number")
             luft.expect(script:find("ual0001", 1, true)).to.be.an("number")
             luft.expect(script:find("ual0301", 1, true)).to.be.an("number")
-            luft.expect(script:find("xsl0301 = 1.2", 1, true)).to.be.an("number")
-            luft.expect(script:find("xsl0307 = 1.25", 1, true)).to.be.an("number")
-            luft.expect(script:find("uel0307 = 1.25", 1, true)).to.be.an("number")
-            luft.expect(script:find("uel0303 = 2.142857", 1, true)).to.be.an("number")
-            luft.expect(script:find("uel0401 = 1.125", 1, true)).to.be.an("number")
+            luft.expect(script:find("xsl0301 = 1000", 1, true)).to.be.an("number")
+            luft.expect(script:find("xsl0307 = 2500", 1, true)).to.be.an("number")
+            luft.expect(script:find("uel0307 = 750", 1, true)).to.be.an("number")
+            luft.expect(script:find("uel0303 = 800", 1, true)).to.be.an("number")
+            luft.expect(script:find("uel0401 = 2500", 1, true)).to.be.an("number")
             luft.expect(script:find("uel0001 = {", 1, true)).to.be.an("number")
             luft.expect(script:find("uel0301 = {", 1, true)).to.be.an("number")
             for _, cat in ipairs({ "categories.AIR", "categories.NAVAL", "categories.STRUCTURE" }) do
@@ -694,13 +702,13 @@ luft.describe('Aeon Shield Amplifier', function()
             luft.expect(script:find("- categories.EXPERIMENTAL", 1, true)).to.equal(nil)
         end)
 
-        luft.test("ACU gets a x1.25 light / x1.2 heavy multiplier in the targets table", function()
+        luft.test("ACU gets fixed +2000 light / +5000 heavy bonuses", function()
             -- The ACU's shields (ShieldAeon / ShieldHeavyAeon) are enhancement-based,
-            -- so each shield gets its own fixed multiplier in a nested table:
+            -- so each shield gets its own fixed bonus in a nested table:
             -- 8000 -> 10000 and 25000 -> 30000.
             luft.expect(script:find("ual0001 = {", 1, true)).to.be.an("number")
-            luft.expect(script:find("ShieldAeon = 1.25", 1, true)).to.be.an("number")
-            luft.expect(script:find("ShieldHeavyAeon = 1.2", 1, true)).to.be.an("number")
+            luft.expect(script:find("ShieldAeon = 2000", 1, true)).to.be.an("number")
+            luft.expect(script:find("ShieldHeavyAeon = 5000", 1, true)).to.be.an("number")
             luft.expect(script:find("ShieldHealthMultACU", 1, true)).to.equal(nil)
         end)
 
@@ -712,12 +720,13 @@ luft.describe('Aeon Shield Amplifier', function()
             luft.expect(script:find("- categories.COMMAND", 1, true)).to.equal(nil)
         end)
 
-        luft.test("Boosts the SACU's own shield by a fixed 7/6 multiplier", function()
-            -- Non-stacking: a single multiplier for both shield stages,
+        luft.test("Boosts the SACU's own shield with fixed per-stage bonuses", function()
+            -- Non-stacking explicit bonuses for both shield stages,
             -- 15000 -> 17500 (+2500) and 30000 -> 35000 (+5000).
-            luft.expect(script:find("ShieldAmplifierSelfMult", 1, true)).to.be.an("number")
+            luft.expect(script:find("ShieldAmplifierSelfBonus", 1, true)).to.be.an("number")
             luft.expect(script:find("ShieldAmplifierApplySelf", 1, true)).to.be.an("number")
-            luft.expect(script:find("return 1.166667", 1, true)).to.be.an("number")
+            luft.expect(script:find("Shield = 2500", 1, true)).to.be.an("number")
+            luft.expect(script:find("ShieldHeavy = 5000", 1, true)).to.be.an("number")
         end)
 
         luft.test("Entropy Field cuts the main cannon damage while installed", function()
@@ -739,12 +748,12 @@ luft.describe('Aeon Shield Amplifier', function()
             luft.expect(script:find("BeenDestroyed", 1, true)).to.be.an("number")
         end)
 
-        luft.test("Applies per-unit multipliers (x1.142857 Obsidian/Asylum, x2.2 Harbinger)", function()
-            -- No category tiers; each shielded unit carries its own fixed multiplier
-            -- in the targets table, derived from base + bonus.
-            luft.expect(script:find("ual0202 = 1.142857", 1, true)).to.be.an("number")
-            luft.expect(script:find("ual0307 = 1.142857", 1, true)).to.be.an("number")
-            luft.expect(script:find("ual0303 = 2.2", 1, true)).to.be.an("number")
+        luft.test("Applies the fixed shield-HP bonus advertised for each unit", function()
+            -- No percentage conversion: the targets table stores the exact HP
+            -- increase that is shown to the player.
+            luft.expect(script:find("ual0202 = 250", 1, true)).to.be.an("number")
+            luft.expect(script:find("ual0307 = 500", 1, true)).to.be.an("number")
+            luft.expect(script:find("ual0303 = 1200", 1, true)).to.be.an("number")
             luft.expect(script:find("ShieldHealthMultT2", 1, true)).to.equal(nil)
             luft.expect(script:find("type(targetMult) == 'number'", 1, true)).to.equal(nil)
         end)
@@ -760,7 +769,7 @@ luft.describe('Aeon Shield Amplifier', function()
             luft.expect(script:find("AeonShieldAmpRemove", 1, true)).to.be.an("number")
             luft.expect(script:find("HasEnhancement('ShieldHeavyAeon')", 1, true)).to.be.an("number")
             luft.expect(script:find("HasEnhancement('ShieldAeon')", 1, true)).to.be.an("number")
-            luft.expect(script:find("type(mult) == 'table'", 1, true)).to.be.an("number")
+            luft.expect(script:find("type(bonus) == 'table'", 1, true)).to.be.an("number")
             luft.expect(script:find("AeonShieldAmpApplyBonus", 1, true)).to.be.an("number")
         end)
 
@@ -768,8 +777,8 @@ luft.describe('Aeon Shield Amplifier', function()
             -- Upgrading ShieldAeon -> ShieldHeavyAeon while inside the field must keep
             -- the boosted capacity on the new shield.
             luft.expect(script:find("RefreshShieldAmplifierBuff", 1, true)).to.be.an("number")
-            luft.expect(script:find("AeonShieldAmpGetSourceMult", 1, true)).to.be.an("number")
-            luft.expect(script:find("AeonShieldAmpApply(nil, mult)", 1, true)).to.be.an("number")
+            luft.expect(script:find("AeonShieldAmpGetSourceBonus", 1, true)).to.be.an("number")
+            luft.expect(script:find("AeonShieldAmpApply(nil, bonus)", 1, true)).to.be.an("number")
         end)
     end)
 
@@ -887,6 +896,16 @@ luft.describe('Aeon Shield Amplifier', function()
             luft.expect(script:find("DoNotFill = true", 1, true)).to.be.an("number")
         end)
 
+        luft.test("Restoration and Vitality use radius 28 and sensor radius 38", function()
+            luft.expect(xsl0301.Enhancements.RegenField.Radius).to.equal(28)
+            luft.expect(xsl0301.Enhancements.HealthField.Radius).to.equal(28)
+            local sensor = xsl0301.Enhancements.SensorRangeEnhancer
+            luft.expect(sensor.NewVisionRadius).to.equal(45)
+            luft.expect(sensor.NewRadarRadius).to.equal(125)
+            luft.expect(sensor.NewOmniRadius).to.equal(40)
+            luft.expect(sensor.NewAuraRadius).to.equal(38)
+        end)
+
         luft.test("Vitality tracks entries, exits and source death without obsolete lethal handling", function()
             local script = readFile("./units/XSL0301/XSL0301_script.lua")
             local descriptions = readFile("./lua/ui/help/unitdescription.lua")
@@ -904,12 +923,12 @@ luft.describe('Aeon Shield Amplifier', function()
             luft.expect(xsl0301.Enhancements.HealthField.ACUAddHealth).to.equal(nil)
         end)
 
-        luft.test("Restoration Field carries the SACU self debuff of -7000 HP", function()
+        luft.test("Restoration Field carries the SACU self debuff of -4000 HP", function()
             local enh = xsl0301.Enhancements.RegenField
-            luft.expect(enh.ACUAddHealth).to.equal(-7000)
+            luft.expect(enh.ACUAddHealth).to.equal(-4000)
             local script = readFile("./units/XSL0301/XSL0301_script.lua")
             luft.expect(script:find("SeraphimSCURegenFieldSelf", 1, true)).to.be.an("number")
-            luft.expect(script:find("ACUAddHealth or -7000", 1, true)).to.be.an("number")
+            luft.expect(script:find("ACUAddHealth or -4000", 1, true)).to.be.an("number")
             -- The old HealthField self debuff buff is gone from the script.
             luft.expect(script:find("SeraphimSCUHealthFieldSelf", 1, true)).to.equal(nil)
         end)
@@ -923,17 +942,17 @@ luft.describe('Aeon Shield Amplifier', function()
             luft.expect(preset).to.have("Shield")
         end)
 
-        luft.test("Personal Shield debuffs the SACU by -5000 HP", function()
-            luft.expect(xsl0301.Enhancements.Shield.ACUAddHealth).to.equal(-5000)
+        luft.test("Personal Shield has no SACU health debuff", function()
+            luft.expect(xsl0301.Enhancements.Shield.ACUAddHealth).to.equal(nil)
             local script = readFile("./units/XSL0301/XSL0301_script.lua")
-            luft.expect(script:find("SeraphimSCUShieldSelf", 1, true)).to.be.an("number")
-            luft.expect(script:find("ACUAddHealth or -5000", 1, true)).to.be.an("number")
-            luft.expect(script:find("COMMANDERAURAFORSELF_SCUShield", 1, true)).to.be.an("number")
+            luft.expect(script:find("SeraphimSCUShieldSelf", 1, true)).to.equal(nil)
+            luft.expect(script:find("ACUAddHealth or -5000", 1, true)).to.equal(nil)
+            luft.expect(script:find("COMMANDERAURAFORSELF_SCUShield", 1, true)).to.equal(nil)
         end)
 
-        luft.test("Aeon Shield Amplifier aura boosts the personal shield to 6000 (x1.2)", function()
+        luft.test("Aeon Shield Amplifier aura adds 1000 HP to the personal shield", function()
             -- The Seraphim SACU's shield is enhancement-based (5000 base), so the
-            -- amplifier applies the fixed x1.2 multiplier from the UAL0301 targets
+            -- amplifier applies the fixed +1000 bonus from the UAL0301 targets
             -- table through the same live shield-state path as the other shield units.
             luft.expect(xsl0301.Enhancements.Shield.ShieldMaxHealth).to.equal(5000)
             local script = readFile("./units/XSL0301/XSL0301_script.lua")

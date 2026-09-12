@@ -84,6 +84,62 @@ UAL0001 = ClassUnit(ACUUnit) {
         EffectUtil.CreateAeonCommanderBuildingEffects(self, unitBeingBuilt, self.BuildEffectBones, self.BuildEffectsBag)
     end,
 
+    --- Keeps simultaneous shield and sensor upkeep from overwriting each other.
+    ApplyEnhancementUpkeep = function(self, key, value)
+        self.EnhancementUpkeep = self.EnhancementUpkeep or {}
+        self.EnhancementUpkeep[key] = value and value > 0 and value or nil
+        local total = 0
+        for _, amount in self.EnhancementUpkeep do
+            total = total + amount
+        end
+        self:SetEnergyMaintenanceConsumptionOverride(total)
+        if total > 0 then
+            self:SetMaintenanceConsumptionActive()
+        else
+            self:SetMaintenanceConsumptionInactive()
+        end
+    end,
+
+    SetEnhancedSensorRadii = function(self, powered)
+        local bpIntel = self.Blueprint.Intel
+        local bp = self.Blueprint.Enhancements.EnhancedSensorsAeon
+        self:SetIntelRadius('Vision', powered and (bp.NewVisionRadius or 80) or (bpIntel.VisionRadius or 26))
+        self:SetIntelRadius('Omni', powered and (bp.NewOmniRadius or 36) or (bpIntel.OmniRadius or 24))
+        self.EnhancedSensorsPowered = powered
+    end,
+
+    EnhancedSensorPowerThread = function(self)
+        while not self.Dead and self.EnhancedSensorsEnabled do
+            local powered = self:GetResourceConsumed() == 1
+            if powered ~= self.EnhancedSensorsPowered then
+                self:SetEnhancedSensorRadii(powered)
+            end
+            WaitTicks(5)
+        end
+        self.EnhancedSensorPowerThreadHandle = nil
+    end,
+
+    SetEnhancedSensorsEnabled = function(self, enabled)
+        if enabled and not self.EnhancedSensorsInstalled then
+            return
+        end
+        self.EnhancedSensorsEnabled = enabled
+        if enabled then
+            local bp = self.Blueprint.Enhancements.EnhancedSensorsAeon
+            self:ApplyEnhancementUpkeep('Sensors', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+            if not self.EnhancedSensorPowerThreadHandle then
+                self.EnhancedSensorPowerThreadHandle = self:ForkThread(self.EnhancedSensorPowerThread)
+            end
+        else
+            if self.EnhancedSensorPowerThreadHandle then
+                KillThread(self.EnhancedSensorPowerThreadHandle)
+                self.EnhancedSensorPowerThreadHandle = nil
+            end
+            self:SetEnhancedSensorRadii(false)
+            self:ApplyEnhancementUpkeep('Sensors', nil)
+        end
+    end,
+
     CreateEnhancement = function(self, enh)
         ACUUnit.CreateEnhancement(self, enh)
         local bp = self:GetBlueprint().Enhancements[enh]
@@ -111,22 +167,25 @@ UAL0001 = ClassUnit(ACUUnit) {
         -- Shields
         elseif enh == 'ShieldAeon' then
             self:AddToggleCap('RULEUTC_ShieldToggle')
-            self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-            self:SetMaintenanceConsumptionActive()
+            self.ActiveShieldEnhancement = 'ShieldAeon'
+            self:ApplyEnhancementUpkeep('Shield', bp.MaintenanceConsumptionPerSecondEnergy or 0)
             self:CreateShield(bp)
             self:RefreshShieldAmplifierBuff()
         elseif enh == 'ShieldAeonRemove' then
             self:AeonShieldAmpRemove()
             self:DestroyShield()
-            self:SetMaintenanceConsumptionInactive()
+            self.ActiveShieldEnhancement = nil
+            self:ApplyEnhancementUpkeep('Shield', nil)
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
         elseif enh == 'ShieldHeavyAeon' then
             self:AddToggleCap('RULEUTC_ShieldToggle')
+            self.ActiveShieldEnhancement = 'ShieldHeavyAeon'
             self:ForkThread(self.CreateHeavyShield, bp)
         elseif enh == 'ShieldHeavyAeonRemove' then
             self:AeonShieldAmpRemove()
             self:DestroyShield()
-            self:SetMaintenanceConsumptionInactive()
+            self.ActiveShieldEnhancement = nil
+            self:ApplyEnhancementUpkeep('Shield', nil)
             self:RemoveToggleCap('RULEUTC_ShieldToggle')
         -- Teleporter
         elseif enh == 'TeleporterAeon' then
@@ -302,15 +361,14 @@ UAL0001 = ClassUnit(ACUUnit) {
             cd:ChangeMaxRadius(bpDisrupt)
         -- Enhanced Sensor Systems
         elseif enh == 'EnhancedSensorsAeon' then
-            self:SetIntelRadius('Vision', bp.NewVisionRadius or 104)
-            self:SetIntelRadius('Omni', bp.NewOmniRadius or 104)
-            self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-            self:SetMaintenanceConsumptionActive()
+            self.EnhancedSensorsInstalled = true
+            self:AddToggleCap('RULEUTC_IntelToggle')
+            self:SetEnhancedSensorsEnabled(true)
+            self:SetScriptBit('RULEUTC_IntelToggle', false)
         elseif enh == 'EnhancedSensorsAeonRemove' then
-            local bpIntel = self:GetBlueprint().Intel
-            self:SetIntelRadius('Vision', bpIntel.VisionRadius or 26)
-            self:SetIntelRadius('Omni', bpIntel.OmniRadius or 26)
-            self:SetMaintenanceConsumptionInactive()
+            self:SetEnhancedSensorsEnabled(false)
+            self.EnhancedSensorsInstalled = false
+            self:RemoveToggleCap('RULEUTC_IntelToggle')
       end
 
         self:UpdateAuraVisualSync()
@@ -320,15 +378,38 @@ UAL0001 = ClassUnit(ACUUnit) {
         -- Strip the aura bonus before swapping shields so the new shield is
         -- created clean and then re-boosted with the correct multiplier.
         local savedBonus = self.AeonShieldAmpBonus
-        local savedMult = self.AeonShieldAmpMult
+        local savedBonusSpec = self.AeonShieldAmpMult
         if savedBonus then
             self:AeonShieldAmpRemove()
         end
         self:CreateShield(bp)
-        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        self:SetMaintenanceConsumptionActive()
+        self:ApplyEnhancementUpkeep('Shield', bp.MaintenanceConsumptionPerSecondEnergy or 0)
         if savedBonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
-            self:AeonShieldAmpApply(nil, savedMult or 1)
+            self:AeonShieldAmpApply(nil, savedBonusSpec)
+        end
+    end,
+
+    OnScriptBitSet = function(self, bit)
+        if bit == 0 then
+            self:EnableShield()
+            local name = self.ActiveShieldEnhancement
+            local bp = name and self.Blueprint.Enhancements[name]
+            self:ApplyEnhancementUpkeep('Shield', bp and bp.MaintenanceConsumptionPerSecondEnergy or nil)
+        elseif bit == 3 then
+            self:SetEnhancedSensorsEnabled(false)
+        else
+            ACUUnit.OnScriptBitSet(self, bit)
+        end
+    end,
+
+    OnScriptBitClear = function(self, bit)
+        if bit == 0 then
+            self:DisableShield()
+            self:ApplyEnhancementUpkeep('Shield', nil)
+        elseif bit == 3 then
+            self:SetEnhancedSensorsEnabled(true)
+        else
+            ACUUnit.OnScriptBitClear(self, bit)
         end
     end,
 
@@ -337,8 +418,8 @@ UAL0001 = ClassUnit(ACUUnit) {
     --- Defense.Shield entry, so the base spec is taken from the current enhancement.
     ---@param self UAL0001
     ---@param instigator Unit
-    ---@param mult number|table # multiplier, or { ShieldAeon = n, ShieldHeavyAeon = n }
-    AeonShieldAmpApply = function(self, instigator, mult)
+    ---@param bonus number|table # absolute bonus, or per-enhancement bonuses
+    AeonShieldAmpApply = function(self, instigator, bonus)
         if self.Dead then
             return
         end
@@ -349,24 +430,15 @@ UAL0001 = ClassUnit(ACUUnit) {
         if not shield or shield:BeenDestroyed() then
             return
         end
-        local enhBp = self:GetBlueprint().Enhancements
-        local baseBp = self:HasEnhancement('ShieldHeavyAeon') and enhBp.ShieldHeavyAeon
-            or (self:HasEnhancement('ShieldAeon') and enhBp.ShieldAeon or nil)
-        if not baseBp then
+        local resolvedBonus = bonus
+        if type(bonus) == 'table' then
+            resolvedBonus = self:HasEnhancement('ShieldHeavyAeon') and bonus.ShieldHeavyAeon or bonus.ShieldAeon or 0
+        end
+        if not resolvedBonus or resolvedBonus <= 0 then
             return
         end
 
-        local resolvedMult = mult
-        if type(mult) == 'table' then
-            resolvedMult = self:HasEnhancement('ShieldHeavyAeon') and mult.ShieldHeavyAeon or mult.ShieldAeon or 1
-        end
-        local baseMax = baseBp.ShieldMaxHealth or 0
-        local bonus = math.floor(baseMax * ((resolvedMult or 1) - 1) + 0.5)
-        if bonus <= 0 then
-            return
-        end
-
-        self:AeonShieldAmpApplyBonus(bonus, mult)
+        self:AeonShieldAmpApplyBonus(resolvedBonus, bonus)
     end,
 
     --- Called when the ACU leaves the aura field (or the enhancement is removed):
@@ -381,10 +453,10 @@ UAL0001 = ClassUnit(ACUUnit) {
     --- The new shield is created from its base spec first, then boosted again.
     ---@param self UAL0001
     RefreshShieldAmplifierBuff = function(self)
-        local mult = self:AeonShieldAmpGetSourceMult() or self.AeonShieldAmpMult
-        if mult and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+        local bonus = self:AeonShieldAmpGetSourceBonus() or self.AeonShieldAmpMult
+        if bonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
             self:AeonShieldAmpRemove()
-            self:AeonShieldAmpApply(nil, mult)
+            self:AeonShieldAmpApply(nil, bonus)
         end
     end,
 }

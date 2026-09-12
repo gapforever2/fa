@@ -498,9 +498,9 @@ URL0301 = ClassUnit(CCommandUnit) {
     ProcessEnhancementSensorRangeEnhancer = function(self, bp)
         self.SensorRangeEnhancerInstalled = true
         self.SensorRangeEnhancerEnabled = true
-        self:SetIntelRadius('Vision', bp.NewVisionRadius or 30)
-        self:SetIntelRadius('Omni', bp.NewOmniRadius or 55)
-        self:SetIntelRadius('Radar', bp.NewRadarRadius or 90)
+        self:SetIntelRadius('Vision', bp.NewVisionRadius or 60)
+        self:SetIntelRadius('Omni', bp.NewOmniRadius or 35)
+        self:SetIntelRadius('Radar', bp.NewRadarRadius or 100)
         self:EnableUnitIntel('Enhancement', 'Omni')
         self:EnableUnitIntel('Enhancement', 'Radar')
         self:UpdateStealthFieldRadius()

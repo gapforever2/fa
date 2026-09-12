@@ -246,8 +246,8 @@ UnitBlueprint{
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
         EngineeringT2AeonRemove = {
-            BuildCostEnergy = 1,
-            BuildCostMass = 1,
+            BuildCostEnergy = 0.1,
+            BuildCostMass = 0.1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "aes",
@@ -276,8 +276,8 @@ UnitBlueprint{
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
         ChronoDampenerAeonRemove = {
-            BuildCostEnergy = 1,
-            BuildCostMass = 1,
+            BuildCostEnergy = 0.1,
+            BuildCostMass = 0.1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "cd",
@@ -307,8 +307,8 @@ UnitBlueprint{
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
         EnhancedSensorsAeonRemove = {
-            BuildCostEnergy = 1,
-            BuildCostMass = 1,
+            BuildCostEnergy = 0.1,
+            BuildCostMass = 0.1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "ess",
@@ -337,8 +337,8 @@ UnitBlueprint{
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
         GAP_CrysalisBeamAdvancedAeonRemove = {
-            BuildCostEnergy = 1,
-            BuildCostMass = 1,
+            BuildCostEnergy = 0.1,
+            BuildCostMass = 0.1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "ecba",
@@ -368,8 +368,8 @@ UnitBlueprint{
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
         GAP_CrysalisBeamAdaptiveAeonRemove = {
-            BuildCostEnergy = 1,
-            BuildCostMass = 1,
+            BuildCostEnergy = 0.1,
+            BuildCostMass = 0.1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "ecba",
@@ -401,8 +401,8 @@ UnitBlueprint{
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
         HeatSinkAeonRemove = {
-            BuildCostEnergy = 1,
-            BuildCostMass = 1,
+            BuildCostEnergy = 0.1,
+            BuildCostMass = 0.1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "hsa",
@@ -450,8 +450,8 @@ UnitBlueprint{
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
         ResourceAllocationAdvancedAeonRemove = {
-            BuildCostEnergy = 1,
-            BuildCostMass = 1,
+            BuildCostEnergy = 0.1,
+            BuildCostMass = 0.1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "eras",
@@ -465,8 +465,8 @@ UnitBlueprint{
             Slot = "RCH",
         },
         ResourceAllocationAeonRemove = {
-            BuildCostEnergy = 1,
-            BuildCostMass = 1,
+            BuildCostEnergy = 0.1,
+            BuildCostMass = 0.1,
             BuildTime = 0.1,
             HideBones = { "Right_Upgrade" },
             Icon = "ras",
@@ -529,8 +529,8 @@ UnitBlueprint{
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
         ShieldHeavyAeonRemove = {
-            BuildCostEnergy = 1,
-            BuildCostMass = 1,
+            BuildCostEnergy = 0.1,
+            BuildCostMass = 0.1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "phtsg",
@@ -544,8 +544,8 @@ UnitBlueprint{
             Slot = "Back",
         },
         ShieldAeonRemove = {
-            BuildCostEnergy = 1,
-            BuildCostMass = 1,
+            BuildCostEnergy = 0.1,
+            BuildCostMass = 0.1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "ptsg",
@@ -594,8 +594,8 @@ UnitBlueprint{
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
         T3EngineeringAeonRemove = {
-            BuildCostEnergy = 1,
-            BuildCostMass = 1,
+            BuildCostEnergy = 0.1,
+            BuildCostMass = 0.1,
             BuildTime = 0.1,
             HideBones = { "Left_Upgrade" },
             Icon = "ees",
@@ -625,8 +625,8 @@ UnitBlueprint{
             UpgradeUnitAmbientBones = { "UAL0001" },
         },
         TeleporterAeonRemove = {
-            BuildCostEnergy = 1,
-            BuildCostMass = 1,
+            BuildCostEnergy = 0.1,
+            BuildCostMass = 0.1,
             BuildTime = 0.1,
             HideBones = { "Back_Upgrade" },
             Icon = "pqt",
@@ -663,6 +663,10 @@ UnitBlueprint{
         FactionName = "Aeon",
         Icon = "amph",
         OrderOverrides = {
+            RULEUTC_IntelToggle = {
+                bitmapId = "intel",
+                helpText = "toggle_sacu_radar",
+            },
             RULEUTC_ShieldToggle = {
                 bitmapId = "shield-personal",
                 helpText = "toggle_shield_personal",

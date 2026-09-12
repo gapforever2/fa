@@ -180,9 +180,9 @@ MobileUnit = ClassUnit(Unit, TreadComponent) {
     --- recharge will fill it to that live maximum when the normal timer completes.
     ---@param self MobileUnit
     ---@param bonus number
-    ---@param mult number|table
+    ---@param bonusSpec number|table
     ---@return boolean
-    AeonShieldAmpApplyBonus = function(self, bonus, mult)
+    AeonShieldAmpApplyBonus = function(self, bonus, bonusSpec)
         if self.Dead or self.AeonShieldAmpBonus or bonus <= 0 then
             return false
         end
@@ -205,7 +205,8 @@ MobileUnit = ClassUnit(Unit, TreadComponent) {
 
         self.Sync.ShieldMaxHealth = newMax
         self.AeonShieldAmpBonus = bonus
-        self.AeonShieldAmpMult = mult
+        -- Keep the legacy field name for callers that recreate enhancement shields.
+        self.AeonShieldAmpMult = bonusSpec
         LOG('[AURA][SHIELD] applied unit=', self.UnitId or self:GetUnitId(),
             ' current=', currentHP, '/', currentMax, ' -> ', newHP, '/', newMax,
             ' up=', shieldIsUp)
@@ -263,7 +264,7 @@ MobileUnit = ClassUnit(Unit, TreadComponent) {
     ---@param source Unit
     ---@param mult number|table
     ---@return boolean
-    AeonShieldAmpRegisterSource = function(self, source, mult)
+    AeonShieldAmpRegisterSource = function(self, source, bonus)
         if self.Dead or not source or IsDestroyed(source) then
             return false
         end
@@ -273,26 +274,32 @@ MobileUnit = ClassUnit(Unit, TreadComponent) {
             sources = {}
             self.AeonShieldAmpSources = sources
         end
-        sources[source] = mult
+        sources[source] = bonus
 
         if not self.AeonShieldAmpBonus then
-            self:AeonShieldAmpApply(source, mult)
+            self:AeonShieldAmpApply(source, bonus)
         end
 
-        return self.AeonShieldAmpBonus ~= nil
+        if not self.AeonShieldAmpBonus then
+            sources[source] = nil
+            self:AeonShieldAmpGetSourceBonus()
+            return false
+        end
+
+        return true
     end,
 
     ---@param self MobileUnit
     ---@return number|table|nil
-    AeonShieldAmpGetSourceMult = function(self)
+    AeonShieldAmpGetSourceBonus = function(self)
         local sources = self.AeonShieldAmpSources
         if not sources then
             return nil
         end
 
-        for source, mult in sources do
+        for source, bonus in sources do
             if source and not IsDestroyed(source) and not source.Dead then
-                return mult
+                return bonus
             end
             sources[source] = nil
         end
@@ -311,7 +318,7 @@ MobileUnit = ClassUnit(Unit, TreadComponent) {
         end
 
         sources[source] = nil
-        if self:AeonShieldAmpGetSourceMult() then
+        if self:AeonShieldAmpGetSourceBonus() then
             return false
         end
 
@@ -322,16 +329,12 @@ MobileUnit = ClassUnit(Unit, TreadComponent) {
     --- Called by the Aeon SACU Shield Amplifier aura when this unit enters its field.
     ---@param self MobileUnit
     ---@param instigator Unit
-    ---@param mult number # multiplier applied to the shield max
-    AeonShieldAmpApply = function(self, instigator, mult)
+    ---@param bonus number # absolute shield HP added to this target
+    AeonShieldAmpApply = function(self, instigator, bonus)
         if self.Dead then
             return
         end
-        -- Enhancement-specific shields pass a lookup table and resolve it in
-        -- their unit class. The generic implementation cannot choose a value
-        -- safely, so ignore an unresolved value instead of throwing every aura
-        -- update tick.
-        if type(mult) ~= 'number' then
+        if type(bonus) ~= 'number' then
             return
         end
         if self.AeonShieldAmpBonus then
@@ -341,17 +344,11 @@ MobileUnit = ClassUnit(Unit, TreadComponent) {
         if not shield or shield:BeenDestroyed() then
             return
         end
-        local baseBp = self:GetBlueprint().Defense.Shield
-        if not baseBp then
-            return
-        end
-        local baseMax = baseBp.ShieldMaxHealth or 0
-        local bonus = math.floor(baseMax * ((mult or 1) - 1) + 0.5)
         if bonus <= 0 then
             return
         end
 
-        self:AeonShieldAmpApplyBonus(bonus, mult)
+        self:AeonShieldAmpApplyBonus(bonus, bonus)
     end,
 
     --- Called when this unit leaves the aura field (or the enhancement is removed):

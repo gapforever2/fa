@@ -302,14 +302,14 @@ UEL0301 = ClassUnit(CommandUnit) {
         self:AddToggleCap('RULEUTC_ShieldToggle')
         self.ActiveShieldEnhancement = 'Shield'
         local savedBonus = self.AeonShieldAmpBonus
-        local savedMult = self.AeonShieldAmpMult
+        local savedBonusSpec = self.AeonShieldAmpMult
         if savedBonus then
             self:AeonShieldAmpRemove()
         end
         self:ApplyEnhancementUpkeep('Shield', bp.MaintenanceConsumptionPerSecondEnergy or 0)
         self:CreateShield(bp)
         if savedBonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
-            self:AeonShieldAmpApply(nil, savedMult or 1)
+            self:AeonShieldAmpApply(nil, savedBonusSpec)
         end
     end,
 
@@ -330,7 +330,7 @@ UEL0301 = ClassUnit(CommandUnit) {
         self:AddToggleCap('RULEUTC_ShieldToggle')
         self.ActiveShieldEnhancement = 'ShieldGeneratorField'
         local savedBonus = self.AeonShieldAmpBonus
-        local savedMult = self.AeonShieldAmpMult
+        local savedBonusSpec = self.AeonShieldAmpMult
         if savedBonus then
             self:AeonShieldAmpRemove()
         end
@@ -338,7 +338,7 @@ UEL0301 = ClassUnit(CommandUnit) {
         self:CreateShield(bp)
         self:ApplyEnhancementUpkeep('Shield', bp.MaintenanceConsumptionPerSecondEnergy or 0)
         if savedBonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
-            self:AeonShieldAmpApply(nil, savedMult or 1)
+            self:AeonShieldAmpApply(nil, savedBonusSpec)
         end
     end,
 
@@ -358,7 +358,7 @@ UEL0301 = ClassUnit(CommandUnit) {
         self:AddToggleCap('RULEUTC_ShieldToggle')
         self.ActiveShieldEnhancement = 'ShieldGeneratorFieldSupport'
         local savedBonus = self.AeonShieldAmpBonus
-        local savedMult = self.AeonShieldAmpMult
+        local savedBonusSpec = self.AeonShieldAmpMult
         if savedBonus then
             self:AeonShieldAmpRemove()
         end
@@ -367,7 +367,7 @@ UEL0301 = ClassUnit(CommandUnit) {
         self:ApplyEnhancementUpkeep('Shield', bp.MaintenanceConsumptionPerSecondEnergy or 0)
         self:UpdateSupportShieldRadius()
         if savedBonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
-            self:AeonShieldAmpApply(nil, savedMult or 1)
+            self:AeonShieldAmpApply(nil, savedBonusSpec)
         end
     end,
 
@@ -402,7 +402,7 @@ UEL0301 = ClassUnit(CommandUnit) {
     ProcessEnhancementSensorRangeEnhancer = function(self, bp)
         self.SensorRangeEnhancerInstalled = true
         self.SensorRangeEnhancerEnabled = true
-        self:SetIntelRadius('Vision', bp.NewVisionRadius or 40)
+        self:SetIntelRadius('Vision', bp.NewVisionRadius or 30)
         self:SetIntelRadius('Omni', bp.NewOmniRadius or 35)
         self:SetIntelRadius('Radar', bp.NewRadarRadius or 120)
         self:EnableUnitIntel('Enhancement', 'Omni')
@@ -612,8 +612,8 @@ UEL0301 = ClassUnit(CommandUnit) {
     --- per-enhancement values).
     ---@param self UEL0301
     ---@param instigator Unit
-    ---@param mult number|table # multiplier, or { Shield = n, ShieldGeneratorFieldSupport = n, ShieldGeneratorField = n }
-    AeonShieldAmpApply = function(self, instigator, mult)
+    ---@param bonus number|table # absolute bonus, or per-enhancement bonuses
+    AeonShieldAmpApply = function(self, instigator, bonus)
         if self.Dead then
             return
         end
@@ -624,27 +624,17 @@ UEL0301 = ClassUnit(CommandUnit) {
         if not shield or shield:BeenDestroyed() then
             return
         end
-        local enhBp = self:GetBlueprint().Enhancements
-        local baseBp = self:HasEnhancement('ShieldGeneratorField') and enhBp.ShieldGeneratorField
-            or (self:HasEnhancement('ShieldGeneratorFieldSupport') and enhBp.ShieldGeneratorFieldSupport or nil)
-            or (self:HasEnhancement('Shield') and enhBp.Shield or nil)
-        if not baseBp then
+        local resolvedBonus = bonus
+        if type(bonus) == 'table' then
+            resolvedBonus = self:HasEnhancement('ShieldGeneratorField') and bonus.ShieldGeneratorField
+                or (self:HasEnhancement('ShieldGeneratorFieldSupport') and bonus.ShieldGeneratorFieldSupport or nil)
+                or bonus.Shield or 0
+        end
+        if not resolvedBonus or resolvedBonus <= 0 then
             return
         end
 
-        local resolvedMult = mult
-        if type(mult) == 'table' then
-            resolvedMult = self:HasEnhancement('ShieldGeneratorField') and mult.ShieldGeneratorField
-                or (self:HasEnhancement('ShieldGeneratorFieldSupport') and mult.ShieldGeneratorFieldSupport or nil)
-                or mult.Shield or 1
-        end
-        local baseMax = baseBp.ShieldMaxHealth or 0
-        local bonus = math.floor(baseMax * ((resolvedMult or 1) - 1) + 0.5)
-        if bonus <= 0 then
-            return
-        end
-
-        self:AeonShieldAmpApplyBonus(bonus, mult)
+        self:AeonShieldAmpApplyBonus(resolvedBonus, bonus)
     end,
 
     --- Called when the SACU leaves the aura field (or the enhancement is removed):
@@ -658,10 +648,10 @@ UEL0301 = ClassUnit(CommandUnit) {
     --- enhancements while standing inside the aura.
     ---@param self UEL0301
     RefreshShieldAmplifierBuff = function(self)
-        local mult = self:AeonShieldAmpGetSourceMult() or self.AeonShieldAmpMult
-        if mult and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+        local bonus = self:AeonShieldAmpGetSourceBonus() or self.AeonShieldAmpMult
+        if bonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
             self:AeonShieldAmpRemove()
-            self:AeonShieldAmpApply(nil, mult)
+            self:AeonShieldAmpApply(nil, bonus)
         end
     end,
 }

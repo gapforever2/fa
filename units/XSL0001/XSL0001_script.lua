@@ -43,19 +43,18 @@ XSL0001 = ClassUnit(ACUUnit) {
     AuraVisuals = {
         [RegenAuraVisualId] = {
             IsActive = function(self)
-                return self:HasEnhancement(AdvancedRegenAuraEnhancement)
-                    or self:HasEnhancement(RegenAuraEnhancement)
+                return self.RegenAuraPowered == true
             end,
             Color = 'ffd000ff',
             Thickness = 0.12,
             GetRadius = function(self)
                 local enhancements = self.Blueprint.Enhancements
-                if self:HasEnhancement(AdvancedRegenAuraEnhancement) then
+                if self.RegenAuraEnhancement == AdvancedRegenAuraEnhancement then
                     local advanced = enhancements[AdvancedRegenAuraEnhancement]
                     return advanced and advanced.Radius or 0
                 end
 
-                if self:HasEnhancement(RegenAuraEnhancement) then
+                if self.RegenAuraEnhancement == RegenAuraEnhancement then
                     local basic = enhancements[RegenAuraEnhancement]
                     return basic and basic.Radius or 0
                 end
@@ -128,8 +127,13 @@ XSL0001 = ClassUnit(ACUUnit) {
     ---@param bp UnitBlueprintEnhancement
     ---@return Unit[]
     GetUnitsToBuff = function(self, bp)
-        local unitCat = ParseEntityCategory(bp.UnitCategory or
-            'BUILTBYTIER3FACTORY + BUILTBYQUANTUMGATE + NEEDMOBILEBUILD')
+        -- Build the faction-neutral union directly. This preserves the original
+        -- target set while avoiding comma-expression parsing differences.
+        local unitCat = categories.BUILTBYTIER3FACTORY
+            + categories.BUILTBYQUANTUMGATE
+            + categories.NEEDMOBILEBUILD
+            + categories.TRANSPORTATION
+            + categories.FIELDENGINEER
         local brain = self:GetAIBrain()
         local all = brain:GetUnitsAroundPoint(unitCat, self:GetPosition(), bp.Radius, 'Ally')
         local units = {}
@@ -143,19 +147,161 @@ XSL0001 = ClassUnit(ACUUnit) {
         return units
     end,
 
+    RefreshRegenAuraTarget = function(self, unit)
+        if unit.Dead then
+            return
+        end
+        local sources = unit.SeraphimACURegenAuraSources
+        local desired
+        if sources then
+            for source, buffName in pairs(sources) do
+                if source and not source.Dead and source.RegenAuraPowered then
+                    if buffName == 'SeraphimACUAdvancedRegenAura' then
+                        desired = buffName
+                    elseif not desired then
+                        desired = buffName
+                    end
+                else
+                    sources[source] = nil
+                end
+            end
+        end
+
+        for _, buffName in {'SeraphimACURegenAura', 'SeraphimACUAdvancedRegenAura'} do
+            if buffName ~= desired and Buffs[buffName] and Buff.HasBuff(unit, buffName) then
+                Buff.RemoveBuff(unit, buffName, true)
+            end
+        end
+        if desired and not Buff.HasBuff(unit, desired) then
+            Buff.ApplyBuff(unit, desired, self)
+        end
+        unit.SeraphimACURegenAuraActiveBuff = desired
+        unit:RequestRefreshUI()
+    end,
+
+    RegisterRegenAuraTarget = function(self, unit)
+        unit.SeraphimACURegenAuraSources = unit.SeraphimACURegenAuraSources or {}
+        unit.SeraphimACURegenAuraSources[self] = self.RegenAuraBuffName
+        self:RefreshRegenAuraTarget(unit)
+    end,
+
+    UnregisterRegenAuraTarget = function(self, unit)
+        local sources = unit.SeraphimACURegenAuraSources
+        if sources then
+            sources[self] = nil
+        end
+        self:RefreshRegenAuraTarget(unit)
+    end,
+
+    RemoveAllRegenAuraTargets = function(self)
+        local active = self.RegenAuraActiveTargets
+        if not active then
+            return
+        end
+        local targets = {}
+        for unit in pairs(active) do
+            table.insert(targets, unit)
+        end
+        for _, unit in targets do
+            if not unit.Dead then
+                self:UnregisterRegenAuraTarget(unit)
+            end
+            active[unit] = nil
+        end
+        self.RegenAuraActiveTargets = nil
+    end,
+
     ---@param self XSL0001
     ---@param regenAuraType Enhancement
-    RegenBuffThread = function(self, regenAuraType, Ehh)
-        local bp = self.Blueprint.Enhancements[Ehh]
-        local buff = 'SeraphimACU' .. regenAuraType
-
-        while not self.Dead do
+    RegenBuffThread = function(self)
+        local bp = self.Blueprint.Enhancements[self.RegenAuraEnhancement]
+        local active = self.RegenAuraActiveTargets or {}
+        self.RegenAuraActiveTargets = active
+        while not self.Dead and self.RegenAuraPowered do
+            local present = {}
             local units = self:GetUnitsToBuff(bp)
             for _, unit in units do
-                Buff.ApplyBuff(unit, buff)
-                unit:RequestRefreshUI()
+                present[unit] = true
+                if not active[unit] then
+                    active[unit] = true
+                    self:RegisterRegenAuraTarget(unit)
+                end
             end
-            WaitTicks(51)
+            for unit in pairs(active) do
+                if not present[unit] or unit.Dead then
+                    if not unit.Dead then
+                        self:UnregisterRegenAuraTarget(unit)
+                    end
+                    active[unit] = nil
+                end
+            end
+            WaitTicks(5)
+        end
+    end,
+
+    SetRegenAuraPowered = function(self, powered)
+        if powered == self.RegenAuraPowered then
+            return
+        end
+        self.RegenAuraPowered = powered
+        if powered then
+            local selfBuff = self.RegenAuraEnhancement == AdvancedRegenAuraEnhancement
+                and 'SeraphimACUAdvancedRegenAuraSelfBuff'
+                or 'SeraphimACURegenAuraSelfBuff'
+            Buff.ApplyBuff(self, selfBuff)
+            self.ShieldEffectsBag = self.ShieldEffectsBag or {}
+            table.insert(self.ShieldEffectsBag, CreateAttachedEmitter(self, 'XSL0001', self.Army,
+                '/effects/emitters/seraphim_regenerative_aura_01_emit.bp'))
+            self.RegenThreadHandle = self:ForkThread(self.RegenBuffThread)
+        else
+            if self.RegenThreadHandle then
+                KillThread(self.RegenThreadHandle)
+                self.RegenThreadHandle = nil
+            end
+            self:RemoveAllRegenAuraTargets()
+            for _, selfBuff in {'SeraphimACURegenAuraSelfBuff', 'SeraphimACUAdvancedRegenAuraSelfBuff'} do
+                if Buffs[selfBuff] and Buff.HasBuff(self, selfBuff) then
+                    Buff.RemoveBuff(self, selfBuff, true)
+                end
+            end
+            if self.ShieldEffectsBag then
+                for _, effect in self.ShieldEffectsBag do
+                    effect:Destroy()
+                end
+                self.ShieldEffectsBag = {}
+            end
+        end
+        self:UpdateAuraVisualSync()
+    end,
+
+    RegenAuraPowerThread = function(self)
+        while not self.Dead and self.RegenAuraEnabled do
+            self:SetRegenAuraPowered(self:GetResourceConsumed() == 1)
+            WaitTicks(5)
+        end
+        self.RegenAuraPowerThreadHandle = nil
+    end,
+
+    SetRegenAuraEnabled = function(self, enabled)
+        if enabled and not self.RegenAuraEnhancement then
+            return
+        end
+        self.RegenAuraEnabled = enabled
+        if enabled then
+            local bp = self.Blueprint.Enhancements[self.RegenAuraEnhancement]
+            self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
+            self:SetMaintenanceConsumptionActive()
+            if not self.RegenAuraPowerThreadHandle then
+                self.RegenAuraPowerThreadHandle = self:ForkThread(self.RegenAuraPowerThread)
+            end
+        else
+            if self.RegenAuraPowerThreadHandle then
+                KillThread(self.RegenAuraPowerThreadHandle)
+                self.RegenAuraPowerThreadHandle = nil
+            end
+            self:SetRegenAuraPowered(false)
+            self:SetEnergyMaintenanceConsumptionOverride(0)
+            self:SetMaintenanceConsumptionInactive()
         end
     end,
 
@@ -172,7 +318,7 @@ XSL0001 = ClassUnit(ACUUnit) {
                 DisplayName = 'SeraphimACURegenAura',
                 BuffType = 'COMMANDERAURA_RegenAura',
                 Stacks = 'REPLACE',
-                Duration = 5,
+                Duration = -1,
                 Effects = { '/effects/emitters/seraphim_regenerative_aura_02_emit.bp' },
                 Affects = {
                     Regen = {
@@ -217,35 +363,21 @@ XSL0001 = ClassUnit(ACUUnit) {
             }
         end
 
-        Buff.ApplyBuff(self, 'SeraphimACURegenAuraSelfBuff')
-        table.insert(self.ShieldEffectsBag, CreateAttachedEmitter(self, 'XSL0001', self.Army, '/effects/emitters/seraphim_regenerative_aura_01_emit.bp'))
-        if self.RegenThreadHandle then
-            KillThread(self.RegenThreadHandle)
-            self.RegenThreadHandle = nil
-        end
-
-        self.RegenThreadHandle = self:ForkThread(self.RegenBuffThread, "RegenAura", "RegenAuraSeraphim")
-        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        self:SetMaintenanceConsumptionActive()
+        self:SetRegenAuraEnabled(false)
+        self.RegenAuraEnhancement = RegenAuraEnhancement
+        self.RegenAuraBuffName = 'SeraphimACURegenAura'
+        self:AddToggleCap('RULEUTC_SpecialToggle')
+        self:SetRegenAuraEnabled(true)
+        self:SetScriptBit('RULEUTC_SpecialToggle', false)
     end,
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementRegenAuraSeraphimRemove = function(self, bp)
-        if self.ShieldEffectsBag then
-            for _, v in self.ShieldEffectsBag do
-                v:Destroy()
-            end
-            self.ShieldEffectsBag = {}
-        end
-        KillThread(self.RegenThreadHandle)
-        self.RegenThreadHandle = nil
-
-        if Buff.HasBuff(self, 'SeraphimACURegenAuraSelfBuff') then
-            Buff.RemoveBuff(self, 'SeraphimACURegenAuraSelfBuff')
-        end
-        self:SetEnergyMaintenanceConsumptionOverride(0)
-        self:SetMaintenanceConsumptionInactive()
+        self:SetRegenAuraEnabled(false)
+        self.RegenAuraEnhancement = nil
+        self.RegenAuraBuffName = nil
+        self:RemoveToggleCap('RULEUTC_SpecialToggle')
     end,
 
     ---@param self XSL0001
@@ -258,7 +390,7 @@ XSL0001 = ClassUnit(ACUUnit) {
                 DisplayName = 'SeraphimACUAdvancedRegenAura',
                 BuffType = 'COMMANDERAURA_AdvancedRegenAura',
                 Stacks = 'REPLACE',
-                Duration = 5,
+                Duration = -1,
                 Effects = { '/effects/emitters/seraphim_regenerative_aura_02_emit.bp' },
                 Affects = {
                     Regen = {
@@ -303,34 +435,21 @@ XSL0001 = ClassUnit(ACUUnit) {
             }
         end
 
-        Buff.ApplyBuff(self, 'SeraphimACUAdvancedRegenAuraSelfBuff')
-        table.insert(self.ShieldEffectsBag, CreateAttachedEmitter(self, 'XSL0001', self.Army, '/effects/emitters/seraphim_regenerative_aura_01_emit.bp'))
-        if self.RegenThreadHandle then
-            KillThread(self.RegenThreadHandle)
-            self.RegenThreadHandle = nil
-        end
-
-        self.RegenThreadHandle = self:ForkThread(self.RegenBuffThread, "AdvancedRegenAura", "AdvancedRegenAuraSeraphim")
-        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        self:SetMaintenanceConsumptionActive()
+        self:SetRegenAuraEnabled(false)
+        self.RegenAuraEnhancement = AdvancedRegenAuraEnhancement
+        self.RegenAuraBuffName = 'SeraphimACUAdvancedRegenAura'
+        self:AddToggleCap('RULEUTC_SpecialToggle')
+        self:SetRegenAuraEnabled(true)
+        self:SetScriptBit('RULEUTC_SpecialToggle', false)
     end,
 
     ---@param self XSL0001
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementAdvancedRegenAuraSeraphimRemove = function(self, bp)
-        if self.ShieldEffectsBag then
-            for _, v in self.ShieldEffectsBag do
-                v:Destroy()
-            end
-            self.ShieldEffectsBag = {}
-        end
-        KillThread(self.RegenThreadHandle)
-        self.RegenThreadHandle = nil
-        if Buff.HasBuff(self, 'SeraphimACUAdvancedRegenAuraSelfBuff') then
-            Buff.RemoveBuff(self, 'SeraphimACUAdvancedRegenAuraSelfBuff')
-        end
-        self:SetEnergyMaintenanceConsumptionOverride(0)
-        self:SetMaintenanceConsumptionInactive()
+        self:SetRegenAuraEnabled(false)
+        self.RegenAuraEnhancement = nil
+        self.RegenAuraBuffName = nil
+        self:RemoveToggleCap('RULEUTC_SpecialToggle')
     end,
 
     ---@param self XSL0001
@@ -624,6 +743,32 @@ XSL0001 = ClassUnit(ACUUnit) {
         oc:ChangeMaxRadius(bpDisrupt or 22)
         local aoc = self:GetWeaponByLabel('AutoOverCharge')
         aoc:ChangeMaxRadius(bpDisrupt or 22)
+    end,
+
+    OnScriptBitSet = function(self, bit)
+        if bit == 7 then
+            self:SetRegenAuraEnabled(false)
+        else
+            ACUUnit.OnScriptBitSet(self, bit)
+        end
+    end,
+
+    OnScriptBitClear = function(self, bit)
+        if bit == 7 then
+            self:SetRegenAuraEnabled(true)
+        else
+            ACUUnit.OnScriptBitClear(self, bit)
+        end
+    end,
+
+    OnKilled = function(self, instigator, type, overkillRatio)
+        self:SetRegenAuraEnabled(false)
+        ACUUnit.OnKilled(self, instigator, type, overkillRatio)
+    end,
+
+    OnDestroy = function(self)
+        self:SetRegenAuraEnabled(false)
+        ACUUnit.OnDestroy(self)
     end,
 
     CreateEnhancement = function(self, enh)

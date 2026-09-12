@@ -466,7 +466,8 @@ XSL0301 = ClassUnit(CommandUnit) {
         -- remain active, so the aura lifecycle uses this explicit state instead.
         self.RegenFieldInstalled = true
         EnsureRegenFieldBuff(bp)
-        -- Powering the field weakens the SACU's own chassis: -7000 max health
+        -- Powering the field weakens the SACU's own chassis: -4000 max health,
+        -- leaving the 14000-HP carrier at exactly 10000 HP.
         -- while the restoration field is active.
         if not Buffs['SeraphimSCURegenFieldSelf'] then
             BuffBlueprint {
@@ -476,7 +477,7 @@ XSL0301 = ClassUnit(CommandUnit) {
                 Stacks = 'REPLACE',
                 Duration = -1,
                 Affects = {
-                    MaxHealth = { Add = bp.ACUAddHealth or -7000, Mult = 1 },
+                    MaxHealth = { Add = bp.ACUAddHealth or -4000, Mult = 1 },
                 },
             }
         end
@@ -647,26 +648,13 @@ XSL0301 = ClassUnit(CommandUnit) {
         self.ShieldInstalled = true
         self:ApplyAuraUpkeep('Shield', bp.MaintenanceConsumptionPerSecondEnergy or 0)
         local savedBonus = self.AeonShieldAmpBonus
-        local savedMult = self.AeonShieldAmpMult
+        local savedBonusSpec = self.AeonShieldAmpMult
         if savedBonus then
             self:AeonShieldAmpRemove()
         end
         self:CreateShield(bp)
-        if not Buffs['SeraphimSCUShieldSelf'] then
-            BuffBlueprint {
-                Name = 'SeraphimSCUShieldSelf',
-                DisplayName = 'SeraphimSCUShieldSelf',
-                BuffType = 'COMMANDERAURAFORSELF_SCUShield',
-                Stacks = 'REPLACE',
-                Duration = -1,
-                Affects = {
-                    MaxHealth = { Add = bp.ACUAddHealth or -5000, Mult = 1 },
-                },
-            }
-        end
-        Buff.ApplyBuff(self, 'SeraphimSCUShieldSelf')
         if savedBonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
-            self:AeonShieldAmpApply(nil, savedMult or 1)
+            self:AeonShieldAmpApply(nil, savedBonusSpec)
         end
     end,
 
@@ -678,9 +666,6 @@ XSL0301 = ClassUnit(CommandUnit) {
         self:DestroyShield()
         self:ApplyAuraUpkeep('Shield', nil)
         self:RemoveToggleCap('RULEUTC_ShieldToggle')
-        if Buff.HasBuff(self, 'SeraphimSCUShieldSelf') then
-            Buff.RemoveBuff(self, 'SeraphimSCUShieldSelf')
-        end
     end,
 
     --- Called by the Aeon SACU Shield Amplifier aura when this SACU enters its field.
@@ -690,8 +675,8 @@ XSL0301 = ClassUnit(CommandUnit) {
     --- Aeon amplifier).
     ---@param self XSL0301
     ---@param instigator Unit
-    ---@param mult number # multiplier applied to the shield max
-    AeonShieldAmpApply = function(self, instigator, mult)
+    ---@param bonus number # absolute shield HP added to the shield max
+    AeonShieldAmpApply = function(self, instigator, bonus)
         if self.Dead then
             return
         end
@@ -702,18 +687,11 @@ XSL0301 = ClassUnit(CommandUnit) {
         if not shield or shield:BeenDestroyed() then
             return
         end
-        local enhBp = self:GetBlueprint().Enhancements
-        local baseBp = self:HasEnhancement('Shield') and enhBp.Shield or nil
-        if not baseBp then
-            return
-        end
-        local baseMax = baseBp.ShieldMaxHealth or 0
-        local bonus = math.floor(baseMax * ((mult or 1) - 1) + 0.5)
-        if bonus <= 0 then
+        if type(bonus) ~= 'number' or bonus <= 0 then
             return
         end
 
-        self:AeonShieldAmpApplyBonus(bonus, mult)
+        self:AeonShieldAmpApplyBonus(bonus, bonus)
     end,
 
     --- Called when the SACU leaves the aura field (or the enhancement is removed):
@@ -725,10 +703,10 @@ XSL0301 = ClassUnit(CommandUnit) {
 
     ---@param self XSL0301
     RefreshShieldAmplifierBuff = function(self)
-        local mult = self:AeonShieldAmpGetSourceMult() or self.AeonShieldAmpMult
-        if mult and Buff.HasBuff(self, 'AeonShieldAmplifier') then
+        local bonus = self:AeonShieldAmpGetSourceBonus() or self.AeonShieldAmpMult
+        if bonus and Buff.HasBuff(self, 'AeonShieldAmplifier') then
             self:AeonShieldAmpRemove()
-            self:AeonShieldAmpApply(nil, mult)
+            self:AeonShieldAmpApply(nil, bonus)
         end
     end,
 
@@ -840,14 +818,13 @@ XSL0301 = ClassUnit(CommandUnit) {
     ProcessEnhancementSensorRangeEnhancer = function(self, bp)
         self.SensorRangeEnhancerInstalled = true
         self.SensorRangeEnhancerEnabled = true
-        self:SetIntelRadius('Vision', bp.NewVisionRadius or 40)
-        self:SetIntelRadius('Omni', bp.NewOmniRadius or 35)
-        self:SetIntelRadius('Radar', bp.NewRadarRadius or 90)
+        self:SetIntelRadius('Vision', bp.NewVisionRadius or 45)
+        self:SetIntelRadius('Omni', bp.NewOmniRadius or 40)
+        self:SetIntelRadius('Radar', bp.NewRadarRadius or 125)
         self:EnableUnitIntel('Enhancement', 'Omni')
         self:EnableUnitIntel('Enhancement', 'Radar')
         self:ApplyAuraUpkeep('Sensor', bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        -- Aura fields extend their radius to match the omni sensor radius while the sensor upgrade is active.
-        self.AuraRadius = bp.NewOmniRadius or 35
+        self.AuraRadius = bp.NewAuraRadius or 38
         self:AddToggleCap('RULEUTC_IntelToggle')
         self:SetScriptBit('RULEUTC_IntelToggle', false)
         self:UpdateAuraVisualSync()

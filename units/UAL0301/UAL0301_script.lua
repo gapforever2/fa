@@ -42,36 +42,33 @@ local function DestroyEntropyVisuals(unit)
     end
 end
 
--- The Shield Amplifier grants each affected unit its own shield-HP multiplier.
--- No category tiers: a unit either has an entry (and gets its multiplier) or it
--- does not. A number is a multiplier; a table holds separate multipliers per
--- shield enhancement (the ACU). `ual0301` (the SACU's own shield) is handled by
--- ShieldAmplifierApplySelf with a fixed 7/6, so its entry here only marks it as
--- eligible.
---
--- Multipliers are derived from the base shield HP: mult = (base + bonus) / base.
+-- The Shield Amplifier grants explicit, fixed shield-HP bonuses. A number is the
+-- absolute bonus for a unit; a table holds separate bonuses per shield enhancement.
 local AeonShieldAmpTargets = {
-    ual0202 = 1.142857,   -- Obsidian (T2 heavy tank): 1750 + 250
-    ual0307 = 1.142857,   -- Asylum (T2 mobile shield generator): 3500 + 500
-    ual0303 = 2.2,        -- Harbinger Mark IV (T3 assault bot): 1000 + 1200
-    ual0001 = {           -- the ACU: light and heavy shield, each its own multiplier
-        ShieldAeon = 1.25,        -- light shield: 8000 + 2000
-        ShieldHeavyAeon = 1.2,    -- heavy shield: 25000 + 5000
+    ual0202 = 250,
+    ual0307 = 500,
+    ual0303 = 1200,
+    ual0001 = {
+        ShieldAeon = 2000,
+        ShieldHeavyAeon = 5000,
     },
-    ual0301 = true,       -- eligibility marker; own shield handled by ShieldAmplifierApplySelf
-    xsl0301 = 1.2,        -- Seraphim SACU (personal shield): 5000 + 1000
-    xsl0307 = 1.25,       -- Athanah (T3 Seraphim mobile shield): 10000 + 2500
-    uel0307 = 1.25,       -- UEF T2 mobile shield generator: 3000 + 750
-    uel0303 = 2.142857,   -- Titan (T3 assault bot, personal shield): 700 + 800
-    uel0401 = 1.125,      -- Fatboy (T4 experimental tank): 20000 + 2500
-    uel0001 = {           -- UEF ACU: personal and bubble shield, each its own multiplier
-        ShieldUEF = 1.157895,             -- personal shield: 19000 + 3000
-        ShieldGeneratorFieldUEF = 2.142857, -- bubble shield: 7000 + 8000
+    ual0301 = {
+        Shield = 2500,
+        ShieldHeavy = 5000,
     },
-    uel0301 = {           -- UEF SACU: personal, support and heavy bubble shield
-        Shield = 1.076923,                        -- personal shield: 26000 + 2000
-        ShieldGeneratorFieldSupport = 1.057143,   -- light bubble shield: 17500 + 1000
-        ShieldGeneratorField = 1.038462,          -- heavy bubble shield: 52000 + 2000
+    xsl0301 = 1000,
+    xsl0307 = 2500,
+    uel0307 = 750,
+    uel0303 = 800,
+    uel0401 = 2500,
+    uel0001 = {
+        ShieldUEF = 3000,
+        ShieldGeneratorFieldUEF = 8000,
+    },
+    uel0301 = {
+        Shield = 2000,
+        ShieldGeneratorFieldSupport = 1000,
+        ShieldGeneratorField = 2000,
     },
 }
 
@@ -122,7 +119,7 @@ UAL0301 = ClassUnit(CommandUnit) {
     GetShieldAmplifierRadius = function(self)
         if self.SensorRangeEnhancerInstalled then
             local sensor = self.Blueprint.Enhancements.SensorRangeEnhancer
-            return sensor and sensor.NewOmniRadius or 45
+            return sensor and sensor.NewAuraRadius or 38
         end
 
         local amplifier = self.Blueprint.Enhancements.ShieldAmplifier
@@ -260,12 +257,11 @@ UAL0301 = ClassUnit(CommandUnit) {
         self.SensorRangeEnhancerEnabled = true
         self:SetIntelRadius('Vision', bp.NewVisionRadius or 30)
         self:SetIntelRadius('Omni', bp.NewOmniRadius or 45)
-        self:SetIntelRadius('Radar', bp.NewRadarRadius or 110)
+        self:SetIntelRadius('Radar', bp.NewRadarRadius or 100)
         self:EnableUnitIntel('Enhancement', 'Omni')
         self:EnableUnitIntel('Enhancement', 'Radar')
         self:ApplyEnhancementUpkeep('SensorRangeEnhancer', bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        -- Entropy Field range scales with the omni sensor radius.
-        self:GetWeaponByLabel('RegenDampener'):ChangeMaxRadius(bp.NewOmniRadius or 45)
+        self:GetWeaponByLabel('RegenDampener'):ChangeMaxRadius(bp.NewAuraRadius or 38)
         self:AddToggleCap('RULEUTC_IntelToggle')
         self:SetScriptBit('RULEUTC_IntelToggle', false)
     end,
@@ -284,7 +280,8 @@ UAL0301 = ClassUnit(CommandUnit) {
         self:SetIntelRadius('Radar', bpIntel.RadarRadius or 0)
         self:ApplyEnhancementUpkeep('SensorRangeEnhancer', nil)
         -- Entropy Field reverts to its base radius.
-        self:GetWeaponByLabel('RegenDampener'):ChangeMaxRadius(30)
+        local weapon = self:GetWeaponByLabel('RegenDampener')
+        weapon:ChangeMaxRadius(weapon:GetBlueprint().MaxRadius or 28)
     end,
 
     ---@param self UAL0301
@@ -315,7 +312,6 @@ UAL0301 = ClassUnit(CommandUnit) {
         self:AddToggleCap('RULEUTC_ShieldToggle')
         self.ActiveShieldEnhancement = 'ShieldHeavy'
         local savedBonus = self.AeonShieldAmpBonus
-        local savedMult = self.AeonShieldAmpMult
         if savedBonus then
             self:AeonShieldAmpRemove()
         end
@@ -454,11 +450,12 @@ UAL0301 = ClassUnit(CommandUnit) {
         self:SetWeaponEnabledByLabel('RegenDampener', false)
         -- Powering the entropy field drains the main cannon: 300 -> 100 damage.
         self:GetWeaponByLabel('RightReactonCannon'):AddDamageMod(bp.NewDamageMod or -200)
-        -- Field radius follows the omni sensor radius: 45 with the radar upgrade, else base 30.
+        local weapon = self:GetWeaponByLabel('RegenDampener')
+        local sensor = self.Blueprint.Enhancements.SensorRangeEnhancer
         local radius = self.SensorRangeEnhancerInstalled
-            and (self.Blueprint.Enhancements['SensorRangeEnhancer'].NewOmniRadius or 45)
-            or 30
-        self:GetWeaponByLabel('RegenDampener'):ChangeMaxRadius(radius)
+            and (sensor.NewAuraRadius or 38)
+            or (weapon:GetBlueprint().MaxRadius or 28)
+        weapon:ChangeMaxRadius(radius)
         -- Remove emitters left by older test builds. The Lotus itself belongs to
         -- the weapon muzzle flash and must only exist while a real wave fires.
         DestroyEntropyVisuals(self)
@@ -517,7 +514,7 @@ UAL0301 = ClassUnit(CommandUnit) {
 
     -- Shield Amplifier boosts existing shields on the explicitly whitelisted allied
     -- ground units. It does not grant a shield. Each unit or shield enhancement gets
-    -- its own fixed multiplier from AeonShieldAmpTargets; overlapping amplifiers are
+    -- its own explicit HP bonus from AeonShieldAmpTargets; overlapping amplifiers are
     -- tracked as independent sources but never stack the bonus.
     --  Running the field strains the SACU's own chassis, cutting its max health by 5500
     --  while the amplifier is installed.
@@ -614,14 +611,18 @@ UAL0301 = ClassUnit(CommandUnit) {
             end
             for _, u in list do
                 if not u.Dead then
-                    local lastSource = true
-                    if u.AeonShieldAmpUnregisterSource then
-                        lastSource = u:AeonShieldAmpUnregisterSource(self)
-                    elseif u.AeonShieldAmpRemove then
-                        u:AeonShieldAmpRemove()
-                    end
-                    if lastSource and Buff.HasBuff(u, 'AeonShieldAmplifier') then
+                    local ok, lastSource = pcall(function()
+                        if u.AeonShieldAmpUnregisterSource then
+                            return u:AeonShieldAmpUnregisterSource(self)
+                        elseif u.AeonShieldAmpRemove then
+                            u:AeonShieldAmpRemove()
+                        end
+                        return true
+                    end)
+                    if ok and lastSource and Buff.HasBuff(u, 'AeonShieldAmplifier') then
                         Buff.RemoveBuff(u, 'AeonShieldAmplifier', true)
+                    elseif not ok then
+                        WARN('UAL0301 ShieldAmplifier cleanup FAILED for ', u.UnitId, ': ', lastSource)
                     end
                     u:RequestRefreshUI()
                 end
@@ -639,25 +640,23 @@ UAL0301 = ClassUnit(CommandUnit) {
         if not shield or shield:BeenDestroyed() then
             return false
         end
-        -- Only the listed shield units are affected: Obsidian, the T2 mobile
-        -- shield, the Harbinger, the ACU, the SACU itself and the Seraphim T3
-        -- mobile shield (Athanah). Everything else is ignored. Each target has
-        -- its own fixed multiplier in AeonShieldAmpTargets.
+        -- Every listed allied unit is eligible regardless of faction or owner.
+        -- Each target receives its explicit fixed bonus from AeonShieldAmpTargets.
         local unitId = GetShieldAmplifierUnitId(u)
         return unitId and AeonShieldAmpTargets[unitId] ~= nil
     end,
 
-    -- Any friendly SACU's personal shield is reinforced by a fixed 7/6 multiplier:
-    -- the basic shield 15000 -> 17500 (+2500) and the heavy shield 30000 -> 35000
-    -- (+5000). The effect is multiplicative and non-stacking: it never compounds
-    -- with the aura's other multipliers or with multiple amplifiers.
+    -- The carrier receives the same explicit fixed bonus as any other listed target.
     ---@param self UAL0301
     ---@return number
-    ShieldAmplifierSelfMult = function(self)
-        if self:HasEnhancement('ShieldHeavy') or self:HasEnhancement('Shield') then
-            return 1.166667
+    ShieldAmplifierSelfBonus = function(self)
+        local bonuses = AeonShieldAmpTargets.ual0301
+        if self:HasEnhancement('ShieldHeavy') then
+            return bonuses.ShieldHeavy
+        elseif self:HasEnhancement('Shield') then
+            return bonuses.Shield
         end
-        return 1
+        return 0
     end,
 
     --- Applies the fixed SACU personal-shield bonus through the shared live-state
@@ -674,25 +673,18 @@ UAL0301 = ClassUnit(CommandUnit) {
         if not shield or shield:BeenDestroyed() then
             return
         end
-        local enhBp = self.Blueprint.Enhancements
-        local base = self:HasEnhancement('ShieldHeavy') and enhBp.ShieldHeavy
-            or (self:HasEnhancement('Shield') and enhBp.Shield or nil)
-        if not base then
-            return
-        end
-        local baseMax = base.ShieldMaxHealth or 0
-        local bonus = math.floor(baseMax * (self:ShieldAmplifierSelfMult() - 1) + 0.5)
+        local bonus = self:ShieldAmplifierSelfBonus()
         if bonus <= 0 then
             return
         end
 
-        self:AeonShieldAmpApplyBonus(bonus, self:ShieldAmplifierSelfMult())
+        self:AeonShieldAmpApplyBonus(bonus, AeonShieldAmpTargets.ual0301)
     end,
 
     ---@param self UAL0301
     ---@param instigator Unit
-    ---@param mult number|table
-    AeonShieldAmpApply = function(self, instigator, mult)
+    ---@param bonus number|table
+    AeonShieldAmpApply = function(self, instigator, bonus)
         self:ShieldAmplifierApplySelf()
     end,
 
@@ -742,28 +734,30 @@ UAL0301 = ClassUnit(CommandUnit) {
                 if not u.Dead and not u:IsBeingBuilt() and self:ShieldAmplifierEligible(u) then
                     present[u] = true
                     local unitId = GetShieldAmplifierUnitId(u)
-                    local targetMult = AeonShieldAmpTargets[unitId]
+                    local targetBonus = AeonShieldAmpTargets[unitId]
                     local wasActive = active[u]
                     local applyOk, applyErr = pcall(function()
                         local applied
                         if u.AeonShieldAmpRegisterSource then
-                            applied = u:AeonShieldAmpRegisterSource(self, targetMult)
+                            applied = u:AeonShieldAmpRegisterSource(self, targetBonus)
                         elseif u.AeonShieldAmpApply then
-                            u:AeonShieldAmpApply(self, targetMult)
+                            u:AeonShieldAmpApply(self, targetBonus)
                             applied = u.AeonShieldAmpBonus ~= nil
                         else
                             WARN('[AURA][SHIELD] target has no apply method: ', unitId)
                         end
                         if applied then
+                            -- Track the target before UI marker work so a later
+                            -- error cannot leave an unowned gameplay bonus behind.
+                            active[u] = true
                             if not Buff.HasBuff(u, 'AeonShieldAmplifier') then
                                 Buff.ApplyBuff(u, 'AeonShieldAmplifier', self)
                                 u:RequestRefreshUI()
                             end
-                            active[u] = true
                             if not wasActive then
                                 local shield = u.MyShield
                                 LOG('[AURA][SHIELD] target entered source=', self.UnitId or self:GetUnitId(),
-                                    ' target=', unitId, ' mult=', targetMult,
+                                    ' target=', unitId, ' bonus=', repr(targetBonus),
                                     ' result=', shield and shield:GetHealth() or 'none', '/',
                                     shield and shield:GetMaxHealth() or 'none')
                             end
