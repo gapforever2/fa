@@ -190,6 +190,7 @@ local function CreateDialog(clients)
 end
 
 local gameEnded = false
+local autoEjectedClients = {}
 
 --- Stops disconnect notifications from taking over the finalized result UI.
 function OnGameEnded()
@@ -210,6 +211,7 @@ function Update()
 
     local needDialog = false
     local clients = GetSessionClients()
+    local armiesInfo = GetArmiesTable().armiesTable
     local stillin = {}
 
     for index, client in clients do
@@ -220,17 +222,33 @@ function Update()
 
     local quietClients = {}
     for index, client in clients do
-        if client.quiet > 5000 then
-            table.insert(quietClients, client.name)
-            needDialog = true
-        end
-        if client.connected then
-            if not table.equal(client.ejectedBy, {}) then
-                needDialog = true
+        local army = armiesInfo[index]
+        local armyIsOutOfGame = army and army.outOfGame
+
+        -- A disconnected client still has to be removed from the lockstep
+        -- session even when its army is already defeated. Do that without
+        -- opening the blocking connectivity dialog: there is no remaining
+        -- army whose command stream needs to be preserved.
+        if armyIsOutOfGame and (not client.connected or client.quiet > 5000) then
+            if not autoEjectedClients[index] then
+                LOG('Automatically ejecting disconnected out-of-game client: ' .. tostring(client.name))
+                EjectSessionClient(index)
+                autoEjectedClients[index] = true
             end
         else
-            if not table.equal(table.sorted(client.ejectedBy), stillin) then
+            if client.quiet > 5000 then
+                table.insert(quietClients, client.name)
                 needDialog = true
+            end
+
+            if client.connected then
+                if not table.equal(client.ejectedBy, {}) then
+                    needDialog = true
+                end
+            else
+                if not table.equal(table.sorted(client.ejectedBy), stillin) then
+                    needDialog = true
+                end
             end
         end
     end

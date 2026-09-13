@@ -120,9 +120,20 @@ function OnSync()
             GpgNetSend('EnforceRating')
         end
 
+        -- The result has become final in the sim, but the last score snapshot and
+        -- GameEnded still need one or two sync beats. Stop pause/disconnect UI now
+        -- so a player leaving in that small window cannot block those final beats.
+        if Sync.GameEnding and SessionIsMultiplayer() then
+            LOG("Game ending; suppressing disconnect and pause UI")
+            import("/lua/ui/game/pause.lua").OnGameEnded()
+            import("/lua/ui/dialogs/disconnect.lua").OnGameEnded()
+        end
+
         -- Informs the server that the game has ended
         if Sync.GameEnded then
             GpgNetSend('GameEnded')
+
+            import("/lua/ui/dialogs/score.lua").OnGameEnded()
             if SessionIsMultiplayer() then
                 import("/lua/ui/game/pause.lua").OnGameEnded()
                 import("/lua/ui/dialogs/disconnect.lua").OnGameEnded()
@@ -556,5 +567,6 @@ function OnSync()
         -- Check a field the UI actually consumes instead.
         LOG("Score data received!")
         import("/lua/ui/dialogs/hotstats.lua").scoreData = Sync.ScoreAccum
+        import("/lua/ui/dialogs/score.lua").OnScoreDataReceived()
     end
 end

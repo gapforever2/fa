@@ -38,6 +38,38 @@ local campaignScore = ''
 
 scoreScreenActive = false
 
+local gameEnded = false
+local pendingScoreDialog = false
+
+local function FinalScoreDataReady()
+    return hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history
+end
+
+local function ShowPendingScoreDialog()
+    if not pendingScoreDialog or not gameEnded or not FinalScoreDataReady() then
+        return
+    end
+
+    local request = pendingScoreDialog
+    pendingScoreDialog = false
+
+    DisableWorldSounds()
+    StopAllSounds()
+    LOG("Final score data ready; displaying score screen")
+    CreateDialog2(request.victory, request.showCampaign, request.operationVictoryTable, request.midGame)
+end
+
+--- Called from UserSync when the simulation has sent the final GameEnded signal.
+function OnGameEnded()
+    gameEnded = true
+    ShowPendingScoreDialog()
+end
+
+--- Called after UserSync has installed the final score snapshot.
+function OnScoreDataReceived()
+    ShowPendingScoreDialog()
+end
+
 -- '<LOC SCORE_0058>Debrief'
 -- '<LOC SCORE_0059>Combat Report'
 
@@ -247,33 +279,28 @@ function CreateDialog(victory, showCampaign, operationVictoryTable, midGame)
         return
     end
     scoreScreenActive = true
+
+    if SessionIsMultiplayer() then
+        -- Do not wait in a thread here: EndGame stops the simulation clock and a
+        -- WaitSeconds loop may never wake up. UserSync calls us again when both
+        -- GameEnded and the final score snapshot have arrived.
+        pendingScoreDialog = {
+            victory = victory,
+            showCampaign = showCampaign,
+            operationVictoryTable = operationVictoryTable,
+            midGame = midGame,
+        }
+        LOG("Score screen requested; waiting for final game result data")
+        ShowPendingScoreDialog()
+        return
+    end
+
+    if SessionIsActive() then
+        SessionEndGame()
+    end
     DisableWorldSounds()
     StopAllSounds()
-    ForkThread(function()
-        -- A victory result reaches the UI before the simulation actually calls EndGame.
-        -- Keep the session connected until then so that the final score sync cannot be
-        -- lost when other players leave or the score button is pressed immediately.
-        local waited = 0
-        local maxWait = 15
-        local sessionFinished = not SessionIsActive() or SessionIsGameOver()
-        local scoreDataReady = hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history
-        while not (sessionFinished and scoreDataReady) do
-            WaitSeconds(0.5)
-            waited = waited + 0.5
-            sessionFinished = not SessionIsActive() or SessionIsGameOver()
-            scoreDataReady = hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history
-            if waited >= maxWait then
-                WARN("Game end or score data was not received within " .. maxWait .. "s; showing score screen with available data.")
-                break
-            end
-        end
-
-        if SessionIsActive() and not SessionIsMultiplayer() then
-            SessionEndGame()
-        end
-        LOG("Score data ready; displaying score screen")
-        CreateDialog2(victory, showCampaign, operationVictoryTable, midGame)
-    end)
+    CreateDialog2(victory, showCampaign, operationVictoryTable, midGame)
 end
 
 function CreateDialog2(victory, showCampaign, operationVictoryTable, midGame)

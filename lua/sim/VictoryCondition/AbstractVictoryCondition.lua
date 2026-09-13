@@ -227,7 +227,19 @@ AbstractVictoryCondition = Class(DebugComponent) {
         -- quick exit: no brains tried to call victory yet, start the procedure
         if not self.VictoryToBeDeclaredFor then
             self.VictoryToBeDeclaredFor = winningBrains
-            self.VictoryDeclaredAt = GetGameTimeSeconds() + self.DelayBeforeVictory
+            -- Tell the UI that the global result is now being finalized. This is
+            -- earlier than GameEnded and prevents a late peer disconnect from
+            -- taking over the result screen during the victory grace period.
+            Sync.GameEnding = true
+
+            -- A regular multiplayer/skirmish result is deterministic at this
+            -- point. One monitoring beat is enough to catch a changed winner set;
+            -- waiting five game seconds can take much longer while a peer leaves.
+            local delayBeforeVictory = self.DelayBeforeVictory
+            if ScenarioInfo.type == 'skirmish' then
+                delayBeforeVictory = 0
+            end
+            self.VictoryDeclaredAt = GetGameTimeSeconds() + delayBeforeVictory
             return
         end
 
@@ -248,7 +260,11 @@ AbstractVictoryCondition = Class(DebugComponent) {
         for k, count in brainCounter do
             if count < 2 then
                 self.VictoryToBeDeclaredFor = winningBrains
-                self.VictoryDeclaredAt = GetGameTimeSeconds() + self.DelayBeforeVictory
+                local delayBeforeVictory = self.DelayBeforeVictory
+                if ScenarioInfo.type == 'skirmish' then
+                    delayBeforeVictory = 0
+                end
+                self.VictoryDeclaredAt = GetGameTimeSeconds() + delayBeforeVictory
                 return
             end
         end
@@ -275,6 +291,8 @@ AbstractVictoryCondition = Class(DebugComponent) {
     --- Ends the game. The monitoring thread is stopped. The game ends after DelayBeforeGameEnds seconds to give all players a window of opportunity to share the game results with the server. 
     ---@param self AbstractVictoryCondition
     EndGame = function(self)
+        Sync.GameEnding = true
+
         -- stop checking the game state
         if (self.ProcessGameStateThreadInstance) then
             KillThread(self.ProcessGameStateThreadInstance)
