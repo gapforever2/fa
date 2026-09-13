@@ -160,7 +160,7 @@ UnitBlueprint{
             AlwaysRecheckTarget = false,
             BallisticArc = "RULEUBA_None",
             CollideFriendly = false,
-            Damage = 1,
+            Damage = 3,
             DamageType = "Normal",
             DisableWhileReloading = true,
             DisplayName = "Quasar Anti Torpedo",
