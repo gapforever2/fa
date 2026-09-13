@@ -38,7 +38,6 @@ UnitBlueprint{
         Abilities = {
             "<LOC ability_aa>Anti-Air",
             "<LOC ability_hover>Hover",
-            "<LOC ability_radar>Radar",
         },
         AnimationDeath = {
             {
@@ -150,7 +149,6 @@ UnitBlueprint{
     },
     Intel = { 
         VisionRadius = 22,
-        RadarRadius = 52,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.58,

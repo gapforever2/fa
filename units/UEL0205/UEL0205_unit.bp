@@ -35,7 +35,6 @@ UnitBlueprint{
     Display = {
         Abilities = {
              "<LOC ability_aa>Anti-Air", 
-             "<LOC ability_radar>Radar",
               },
         Mesh = {
             IconFadeInZoom = 130,
@@ -104,7 +103,6 @@ UnitBlueprint{
     },
     Intel = { 
         VisionRadius = 22, 
-        RadarRadius = 52,
     },
     LifeBarHeight = 0.075,
     LifeBarOffset = 0.4,

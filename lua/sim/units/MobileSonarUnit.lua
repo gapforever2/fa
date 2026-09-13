@@ -141,6 +141,9 @@ MobileSonarUnit = ClassUnit(SeaUnit) {
 
     UpgradingState = State {
         Main = function(self)
+            -- A mobile sonar upgrades in place like a structure. Prevent movement
+            -- orders from dragging the builder away while the T3 sonar is built.
+            self:SetImmobile(true)
             self:PlayUnitSound('UpgradeStart')
             self:DisableDefaultToggleCaps()
 
@@ -169,6 +172,10 @@ MobileSonarUnit = ClassUnit(SeaUnit) {
                     self.AnimatorUpgradeManip:SetRate(1)
                 end
                 self:FinishUpgrade(unitBuilding)
+            elseif not self.Dead then
+                self:SetImmobile(false)
+                self:EnableDefaultToggleCaps()
+                ChangeState(self, self.IdleState)
             end
         end,
 

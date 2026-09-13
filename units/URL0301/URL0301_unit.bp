@@ -311,19 +311,6 @@ UnitBlueprint{
             SortCategory = "SORTINTEL",
             UnitName = "<LOC url0301_Rambo_name>SACU (Rambo preset)",
         },
-        Stealth = {
-            Description = "<LOC url0301_Stealth_desc>SACU (Stealth preset)",
-            BuildIconSortPriority = 30,
-            Enhancements = {
-                "StealthGenerator",
-                "NaniteMissileSystem",
-                "Switchback",
-            },
-            HelpText = "<LOC url0301_Stealth_help>Enhanced with Personal Stealth, Nanite Missile and Engineering systems.",
-            SelectionPriority = 1,
-            SortCategory = "SORTSTRATEGIC",
-            UnitName = "<LOC url0301_Stealth_name>SACU (Stealth preset)",
-        },
     },
     Enhancements = {
         CloakingGenerator = {
