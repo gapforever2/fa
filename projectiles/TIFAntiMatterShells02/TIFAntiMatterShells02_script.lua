@@ -13,7 +13,7 @@ TIFAntiMatterShells02 = ClassProjectile(TArtilleryAntiMatterSmallProjectile) {
         local marker = VisionMarkerOpti({ Owner = self })
         marker:UpdatePosition(px, pz)
         marker:UpdateDuration(5)
-        marker:UpdateIntel(self.Army, 5, 'Vision', true)
+        marker:UpdateIntel(self.Army, 10, 'Vision', true)
 
         TArtilleryAntiMatterSmallProjectile.OnImpact(self, targetType, targetEntity)
         self:ShakeCamera( 20, 1, 0, 1 )
