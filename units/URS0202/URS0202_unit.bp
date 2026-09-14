@@ -390,7 +390,7 @@ UnitBlueprint{
             DamageType = "Normal",
             DisplayName = "Nanodart Surface Launcher",
             FireTargetLayerCapsTable = { Water = "Land|Water|Seabed" },
-            FiringRandomness = 0.9,
+            FiringRandomness = 0.63,
             FiringTolerance = 0.1,
             Label = "GroundGun",
             LeadTarget = true,
