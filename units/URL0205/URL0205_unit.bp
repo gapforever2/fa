@@ -29,8 +29,8 @@ UnitBlueprint{
     Defense = {
         AirThreatLevel = 15,
         ArmorType = "Normal",
-        Health = 2000,
-        MaxHealth = 2000,
+        Health = 1700,
+        MaxHealth = 1700,
     },
     Display = {
         Abilities = { 
@@ -169,7 +169,7 @@ UnitBlueprint{
             CollideFriendly = false,
             Damage = 90,
             DamageFriendly = false,
-            DamageRadius = 4,
+            DamageRadius = 3,
             DamageType = "Normal",
             DetonatesAtTargetHeight = true,
             DisplayName = "Electron Flak",
