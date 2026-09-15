@@ -32,6 +32,45 @@ local CDFParticleCannonWeapon = import('/lua/cybranweapons.lua').CDFParticleCann
 local StealthFieldAuraVisualId = 'StealthFieldCybranSCU'
 local SpeedAuraVisualId = 'SpeedAuraCybranSCU'
 
+-- Keep the smoke alive across the speed buff's periodic REPLACE refreshes.
+local function PlaySpeedAuraSmoke(buff, unit, instigator)
+    local sources = unit.CybranSpeedAuraSmokeSources or {}
+    unit.CybranSpeedAuraSmokeSources = sources
+    sources[instigator] = GetGameTick()
+    if unit.CybranSpeedAuraSmoke then
+        return
+    end
+
+    local emitter = CreateAttachedEmitter(unit, 0, unit.Army,
+        '/effects/emitters/cybran_speed_aura_smoke_01_emit.bp')
+    -- Anchor at the unit's base, not at a height proportional to its chassis.
+    local base = unit:GetPosition()
+    local root = unit:GetPosition(0)
+    emitter:OffsetEmitter(0, base[2] - root[2] + 0.08, 0)
+    unit.CybranSpeedAuraSmoke = emitter
+    unit.Trash:Add(emitter)
+    unit.Trash:Add(ForkThread(function()
+        while not unit.Dead do
+            WaitTicks(2)
+            local active = false
+            local tick = GetGameTick()
+            for source, refreshed in pairs(sources) do
+                if source.Dead or not source.SpeedAuraEnabled or tick - refreshed > 20 then
+                    sources[source] = nil
+                else
+                    active = true
+                end
+            end
+            if not active then
+                break
+            end
+        end
+        emitter:Destroy()
+        unit.CybranSpeedAuraSmoke = nil
+        unit.CybranSpeedAuraSmokeSources = nil
+    end))
+end
+
 
 ---@class URL0301 : CCommandUnit
 ---@field HasStealthEnh? boolean
@@ -570,7 +609,7 @@ URL0301 = ClassUnit(CCommandUnit) {
         while not self.Dead do
             -- The carrier is guaranteed to receive the SACU multiplier even if
             -- GetUnitsAroundPoint does not include the source unit.
-            Buff.ApplyBuff(self, 'CybranSpeedAuraSCU')
+            Buff.ApplyBuff(self, 'CybranSpeedAuraSCU', self)
 
             local radius = self:GetEnhancementAuraRadius('SpeedAura')
             local units = brain:GetUnitsAroundPoint(cat, self:GetPosition(), radius, 'Ally')
@@ -587,7 +626,7 @@ URL0301 = ClassUnit(CCommandUnit) {
                         buffName = 'CybranSpeedAuraT1'
                     end
                     if buffName then
-                        Buff.ApplyBuff(u, buffName)
+                        Buff.ApplyBuff(u, buffName, self)
                     end
                 end
             end
@@ -607,6 +646,7 @@ URL0301 = ClassUnit(CCommandUnit) {
                     BuffType = 'CYBRANSCUSPEEDAURA',
                     Stacks = 'REPLACE',
                     Duration = 2,
+                    OnApplyBuff = PlaySpeedAuraSmoke,
                     Affects = {
                         MoveMult = {
                             Mult = mult,
