@@ -2271,7 +2271,6 @@ local function TryLaunch(skipNoObserversCheck)
         AssignAINames()
         local allRatings = {}
         local clanTags = {}
-        local aiBotAdminPlayers = {}
         for k, player in gameInfo.PlayerOptions do
             if player.Human and player.PL then
                 allRatings[player.PlayerName] = player.PL
@@ -2282,21 +2281,12 @@ local function TryLaunch(skipNoObserversCheck)
                 end
             end
 
-            if player.Human
-                and type(player.GroupRole) == 'string'
-                and string.lower(player.GroupRole) == 'admin'
-            then
-                aiBotAdminPlayers[player.PlayerName] = true
-            end
-
             if player.OwnerID == localPlayerID then
                 UIUtil.SetCurrentSkin(FACTION_NAMES[player.Faction])
             end
         end
         gameInfo.GameOptions['Ratings'] = allRatings
         gameInfo.GameOptions['ClanTags'] = clanTags
-        gameInfo.GameOptions['AiBotAdminPlayers'] = aiBotAdminPlayers
-
         scenarioInfo = MapUtil.LoadScenario(gameInfo.GameOptions.ScenarioFile)
 
         -- Load in the default map options if they are not set manually

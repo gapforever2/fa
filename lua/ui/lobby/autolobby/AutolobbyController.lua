@@ -546,26 +546,6 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         return allClanTags
     end,
 
-    --- Creates the immutable SIM-side allowlist for the privileged AiBot
-    --- callback. Player names are unique in the launch configuration.
-    ---@param self UIAutolobbyCommunications
-    ---@param playerOptions UIAutolobbyPlayer[]
-    ---@return table<string, boolean>
-    CreateAiBotAdminPlayersTable = function(self, playerOptions)
-        local adminPlayers = {}
-
-        for _, options in pairs(playerOptions) do
-            if options.Human
-                and type(options.GroupRole) == 'string'
-                and string.lower(options.GroupRole) == 'admin'
-            then
-                adminPlayers[options.PlayerName] = true
-            end
-        end
-
-        return adminPlayers
-    end,
-
     --- Verifies whether we can launch the game.
     ---@param self UIAutolobbyCommunications
     ---@param peerStatus UIAutolobbyStatus
@@ -813,8 +793,6 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
                     self.GameOptions.Ratings = self:CreateRatingsTable(self.PlayerOptions)
                     self.GameOptions.Divisions = self:CreateDivisionsTable(self.PlayerOptions)
                     self.GameOptions.ClanTags = self:CreateClanTagsTable(self.PlayerOptions)
-                    self.GameOptions.AiBotAdminPlayers = self:CreateAiBotAdminPlayersTable(self.PlayerOptions)
-
                     -- create game configuration
                     local gameConfiguration = {
                         GameMods = self.GameMods,
