@@ -7,21 +7,34 @@ local GROUP_DEV_ROLES = {
 }
 
 local canUseCached = nil
+local isAdminCached = nil
 
-local function CanUse()
+local function GetRole()
+    local arg = GetCommandLineArg("/group", 1)
+    if not arg or not arg[1] then
+        return false
+    end
+
+    return string.lower(tostring(arg[1]))
+end
+
+function CanUse()
     if canUseCached == nil then
-        local arg = GetCommandLineArg("/group", 1)
-        if not arg or not arg[1] then
-            canUseCached = false
-        else
-            local role = string.lower(tostring(arg[1]))
-            canUseCached = GROUP_DEV_ROLES[role] == true
-        end
+        canUseCached = GROUP_DEV_ROLES[GetRole()] == true
     end
 
     return canUseCached
 end
 
+function IsAdmin()
+    if isAdminCached == nil then
+        isAdminCached = GetRole() == 'admin'
+    end
+
+    return isAdminCached
+end
+
 return {
     CanUse = CanUse,
+    IsAdmin = IsAdmin,
 }

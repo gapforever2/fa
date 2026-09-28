@@ -51,6 +51,19 @@ local CategoriesTransportation = categories.TRANSPORTATION
 --- List of callbacks that is being populated throughout this file
 ---@type table<string, fun(data: table, units?: Unit[])>
 local Callbacks = {}
+
+--- Registers a callback from an integrated hook without exposing the callback
+--- table itself. Hook files execute in a separate chunk and cannot access this
+--- module's locals directly.
+---@param name string
+---@param callback fun(data: table, units?: Unit[])
+function RegisterSimCallback(name, callback)
+    if type(name) != 'string' or type(callback) != 'function' then
+        error('Invalid simulation callback registration')
+    end
+
+    Callbacks[name] = callback
+end
 local AnimationPanelCooldownSeconds = 10
 local AnimationPanelNextAllowedByArmy = {}
 
