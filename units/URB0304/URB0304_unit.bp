@@ -88,10 +88,10 @@ UnitBlueprint{
         UniformScale = 0.07,
     },
     Economy = {
-        BuildCostEnergy = 30000,
-        BuildCostMass = 3000,
+        BuildCostEnergy = 24000,
+        BuildCostMass = 1200,
         BuildRate = 150,
-        BuildTime = 4097,
+        BuildTime = 1950,
         BuildableCategory = { "BUILTBYQUANTUMGATE CYBRAN" },
         RebuildBonusIds = { "urb0304" },
     },

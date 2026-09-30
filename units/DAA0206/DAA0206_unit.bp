@@ -105,8 +105,8 @@ UnitBlueprint{
         UniformScale = 0.15,
     },
     Economy = {
-        BuildCostEnergy = 8850,
-        BuildCostMass = 270,
+        BuildCostEnergy = 9000,
+        BuildCostMass = 360,
         BuildTime = 1600,
     },
     Footprint = {
@@ -164,7 +164,7 @@ UnitBlueprint{
             },
             BallicsticArc = "RULEUBA_None",
             CollideFriendly = true,
-            Damage = 2400,
+            Damage = 2000,
             DamageFriendly = true,
             DamageRadius = 3,
             DamageType = "Normal",

@@ -31,7 +31,7 @@ UnitBlueprint{
     Defense = {
         ArmorType = "Structure",
         EconomyThreatLevel = 7,
-        Health = 600,
+        Health = 300,
         MaxHealth = 600,
         RegenRate = 3,
     },
@@ -83,10 +83,10 @@ UnitBlueprint{
     },
     Economy = {
         AdjacentMassProductionMod = 0.25,
-        BuildCostEnergy = 1500,
-        BuildCostMass = 200,
-        BuildTime = 250,
-        RebuildBonusIds = { "urb1106" },
+        BuildCostEnergy = 750,
+        BuildCostMass = 100,
+        BuildTime = 120,
+        RebuildBonusIds = { "uab1106" },
         StorageMass = 500,
     },
     General = {
