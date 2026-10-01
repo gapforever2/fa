@@ -209,7 +209,7 @@ UnitBlueprint{
             MuzzleChargeDelay = 0.1,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 1,
-            MuzzleVelocity = 25,
+            MuzzleVelocity = 60,
             ProjectileId = "/projectiles/AAAFizz01/AAAFizz01_proj.bp",
             ProjectileLifetimeUsesMultiplier = 1.25,
             RackBones = {

@@ -158,7 +158,7 @@ UnitBlueprint{
             MaxRadius = 50,
             MuzzleSalvoDelay = 0.1,
             MuzzleSalvoSize = 2,
-            MuzzleVelocity = 40,
+            MuzzleVelocity = 60,
             ProjectileId = "/projectiles/CAABurstCloud01/CAABurstCloud01_proj.bp",
             ProjectileLifetimeUsesMultiplier = 1.25,
             ProjectilesPerOnFire = 2,

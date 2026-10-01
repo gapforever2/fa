@@ -159,7 +159,7 @@ UnitBlueprint{
             MaxRadius = 50,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 1,
-            MuzzleVelocity = 40,
+            MuzzleVelocity = 60,
             ProjectileId = "/projectiles/TAALightFragmentationShell01/TAALightFragmentationShell01_proj.bp",
             ProjectileLifetimeUsesMultiplier = 1.25,
             ProjectilesPerOnFire = 1,
