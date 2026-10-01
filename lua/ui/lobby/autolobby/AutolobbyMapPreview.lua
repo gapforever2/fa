@@ -199,6 +199,7 @@ local AutolobbyMapPreview = ClassUI(Group) {
             -- clean up
             for id, icon in spawnIcons do
                 icon:Destroy()
+                spawnIcons[id] = nil
             end
 
             return
@@ -208,6 +209,7 @@ local AutolobbyMapPreview = ClassUI(Group) {
         for id, icon in spawnIcons do
             if not positions[id] then
                 icon:Destroy()
+                spawnIcons[id] = nil
             end
         end
 
@@ -227,7 +229,7 @@ local AutolobbyMapPreview = ClassUI(Group) {
 
             local playerOptions = playerOptions[id]
             if playerOptions then
-                icon:Update(playerOptions.Faction)
+                icon:Update(playerOptions)
             else
                 icon:Reset()
             end

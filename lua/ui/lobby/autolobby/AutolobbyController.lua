@@ -169,6 +169,12 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         self.GameMods = {}
         self.GameOptions = self:CreateLocalGameOptions()
         self.IsGafAutohost = self.GameOptions.GAFExpectedPlayer1 != nil
+        if self.IsGafAutohost then
+            -- Teams and mirrored roles are already chosen by the server and
+            -- shown in the loading preview. Keep those positions at launch.
+            self.GameOptions.TeamSpawn = 'fixed'
+            self.GameOptions.AutoTeams = 'none'
+        end
         self.ControlPrefix = self.GameOptions.GAFControlPrefix
         self.GameOptions.GAFControlPrefix = nil
         if self.ControlPrefix then
