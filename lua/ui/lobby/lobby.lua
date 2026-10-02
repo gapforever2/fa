@@ -2961,7 +2961,7 @@ function CreateSlotsUI(makeLabel)
             local isHuman = playerInfo.Human
             local isDev   = isHuman and groupDevColors[playerInfo.GroupRole] ~= nil
 
-            if isHuman and not isDev and index > 19 then
+            if isHuman and not isDev and index > 27 then
                 self:SetItem(playerInfo.PlayerColor)
                 AddChatText(LOC("<LOC lobui_0013_gaf>Color #" .. index .. " available only for Boosty subscribers and Staff."))
 

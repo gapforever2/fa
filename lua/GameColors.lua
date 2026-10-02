@@ -77,67 +77,79 @@ GameColors = {
 
     -- Faction colours
     ArmyColors = {
-       "FFe80a0a", -- (01) Cybran red
-        "7c0000", -- (02) dark red
-        "FFFF873E", -- (03) Nomads orange
-        "914805", -- (04) new brown
-        "ffa79602", -- (05) Sera golden
-        "fffafa00", -- (06) new yellow
-        "adff77", -- (07) Order Green
-        "ff40bf40", -- (08) mid green
-        "257100", -- (09) new green
-        "FF2F4F4F", -- (10) olive (dark green)
-        "3D66E2", -- (11) new blue1
-        "3544C9", -- (12) UEF blue
-        "9E18D3", -- (13) dark purple
-        "ff9161ff", -- (14) purple
-        "ff66ffcc", -- (15) aqua
-        "ffffffff", -- (16) white
-        "ff616d7e", -- (17) grey
-        "ffff88ff", -- (18) pink
-        "EC0BEC", -- (19) new fuschia
-        "26018B", -- (20) VIOLET
-        "FFBF00", -- (21) Gold
-        "00BFFF", -- (22) Deep sky blue
-        "26FF00", -- (23) Neon green
-        "FF5E00", -- (24) Hot pink
-        "EAFF004C", -- (25) Raspberry
-        "09498A", -- (26) dark blue
-        "FF009D", -- (27) pinkpink
-        "660066", -- (28) The Great
-        "00FFAA", -- (29) new turquoise
+        "940000", -- (01) dark red
+        "FE0000", -- (02) Cybran red
+        "FF8385", -- (03) light red
+        "A54900", -- (04) black and orange
+        "FD862C", -- (05) light orange
+        "FFAD7B", -- (06) light orange1
+        "AD9A00", -- (07) dark yellow
+        "FFFC04", -- (08) yellow
+        "FFFF6B", -- (09) light yellow
+        "007000", -- (10) dark green
+        "00BE32", -- (11) nautical
+        "72FF59", -- (12) light green
+        "0008FF", -- (13) blue
+        "3141D5", -- (14) UEF blue
+        "5A69FF", -- (15) light blue
+        "006162", -- (16) dark navy blue
+        "00BDB6", -- (17) dark turquoise
+        "00FFF7", -- (18) turquoise
+        "6B01AC", -- (19) violet
+		"B20ADB", -- (20) light purple
+        "A461FF", -- (21) purple
+        "FF009C", -- (22) dark pink
+        "FF04F7", -- (23) pink
+        "FF8EF6", -- (24) light pink
+        "000000", -- (25) black
+        "ffffffff", -- (26) white
+        "ff616d7e", -- (27) grey
+        "FF0042", -- (28) crimson
+        "FF5D00", -- (29) orange
+        "FFBE00", -- (30) gold
+        "00FF01", -- (31) green
+        "210193", -- (32) oceanic
+        "004593", -- (33) lacustrine
+        "014D49", -- (34) turquoise-green
+        "00FEA4", -- (35) greenish-turquoise
     },
 
     PlayerColors = {
-        "FFe80a0a", -- (01) Cybran red
-        "7c0000", -- (02) dark red
-        "FFFF873E", -- (03) Nomads orange
-        "914805", -- (04) new brown
-        "ffa79602", -- (05) Sera golden
-        "fffafa00", -- (06) new yellow
-        "adff77", -- (07) Order Green
-        "ff40bf40", -- (08) mid green
-        "257100", -- (09) new green
-        "FF2F4F4F", -- (10) olive (dark green)
-        "3D66E2", -- (11) new blue1
-        "3544C9", -- (12) UEF blue
-        "9E18D3", -- (13) dark purple
-        "ff9161ff", -- (14) purple
-        "ff66ffcc", -- (15) aqua
-        "ffffffff", -- (16) white
-        "ff616d7e", -- (17) grey
-        "ffff88ff", -- (18) pink
-        "EC0BEC", -- (19) new fuschia
-		"26018B", -- (20) VIOLET
-        "FFBF00", -- (21) Gold
-        "00BFFF", -- (22) Deep sky blue
-        "26FF00", -- (23) Neon green
-        "FF5E00", -- (24) Hot pink
-        "EAFF004C", -- (25) Raspberry
-        "09498A", -- (26) dark blue
-        "FF009D", -- (27) pinkpink
-        "660066", -- (28) The Great
-        "00FFAA", -- (29) new turquoise
+        "940000", -- (01) dark red
+        "FE0000", -- (02) Cybran red
+        "FF8385", -- (03) light red
+        "A54900", -- (04) black and orange
+        "FD862C", -- (05) light orange
+        "FFAD7B", -- (06) light orange1
+        "AD9A00", -- (07) dark yellow
+        "FFFC04", -- (08) yellow
+        "FFFF6B", -- (09) light yellow
+        "007000", -- (10) dark green
+        "00BE32", -- (11) nautical
+        "72FF59", -- (12) light green
+        "0008FF", -- (13) blue
+        "3141D5", -- (14) UEF blue
+        "5A69FF", -- (15) light blue
+        "006162", -- (16) dark navy blue
+        "00BDB6", -- (17) dark turquoise
+        "00FFF7", -- (18) turquoise
+        "6B01AC", -- (19) violet
+		"B20ADB", -- (20) light purple
+        "A461FF", -- (21) purple
+        "FF009C", -- (22) dark pink
+        "FF04F7", -- (23) pink
+        "FF8EF6", -- (24) light pink
+        "000000", -- (25) black
+        "ffffffff", -- (26) white
+        "ff616d7e", -- (27) grey
+        "FF0042", -- (28) crimson
+        "FF5D00", -- (29) orange
+        "FFBE00", -- (30) gold
+        "00FF01", -- (31) green
+        "210193", -- (32) oceanic
+        "004593", -- (33) lacustrine
+        "014D49", -- (34) turquoise-green
+        "00FEA4", -- (35) greenish-turquoise
     },
 
     TeamColorMode = {
