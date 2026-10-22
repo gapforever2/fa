@@ -31,8 +31,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Normal",
-        Health = 1600,
-        MaxHealth = 1600,
+        Health = 1500,
+        MaxHealth = 1500,
         SurfaceThreatLevel = 9,
     },
     Display = {
@@ -122,8 +122,8 @@ UnitBlueprint{
         UniformScale = 0.09,
     },
     Economy = {
-        BuildCostEnergy = 1360,
-        BuildCostMass = 250,
+        BuildCostEnergy = 1120,
+        BuildCostMass = 220,
         BuildTime = 920,
         TeleportEnergyMod = 0.15,
         TeleportMassMod = 1,
@@ -193,7 +193,7 @@ UnitBlueprint{
             },
             BallisticArc = "RULEUBA_LowArc",
             CollideFriendly = false,
-            Damage = 13.5,
+            Damage = 10,
             DamageType = "Normal",
             DisplayName = "Hells Fury Riot Gun",
             FireTargetLayerCapsTable = {

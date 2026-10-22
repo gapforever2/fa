@@ -30,8 +30,8 @@ UnitBlueprint{
     Defense = {
         ArmorType = "Structure",
         EconomyThreatLevel = 7,
-        Health = 325,
-        MaxHealth = 325,
+        Health = 650,
+        MaxHealth = 650,
     },
     Display = {
         BlinkingLights = {
@@ -76,9 +76,9 @@ UnitBlueprint{
     },
     Economy = {
         AdjacentMassProductionMod = 0.25,
-        BuildCostEnergy = 750,
-        BuildCostMass = 100,
-        BuildTime = 120,
+        BuildCostEnergy = 1500,
+        BuildCostMass = 200,
+        BuildTime = 250,
         RebuildBonusIds = { "uab1106" },
         StorageMass = 500,
     },
