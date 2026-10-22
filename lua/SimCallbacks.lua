@@ -51,6 +51,19 @@ local CategoriesTransportation = categories.TRANSPORTATION
 --- List of callbacks that is being populated throughout this file
 ---@type table<string, fun(data: table, units?: Unit[])>
 local Callbacks = {}
+
+--- Registers a callback from an integrated hook without exposing the callback
+--- table itself. Hook files execute in a separate chunk and cannot access this
+--- module's locals directly.
+---@param name string
+---@param callback fun(data: table, units?: Unit[])
+function RegisterSimCallback(name, callback)
+    if type(name) != 'string' or type(callback) != 'function' then
+        error('Invalid simulation callback registration')
+    end
+
+    Callbacks[name] = callback
+end
 local AnimationPanelCooldownSeconds = 10
 local AnimationPanelNextAllowedByArmy = {}
 
@@ -107,6 +120,56 @@ end
 
 --- Empty callback for ui mods to communicate
 Callbacks.EmptyCallback = function(data, units)
+end
+
+---@param data { minX: number, maxX: number, minZ: number, maxZ: number }
+---@param units Unit[]
+Callbacks.MexRebuildHotkeyCancelBuilds = function(data, units)
+    if not data then
+        return
+    end
+    local minX, maxX, minZ, maxZ = data.minX, data.maxX, data.minZ, data.maxZ
+    if not (minX and maxX and minZ and maxZ) then
+        return
+    end
+
+    local cancelled = 0
+    local processed = 0
+
+    for _, unit in SecureUnits(units) do
+        if not unit.Dead then
+            local queue = unit:GetCommandQueue()
+            if queue then
+                local keep = {}
+                local boxed = 0
+                local blocked = false
+
+                for _, cmd in queue do
+                    if cmd.blueprintId and cmd.commandType == 8 then -- 8 == BuildMobile
+                        local x, z = cmd.x, cmd.z
+                        if x and z and x >= minX and x <= maxX and z >= minZ and z <= maxZ then
+                            boxed = boxed + 1
+                        else
+                            TableInsert(keep, { cmd.x, cmd.y, cmd.z, cmd.blueprintId })
+                        end
+                    else
+                        blocked = true
+                    end
+                end
+
+                if boxed > 0 and not blocked then
+                    IssueClearCommands({ unit })
+                    for _, k in keep do
+                        IssueBuildMobile({ unit }, { k[1], k[2], k[3] }, k[4], {})
+                    end
+                    cancelled = cancelled + boxed
+                    processed = processed + 1
+                end
+            end
+        end
+    end
+
+    SPEW(string.format('[MexCancel] cancelled %d build order(s) across %d engineer(s)', cancelled, processed))
 end
 
 --- Callback takes a boolean and toggles a stat on given units between 0 and 1

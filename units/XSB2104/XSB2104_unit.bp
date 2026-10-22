@@ -157,7 +157,7 @@ UnitBlueprint{
             MuzzleSalvoSize = 2,
             MuzzleVelocity = 45,
             ProjectileId = "/projectiles/SAAShleoAAGatlingGun02/SAAShleoAAGatlingGun02_proj.bp",
-            ProjectileLifetimeUsesMultiplier = 1.25,
+            ProjectileLifetime = 1.3,
             ProjectilesPerOnFire = 2,
             RackBones = {
                 {

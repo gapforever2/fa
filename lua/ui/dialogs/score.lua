@@ -38,6 +38,38 @@ local campaignScore = ''
 
 scoreScreenActive = false
 
+local gameEnded = false
+local pendingScoreDialog = false
+
+local function FinalScoreDataReady()
+    return hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history
+end
+
+local function ShowPendingScoreDialog()
+    if not pendingScoreDialog or not gameEnded or not FinalScoreDataReady() then
+        return
+    end
+
+    local request = pendingScoreDialog
+    pendingScoreDialog = false
+
+    DisableWorldSounds()
+    StopAllSounds()
+    LOG("Final score data ready; displaying score screen")
+    CreateDialog2(request.victory, request.showCampaign, request.operationVictoryTable, request.midGame)
+end
+
+--- Called from UserSync when the simulation has sent the final GameEnded signal.
+function OnGameEnded()
+    gameEnded = true
+    ShowPendingScoreDialog()
+end
+
+--- Called after UserSync has installed the final score snapshot.
+function OnScoreDataReceived()
+    ShowPendingScoreDialog()
+end
+
 -- '<LOC SCORE_0058>Debrief'
 -- '<LOC SCORE_0059>Combat Report'
 
@@ -227,7 +259,9 @@ function UpdateData()
         if not armyInfo.civilian and armyInfo.showScore then
             -- set basic info from armies table
             curInfo[index] = {}
-            curInfo[index].name = hotstats.scoreData.current[i].name
+            curInfo[index].name = (hotstats.scoreData and hotstats.scoreData.current
+                and hotstats.scoreData.current[i] and hotstats.scoreData.current[i].name)
+                or armyInfo.nickname or ''
             curInfo[index].faction = armyInfo.faction
             curInfo[index].color = armyInfo.color
             --curInfo[index].teamName = index --TODO we need to get team data in here
@@ -245,21 +279,39 @@ function CreateDialog(victory, showCampaign, operationVictoryTable, midGame)
         return
     end
     scoreScreenActive = true
-    SessionEndGame()
+
+    if SessionIsMultiplayer() then
+        -- Do not wait in a thread here: EndGame stops the simulation clock and a
+        -- WaitSeconds loop may never wake up. UserSync calls us again when both
+        -- GameEnded and the final score snapshot have arrived.
+        pendingScoreDialog = {
+            victory = victory,
+            showCampaign = showCampaign,
+            operationVictoryTable = operationVictoryTable,
+            midGame = midGame,
+        }
+        LOG("Score screen requested; waiting for final game result data")
+        ShowPendingScoreDialog()
+        return
+    end
+
+    if SessionIsActive() then
+        SessionEndGame()
+    end
     DisableWorldSounds()
     StopAllSounds()
-    ForkThread(function()
-        while not(hotstats.scoreData.interval and hotstats.scoreData.current and hotstats.scoreData.history) do
-            WaitSeconds(0.5)
-        end
-        CreateDialog2(victory, showCampaign, operationVictoryTable, midGame)
-    end)
+    CreateDialog2(victory, showCampaign, operationVictoryTable, midGame)
 end
 
 function CreateDialog2(victory, showCampaign, operationVictoryTable, midGame)
     UpdateData()
 
-    campaignScore = tostring(curInfo.scoreData.current[1].general.score)
+    local firstPlayer = curInfo.scoreData and curInfo.scoreData.current and curInfo.scoreData.current[1]
+    if firstPlayer and firstPlayer.general then
+        campaignScore = tostring(firstPlayer.general.score)
+    else
+        campaignScore = '0'
+    end
 
     if showCampaign then
         Prefs.SetToCurrentProfile('last_faction', operationVictoryTable.faction)

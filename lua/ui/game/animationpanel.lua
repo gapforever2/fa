@@ -251,15 +251,29 @@ local function CreatePanel(parent)
     LayoutHelpers.SetDimensions(ring, RING_SIZE, RING_SIZE)
     LayoutHelpers.AtCenterIn(ring, bg)
     ring:DisableHitTest()
+
     for i = 1, table.getn(ANIMATION_OPTIONS) do
-        local segmentTexture = SEGMENT_HOVER_TEXTURES[i] or SEGMENT_HOVER_TEXTURES[1]
-        local overlay = Bitmap(bg, UIUtil.UIFile(segmentTexture))
+        local overlay = Bitmap(bg)
         LayoutHelpers.SetDimensions(overlay, RING_SIZE, RING_SIZE)
         LayoutHelpers.AtCenterIn(overlay, bg)
         overlay:SetAlpha(SEGMENT_ALPHA_NORMAL)
         overlay:DisableHitTest()
         bg._segmentOverlays[i] = overlay
     end
+
+    ForkThread(function()
+        for i = 1, table.getn(ANIMATION_OPTIONS) do
+            if IsDestroyed(bg) then
+                return
+            end
+            local overlay = bg._segmentOverlays[i]
+            if overlay and not IsDestroyed(overlay) then
+                local segmentTexture = SEGMENT_HOVER_TEXTURES[i] or SEGMENT_HOVER_TEXTURES[1]
+                overlay:SetTexture(UIUtil.UIFile(segmentTexture))
+            end
+            WaitSeconds(0.03)
+        end
+    end)
 
     local n = table.getn(ANIMATION_OPTIONS)
     local angleStep = 360 / n

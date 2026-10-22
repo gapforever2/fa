@@ -911,7 +911,19 @@ function TransferUnitsToHighestBrain(self, brains, transferUnfinishedUnits, cate
         return
     end
 
-    local ratings = ScenarioInfo.Options.Ratings
+    local rawRatings = ScenarioInfo.Options.Ratings
+    local ratings = rawRatings
+    if type(rawRatings) == "string" and rawRatings ~= "" then
+        local JSON = import("/lua/system/dkson.lua").json
+        local ok, decoded = pcall(JSON.decode, rawRatings)
+        if ok and type(decoded) == "table" then
+            ratings = decoded
+        else
+            ratings = {}
+        end
+    elseif type(rawRatings) ~= "table" then
+        ratings = {}
+    end
     ---@type table<AIBrain, number>
     local brainRatings = {}
     for _, brain in brains do

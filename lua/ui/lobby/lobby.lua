@@ -2287,7 +2287,6 @@ local function TryLaunch(skipNoObserversCheck)
         end
         gameInfo.GameOptions['Ratings'] = allRatings
         gameInfo.GameOptions['ClanTags'] = clanTags
-
         scenarioInfo = MapUtil.LoadScenario(gameInfo.GameOptions.ScenarioFile)
 
         -- Load in the default map options if they are not set manually

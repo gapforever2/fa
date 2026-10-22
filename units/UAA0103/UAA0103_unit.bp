@@ -240,6 +240,7 @@ UnitBlueprint{
             TargetRestrictDisallow = "UNTARGETABLE",
             TurretDualManipulators = false,
             Turreted = false,
+            RenderFireClock = true,
             WeaponCategory = "Bomb",
         },
         {

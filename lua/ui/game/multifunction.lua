@@ -38,6 +38,17 @@ controls.pingBtns = controls.pingBtns or {}
 savedParent = controls.savedParent
 
 local activeFilters = Prefs.GetFromCurrentProfile('activeFilters') or {}
+local AuraFilterKey = 'auraradius'
+if activeFilters[AuraFilterKey] == nil then
+    activeFilters[AuraFilterKey] = true
+end
+
+local function SetAuraVisibility(visible)
+    local auraRadius = import('/lua/ui/game/auraradius.lua')
+    if auraRadius and auraRadius.SetVisible then
+        auraRadius.SetVisible(visible == true)
+    end
+end
 
 local filterConditionals = {
     {
@@ -107,6 +118,7 @@ local buttons = {
                     SetActiveOverlays()
                 else
                     SetOverlayFilters({})
+                    SetAuraVisibility(false)
                 end
             end,
         },
@@ -145,7 +157,7 @@ function SetActiveOverlays()
     local comboData = {}
     for overlay,_ in activeFilters do
         for filterName,filterData in filters do
-            if overlay == filterData.key and filterData.Combo then
+            if overlay == filterData.key and filterData.Combo and not filterData.VisualOnly then
                 table.insert(tempFilters, filterName)
                 combos[filterData.Type] = 'empty'
                 comboData[filterData.Type] = filterData
@@ -157,7 +169,11 @@ function SetActiveOverlays()
     for overlay,_ in activeFilters do
         for filterName,filterData in filters do
             if overlay == filterData.key then
-                if combos[filterData.Type] then
+                if filterData.VisualOnly then
+                    -- Visual-only filters are handled by their own renderer and must
+                    -- never become a weapon/category overlay.
+                    break
+                elseif combos[filterData.Type] then
                     if combos[filterData.Type] == 'empty' then
                         combos[filterData.Type] = filterData.Categories
                     else
@@ -176,18 +192,24 @@ function SetActiveOverlays()
         SetOverlayFilter(info.filterName,categories,info.NormalColor,info.SelectColor,info.RolloverColor,info.Inner[1],info.Inner[2],info.Outer[1],info.Outer[2])
     end
     if table.empty(tempFilters) then
-        buttonState = false
-        GetButton('military'):Disable()
+        if activeFilters[AuraFilterKey] == true then
+            GetButton('military'):Enable()
+        else
+            buttonState = false
+            GetButton('military'):Disable()
+        end
     else
         GetButton('military'):Enable()
     end
     Prefs.SetToCurrentProfile('activeFilters', activeFilters)
     GetButton('military'):SetCheck(buttonState, true)
     SetOverlayFilters(tempFilters)
+    SetAuraVisibility(activeFilters[AuraFilterKey] == true)
 end
 
 function PreNIS()
     SetOverlayFilters({})
+    SetAuraVisibility(false)
 end
 
 function PostNIS()
@@ -269,7 +291,9 @@ function Create(parent)
     end
 
     for overlay, info in filters do
-        SetOverlayFilter(overlay,info.Categories,info.NormalColor,info.SelectColor,info.RolloverColor,info.Inner[1],info.Inner[2],info.Outer[1],info.Outer[2])
+        if not info.VisualOnly then
+            SetOverlayFilter(overlay,info.Categories,info.NormalColor,info.SelectColor,info.RolloverColor,info.Inner[1],info.Inner[2],info.Outer[1],info.Outer[2])
+        end
     end
 
     for _, info in filterConditionals do
@@ -1134,6 +1158,9 @@ end
 
 function UpdateActiveFilters()
     activeFilters = Prefs.GetFromCurrentProfile('activeFilters') or {}
+    if activeFilters[AuraFilterKey] == nil then
+        activeFilters[AuraFilterKey] = true
+    end
     SetActiveOverlays()
 end
 
@@ -1192,6 +1219,12 @@ local function calculateTeamColors()
     local focusArmy = GetFocusArmy()
     local colorsTbl = {}
     local tblSize
+
+    -- Replays can initialize this UI before a focus army exists. Calling
+    -- IsNeutral / IsAlly with the temporary -1 army index throws an exception.
+    if not focusArmy or focusArmy < 1 or not armies[focusArmy] then
+        return false
+    end
     
     colorsTbl[focusArmy] = teamColorSettings.colors.Player[1]
     
@@ -1397,8 +1430,11 @@ function TeamColorHandler(self, modifiers)
                 changeScoreboardColors()
             end      
         else
-            TeamColorMode(calculateTeamColors())
-            TeamColorMode(true)
+            local colors = calculateTeamColors()
+            if colors then
+                TeamColorMode(colors)
+                TeamColorMode(true)
+            end
         end    
     end
 end
@@ -1412,8 +1448,11 @@ end)
 function TeamColorSettingStartup()
     WaitSeconds(0.5 - --[[has already occured]]0.1)
     if teamColorSettings.autoEnable then
-        TeamColorMode(calculateTeamColors())
-        TeamColorMode(true)
-        GetButton('teamcolor'):ToggleCheck()
+        local colors = calculateTeamColors()
+        if colors then
+            TeamColorMode(colors)
+            TeamColorMode(true)
+            GetButton('teamcolor'):ToggleCheck()
+        end
     end
 end

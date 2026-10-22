@@ -2222,6 +2222,16 @@ THeavyFragmentationGrenadeUnitHit = {
     EmtBpPath .. 'terran_fragmentation_grenade_hit_08_emit.bp',
     EmtBpPath .. 'destruction_unit_hit_shrapnel_01_emit.bp',
 }
+TUEL0303CruiseMissileHit = {
+    EmtBpPath .. 'terran_explosive_titan_rockets_hit_01_emit.bp',
+    EmtBpPath .. 'terran_explosive_titan_rockets_hit_02_emit.bp',
+    EmtBpPath .. 'terran_explosive_titan_rockets_hit_03_emit.bp',
+    EmtBpPath .. 'terran_explosive_titan_rockets_hit_04_emit.bp',
+    EmtBpPath .. 'terran_explosive_titan_rockets_hit_05_emit.bp',
+    EmtBpPath .. 'terran_explosive_titan_rockets_hit_06_emit.bp',
+    EmtBpPath .. 'terran_explosive_titan_rockets_hit_07_emit.bp',
+    EmtBpPath .. 'terran_explosive_titan_rockets_hit_08_emit.bp',
+}
 THeavyFragmentationGrenadeFxTrails = {
     EmtBpPath .. 'terran_fragmentation_grenade_fxtrail_01_emit.bp',
 }

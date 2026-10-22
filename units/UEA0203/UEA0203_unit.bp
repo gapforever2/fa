@@ -19,7 +19,7 @@ UnitBlueprint{
         KTurn = 0.8,
         KTurnDamping = 1.5,
         LiftFactor = 7,
-        MaxAirspeed = 13.5,
+        MaxAirspeed = 15,
         MinAirspeed = 3,
         StartTurnDistance = 5,
         TransportHoverHeight = 2,
@@ -59,8 +59,8 @@ UnitBlueprint{
     },
     Defense = {
         ArmorType = "Light",
-        Health = 700,
-        MaxHealth = 700,
+        Health = 900,
+        MaxHealth = 900,
         SurfaceThreatLevel = 5,
     },
     Display = {
@@ -167,8 +167,8 @@ UnitBlueprint{
         UniformScale = 0.08,
     },
     Economy = {
-        BuildCostEnergy = 3840,
-        BuildCostMass = 192,
+        BuildCostEnergy = 4000,
+        BuildCostMass = 200,
         BuildTime = 1280,
     },
     Footprint = {
@@ -198,7 +198,7 @@ UnitBlueprint{
     LifeBarOffset = 0.5,
     LifeBarSize = 1,
     Physics = {
-        Elevation = 18,
+        Elevation = 12,
         FuelRechargeRate = 5,
         FuelUseTime = 400,
         GroundCollisionOffset = 1.6,

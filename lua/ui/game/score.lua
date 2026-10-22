@@ -44,11 +44,38 @@ local DisplayStorage = 0
 
 local created = false
 
+local JSON = import("/lua/system/dkson.lua").json
+local normalizedOptions = {}
+
+local function getOptionTable(key)
+    if normalizedOptions[key] ~= nil then
+        return normalizedOptions[key]
+    end
+    local raw = sessionInfo.Options and sessionInfo.Options[key]
+    if type(raw) == "table" then
+        normalizedOptions[key] = raw
+        return raw
+    end
+    if type(raw) == "string" and raw ~= "" then
+        local ok, decoded = pcall(JSON.decode, raw)
+        if ok and type(decoded) == "table" then
+            normalizedOptions[key] = decoded
+            return decoded
+        end
+    end
+    normalizedOptions[key] = {}
+    return normalizedOptions[key]
+end
+
 function updatePlayerName(line)
     local playerName = line.name:GetText()
-    local playerDivision = sessionInfo.Options.Divisions[playerName]
-    local playerRating = sessionInfo.Options.Ratings[playerName] or 0
-    local playerClan = sessionInfo.Options.ClanTags[playerName]
+    local divisions = getOptionTable("Divisions")
+    local ratings   = getOptionTable("Ratings")
+    local clanTags  = getOptionTable("ClanTags")
+
+    local playerDivision = divisions[playerName]
+    local playerRating = ratings[playerName] or 0
+    local playerClan = clanTags[playerName]
 
     if playerClan and playerClan ~= "" then
         playerClan = '[' .. playerClan .. '] '
@@ -56,7 +83,10 @@ function updatePlayerName(line)
         playerClan = ""
     end
 
-    if playerDivision then
+    local hasDivision = type(playerDivision) == "string"
+                        and playerDivision ~= ""
+                        and playerDivision ~= "unlisted"
+    if hasDivision then
         playerDivision = ' [' .. (playerDivision:gsub("^.", string.upper)) .. ']'
     else
         playerDivision = ""
@@ -66,7 +96,7 @@ function updatePlayerName(line)
         playerRating = ' [' .. math.floor(playerRating+0.5) .. ']'
     end
 
-    if sessionInfo.Options.Divisions then
+    if hasDivision then
         line.name:SetText(playerClan .. playerName .. playerDivision)
     else
         line.name:SetText(playerClan .. playerName .. playerRating)

@@ -1,4 +1,4 @@
-﻿--****************************************************************************
+--****************************************************************************
 --*  File     :  lua/modules/ui/help/unitdescriptions.lua
 --*  Author(s):  Ted Snook
 --*
@@ -10,12 +10,13 @@
 Description = {
 
     -- UEF -- Armored Commander Unit/Upgrades
-    ['uel0001'] = "<LOC Unit_Description_0303> Armored Commander is a combination of barracks and command center. Contains all the blueprints necessary to build a basic army from scratch. Upgradeable with combat enhancements, advanced engineering suits, resource allocation system, and teleporting.",
+    ['uel0001'] = "<LOC Unit_Description_0303> Armored Commander is a combination of barracks and command center. Contains all the blueprints necessary to build a basic army from scratch. Upgradeable with combat enhancements, advanced engineering suits, resource allocation system, and teleporting.\n\nShield health boost from the \"Shield Amplifier\" aura: +3000 (personal) / +8000 (bubble).",
     ['uel0001-tm'] = "<LOC Unit_Description_0004> Mounts a tactical cruise missile launcher onto the back of the ACU.",
     ['uel0001-aes'] = "<LOC Unit_Description_0005> Expands the number of available schematics and increases the ACU's build speed and maximum health.",
     ['uel0001-dsu'] = "<LOC Unit_Description_0006> Greatly increases the speed at which the ACU repairs itself.",
     ['uel0001-ees'] = "<LOC Unit_Description_0007> Replaces the Tech 2 Engineering Suite. Expands the number of available schematics and further increases the ACU's build speed and maximum health.",
     ['uel0001-hamc'] = "<LOC Unit_Description_0008> Increases main cannon's damage output by several factors. Also increases range of main cannon and Overcharge.",
+    ['uel0001-hamc2'] = "<LOC Unit_Description_Frostmourne> Upgrades the main cannon to a level comparable to Tech 3. The weapon and projectile cooling system lets it fire cold, powerful plasma and sustain continuous fire on the enemy.",
     ['uel0001-srtn'] = "<LOC Unit_Description_0009> Adds a short-range tactical nuke.",
     ['uel0001-pqt'] = "<LOC Unit_Description_0010> Adds teleporter. Requires considerable Energy to activate.",
     ['uel0001-sgf'] = "<LOC Unit_Description_0011> Expands the radius of the ACU's personal shield. Requires Energy to run.",
@@ -25,7 +26,7 @@ Description = {
     ['uel0001-red'] = "<LOC Unit_Description_0015> Adds a second Engineering Drone. Requires an initial Engineering Drone.",
 
     -- UEF -- Support Commander Units/Upgrades
-    ['uel0301'] = "<LOC Unit_Description_0016> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer. ",
+    ['uel0301'] = "<LOC Unit_Description_0016> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer. \n\nShield health boost from the \"Shield Amplifier\" aura: +2000 (personal) / +1000 (light bubble) / +2000 (heavy bubble).",
     ['uel0301-ed'] = "<LOC Unit_Description_0017> Engineering Drone acts as a secondary Engineer. Assists the SACU where applicable.",
     ['uel0301-psg'] = "<LOC Unit_Description_0018> Creates a protective shield around the SACU. Requires Energy to run.",
     ['uel0301-sgf'] = "<LOC Unit_Description_0019> Expands the radius of the SACU's personal shield. Requires Energy to run.",
@@ -33,6 +34,7 @@ Description = {
     ['uel0301-isb'] = "<LOC Unit_Description_0021> Increases SACU's resource generation.",
     ['uel0301-sre'] = "<LOC Unit_Description_0022> Greatly expands the range of the standard on-board SACU sensor systems.",
     ['uel0301-col'] = "<LOC Unit_Description_0023> Rapidly cools any weapon mounted onto the SACU. Increases rate of fire.",
+    ['uel0301-acu'] = "<LOC Unit_Description_0023> Rapidly cools any weapon mounted onto the SACU. Increases rate of fire.",
     ['uel0301-heo'] = "<LOC Unit_Description_0024> Equips the standard SACU Heavy plasma cannon with area-of-effect damage.",
 
     -- UEF -- Support Commander Presets
@@ -53,10 +55,10 @@ Description = {
     ['uel0203'] = "<LOC Unit_Description_0031> Amphibious tank. Provides direct-fire support with two riot guns.",
     ['uel0111'] = "<LOC Unit_Description_0032> Heavily armored, mobile tactical missile launcher. Designed to attack at long range.",
     ['uel0205'] = "<LOC Unit_Description_0033> Mobile AA unit. Armed with flak artillery.",
-    ['uel0307'] = "<LOC Unit_Description_0034> Mobile shield generator.",
-    ['uel0303'] = "<LOC Unit_Description_0035> Shielded heavy assault bot. Armed with two cannons and tactical rocket launcher.",
+    ['uel0307'] = "<LOC Unit_Description_0034> Mobile shield generator.\n\nShield health boost from the \"Shield Amplifier\" aura: +750.",
+    ['uel0303'] = "<LOC Unit_Description_0035> Shielded heavy assault bot. Armed with two cannons and tactical rocket launcher.\n\nShield health boost from the \"Shield Amplifier\" aura: +800.",
     ['uel0304'] = "<LOC Unit_Description_0036> Slow-moving heavy artillery. Must be stationary to fire.",
-    ['uel0401'] = "<LOC Unit_Description_0037> Experimental, amphibious mobile factory. Equipped with battleship-level weapons and armor. Its shield consumes Energy.",
+    ['uel0401'] = "<LOC Unit_Description_0037> Experimental, amphibious mobile factory. Equipped with battleship-level weapons and armor. Its shield consumes Energy.\n\nShield health boost from the \"Shield Amplifier\" aura: +2500.",
     ['xel0305'] = "<LOC Unit_Description_0307> Slow-moving, heavily armored assault bot. Designed to engage base defenses and structures.",
     ['xel0306'] = "<LOC Unit_Description_0308> Mobile missile launcher. Long reload time. Designed to overwhelm enemy shields and tactical missile defenses with large salvos.",
 
@@ -165,7 +167,7 @@ Description = {
     -- CYBRAN -- Armored Commander Unit/Upgrades
     ['url0001'] = "<LOC Unit_Description_0304> Armored Commander is a combination of barracks and command center. Contains all the blueprints necessary to build a basic army from scratch. Upgradeable with combat enhancements, advanced engineering suits, resource allocation system, and teleporting.",
     ['url0001-ras'] = "<LOC Unit_Description_0106> Increases ACU's resource generation.",
-    ['url0001-pcg'] = "<LOC Unit_Description_0107> Cloaks the ACU from optical sensors and increases maximum health. Can be detected by Omni Sensors. Requires Energy to run.",
+    ['url0001-pcg'] = "<LOC Unit_Description_0107> Cloaks the ACU from optical sensors and increases maximum health. Does not provide radar or sonar stealth. Can be detected by Omni Sensors. Requires Energy to run.",
     ['url0001-srs'] = "<LOC Unit_Description_0465_faf>Massively increases the rate at which the ACU repairs its armour.",
     ['url0001-psg'] = "<LOC Unit_Description_0108> Hides the ACU from radar. Requires Energy to run.",
     ['url0001-pqt'] = "<LOC Unit_Description_0109> Adds teleporter. Requires considerable Energy to activate.",
@@ -174,18 +176,21 @@ Description = {
     ['url0001-acu'] = "<LOC Unit_Description_0112> Increases main cannon's rate of fire and range. Also increases range of the Molecular Ripper and Overcharge.",
     ['url0001-mlg'] = "<LOC Unit_Description_0113> ACU can generate a beam laser that sweeps over enemy units. Range of the beam increases with Gun Range.",
     ['url0001-ntt'] = "<LOC Unit_Description_0114> Equips the ACU with a standard Cybran Nanite torpedo tube and sonar.",
+    ['url0001-exbbat1'] = "<LOC Unit_Description_CybranStealthField>Generates a stealth field that hides the ACU and nearby allied units from enemy radar and sonar.",
 
     -- CYBRAN -- Support Commander Units/Upgrades
     ['url0301'] = "<LOC Unit_Description_0115> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
     ['url0301-cfs'] = "<LOC Unit_Description_0116> Cloaks the SACU from optical sensors. Can be detected by Omni Sensors. Requires Energy to run.",
     ['url0301-emp'] = "<LOC Unit_Description_0117> EMP burst effectively disables enemy units for a few seconds.",
-    ['url0301-fc'] = "<LOC Unit_Description_0118> Greatly enhances the pulse laser's cohesion, almost doubling its damage output.",
+    ['url0301-fc'] = "<LOC Unit_Description_0118> Adds EMI and EMP ammunition to the main gun, stunning targets, damaging shields and increasing firing range.",
     ['url0301-nms'] = "<LOC Unit_Description_0119> Adds AA defensive system.",
     ['url0301-ras'] = "<LOC Unit_Description_0120> Increases SACU's resource generation.",
     ['url0301-ses'] = "<LOC Unit_Description_0121> Speeds up all engineering-related functions.",
     ['url0301-srs'] = "<LOC Unit_Description_0122> Greatly increases the speed at which the SACU repairs itself.",
     ['url0301-sfs'] = "<LOC Unit_Description_0123> Hides the SACU from radar. Requires Energy to run.",
     ['url0301-saa'] = "<LOC Unit_Description_0002_gaf> The main gun cooling module allows the SACU's primary weapon to fire twice as often.",
+    ['url0301-acu'] = "<LOC Unit_Description_0002_gaf> The main gun cooling module allows the SACU's primary weapon to fire twice as often.",
+    ['url0301-exbbat1'] = "<LOC url0301_stealthfield_desc> Generates a stealth field that hides the SACU and nearby allied units from enemy radar and sonar.",
     ['url0301-rads'] = "<LOC Unit_Description_0007_gaf> Adds a personal sensor system for the SACU.",
 
     -- CYBRAN -- Support Commander Presets
@@ -335,11 +340,12 @@ Description = {
     ['urb3104'] = "<LOC Unit_Description_0222> High-end intelligence system. Provides maximum radar and sonar coverage. Counters enemy intelligence systems.",
 
     -- AEON -- Armored Commander Unit/Upgrades
-    ['ual0001'] = "<LOC Unit_Description_0305> Armored Commander is a combination of barracks and command center. Contains all the blueprints necessary to build a basic army from scratch. Upgradeable with combat enhancements, advanced engineering suits, resource allocation system, and teleporting.",
+    ['ual0001'] = "<LOC Unit_Description_0305> Armored Commander is a combination of barracks and command center. Contains all the blueprints necessary to build a basic army from scratch. Upgradeable with combat enhancements, advanced engineering suits, resource allocation system, and teleporting.\n\nShield health boost from the \"Shield Amplifier\" aura: +2000 (light) / +5000 (heavy).",
     ['ual0001-aes'] = "<LOC Unit_Description_0156> Expands the number of available schematics and increases the ACU's build speed and maximum health.",
     ['ual0001-cd'] = "<LOC Unit_Description_0157> Creates a Quantum Stasis Field around the ACU. Immobilizes enemy units within the ACU's main cannon range. Multiple Quantum Stasis Fields interfere with each other, having a limited effect.",
     ['ual0001-cba'] = "<LOC Unit_Description_0158>Increases the range of the ACU's main cannon and that of Overcharge.",
     ['ual0001-ecba'] = "<LOC Unit_Description_0466_faf>Massively increases the range of the ACU's main cannon and that of Overcharge.",
+    ['ual0001-ecba2'] = "<LOC Unit_Description_0467_gaf>Apollo's Bow.",
     ['ual0001-ess'] = "<LOC Unit_Description_0159> Greatly expands the range of the standard on-board ACU sensor systems.",
     ['ual0001-ees'] = "<LOC Unit_Description_0160> Replaces the Tech 2 Engineering Suite. Expands the number of available schematics and further increases the ACU's build speed and maximum health.",
     ['ual0001-hsa'] = "<LOC Unit_Description_0161> Rapidly cools the Quantum Disruptor beam. Increases rate of fire.",
@@ -350,7 +356,7 @@ Description = {
     ['ual0001-pqt'] = "<LOC Unit_Description_0166> Adds teleporter. Requires considerable Energy to activate.",
 
     -- AEON -- Support Commander Units/Upgrades
-    ['ual0301'] = "<LOC Unit_Description_0167> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
+    ['ual0301'] = "<LOC Unit_Description_0167> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.\n\nShield health boost from the \"Shield Amplifier\" aura: +2500 (light) / +5000 (heavy).",
     ['ual0301-efm'] = "<LOC Unit_Description_0168> Speeds up all engineering-related functions.",
     ['ual0301-ras'] = "<LOC Unit_Description_0169> Increases SACU's resource generation.",
     ['ual0301-sp'] = "<LOC Unit_Description_0170> SACU is sacrificed and its Mass is added to a structure. This destroys the SACU.",
@@ -363,11 +369,9 @@ Description = {
 
     -- AEON -- Support Commander Presets
     ['ual0301_Engineer']     = "<LOC ual0301_Engineer_help> Support Armored Command Unit. Enhanced during construction with rapid fabrication enhancement.",
-    ['ual0301_NanoCombat'] = "<LOC ual0301_NanoCombat_help> Support Armored Command Unit. Enhanced during construction with the reacton refractor and nano-repair system enhancements.",
     ['ual0301_Rambo'] = "<LOC ual0301_Rambo_help> Support Armored Command Unit. Enhanced during construction with a heavy personal shield and the reacton refractor enhancements.",
     ['ual0301_RAS'] = "<LOC ual0301_RAS_help> Support Armored Command Unit. Enhanced during construction with a Resource Allocation System.",
     ['ual0301_ShieldCombat'] = "<LOC ual0301_ShieldCombat_help> Support Armored Command Unit. Enhanced during construction with a personal shield and the reacton refractor enhancements.",
-    ['ual0301_Support'] = "<LOC ual0301_Support_help> Support Armored Command Unit. Enhanced during construction with the reacton refractor enhancement.",
 
     -- AEON -- Land Units
     ['ual0101'] = "<LOC Unit_Description_0223> Fast, lightly armored reconnaissance vehicle. Armed with a laser and a state-of-the-art sensor suite.",
@@ -375,11 +379,11 @@ Description = {
     ['ual0201'] = "<LOC Unit_Description_0225> Amphibious light tank. Armed with a single cannon.",
     ['ual0103'] = "<LOC Unit_Description_0226> Mobile light artillery. Designed to engage enemy units at long range.",
     ['ual0104'] = "<LOC Unit_Description_0227> Mobile anti-air unit. Effective against low-end enemy air units.",
-    ['ual0202'] = "<LOC Unit_Description_0228> Heavy tank. Equipped with a single cannon and a shield generator.",
+    ['ual0202'] = "<LOC Unit_Description_0228> Heavy tank. Equipped with a single cannon and a shield generator.\n\nShield health boost from the \"Shield Amplifier\" aura: +250.",
     ['ual0111'] = "<LOC Unit_Description_0229> Mobile tactical missile launcher. Missile has medium range and inflicts light damage.",
     ['ual0205'] = "<LOC Unit_Description_0230> Mobile AA unit. Armed with a temporal AA Fizz launcher.",
-    ['ual0307'] = "<LOC Unit_Description_0231> Mobile shield generator.",
-    ['ual0303'] = "<LOC Unit_Description_0232> Shielded Siege assault bot. Armed with a high-intensity laser. Can repair and reclaim Mass.",
+    ['ual0307'] = "<LOC Unit_Description_0231> Mobile shield generator.\n\nShield health boost from the \"Shield Amplifier\" aura: +500.",
+    ['ual0303'] = "<LOC Unit_Description_0232> Shielded Siege assault bot. Armed with a high-intensity laser. Can repair and reclaim Mass.\n\nShield health boost from the \"Shield Amplifier\" aura: +1200.",
     ['ual0304'] = "<LOC Unit_Description_0233> Slow-moving heavy artillery. Must be stationary to fire.",
     ['ual0401'] = "<LOC Unit_Description_0234> Sacred assault bot. Incinerates enemy units and structures with Phason laser. Also equipped with tractor beam. Pulls in and crushes mobile enemy units.",
     ['xal0203'] = "<LOC Unit_Description_0327> Fast, lightly armored tank. Armed with dual, rapid-fire autoguns.",
@@ -492,14 +496,14 @@ Description = {
     ['xsl0001-eras'] = "<LOC Unit_Description_0425> Requires Resource Allocation System. Further increases ACU's resource generation.",
     ['xsl0001-aes'] = "<LOC Unit_Description_0426> Expands the number of available schematics and increases the ACU's build speed and maximum health.",
     ['xsl0001-ees'] = "<LOC Unit_Description_0427> Replaces the Tech 2 Engineering Suite. Expands the number of available schematics and further increases the ACU's build speed and maximum health.",
-    ['xsl0001-cba'] = "<LOC Unit_Description_0428> Increases the damage inflicted by ACU's primary weapon. Adds area-of-effect damage.",
+    ['xsl0001-cba'] = "<LOC Unit_Description_0428> Increases the damage inflicted by ACU's primary weapon, adds area-of-effect damage and increases movement speed.",
     ['xsl0001-nrf'] = "<LOC Unit_Description_0429> Automatically speeds up the repair speed of nearby units.",
     ['xsl0001-anrf'] = "<LOC Unit_Description_0430> Further speeds up the repair speed of nearby units. Increases maximum health of nearby units.",
     ['xsl0001-hsa'] = "<LOC Unit_Description_0431> Increases main cannon's rate of fire and range. Also increases range of Overcharge.",
     ['xsl0001-tml'] = "<LOC Unit_Description_0432> Mounts a tactical cruise missile launcher onto the back of the ACU.",
 
     -- SERAPHIM -- Support Commander Units/Upgrades
-    ['xsl0301'] = "<LOC Unit_Description_0433> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.",
+    ['xsl0301'] = "<LOC Unit_Description_0433> A multi-purpose construction, repair, capture and reclamation unit. Equivalent to a Tech 3 Engineer.\n\nShield health boost from the \"Shield Amplifier\" aura: +1000.",
     ['xsl0301-tmu'] = "<LOC Unit_Description_0434> Mounts a tactical cruise missile launcher onto the back of the SACU.",
     ['xsl0301-dss'] = "<LOC Unit_Description_0435> Increases the speed at which the SACU repairs itself. Also increases hit points.",
     ['xsl0301-sre'] = "<LOC Unit_Description_0436> Significantly expands the capabilities of standard onboard SACU sensor systems: Radar, Omni, Vision.",
@@ -532,7 +536,7 @@ Description = {
     ['xsl0303'] = "<LOC Unit_Description_0345> Amphibious siege tank that is armed with a slow-firing Thau cannon. Also armed with bolters and a single torpedo launcher.",
     ['xsl0305'] = "<LOC Unit_Description_0346> Lightly armored, fast sniper bot. Armed with an extremely powerful energy rifle.",
     ['xsl0304'] = "<LOC Unit_Description_0347> Mobile heavy artillery. Ordinance inflicts moderate damage upon impact.",
-    ['xsl0307'] = "<LOC Unit_Description_0348> High-end mobile shield generator.",
+    ['xsl0307'] = "<LOC Unit_Description_0348> High-end mobile shield generator.\n\nShield health boost from the \"Shield Amplifier\" aura: +2500.",
     ['xsl0401'] = "<LOC Unit_Description_0349> A two-stage weapon. In its initial form, it fires an extremely destructive Phason laser. When the primary unit is destroyed, it unleashes a ferocious Quantum energy being.",
 
     -- SERAPHIM -- Air Units
@@ -640,4 +644,13 @@ Description = {
     ['dslk004'] = "<LOC Unit_Description_0464> Mobile Anti-Air unit. Armed with a long-range lasers, excellent against enemy gunships or air-fighters. Capable of switching weapon to anti-land attack but with smaller damage.",
     ['srl0310'] = "<LOC Unit_Description_srl0310> Mobile support unit. Designed to attack and destroy enemy shields. Weapon system only very briefly stuns enemy units.",
 
+    ['ual0301-cd'] = "<LOC ual0301_regendampener_desc> Entropy Field.",
+    ['ual0301-ptsg'] = "<LOC ual0301_shieldamplifier_desc> Shield Amplifier.",
+    ['ual0301_Defiler'] = "<LOC ual0301_Defiler_help> Support Armored Command Unit. Enhanced during construction with Entropy Field, Personal Shield and Enhanced Sensor System.",
+    ['ual0301_Aegis'] = "<LOC ual0301_Aegis_help> Support Armored Command Unit. Enhanced during construction with Shield Amplifier, Nano-Repair System and Enhanced Sensor System.",
+    ['ual0301_Heretic'] = "<LOC ual0301_Heretic_help> Support Armored Command Unit. Enhanced during construction with Entropy Field, Shield Amplifier, Nano-Repair System and Enhanced Sensor System.",
+    ['uel0301-sgf-support'] = "<LOC uel0301_support_shield_desc> Creates a light Support Bubble Shield around the SACU. Requires Energy to run.",
+    ['url0301-exbbat2'] = "<LOC url0301_speedaura_desc> Generates a field that accelerates nearby allied land units.",
+    ['xsl0301-anrf'] = "<LOC xsl0301_regenfield_desc> Emits a restoration field that regenerates nearby allied ground units.",
+    ['xsl0301-nrf'] = "<LOC xsl0301_healthfield_desc> Emits a vitality field that increases the maximum health of nearby allied ground units by 15%.",
 }

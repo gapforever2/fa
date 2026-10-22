@@ -106,7 +106,10 @@ UnitBlueprint{
         SizeZ = 1,
     },
     General = {
-        CommandCaps = { RULEUCC_Pause = true },
+        CommandCaps = {
+            RULEUCC_Pause = true,
+            RULEUCC_Stop = true,
+        },
         FactionName = "UEF",
         Icon = "land",
         OrderOverrides = {

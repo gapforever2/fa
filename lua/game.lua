@@ -61,6 +61,15 @@ function GetConstructEconomyModel(builder, targetData, upgradeBaseData)
         energy = math.max(energy - upgradeBaseData.BuildCostEnergy, 0)
     end
 
+    -- Separate cost/time for the upgrade path only (a fresh build still uses BuildCost*).
+    -- Lets a unit be cheaper/faster to upgrade into than to build from scratch.
+    -- Used by mass extractors (T2 -> T3). Only applies when this is an upgrade.
+    if upgradeBaseData then
+        if targetData.UpgradeCostMass then mass = targetData.UpgradeCostMass end
+        if targetData.UpgradeCostEnergy then energy = targetData.UpgradeCostEnergy end
+        if targetData.UpgradeBuildTime then buildtime = targetData.UpgradeBuildTime end
+    end
+
     -- Apply penalties/bonuses to effective costs
     local time_mod = builder.BuildTimeModifier or 0
     local energy_mod = builder.EnergyModifier or 0

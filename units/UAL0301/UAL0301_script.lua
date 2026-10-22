@@ -20,17 +20,145 @@ local EffectUtil = import("/lua/effectutilities.lua")
 local Buff = import("/lua/sim/buff.lua")
 local ADFCannonQuantumWeapon = AWeapons.ADFCannonQuantumWeapon
 
+local ADFEntropyField = import("/lua/sim/weapons/aeon/adfentropyfield.lua").ADFEntropyField
+
+local EntropyAuraVisualId = 'RegenDampener'
+local ShieldAmplifierAuraVisualId = 'ShieldAmplifier'
+local LOG = LOG
+
+local function GetShieldAmplifierUnitId(unit)
+    local unitId = unit.UnitId or unit:GetUnitId()
+    return unitId and string.lower(tostring(unitId)) or nil
+end
+
+local function DestroyEntropyVisuals(unit)
+    if unit.EntropyVisuals then
+        for _, emit in unit.EntropyVisuals do
+            if emit then
+                emit:Destroy()
+            end
+        end
+        unit.EntropyVisuals = nil
+    end
+end
+
+-- The Shield Amplifier grants explicit, fixed shield-HP bonuses. A number is the
+-- absolute bonus for a unit; a table holds separate bonuses per shield enhancement.
+local AeonShieldAmpTargets = {
+    ual0202 = 250,
+    ual0307 = 500,
+    ual0303 = 1200,
+    ual0001 = {
+        ShieldAeon = 2000,
+        ShieldHeavyAeon = 5000,
+    },
+    ual0301 = {
+        Shield = 2500,
+        ShieldHeavy = 5000,
+    },
+    xsl0301 = 1000,
+    xsl0307 = 2500,
+    uel0307 = 750,
+    uel0303 = 800,
+    uel0401 = 2500,
+    uel0001 = {
+        ShieldUEF = 3000,
+        ShieldGeneratorFieldUEF = 8000,
+    },
+    uel0301 = {
+        Shield = 2000,
+        ShieldGeneratorFieldSupport = 1000,
+        ShieldGeneratorField = 2000,
+    },
+}
+
 ---@class UAL0301 : CommandUnit
 UAL0301 = ClassUnit(CommandUnit) {
+    AuraVisuals = {
+        [EntropyAuraVisualId] = {
+            IsActive = function(self)
+                return self.EntropyFieldEnabled == true
+            end,
+            Color = 'ffd000ff',
+            Thickness = 0.12,
+            GetRadius = function(self)
+                local weapon = self:GetWeaponByLabel('RegenDampener')
+                return weapon and weapon:GetMaxRadius() or 0
+            end,
+        },
+        [ShieldAmplifierAuraVisualId] = {
+            IsActive = function(self)
+                return self.ShieldAmplifierEnabled == true
+            end,
+            Color = 'ffd000ff',
+            Thickness = 0.12,
+            GetRadius = function(self)
+                return self:GetShieldAmplifierRadius()
+            end,
+        },
+    },
+
     Weapons = {
         RightReactonCannon = ClassWeapon(ADFReactonCannon) {},
         DeathWeapon = ClassWeapon(SCUDeathWeapon) {},
         RedeemerGun = ClassWeapon(ADFCannonQuantumWeapon) {},
+
+        --- White entropy field: suppresses enemy HP regen and damages enemies with its wave.
+        RegenDampener = ClassWeapon(ADFEntropyField) {},
     },
 
     ---@param self UAL0301
     __init = function(self)
         CommandUnit.__init(self, 'RightReactonCannon')
+    end,
+
+    --- Returns the single gameplay radius used by both the shield target scan and
+    --- the declarative visual ring.
+    ---@param self UAL0301
+    ---@return number
+    GetShieldAmplifierRadius = function(self)
+        if self.SensorRangeEnhancerInstalled then
+            local sensor = self.Blueprint.Enhancements.SensorRangeEnhancer
+            return sensor and sensor.NewAuraRadius or 38
+        end
+
+        local amplifier = self.Blueprint.Enhancements.ShieldAmplifier
+        return amplifier and amplifier.Radius or 30
+    end,
+
+    --- Aggregates concurrently installed enhancement upkeep instead of allowing
+    --- SensorRangeEnhancer and ShieldAmplifier to overwrite the same engine value.
+    ---@param self UAL0301
+    ---@param key string
+    ---@param value number|nil
+    ApplyEnhancementUpkeep = function(self, key, value)
+        local upkeep = self.EnhancementUpkeep
+        if not upkeep then
+            upkeep = {}
+            self.EnhancementUpkeep = upkeep
+        end
+
+        upkeep[key] = value and value > 0 and value or nil
+
+        local total = 0
+        for _, amount in upkeep do
+            total = total + amount
+        end
+
+        self:SetEnergyMaintenanceConsumptionOverride(total)
+        if total > 0 then
+            self:SetMaintenanceConsumptionActive()
+        else
+            self:SetMaintenanceConsumptionInactive()
+        end
+    end,
+
+    ---@param self UAL0301
+    ---@return number
+    GetActiveShieldUpkeep = function(self)
+        local name = self.ActiveShieldEnhancement
+        local bp = name and self.Blueprint.Enhancements[name]
+        return bp and bp.MaintenanceConsumptionPerSecondEnergy or 0
     end,
 
     ---@param self UAL0301
@@ -51,6 +179,45 @@ UAL0301 = ClassUnit(CommandUnit) {
     ---@param layer Layer
     OnStopBeingBuilt = function(self, builder, layer)
         CommandUnit.OnStopBeingBuilt(self, builder, layer)
+        self:SetWeaponEnabledByLabel('RegenDampener', false)
+    end,
+
+    ---@param self UAL0301
+    ---@param instigator Unit
+    ---@param type DamageType
+    ---@param overkillRatio number
+    OnKilled = function(self, instigator, type, overkillRatio)
+        self.EntropyFieldEnabled = false
+        self.ShieldAmplifierEnabled = false
+        if self.EntropyActivationThread then
+            KillThread(self.EntropyActivationThread)
+            self.EntropyActivationThread = nil
+        end
+        if self.ShieldAmplifierThreadHandle then
+            KillThread(self.ShieldAmplifierThreadHandle)
+            self.ShieldAmplifierThreadHandle = nil
+        end
+        self:ShieldAmplifierRemoveAll()
+        if self.ShieldAmplifierVisual then
+            self.ShieldAmplifierVisual:Destroy()
+            self.ShieldAmplifierVisual = nil
+        end
+        DestroyEntropyVisuals(self)
+        CommandUnit.OnKilled(self, instigator, type, overkillRatio)
+    end,
+
+    --- Releases every registered target when the unit is removed directly
+    --- (scenario cleanup, transfer cleanup, or scripted Destroy). Normal combat
+    --- death already does this in OnKilled; the operation is safe to repeat.
+    ---@param self UAL0301
+    OnDestroy = function(self)
+        self.ShieldAmplifierEnabled = false
+        if self.ShieldAmplifierThreadHandle then
+            KillThread(self.ShieldAmplifierThreadHandle)
+            self.ShieldAmplifierThreadHandle = nil
+        end
+        self:ShieldAmplifierRemoveAll()
+        CommandUnit.OnDestroy(self)
     end,
 
     ---@psaram self UAL0301
@@ -86,53 +253,82 @@ UAL0301 = ClassUnit(CommandUnit) {
     ---@param self UAL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementSensorRangeEnhancer = function(self, bp)
+        self.SensorRangeEnhancerInstalled = true
+        self.SensorRangeEnhancerEnabled = true
         self:SetIntelRadius('Vision', bp.NewVisionRadius or 30)
-        self:SetIntelRadius('Omni', bp.NewOmniRadius or 55)
-        self:SetIntelRadius('Radar', bp.NewRadarRadius or 90)
-        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        self:SetMaintenanceConsumptionActive()
+        self:SetIntelRadius('Omni', bp.NewOmniRadius or 45)
+        self:SetIntelRadius('Radar', bp.NewRadarRadius or 100)
+        self:EnableUnitIntel('Enhancement', 'Omni')
+        self:EnableUnitIntel('Enhancement', 'Radar')
+        self:ApplyEnhancementUpkeep('SensorRangeEnhancer', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        self:GetWeaponByLabel('RegenDampener'):ChangeMaxRadius(bp.NewAuraRadius or 38)
+        self:AddToggleCap('RULEUTC_IntelToggle')
+        self:SetScriptBit('RULEUTC_IntelToggle', false)
     end,
 
     ---@param self UAL0301
     ---@param bp UnitBlueprintEnhancement unused
     ProcessEnhancementSensorRangeEnhancerRemove = function(self, bp)
+        self.SensorRangeEnhancerEnabled = false
+        self.SensorRangeEnhancerInstalled = false
+        self:DisableUnitIntel('Enhancement', 'Omni')
+        self:DisableUnitIntel('Enhancement', 'Radar')
+        self:RemoveToggleCap('RULEUTC_IntelToggle')
         local bpIntel = self.Blueprint.Intel
         self:SetIntelRadius('Vision', bpIntel.VisionRadius or 26)
         self:SetIntelRadius('Omni', bpIntel.OmniRadius or 26)
-        self:SetIntelRadius('Radar', bp.RadarRadius or 0)
+        self:SetIntelRadius('Radar', bpIntel.RadarRadius or 0)
+        self:ApplyEnhancementUpkeep('SensorRangeEnhancer', nil)
+        -- Entropy Field reverts to its base radius.
+        local weapon = self:GetWeaponByLabel('RegenDampener')
+        weapon:ChangeMaxRadius(weapon:GetBlueprint().MaxRadius or 28)
     end,
 
     ---@param self UAL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementShield = function(self, bp)
         self:AddToggleCap('RULEUTC_ShieldToggle')
-        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        self:SetMaintenanceConsumptionActive()
+        self.ActiveShieldEnhancement = 'Shield'
+        self:ApplyEnhancementUpkeep('Shield', bp.MaintenanceConsumptionPerSecondEnergy or 0)
         self:CreateShield(bp)
+        if self:HasEnhancement('ShieldAmplifier') then
+            self:ShieldAmplifierApplySelf()
+        end
     end,
 
     ---@param self UAL0301
     ---@param bp UnitBlueprintEnhancement unused
     ProcessEnhancementShieldRemove = function(self, bp)
+        self:AeonShieldAmpRemove()
         self:DestroyShield()
-        self:SetMaintenanceConsumptionInactive()
+        self.ActiveShieldEnhancement = nil
+        self:ApplyEnhancementUpkeep('Shield', nil)
         self:RemoveToggleCap('RULEUTC_ShieldToggle')
     end,
 
     ---@param self UAL0301
     ---@param bp UnitBlueprintEnhancement
     ProcessEnhancementShieldHeavy = function(self, bp)
-        WaitTicks(1)
+        self:AddToggleCap('RULEUTC_ShieldToggle')
+        self.ActiveShieldEnhancement = 'ShieldHeavy'
+        local savedBonus = self.AeonShieldAmpBonus
+        if savedBonus then
+            self:AeonShieldAmpRemove()
+        end
         self:CreateShield(bp)
-        self:SetEnergyMaintenanceConsumptionOverride(bp.MaintenanceConsumptionPerSecondEnergy or 0)
-        self:SetMaintenanceConsumptionActive()
+        self:ApplyEnhancementUpkeep('Shield', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+        if savedBonus and self:HasEnhancement('ShieldAmplifier') then
+            self:ShieldAmplifierApplySelf()
+        end
     end,
 
     ---@param self UAL0301
     ---@param bp UnitBlueprintEnhancement unused
     ProcessEnhancementShieldHeavyRemove = function(self, bp)
+        self:AeonShieldAmpRemove()
         self:DestroyShield()
-        self:SetMaintenanceConsumptionInactive()
+        self.ActiveShieldEnhancement = nil
+        self:ApplyEnhancementUpkeep('Shield', nil)
         self:RemoveToggleCap('RULEUTC_ShieldToggle')
     end,
 
@@ -200,6 +396,9 @@ UAL0301 = ClassUnit(CommandUnit) {
                         Add = bp.NewRegenRate - self.Blueprint.Defense.RegenRate,
                         Mult = 1,
                     },
+                    MoveMult = {
+                        Mult = 1.15,
+                    },
                 },
             }
         end
@@ -245,6 +444,418 @@ UAL0301 = ClassUnit(CommandUnit) {
     end,
 
     ---@param self UAL0301
+    ---@param bp UnitBlueprintEnhancement unused
+    ProcessEnhancementRegenDampener = function(self, bp)
+        self.EntropyFieldInstalled = true
+        self:SetWeaponEnabledByLabel('RegenDampener', false)
+        -- Powering the entropy field drains the main cannon: 300 -> 100 damage.
+        self:GetWeaponByLabel('RightReactonCannon'):AddDamageMod(bp.NewDamageMod or -200)
+        local weapon = self:GetWeaponByLabel('RegenDampener')
+        local sensor = self.Blueprint.Enhancements.SensorRangeEnhancer
+        local radius = self.SensorRangeEnhancerInstalled
+            and (sensor.NewAuraRadius or 38)
+            or (weapon:GetBlueprint().MaxRadius or 28)
+        weapon:ChangeMaxRadius(radius)
+        -- Remove emitters left by older test builds. The Lotus itself belongs to
+        -- the weapon muzzle flash and must only exist while a real wave fires.
+        DestroyEntropyVisuals(self)
+
+        self:AddToggleCap('RULEUTC_SpecialToggle')
+        self:SetEntropyFieldEnabled(true)
+        self:SetScriptBit('RULEUTC_SpecialToggle', false)
+    end,
+
+    --- Starts or stops entropy waves without uninstalling the enhancement.
+    ---@param self UAL0301
+    ---@param enabled boolean
+    SetEntropyFieldEnabled = function(self, enabled)
+        if enabled and not self.EntropyFieldInstalled then
+            return
+        end
+
+        self.EntropyFieldEnabled = enabled
+        self:SetWeaponEnabledByLabel('RegenDampener', false)
+        if self.EntropyActivationThread then
+            KillThread(self.EntropyActivationThread)
+            self.EntropyActivationThread = nil
+        end
+        DestroyEntropyVisuals(self)
+
+        if enabled then
+            -- Do not fire a wave immediately after enabling the field.
+            self.EntropyActivationThread = self:ForkThread(self.EntropyActivationDelayThread)
+        end
+        self:UpdateAuraVisualSync()
+    end,
+
+    ---@param self UAL0301
+    EntropyActivationDelayThread = function(self)
+        local weapon = self:GetWeaponByLabel('RegenDampener')
+        local weaponBp = weapon and weapon.Blueprint
+        local rateOfFire = weaponBp and weaponBp.RateOfFire or 0.1
+        local delayTicks = math.max(1, math.floor(10 / rateOfFire + 0.5))
+        WaitTicks(delayTicks)
+
+        self.EntropyActivationThread = nil
+        if not self.Dead and self.EntropyFieldEnabled then
+            self:SetWeaponEnabledByLabel('RegenDampener', true)
+        end
+    end,
+
+    ---@param self UAL0301
+    ---@param bp UnitBlueprintEnhancement unused
+    ProcessEnhancementRegenDampenerRemove = function(self, bp)
+        self:SetEntropyFieldEnabled(false)
+        self.EntropyFieldInstalled = false
+        self:RemoveToggleCap('RULEUTC_SpecialToggle')
+        -- Restore the main cannon damage.
+        self:GetWeaponByLabel('RightReactonCannon'):AddDamageMod(-(self.Blueprint.Enhancements.RegenDampener.NewDamageMod or -200))
+    end,
+
+    -- Shield Amplifier boosts existing shields on the explicitly whitelisted allied
+    -- ground units. It does not grant a shield. Each unit or shield enhancement gets
+    -- its own explicit HP bonus from AeonShieldAmpTargets; overlapping amplifiers are
+    -- tracked as independent sources but never stack the bonus.
+    --  Running the field strains the SACU's own chassis, cutting its max health by 5500
+    --  while the amplifier is installed.
+    --  The aura thread changes the live shield entity's current/max HP without
+    --  recreating it, so the engine's damage-recharge state and timer are preserved.
+    --  The buff is only the marker (UI icon + target emitter).
+    ---@param self UAL0301
+    ---@param bp UnitBlueprintEnhancement
+    ProcessEnhancementShieldAmplifier = function(self, bp)
+        self.ShieldAmplifierInstalled = true
+        if not Buffs['AeonShieldAmplifier'] then
+            BuffBlueprint {
+                Name = 'AeonShieldAmplifier',
+                DisplayName = 'Aeon Shield Amplifier',
+                BuffType = 'AEONSCUSHIELDAURA',
+                Stacks = 'REPLACE',
+                Duration = -1,
+                Effects = { '/effects/emitters/aeon_shield_amplifier_aura_02_emit.bp' },
+                Icon = true,
+                Affects = {},
+            }
+        end
+        -- Powering the field strains the SACU's own chassis: -5500 max health.
+        if not Buffs['AeonShieldAmpSelfDebuff'] then
+            BuffBlueprint {
+                Name = 'AeonShieldAmpSelfDebuff',
+                DisplayName = 'AeonShieldAmpSelfDebuff',
+                BuffType = 'AEONSCUSHIELDDEBUFF',
+                Stacks = 'REPLACE',
+                Duration = -1,
+                Affects = {
+                    MaxHealth = { Add = bp.ACUAddHealth or -5500, Mult = 1 },
+                },
+            }
+        end
+        Buff.ApplyBuff(self, 'AeonShieldAmpSelfDebuff')
+        self:AddToggleCap('RULEUTC_StealthToggle')
+        self:SetShieldAmplifierEnabled(true)
+        self:SetScriptBit('RULEUTC_StealthToggle', false)
+    end,
+
+    --- Starts or stops the shield-amplifier field without uninstalling it.
+    ---@param self UAL0301
+    ---@param enabled boolean
+    SetShieldAmplifierEnabled = function(self, enabled)
+        if enabled and not self.ShieldAmplifierInstalled then
+            return
+        end
+
+        self.ShieldAmplifierEnabled = enabled
+        if enabled then
+            self:ShieldAmplifierApplySelf()
+            if not Buff.HasBuff(self, 'AeonShieldAmplifier') then
+                Buff.ApplyBuff(self, 'AeonShieldAmplifier', self)
+            end
+            local bp = self.Blueprint.Enhancements.ShieldAmplifier
+            self:ApplyEnhancementUpkeep('ShieldAmplifier', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+            if not self.ShieldAmplifierThreadHandle then
+                self.ShieldAmplifierThreadHandle = self:ForkThread(self.ShieldAmplifierThread)
+            end
+        else
+            if self.ShieldAmplifierThreadHandle then
+                KillThread(self.ShieldAmplifierThreadHandle)
+                self.ShieldAmplifierThreadHandle = nil
+            end
+            self:ApplyEnhancementUpkeep('ShieldAmplifier', nil)
+            self:AeonShieldAmpRemove()
+            if Buff.HasBuff(self, 'AeonShieldAmplifier') then
+                Buff.RemoveBuff(self, 'AeonShieldAmplifier')
+            end
+            self:ShieldAmplifierRemoveAll()
+        end
+        self:UpdateShieldAmplifierVisual()
+        self:UpdateAuraVisualSync()
+    end,
+
+    ---@param self UAL0301
+    ---@param bp UnitBlueprintEnhancement unused
+    ProcessEnhancementShieldAmplifierRemove = function(self, bp)
+        self:SetShieldAmplifierEnabled(false)
+        self.ShieldAmplifierInstalled = false
+        self:RemoveToggleCap('RULEUTC_StealthToggle')
+        if Buff.HasBuff(self, 'AeonShieldAmpSelfDebuff') then
+            Buff.RemoveBuff(self, 'AeonShieldAmpSelfDebuff')
+        end
+    end,
+
+    ---@param self UAL0301
+    ShieldAmplifierRemoveAll = function(self)
+        if self.ShieldAmplifierActive then
+            local list = {}
+            for u in pairs(self.ShieldAmplifierActive) do
+                table.insert(list, u)
+            end
+            for _, u in list do
+                if not u.Dead then
+                    local ok, lastSource = pcall(function()
+                        if u.AeonShieldAmpUnregisterSource then
+                            return u:AeonShieldAmpUnregisterSource(self)
+                        elseif u.AeonShieldAmpRemove then
+                            u:AeonShieldAmpRemove()
+                        end
+                        return true
+                    end)
+                    if ok and lastSource and Buff.HasBuff(u, 'AeonShieldAmplifier') then
+                        Buff.RemoveBuff(u, 'AeonShieldAmplifier', true)
+                    elseif not ok then
+                        WARN('UAL0301 ShieldAmplifier cleanup FAILED for ', u.UnitId, ': ', lastSource)
+                    end
+                    u:RequestRefreshUI()
+                end
+                self.ShieldAmplifierActive[u] = nil
+            end
+            self.ShieldAmplifierActive = nil
+        end
+    end,
+
+    ---@param self UAL0301
+    ---@param u Unit
+    ---@return boolean
+    ShieldAmplifierEligible = function(self, u)
+        local shield = u.MyShield
+        if not shield or shield:BeenDestroyed() then
+            return false
+        end
+        -- Every listed allied unit is eligible regardless of faction or owner.
+        -- Each target receives its explicit fixed bonus from AeonShieldAmpTargets.
+        local unitId = GetShieldAmplifierUnitId(u)
+        return unitId and AeonShieldAmpTargets[unitId] ~= nil
+    end,
+
+    -- The carrier receives the same explicit fixed bonus as any other listed target.
+    ---@param self UAL0301
+    ---@return number
+    ShieldAmplifierSelfBonus = function(self)
+        local bonuses = AeonShieldAmpTargets.ual0301
+        if self:HasEnhancement('ShieldHeavy') then
+            return bonuses.ShieldHeavy
+        elseif self:HasEnhancement('Shield') then
+            return bonuses.Shield
+        end
+        return 0
+    end,
+
+    --- Applies the fixed SACU personal-shield bonus through the shared live-state
+    --- transition used by every Shield Amplifier target.
+    ---@param self UAL0301
+    ShieldAmplifierApplySelf = function(self)
+        if self.Dead then
+            return
+        end
+        if self.AeonShieldAmpBonus then
+            return
+        end
+        local shield = self.MyShield
+        if not shield or shield:BeenDestroyed() then
+            return
+        end
+        local bonus = self:ShieldAmplifierSelfBonus()
+        if bonus <= 0 then
+            return
+        end
+
+        self:AeonShieldAmpApplyBonus(bonus, AeonShieldAmpTargets.ual0301)
+    end,
+
+    ---@param self UAL0301
+    ---@param instigator Unit
+    ---@param bonus number|table
+    AeonShieldAmpApply = function(self, instigator, bonus)
+        self:ShieldAmplifierApplySelf()
+    end,
+
+    --- Restores the SACU's own personal shield by subtracting the bonus.
+    ---@param self UAL0301
+    AeonShieldAmpRemove = function(self)
+        self:AeonShieldAmpRemoveBonus()
+    end,
+
+    --- Maintains a single, dimmed emitter on the SACU itself so the field is visible
+    --- while the enhancement is active. Mirrors the XSL0301 self-aura visual.
+    ---@param self UAL0301
+    UpdateShieldAmplifierVisual = function(self)
+        if self.ShieldAmplifierThreadHandle then
+            if not self.ShieldAmplifierVisual then
+                local emit = CreateAttachedEmitter(self, 0, self.Army,
+                    '/effects/emitters/aeon_shield_amplifier_aura_02_emit.bp')
+                emit:ScaleEmitter(0.5)
+                self.ShieldAmplifierVisual = emit
+            end
+        elseif self.ShieldAmplifierVisual then
+            self.ShieldAmplifierVisual:Destroy()
+            self.ShieldAmplifierVisual = nil
+        end
+    end,
+
+    ---@param self UAL0301
+    ShieldAmplifierThread = function(self)
+        local brain = self:GetAIBrain()
+        local cat = categories.MOBILE
+            - categories.AIR
+            - categories.NAVAL
+            - categories.STRUCTURE
+
+        local active = self.ShieldAmplifierActive or {}
+        self.ShieldAmplifierActive = active
+        LOG('[AURA][SHIELD] watcher started source=', self.UnitId or self:GetUnitId(),
+            ' radius=', self:GetShieldAmplifierRadius())
+
+        while not self.Dead and self.ShieldAmplifierEnabled do
+            local ok, err = pcall(function()
+            local radius = self:GetShieldAmplifierRadius()
+            local present = {}
+
+            local units = brain:GetUnitsAroundPoint(cat, self:GetPosition(), radius, 'Ally')
+            for _, u in units do
+                if not u.Dead and not u:IsBeingBuilt() and self:ShieldAmplifierEligible(u) then
+                    present[u] = true
+                    local unitId = GetShieldAmplifierUnitId(u)
+                    local targetBonus = AeonShieldAmpTargets[unitId]
+                    local wasActive = active[u]
+                    local applyOk, applyErr = pcall(function()
+                        local applied
+                        if u.AeonShieldAmpRegisterSource then
+                            applied = u:AeonShieldAmpRegisterSource(self, targetBonus)
+                        elseif u.AeonShieldAmpApply then
+                            u:AeonShieldAmpApply(self, targetBonus)
+                            applied = u.AeonShieldAmpBonus ~= nil
+                        else
+                            WARN('[AURA][SHIELD] target has no apply method: ', unitId)
+                        end
+                        if applied then
+                            -- Track the target before UI marker work so a later
+                            -- error cannot leave an unowned gameplay bonus behind.
+                            active[u] = true
+                            if not Buff.HasBuff(u, 'AeonShieldAmplifier') then
+                                Buff.ApplyBuff(u, 'AeonShieldAmplifier', self)
+                                u:RequestRefreshUI()
+                            end
+                            if not wasActive then
+                                local shield = u.MyShield
+                                LOG('[AURA][SHIELD] target entered source=', self.UnitId or self:GetUnitId(),
+                                    ' target=', unitId, ' bonus=', repr(targetBonus),
+                                    ' result=', shield and shield:GetHealth() or 'none', '/',
+                                    shield and shield:GetMaxHealth() or 'none')
+                            end
+                        end
+                    end)
+                    if not applyOk then
+                        WARN('UAL0301 ShieldAmplifier apply FAILED for ', u.UnitId, ': ', applyErr)
+                    end
+                end
+            end
+
+            -- Units that left the field (or lost their shield) drop the buff and
+            -- restore their shield through AeonShieldAmpRemove (subtracts the bonus).
+            for u in pairs(active) do
+                if not present[u] or u.Dead then
+                    if not u.Dead then
+                        local removeOk, lastSource = pcall(function()
+                            if u.AeonShieldAmpUnregisterSource then
+                                return u:AeonShieldAmpUnregisterSource(self)
+                            elseif u.AeonShieldAmpRemove then
+                                u:AeonShieldAmpRemove()
+                            end
+                            return true
+                        end)
+                        if not removeOk then
+                            WARN('UAL0301 ShieldAmplifier remove FAILED for ', u.UnitId, ': ', lastSource)
+                        end
+                        if removeOk then
+                            LOG('[AURA][SHIELD] target left source=', self.UnitId or self:GetUnitId(),
+                                ' target=', GetShieldAmplifierUnitId(u), ' lastSource=', lastSource)
+                        end
+                        local buffOk, buffErr = pcall(function()
+                            if removeOk and lastSource and Buff.HasBuff(u, 'AeonShieldAmplifier') then
+                                Buff.RemoveBuff(u, 'AeonShieldAmplifier', true)
+                            end
+                            u:RequestRefreshUI()
+                        end)
+                        if not buffOk then
+                            WARN('UAL0301 ShieldAmplifier buff remove FAILED for ', u.UnitId, ': ', buffErr)
+                        end
+                    end
+                    active[u] = nil
+                end
+            end
+            end) -- pcall
+            if not ok then
+                WARN('UAL0301 ShieldAmplifierThread iteration FAILED: ', err)
+            end
+
+            WaitTicks(5)
+        end
+    end,
+
+    --- Keep radar, entropy and shield amplification independent.
+    ---@param self UAL0301
+    ---@param bit number
+    OnScriptBitSet = function(self, bit)
+        if bit == 0 then
+            self:EnableShield()
+            self:ApplyEnhancementUpkeep('Shield', self:GetActiveShieldUpkeep())
+        elseif bit == 3 then
+            self.SensorRangeEnhancerEnabled = false
+            self:DisableUnitIntel('ToggleBit3', 'Radar')
+            self:DisableUnitIntel('ToggleBit3', 'Omni')
+            self:ApplyEnhancementUpkeep('SensorRangeEnhancer', nil)
+        elseif bit == 5 then
+            self:SetShieldAmplifierEnabled(false)
+        elseif bit == 7 then
+            self:SetEntropyFieldEnabled(false)
+        else
+            CommandUnit.OnScriptBitSet(self, bit)
+        end
+    end,
+
+    ---@param self UAL0301
+    ---@param bit number
+    OnScriptBitClear = function(self, bit)
+        if bit == 0 then
+            self:DisableShield()
+            self:ApplyEnhancementUpkeep('Shield', nil)
+        elseif bit == 3 then
+            if self.SensorRangeEnhancerInstalled then
+                self.SensorRangeEnhancerEnabled = true
+                self:EnableUnitIntel('ToggleBit3', 'Radar')
+                self:EnableUnitIntel('ToggleBit3', 'Omni')
+                local bp = self.Blueprint.Enhancements.SensorRangeEnhancer
+                self:ApplyEnhancementUpkeep('SensorRangeEnhancer', bp.MaintenanceConsumptionPerSecondEnergy or 0)
+            end
+        elseif bit == 5 then
+            self:SetShieldAmplifierEnabled(true)
+        elseif bit == 7 then
+            self:SetEntropyFieldEnabled(true)
+        else
+            CommandUnit.OnScriptBitClear(self, bit)
+        end
+    end,
+
+    ---@param self UAL0301
     ---@param enh Enhancement
     CreateEnhancement = function(self, enh)
         CommandUnit.CreateEnhancement(self, enh)
@@ -258,6 +869,7 @@ UAL0301 = ClassUnit(CommandUnit) {
         else
             WARN("Missing enhancement: ", enh, " for unit: ", self:GetUnitId(), " note that the function name should be called: ", ref)
         end
+        self:UpdateAuraVisualSync()
     end,
 
     --#endregion

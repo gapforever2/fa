@@ -14,6 +14,15 @@ local quickDialog = false
 -- Terminate the game in a vaguely graceful fashion. This may or may not reduce the amount of times
 -- sudden quits lead to players having to wait for a timeout.
 function SafeQuit()
+    -- In a GPGNet game the launcher owns the game process and performs the
+    -- network cleanup after it exits. SessionEndGame followed by WaitSeconds
+    -- can strand the exit thread when a defeated player leaves or when the
+    -- simulation clock has already stopped at the final result screen.
+    if HasCommandLineArg('/gpgnet') then
+        ExitApplication()
+        return
+    end
+
     if SessionIsActive() and not SessionIsReplay() then
         ForkThread(function ()
             ConExecute('ren_oblivion true')

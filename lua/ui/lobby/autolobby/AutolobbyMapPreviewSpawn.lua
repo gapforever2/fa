@@ -20,8 +20,9 @@
 --** SOFTWARE.
 --******************************************************************************************************
 
-local UIUtil = import("/lua/ui/uiutil.lua")
 local LayoutHelpers = import("/lua/maui/layouthelpers.lua")
+local GameColors = import("/lua/gamecolors.lua").GameColors
+local Tooltip = import("/lua/ui/game/tooltip.lua")
 
 local Bitmap = import("/lua/maui/bitmap.lua").Bitmap
 
@@ -30,22 +31,16 @@ local Bitmap = import("/lua/maui/bitmap.lua").Bitmap
 ---@field Faction? number
 local AutolobbyMapPreviewSpawn = ClassUI(Bitmap) {
 
-    BorderPath = "/textures/ui/common/scx_menu/gameselect/map-slot_bmp.dds",
-    EmptyPath = "/textures/ui/common/dialogs/mapselect02/commander_alpha.dds",
-    UnknownIconPath = "/textures/ui/common/faction_icon-sm/random_ico.dds",
-    FactionIconPaths = {
-        -- faction_icon-lg
-        -- D:\SteamLibrary\steamapps\common\Supreme Commander Forged Alliance\gamedata\textures\textures\ui\common\dialogs\logo-btn
-        "/textures/ui/common/faction_icon-lg/uef_med.dds",
-        "/textures/ui/common/faction_icon-lg/aeon_med.dds",
-        "/textures/ui/common/faction_icon-lg/cybran_med.dds",
-        "/textures/ui/common/faction_icon-lg/seraphim_med.dds",
-    },
+    CommanderPath = "/textures/ui/icons_strategic/commander_generic.dds",
+    FactionNames = {'UEF', 'Aeon', 'Cybran', 'Seraphim', 'Random'},
 
     ---@param self UIAutolobbyMapPreviewSpawn
     ---@param parent Control
     __init = function(self, parent)
-        Bitmap.__init(self, parent, self.EmptyPath)
+        Bitmap.__init(self, parent, self.CommanderPath)
+        self:SetColorMask('ff101018')
+        self.Icon = Bitmap(self, self.CommanderPath)
+        self.Icon:DisableHitTest()
 
         self.Faction = nil
         self:Hide()
@@ -55,9 +50,15 @@ local AutolobbyMapPreviewSpawn = ClassUI(Bitmap) {
     ---@param parent Control
     __post_init = function(self, parent)
         LayoutHelpers.ReusedLayoutFor(self)
-            :Width(32)
-            :Height(32)
+            :Width(24)
+            :Height(24)
             :Over(parent, 32)
+            :End()
+        LayoutHelpers.ReusedLayoutFor(self.Icon)
+            :Width(20)
+            :Height(20)
+            :AtCenterIn(self)
+            :Over(self, 1)
             :End()
     end,
 
@@ -72,7 +73,7 @@ local AutolobbyMapPreviewSpawn = ClassUI(Bitmap) {
     ---@return boolean
     HandleEvent = function(self, event)
         if event.Type == 'MouseEnter' then
-            self:SetAlpha(0.25)
+            self:SetAlpha(0.8)
         elseif event.Type == 'MouseExit' then
             self:SetAlpha(1.0)
         end
@@ -90,14 +91,16 @@ local AutolobbyMapPreviewSpawn = ClassUI(Bitmap) {
     end,
 
     ---@param self UIAutolobbyMapPreviewSpawn
-    ---@param faction number
-    Update = function(self, faction)
-        local factionIcon = self.FactionIconPaths[faction]
-        if factionIcon then
-            self.Faction = faction
-            self:SetTexture(UIUtil.UIFile(factionIcon))
-            self:Show()
-        end
+    ---@param playerOptions UIAutolobbyPlayer
+    Update = function(self, playerOptions)
+        self.Faction = playerOptions.Faction or 5
+        self.Icon:SetColorMask(GameColors.PlayerColors[playerOptions.PlayerColor or 0] or 'ffffffff')
+        Tooltip.AddControlTooltip(self, {
+            text = playerOptions.PlayerName or '',
+            body = '#' .. tostring(playerOptions.StartSpot or '')
+                .. '  ' .. (self.FactionNames[self.Faction] or 'Random'),
+        })
+        self:Show()
     end,
 }
 
