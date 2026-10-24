@@ -1,0 +1,105 @@
+-- Scathis Copter: native units-only blueprint extension.
+-- /lua/system/Blueprints.lua:954-961 explicitly supports
+-- SetModBlueprintFunction from a blueprint file, including native reloads.
+-- Native *.bp discovery executes this file before registered callbacks run.
+-- Inherit URL0401 after balance overrides; never replace its balance .bp.
+-- Native GAP Beta integration: inherit this balance's own URL0401.
+SetModBlueprintFunction(function(allBlueprints)
+    local ground = allBlueprints.Unit.url0401
+    if not ground then
+        WARN('[ScathisCopter] URL0401 blueprint missing; flight disabled')
+        return
+    end
+
+    ground.General.ToggleCaps = ground.General.ToggleCaps or {}
+    ground.General.ToggleCaps.RULEUTC_SpecialToggle = true
+
+    local air = table.deepcopy(ground)
+    air.BlueprintId = 'sca0401'
+    -- UnitView uses BaseBlueprintId for the portrait of alternate forms.
+    air.BaseBlueprintId = 'url0401'
+    -- Selection icons use Display.IconName independently of BaseBlueprintId.
+    air.Display.IconName = ground.Display.IconName or 'url0401'
+    air.ScriptClass = 'SCA0401'
+    air.ScriptModule = '/units/SCA0401/SCA0401_script.lua'
+    -- Keep the stock resolved mesh/source: no model or textures are duplicated.
+    air.Description = 'Flying Scathis (unarmed)'
+    air.LayerCategory = 'AIR'
+    air.AI = { GuardScanRadius = 0 }
+    air.General.Icon = 'air'
+    air.General.OrderOverrides = nil
+    air.General.CommandCaps = {
+        RULEUCC_Move = true,
+        RULEUCC_Stop = true,
+        RULEUCC_Guard = true,
+        RULEUCC_Patrol = true,
+    }
+    air.General.CommandCapsHash = table.copy(air.General.CommandCaps)
+    air.General.ToggleCaps = { RULEUTC_SpecialToggle = true }
+    air.Weapon = {}
+    air.Air = {
+        CanFly = true,
+        -- Omit AutoLandTime, as on hovering engineering drones.
+        BankFactor = 0.1,
+        BankForward = false,
+        KLift = 2,
+        KLiftDamping = 2,
+        KMove = 1,
+        KMoveDamping = 2,
+        KRoll = 1,
+        KRollDamping = 2,
+        KTurn = 2,
+        KTurnDamping = 2,
+        LiftFactor = 6,
+        MaxAirspeed = 6,
+        MinAirspeed = 0,
+        StartTurnDistance = 3,
+    }
+    air.Physics = {
+        MotionType = 'RULEUMT_Air',
+        Elevation = 18,
+        MaxSpeed = 0.5,
+        GroundCollisionOffset = 1,
+    }
+    air.Transport = { AirClass = true, TransportClass = 10 }
+    air.Display.MovementEffects = {}
+    air.Display.Abilities = { 'Helicopter flight', 'Unarmed while airborne' }
+    air.Defense.AirThreatLevel = 0
+    air.Defense.SurfaceThreatLevel = 0
+    air.Defense.SubThreatLevel = 0
+
+    -- Air form is created by the toggle, never built as an extra experiment.
+    local remove = {
+        LAND = true, AMPHIBIOUS = true, ARTILLERY = true,
+        INDIRECTFIRE = true, OVERLAYINDIRECTFIRE = true,
+        NEEDMOBILEBUILD = true, DRAGBUILD = true, CQUEMOV = true,
+    }
+    local categories = {}
+    for _, category in ipairs(ground.Categories) do
+        if not remove[category] and not string.find(category, 'BUILTBY', 1, true) then
+            table.insert(categories, category)
+        end
+    end
+    table.insert(categories, 'AIR')
+    table.insert(categories, 'CANNOTUSEAIRSTAGING')
+    air.Categories = categories
+    air.CategoriesHash = table.hash(categories)
+    air.CategoriesCount = table.getn(categories)
+    allBlueprints.Unit.sca0401 = air
+    LOG('[ScathisCopter] units-only blueprints ready: URL0401 ground / SCA0401 air; speed=6 altitude=18 unarmed; icon=' .. air.Display.IconName)
+end)
+
+-- FAF normally disables veterancy for unarmed blueprints. This is a flight
+-- form of the same veteran unit: retain its health buffs and experience.
+-- Stable source: /lua/system/blueprints-units.lua, lines 442-469.
+local PreviousPostModBlueprints = PostModBlueprints
+function PostModBlueprints(allBlueprints)
+    local result = PreviousPostModBlueprints(allBlueprints)
+    local ground = allBlueprints.Unit.url0401
+    local air = allBlueprints.Unit.sca0401
+    if ground and air then
+        air.VetEnabled = ground.VetEnabled
+        air.VetThresholds = table.deepcopy(ground.VetThresholds)
+    end
+    return result
+end

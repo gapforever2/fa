@@ -163,3 +163,225 @@ URL0401 = ClassUnit(CLandUnit) {
 }
 
 TypeClass = URL0401
+
+-- Native flight extension. All dependencies are mounted game resources.
+local PreviousURL0401 = URL0401
+local PreviousGun = PreviousURL0401.Weapons.Gun01
+local Rotor = import('/units/URL0401/ScathisRotor.lua')
+local Flight = import('/units/URL0401/ScathisFlight.lua')
+
+URL0401 = ClassUnit(PreviousURL0401) {
+    SendNotifyMessage = function(self, message, ...)
+        if message == 'completed' and (self.CopterFlightMorph or Flight.SpawningMorph) then
+            return
+        end
+        return PreviousURL0401.SendNotifyMessage(self, message, unpack(arg))
+    end,
+
+    OnStopBeingBuilt = function(self, builder, layer)
+        local result = PreviousURL0401.OnStopBeingBuilt(self, builder, layer)
+        if result == false then
+            return false
+        end
+        self.CopterBuildCounted = true
+        self.CopterChangingBit = true
+        self:SetScriptBit('RULEUTC_SpecialToggle', false)
+        self.CopterChangingBit = false
+        LOG(string.format('[ScathisCopter] ground-ready id=%d landed=%s', self.EntityId, tostring(self.CopterLanded == true)))
+        if self.CopterLanded then
+            self:BeginCopterLandingCleanup()
+        end
+        return result
+    end,
+
+    SetCopterButton = function(self, state)
+        self.CopterChangingBit = true
+        self:SetScriptBit('RULEUTC_SpecialToggle', state)
+        self.CopterChangingBit = false
+    end,
+
+    OnScriptBitSet = function(self, bit)
+        if bit ~= 7 then
+            return PreviousURL0401.OnScriptBitSet(self, bit)
+        end
+        if self.CopterChangingBit or self.CopterFlightMorph then
+            return
+        end
+        if self.CopterTransition or self:GetFractionComplete() < 1 then
+            self:SetCopterButton(false)
+            return
+        end
+        self.CopterTransition = true
+        self.CopterTakingOff = true
+        self.CopterCancelTakeoff = false
+        self.CopterLiftElevation = 0
+        self.CopterSavedFireState = self:GetFireState()
+        self:SuspendCopterWeapon()
+        self:SetImmobile(true)
+        self:SetBusy(true)
+        self.CopterThread = self:ForkThread(self.CopterTakeoffThread)
+    end,
+
+    OnScriptBitClear = function(self, bit)
+        if bit ~= 7 then
+            return PreviousURL0401.OnScriptBitClear(self, bit)
+        end
+        if not self.CopterChangingBit and not self.CopterFlightMorph and self.CopterTakingOff then
+            self.CopterCancelTakeoff = true
+            LOG(string.format('[ScathisCopter] takeoff-cancel-request id=%d', self.EntityId))
+        end
+    end,
+
+    SuspendCopterWeapon = function(self)
+        local weapon = self:GetWeaponByLabel('Gun01')
+        self:SetFireState(1)
+        ChangeState(weapon, weapon.CopterDisabledState)
+        weapon:SetWeaponEnabled(false)
+        weapon:AimManipulatorSetEnabled(false)
+        weapon:ResetTarget()
+        weapon.WeaponCanFire = false
+        if weapon.UnpackAnimator then
+            self.CopterDeployFraction = weapon.UnpackAnimator:GetAnimationFraction()
+            weapon.UnpackAnimator:Destroy()
+            weapon.UnpackAnimator = nil
+        end
+        if weapon.Rotator then
+            weapon.Rotator:Destroy()
+            weapon.Rotator = nil
+        end
+        for index, rotator in weapon.PitchRotators or {} do
+            rotator:Destroy()
+        end
+        weapon.PitchRotators = {}
+        weapon.initialaim = true
+        weapon.losttarget = false
+        weapon.currentbarrel = 1
+        weapon.Goal = 0
+        weapon.WeaponPackState = 'Packed'
+    end,
+
+    RestoreCopterGround = function(self)
+        if self.Dead or self:BeenDestroyed() then
+            return
+        end
+        self:RevertElevation()
+        self:SetCopterButton(false)
+        self.CopterTakingOff = false
+        self.CopterTransition = false
+        self.CopterCancelTakeoff = false
+        self.CopterLiftElevation = nil
+        self:SetImmobile(false)
+        self:SetBusy(false)
+        self:SetFireState(self.CopterSavedFireState or 2)
+        local weapon = self:GetWeaponByLabel('Gun01')
+        weapon.WeaponCanFire = true
+        ChangeState(weapon, weapon.IdleState)
+        weapon:SetWeaponEnabled(true)
+        weapon:AimManipulatorSetEnabled(true)
+        self.CopterSavedFireState = nil
+        LOG(string.format('[ScathisCopter] ground-restored id=%d', self.EntityId))
+    end,
+
+    CopterTakeoffThread = function(self)
+        LOG(string.format('[ScathisCopter] takeoff-start id=%d', self.EntityId))
+        local ready = Rotor.Start(self, false)
+        if ready and not self.CopterCancelTakeoff then
+            for tick = 1, 30 do
+                WaitTicks(1)
+                if self.Dead or self:BeenDestroyed() then
+                    return
+                end
+                if self.CopterCancelTakeoff then
+                    break
+                end
+                self.CopterLiftElevation = 18 * tick / 30
+                self:SetElevation(self.CopterLiftElevation)
+            end
+        end
+        if self.Dead or self:BeenDestroyed() then
+            return
+        end
+        if ready and not self.CopterCancelTakeoff then
+            local replacement, reason = Flight.Transform(self, 'sca0401', 'Air')
+            if replacement then
+                return
+            end
+            WARN('[ScathisCopter] takeoff-transform-failed ' .. tostring(reason))
+        end
+        -- Return from the current height even when cancelled partway through lift.
+        local elevation = self.CopterLiftElevation or 0
+        for tick = 29, 0, -1 do
+            self:SetElevation(elevation * tick / 30)
+            WaitTicks(1)
+            if self.Dead or self:BeenDestroyed() then
+                return
+            end
+        end
+        if Rotor.Stop(self, false) then
+            self:RestoreCopterGround()
+        end
+    end,
+
+    -- Flight.Transform also calls this after creating an already finished unit.
+    BeginCopterLandingCleanup = function(self)
+        if self.CopterLandingCleanupStarted then
+            return
+        end
+        self.CopterLandingCleanupStarted = true
+        self.CopterTakingOff = true
+        self.CopterTransition = true
+        self:SuspendCopterWeapon()
+        self:SetCopterButton(false)
+        self:SetElevation(0)
+        self:SetImmobile(true)
+        self:SetBusy(true)
+        Rotor.Start(self, true)
+        self.CopterThread = self:ForkThread(function(unit)
+            if Rotor.Stop(unit, false) then
+                unit:RestoreCopterGround()
+            end
+        end)
+    end,
+
+    Weapons = {
+        Gun01 = ClassWeapon(PreviousGun) {
+            SetWeaponEnabled = function(self, enabled)
+                PreviousGun.SetWeaponEnabled(self, enabled and not self.unit.CopterTakingOff)
+            end,
+
+            CreateProjectileAtMuzzle = function(self, muzzle)
+                if not self.unit.CopterTakingOff then
+                    return PreviousGun.CreateProjectileAtMuzzle(self, muzzle)
+                end
+            end,
+
+            -- The stock helper forks independently and sleeps two ticks. Check
+            -- ownership again after the sleep before touching the shared bone.
+            RotateBarrels = function(self)
+                local rotor = self.Rotator
+                if self.unit.CopterTakingOff or self.losttarget or not rotor then
+                    return
+                end
+                rotor:SetSpeed(320)
+                self.Goal = math.mod(self.Goal + 60, 360)
+                WaitTicks(2)
+                if self.unit.CopterTakingOff or self.Rotator ~= rotor then
+                    return
+                end
+                rotor:SetGoal(self.Goal)
+                self.currentbarrel = math.mod(self.currentbarrel, 6) + 1
+            end,
+
+            CopterDisabledState = State {
+                WeaponWantEnabled = false,
+                WeaponAimWantEnabled = false,
+                Main = function(self) end,
+                OnFire = function(self) end,
+                OnGotTarget = function(self) end,
+                OnLostTarget = function(self) end,
+            },
+        },
+    },
+}
+
+TypeClass = URL0401
