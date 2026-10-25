@@ -1,4 +1,5 @@
 local UIUtil = import("/lua/ui/uiutil.lua")
+local UserMute = import("/lua/ui/usermute.lua")
 
 ---@alias PingType 'Alert' | 'Move' | 'Attack' | 'Marker'
 
@@ -183,32 +184,35 @@ function DisplayPing(data)
 
     -- for each ping
     for index, ping in data do
+        -- A flush has no owner and must always clear the visible markers.
+        -- Ping owners are zero-based, unlike the armies table.
+        if ping.Action == 'flush' or not UserMute.IsArmyMuted(ping.Owner + 1) then
+            -- for each world view (think about split-screen)
+            for _, viewControl in views do
 
-        -- for each world view (think about split-screen)
-        for _, viewControl in views do
-
-            -- perform the corresponding action
-            if viewControl and ping.Action ~= 'renew' then
-                if ping.Action then
-                    viewControl:UpdatePing(ping)
-                    if ping.Action == 'delete' then
-                        markers[ping.Owner][ping.ID] = nil
-                    elseif ping.Action == 'flush' then
-                        markers = {}
-                    end
-                else
-                    viewControl:DisplayPing(ping)
-                    if ping.Marker then
-                        if not markers[ping.Owner] then markers[ping.Owner] = {} end
-                        markers[ping.Owner][ping.ID] = ping
+                -- perform the corresponding action
+                if viewControl and ping.Action ~= 'renew' then
+                    if ping.Action then
+                        viewControl:UpdatePing(ping)
+                        if ping.Action == 'delete' and markers[ping.Owner] then
+                            markers[ping.Owner][ping.ID] = nil
+                        elseif ping.Action == 'flush' then
+                            markers = {}
+                        end
+                    else
+                        viewControl:DisplayPing(ping)
+                        if ping.Marker then
+                            if not markers[ping.Owner] then markers[ping.Owner] = {} end
+                            markers[ping.Owner][ping.ID] = ping
+                        end
                     end
                 end
             end
-        end
 
-        -- for new pings we perform a sound
-        if ping.Sound and not ping.Renew then
-            PlaySound(Sound { Bank = 'Interface', Cue = ping.Sound })
+            -- for new pings we perform a sound
+            if ping.Sound and not ping.Renew then
+                PlaySound(Sound { Bank = 'Interface', Cue = ping.Sound })
+            end
         end
     end
 end

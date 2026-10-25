@@ -592,15 +592,69 @@ local function LoadVaultContent(path)
     MountModContent(path .. '/mods')
 end
 
--- END OF COPY --
+-- BEGIN LOCAL MUTE SNAPSHOT
+-- Old clients already save foe.txt as UTF-8. Read it here, before the UI
+-- sandbox is created, and expose a safely quoted snapshot to the user state.
+do
+    local function PrepareLocalMuteSnapshot()
+        local caches = { InitFileDir .. '/../cache' }
+        local getenv = os and os.getenv
+        if getenv then
+            local cacheHome = getenv('XDG_CACHE_HOME')
+            local home = getenv('HOME')
+            if not cacheHome or string.sub(cacheHome, 1, 1) ~= '/' then
+                cacheHome = home and (home .. '/.cache')
+            end
+            if cacheHome and string.sub(cacheHome, 1, 1) == '/' then
+                -- Native Linux clients launch the Windows game through Wine.
+                table.insert(caches, 'Z:' .. cacheHome .. '/gapforever')
+            end
+        end
 
--- Clears out the shader cache as it takes a release to reset the shaders
-local shaderCache = SHGetFolderPath('LOCAL_APPDATA') .. 'Gas Powered Games/Supreme Commander Forged Alliance/cache'
-for k, file in IoDir(shaderCache .. '/*') do
-    if file != '.' and file != '..' then 
-        os.remove(shaderCache .. '/' .. file)
+        for _, cache in ipairs(caches) do
+            local source = io.open(cache .. '/foe.txt', 'rb')
+            if source then
+                local content = source:read('*a')
+                source:close()
+                if not content then return end
+                content = string.gsub(content, '^\239\187\191', '')
+                local lines = { 'MutedNames = {\n' }
+                for line in string.gfind(content, '[^\r\n]+') do
+                    local _, _, name = string.find(line, '^%s*(.-)%s*$')
+                    if name ~= '' then
+                        -- Decimal escapes keep the snapshot ASCII and prevent
+                        -- names containing quotes or Lua syntax becoming code.
+                        local escaped = string.gsub(name, '.', function(byte)
+                            return string.format('\\%03d', string.byte(byte))
+                        end)
+                        table.insert(lines, '["' .. escaped .. '"] = true,\n')
+                    end
+                end
+                table.insert(lines, '}\n')
+                local snapshot = io.open(cache .. '/gaf-local-mute.lua', 'wb')
+                if not snapshot then
+                    LOG('Could not write the local mute snapshot')
+                    return
+                end
+                local written = snapshot:write(table.concat(lines))
+                local closed = snapshot:close()
+                if written and closed then
+                    MountDirectory(cache, '/gaf-client-cache')
+                end
+                -- Never mount a stale snapshot if reading/writing failed.
+                return
+            end
+        end
+    end
+
+    local ok, message = pcall(PrepareLocalMuteSnapshot)
+    if not ok then
+        LOG('Could not prepare local mute list: ' .. tostring(message))
     end
 end
+-- END LOCAL MUTE SNAPSHOT
+
+-- END OF COPY --
 
 -- typical FAF packages
 local allowedAssetsNxy = { }

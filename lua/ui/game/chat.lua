@@ -16,6 +16,7 @@ local Prefs = import("/lua/user/prefs.lua")
 local Dragger = import("/lua/maui/dragger.lua").Dragger
 local Tooltip = import("/lua/ui/game/tooltip.lua")
 local UIMain = import("/lua/ui/uimain.lua")
+local UserMute = import("/lua/ui/usermute.lua")
 --[[ LOC Strings
 <LOC chat_win_0001>To %s:
 <LOC chat_win_0002>Chat (%d - %d of %d lines)
@@ -30,34 +31,6 @@ local chatHistory = {}
 local commandHistory = {}
 
 local ChatTo = import("/lua/lazyvar.lua").Create()
-
-
-local function parseCommandlineArguments()
-    local CMDLINE_ARGUMENT_KEYS = {
-        ["/foe"] = true,
-    }
-
-    local function GetCommandLineArgOrDefault(argname, default)
-        local arg = GetCommandLineArg(argname, 1)
-        if arg and not CMDLINE_ARGUMENT_KEYS[arg[1]] then
-            return arg[1]
-        end
-
-        return default
-    end
-
-   return {
-        foe_list = tostring(GetCommandLineArgOrDefault("/foe", "")),
-    }
-end
-local argv = parseCommandlineArguments()
-local foe_list_ = {}
-local foe_it = 1
-for it in string.gmatch(argv.foe_list, "[^,]+") do
-   foe_list_[foe_it] = it
-   foe_it = foe_it + 1
-end
--- kazbek peredai privet cucleusu
 
 
 local defOptions = { all_color = 1,
@@ -863,6 +836,10 @@ function ReceiveChatFromSim(sender, msg)
         return
     end
 
+    if not msg.echo and UserMute.IsMuted(sender) then
+        return
+    end
+
     if not msg.Chat then
         return
     end
@@ -1245,13 +1222,7 @@ function CreateChat()
 
     for i, v in GetArmiesTable().armiesTable do
         if not v.civilian then
-            ChatOptions[i] = true
-            for it, value1230 in foe_list_ do
-                if v.nickname == value1230 then
-                    ChatOptions[i] = false
-                    break
-                end
-            end
+            ChatOptions[i] = not UserMute.IsMuted(v.nickname)
         end
     end
     GUI.bg:SetAlpha(ChatOptions.win_alpha, true)
@@ -1496,9 +1467,6 @@ function CreateConfigWindow()
     for i, v in armyData.armiesTable do
         if not v.civilian then
             table.insert(options.filters, {type = 'filter', name = v.nickname, key = i})
-            -- for it, value12344 in foe_list_ do
-            --     table.insert(options.filters, {type = 'filter', name = foe_list_[it], key = it})
-            -- end
         end
     end
 

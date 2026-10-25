@@ -164,6 +164,8 @@ local selectedUIMods = {} -- Similar map for activated UI mods
 
 local CPU_Benchmarks = {} -- Stores CPU benchmark data
 
+local UserMute = import("/lua/ui/usermute.lua")
+
 local function parseCommandlineArguments()
     -- Set of all possible command line option keys.
     -- The client sometimes gives us empty-string as some args, which gets interpreted as that key
@@ -203,17 +205,10 @@ local function parseCommandlineArguments()
         playerMean = tonumber(GetCommandLineArgOrDefault("/mean", 1500)),
         playerClan = tostring(GetCommandLineArgOrDefault("/clan", "")),
         playerDeviation = tonumber(GetCommandLineArgOrDefault("/deviation", 500)),
-        foe_list = tostring(GetCommandLineArgOrDefault("/foe", "")),
         groupDev = tostring(GetCommandLineArgOrDefault("/group", "")),
     }
 end
 local argv = parseCommandlineArguments()
-local foe_list_ = {}
-local foe_it1212 = 1
-for it1212 in string.gmatch(argv.foe_list, "[^,]+") do
-   foe_list_[foe_it1212] = it1212
-   foe_it1212 = foe_it1212 + 1
-end
 
 local playerRating = math.floor(Trueskill.round2((argv.playerMean - 3 * argv.playerDeviation) / 100.0) * 100)
 
@@ -4799,7 +4794,7 @@ function setupChatEdit(chatPanel)
     local commandQueueIndex = 0
     local commandQueue = {}
     GUI.chatEdit.OnEnterPressed = function(self, text)
-	    if HasCommandLineArg('/mute') then
+	    if UserMute.IsGloballyMuted() then
             WARN("You are muted from lobby")
             return
         end
@@ -5497,9 +5492,7 @@ local MessageHandlers = {
             return data.SenderName == FindNameForID(data.SenderID)
         end,
         Handle = function(data)
-            for _, mutedPlayerName in foe_list_ do
-                if mutedPlayerName == data.SenderName then return end
-            end
+            if UserMute.IsMuted(data.SenderName) then return end
             AddChatText(data.Text, data.SenderID)
         end,
     },
@@ -5509,9 +5502,7 @@ local MessageHandlers = {
             return data.SenderName == FindNameForID(data.SenderID)
         end,
         Handle = function(data)
-            for _, mutedPlayerName in foe_list_ do
-                if mutedPlayerName == data.SenderName then return end
-            end
+            if UserMute.IsMuted(data.SenderName) then return end
             AddChatText("<<" .. LOCF("<LOC lobui_0442>From %s", data.SenderName) .. ">> " .. data.Text)
         end
     },
