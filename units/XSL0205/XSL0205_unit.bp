@@ -126,8 +126,8 @@ UnitBlueprint{
         UniformScale = 0.038,
     },
     Economy = {
-        BuildCostEnergy = 1600,
-        BuildCostMass = 200,
+        BuildCostEnergy = 2000,
+        BuildCostMass = 300,
         BuildTime = 800,
         TeleportEnergyMod = 0.15,
         TeleportMassMod = 1,
@@ -202,7 +202,7 @@ UnitBlueprint{
                 Land = "Air|Land|Water",
                 Water = "Air|Land|Water",
             },
-            MaxRadius = 33,
+            MaxRadius = 50,
             RackBones = {
                 {
                     MuzzleBones = { "Turret" },
@@ -222,7 +222,7 @@ UnitBlueprint{
             BallisticArc = "RULEUBA_None",
             CannotAttackGround = true,
             CollideFriendly = false,
-            Damage = 72,
+            Damage = 300,
             DamageFriendly = false,
             DamageRadius = 3,
             DamageType = "Normal",
@@ -256,7 +256,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = true,
             RangeCategory = "UWRC_AntiAir",
-            RateOfFire = 10/5, --10/integer interval in ticks
+            RateOfFire = 10/20, --10/integer interval in ticks
             SlavedToBody = false,
             TargetPriorities = {
                 "(AIR * MOBILE * EXPERIMENTAL - BOMBER)",
