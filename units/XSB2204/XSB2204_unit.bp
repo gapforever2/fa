@@ -90,9 +90,9 @@ UnitBlueprint{
         UniformScale = 0.035,
     },
     Economy = {
-        BuildCostEnergy = 2200,
-        BuildCostMass = 220,
-        BuildTime = 540,
+        BuildCostEnergy = 4000,
+        BuildCostMass = 400,
+        BuildTime = 600,
         RebuildBonusIds = { "xsb2204" },
     },
     Footprint = { MinWaterDepth = 1 },
@@ -151,9 +151,9 @@ UnitBlueprint{
             BallisticArc = "RULEUBA_None",
             CannotAttackGround = true,
             CollideFriendly = false,
-            Damage = 50,
+            Damage = 150,
             DamageFriendly = false,
-            DamageRadius = 4,
+            DamageRadius = 3,
             DamageType = "Normal",
             DetonatesAtTargetHeight = true,
             DisplayName = "Olaris AA Artillery Cannon",
@@ -168,7 +168,7 @@ UnitBlueprint{
             MaxRadius = 50,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 2,
-            MuzzleVelocity = 40,
+            MuzzleVelocity = 60,
             ProjectileId = "/projectiles/SAAOlarisAAArtillery06/SAAOlarisAAArtillery06_proj.bp",
             ProjectileLifetimeUsesMultiplier = 1.25,
             ProjectilesPerOnFire = 2,
@@ -190,7 +190,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = true,
             RangeCategory = "UWRC_AntiAir",
-            RateOfFire = 10/7, --10/integer interval in ticks
+            RateOfFire = 10/20, --10/integer interval in ticks
             TargetCheckInterval = 1.0,
             TargetPriorities = {
                 "(AIR * MOBILE * EXPERIMENTAL - BOMBER)",
