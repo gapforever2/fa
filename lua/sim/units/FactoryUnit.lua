@@ -399,7 +399,7 @@ FactoryUnit = ClassUnit(StructureUnit) {
             size = unitBeingBuilt.Blueprint.SizeZ
         end
 
-        size = (0.5 * size) * (0.5 * size)
+        size = (0.25 * size) * (0.25 * size)
         local unitPosition, dx, dz, d
         local buildPosition = self:GetPosition(self.Blueprint.Display.BuildAttachBone or 0)
         repeat
@@ -407,7 +407,7 @@ FactoryUnit = ClassUnit(StructureUnit) {
             dx = buildPosition[1] - unitPosition[1]
             dz = buildPosition[3] - unitPosition[3]
             d = dx * dx + dz * dz
-            WaitTicks(2)
+            WaitTicks(1)
         until IsDestroyed(unitBeingBuilt) or d > size
 
         self:PlayFxRollOffEnd()
