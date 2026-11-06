@@ -379,8 +379,6 @@ URL0001 = ClassUnit(ACUUnit, CCommandUnit) {
     ProcessEnhancementCloakingGeneratorCybran = function(self, bp)
         if not self.HasStealthFieldEnh then
             self:RemoveToggleCap('RULEUTC_StealthToggle')
-            self:DisableUnitIntel('Enhancement', 'RadarStealth')
-            self:DisableUnitIntel('Enhancement', 'SonarStealth')
         end
         self:AddToggleCap('RULEUTC_CloakToggle')
         self.HasStealthEnh = nil
