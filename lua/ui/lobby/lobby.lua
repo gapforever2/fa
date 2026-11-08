@@ -2954,11 +2954,14 @@ function CreateSlotsUI(makeLabel)
         colorSelector.OnClick = function(self, index)
             local playerInfo = gameInfo.PlayerOptions[curRow]
             local isHuman = playerInfo.Human
-            local isDev   = isHuman and groupDevColors[playerInfo.GroupRole] ~= nil
 
-            if isHuman and not isDev and index > 16 then
+            if isHuman and not import('/lua/GameColors.lua').CanUsePlayerColor(index, playerInfo.GroupRole) then
                 self:SetItem(playerInfo.PlayerColor)
-                AddChatText(LOC("<LOC lobui_0013_gaf>Color #" .. index .. " available only for Boosty subscribers and Staff."))
+                if gameColors.PlayerColorAccess[index] == 'admin' then
+                    AddChatText(LOC('<LOC lobui_admin_color_gaf>This color is available only to administrators.'))
+                else
+                    AddChatText(LOC("<LOC lobui_0013_gaf>Color #" .. index .. " available only for Boosty subscribers and Staff."))
+                end
 
                 return
             end
@@ -5710,7 +5713,11 @@ local MessageHandlers = {
         Accept = AmHost,
         Handle = function(data)
             local TargetSlot = FindSlotForID(data.SenderID)
-            if IsColorFree(data.Color) then
+            if not TargetSlot then
+                return
+            end
+            local playerInfo = gameInfo.PlayerOptions[TargetSlot]
+            if import('/lua/GameColors.lua').CanUsePlayerColor(data.Color, playerInfo.GroupRole) and IsColorFree(data.Color) then
                 -- Color is available, let everyone else know
                 SetPlayerColor(gameInfo.PlayerOptions[TargetSlot], data.Color)
                 lobbyComm:BroadcastData({ Type = 'SetColor', Color = data.Color, Slot = TargetSlot })
