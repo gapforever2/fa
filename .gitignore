@@ -25,3 +25,8 @@ textures/ui/common/BUTTON/BACKUP/
 act.exe
 *.venv
 lua_changelog
+
+# Local deployment tooling; do not publish infrastructure scripts with game sources.
+/scripts/deploy-beta.ps1
+/scripts/server/ingest_nx_files.sh
+/scripts/tests/test-ingest-nx-files.sh

@@ -27,30 +27,30 @@
 
 local WarmColdMapping = {
     -- 1v1
-    11, -- "ff436eee" (11) new blue1
-    01, -- "FFe80a0a" (01) Cybran red
+    9, -- blue
+    2, -- Cybran red
 
     -- 2v2
-    12, -- "FF2929e1" (12) UEF blue
-    02, -- "ff901427" (02) dark red
+    10, -- UEF blue
+    1, -- dark red
 
     -- 3v3
-    14, -- "ff9161ff" (14) purple
-    03, -- "FFFF873E" (03) Nomads orange
+    13, -- violet
+    4, -- light orange
 
     -- 4v4
-    15, -- "ff66ffcc" (15) aqua
-    05, -- "ffa79602" (05) Sera golden
+    12, -- turquoise
+    5, -- yellow
 
     -- beyond 4v4, which we'll not likely support any time soon.
-    08,
-    19,
-    07,
-    05,
-    13,
+    8,
+    3,
+    7,
+    6,
+    11,
+    14,
     16,
-    17,
-    04
+    15
 }
 
 --- Maps the start location of a player into a a warm vs cold color scheme. Read the
@@ -69,7 +69,36 @@ GameColors = {
 
     -- Default color order used for lobbies/TMM if not otherwise specified. Tightly coupled
     -- with the ArmyColors and the PlayerColors tables.
-    LobbyColorOrder = { 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 }, -- rainbow-like color for Fearghal
+    LobbyColorOrder = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
+
+    -- Every color needs an explicit policy, independent of its position/RGB.
+    -- Add new colors to BOTH arrays below, then add their policy here.
+    -- Missing/unknown policies are denied in-game and block publication.
+    PlayerColorAccess = {
+        [1] = 'public',
+        [2] = 'public',
+        [3] = 'public',
+        [4] = 'public',
+        [5] = 'public',
+        [6] = 'public',
+        [7] = 'public',
+        [8] = 'public',
+        [9] = 'public',
+        [10] = 'public',
+        [11] = 'public',
+        [12] = 'public',
+        [13] = 'public',
+        [14] = 'public',
+        [15] = 'public',
+        [16] = 'public',
+        [17] = 'premium',
+        [18] = 'premium',
+        [19] = 'premium',
+        [20] = 'premium',
+        [21] = 'premium',
+        [22] = 'premium',
+        [23] = 'admin',
+    },
 
     -- If you end up working with this file, suggestion to install the Color Highlight extension:
     -- - https://marketplace.visualstudio.com/items?itemName=naumovs.color-highlight
@@ -99,7 +128,7 @@ GameColors = {
         "004593", -- (20) lacustrine
         "00FEA4", -- (21) greenish-turquoise
         "00FFF7", -- (22) turquoise
-        "000000", -- (23) black
+        "FF000000", -- (23) black, explicitly opaque
     },
 
     PlayerColors = {
@@ -125,7 +154,7 @@ GameColors = {
         "004593", -- (20) lacustrine
         "00FEA4", -- (21) greenish-turquoise
         "00FFF7", -- (22) turquoise
-        "000000", -- (23) black
+        "FF000000", -- (23) black, explicitly opaque
     },
 
     TeamColorMode = {
@@ -137,3 +166,22 @@ GameColors = {
 
     UnidentifiedColor = "FF808080",
 }
+
+--- Shared UI/host policy. The autohost server independently enforces this policy.
+CanUsePlayerColor = function(index, role)
+    if type(index) ~= 'number' or index ~= math.floor(index) or not GameColors.PlayerColors[index] then
+        return false
+    end
+    role = type(role) == 'string' and string.lower(role) or ''
+    local access = GameColors.PlayerColorAccess[index]
+    if access == 'public' then
+        return true
+    end
+    if access == 'admin' then
+        return role == 'admin'
+    end
+    if access == 'premium' then
+        return role == 'admin' or role == 'mod' or role == 'bal' or role == 'yt' or role == 'bs'
+    end
+    return false
+end
