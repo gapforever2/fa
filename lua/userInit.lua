@@ -578,19 +578,19 @@ do
     local type = type
     local _SimCallback = SimCallback
 
-    local HasCommandLineArg = HasCommandLineArg
+    local IsGloballyMuted = import('/lua/ui/usermute.lua').IsGloballyMuted
     ---@param callback SimCallback
     ---@param addUnitSelection? boolean
     _G.SimCallback = function(callback, addUnitSelection)
         if callback and callback.Func == "SpawnPing" then
-            if HasCommandLineArg('/mute') and not callback.Args.Marker then
+            if IsGloballyMuted() and not callback.Args.Marker then
                 if maxPingsAllowed == 0 then
                     WARN("You are muted from spawning a ping")
                     return
                 end
                 maxPingsAllowed = maxPingsAllowed - 1
                 print(("Pings left %i"):format(maxPingsAllowed))
-            elseif HasCommandLineArg('/mute') and callback.Args.Marker then
+            elseif IsGloballyMuted() and callback.Args.Marker then
                 if maxMarkersAllowed == 0 then
                     WARN("You are muted from spawning a marker")
                     return
@@ -605,7 +605,7 @@ do
 
     local function CanSendChat(message)
         return not
-            (HasCommandLineArg('/mute') and message and type(message) == "table" and (message.Chat or message.Taunt)
+            (IsGloballyMuted() and message and type(message) == "table" and (message.Chat or message.Taunt)
             )
     end
 

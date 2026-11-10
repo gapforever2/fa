@@ -170,7 +170,7 @@ UnitBlueprint{
             CollideFriendly = false,
             Damage = 150,
             DamageFriendly = false,
-            DamageRadius = 3,
+            DamageRadius = 1,
             DamageType = "Normal",
             DetonatesAtTargetHeight = true,
             DisplayName = "Fragmentation Flak",

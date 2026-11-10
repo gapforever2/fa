@@ -204,7 +204,7 @@ UnitBlueprint{
             MuzzleChargeDelay = 0.1,
             MuzzleSalvoDelay = 0.2,
             MuzzleSalvoSize = 2,
-            MuzzleVelocity = 34,
+            MuzzleVelocity = 50,
             ProjectileId = "/projectiles/AASerpentine/AASerpentine_proj.bp",
             ProjectileLifetime = 8,
             ProjectilesPerOnFire = 1,

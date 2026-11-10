@@ -224,7 +224,7 @@ UnitBlueprint{
             CollideFriendly = false,
             Damage = 300,
             DamageFriendly = false,
-            DamageRadius = 3,
+            DamageRadius = 1,
             DamageType = "Normal",
             DetonatesAtTargetHeight = true,
             DisplayName = "Olaris AA Artillery Cannon",

@@ -27,30 +27,30 @@
 
 local WarmColdMapping = {
     -- 1v1
-    11, -- "ff436eee" (11) new blue1
-    01, -- "FFe80a0a" (01) Cybran red
+    9, -- blue
+    2, -- Cybran red
 
     -- 2v2
-    12, -- "FF2929e1" (12) UEF blue
-    02, -- "ff901427" (02) dark red
+    10, -- UEF blue
+    1, -- dark red
 
     -- 3v3
-    14, -- "ff9161ff" (14) purple
-    03, -- "FFFF873E" (03) Nomads orange
+    13, -- violet
+    4, -- light orange
 
     -- 4v4
-    15, -- "ff66ffcc" (15) aqua
-    05, -- "ffa79602" (05) Sera golden
+    12, -- turquoise
+    5, -- yellow
 
     -- beyond 4v4, which we'll not likely support any time soon.
-    08,
-    19,
-    07,
-    05,
-    13,
+    8,
+    3,
+    7,
+    6,
+    11,
+    14,
     16,
-    17,
-    04
+    15
 }
 
 --- Maps the start location of a player into a a warm vs cold color scheme. Read the
@@ -69,7 +69,36 @@ GameColors = {
 
     -- Default color order used for lobbies/TMM if not otherwise specified. Tightly coupled
     -- with the ArmyColors and the PlayerColors tables.
-    LobbyColorOrder = { 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29 }, -- rainbow-like color for Fearghal
+    LobbyColorOrder = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 },
+
+    -- Every color needs an explicit policy, independent of its position/RGB.
+    -- Add new colors to BOTH arrays below, then add their policy here.
+    -- Missing/unknown policies are denied in-game and block publication.
+    PlayerColorAccess = {
+        [1] = 'public',
+        [2] = 'public',
+        [3] = 'public',
+        [4] = 'public',
+        [5] = 'public',
+        [6] = 'public',
+        [7] = 'public',
+        [8] = 'public',
+        [9] = 'public',
+        [10] = 'public',
+        [11] = 'public',
+        [12] = 'public',
+        [13] = 'public',
+        [14] = 'public',
+        [15] = 'public',
+        [16] = 'public',
+        [17] = 'premium',
+        [18] = 'premium',
+        [19] = 'premium',
+        [20] = 'premium',
+        [21] = 'premium',
+        [22] = 'premium',
+        [23] = 'admin',
+    },
 
     -- If you end up working with this file, suggestion to install the Color Highlight extension:
     -- - https://marketplace.visualstudio.com/items?itemName=naumovs.color-highlight
@@ -77,67 +106,55 @@ GameColors = {
 
     -- Faction colours
     ArmyColors = {
-       "FFe80a0a", -- (01) Cybran red
-        "7c0000", -- (02) dark red
-        "FFFF873E", -- (03) Nomads orange
-        "914805", -- (04) new brown
-        "ffa79602", -- (05) Sera golden
-        "fffafa00", -- (06) new yellow
-        "adff77", -- (07) Order Green
-        "ff40bf40", -- (08) mid green
-        "257100", -- (09) new green
-        "FF2F4F4F", -- (10) olive (dark green)
-        "3D66E2", -- (11) new blue1
-        "3544C9", -- (12) UEF blue
-        "9E18D3", -- (13) dark purple
-        "ff9161ff", -- (14) purple
-        "ff66ffcc", -- (15) aqua
-        "ffffffff", -- (16) white
-        "ff616d7e", -- (17) grey
-        "ffff88ff", -- (18) pink
-        "EC0BEC", -- (19) new fuschia
-        "26018B", -- (20) VIOLET
-        "FFBF00", -- (21) Gold
-        "00BFFF", -- (22) Deep sky blue
-        "26FF00", -- (23) Neon green
-        "FF5E00", -- (24) Hot pink
-        "EAFF004C", -- (25) Raspberry
-        "09498A", -- (26) dark blue
-        "FF009D", -- (27) pinkpink
-        "660066", -- (28) The Great
-        "00FFAA", -- (29) new turquoise
+        "940000", -- (01) dark red
+        "FE0000", -- (02) Cybran red
+        "A54900", -- (03) black and orange
+        "FE8630", -- (04) light orange
+        "FFFC01", -- (05) yellow
+        "00FF01", -- (06) green
+        "007000", -- (07) dark green
+        "00BE32", -- (08) light green
+        "0008FF", -- (09) blue
+        "42AAFF", -- (10) UEF blue
+        "006162", -- (11) dark navy blue
+        "00BDB6", -- (12) dark turquoise
+        "6B01AC", -- (13) violet
+        "FF04F7", -- (14) pink light
+        "ffffffff", -- (15) white
+        "ff616d7e", -- (16) grey
+        "FF009C", -- (17) pink
+        "FF5D00", -- (18) orange
+        "FFBE00", -- (19) gold
+        "004593", -- (20) lacustrine
+        "00FEA4", -- (21) greenish-turquoise
+        "00FFF7", -- (22) turquoise
+        "FF000000", -- (23) black, explicitly opaque
     },
 
     PlayerColors = {
-        "FFe80a0a", -- (01) Cybran red
-        "7c0000", -- (02) dark red
-        "FFFF873E", -- (03) Nomads orange
-        "914805", -- (04) new brown
-        "ffa79602", -- (05) Sera golden
-        "fffafa00", -- (06) new yellow
-        "adff77", -- (07) Order Green
-        "ff40bf40", -- (08) mid green
-        "257100", -- (09) new green
-        "FF2F4F4F", -- (10) olive (dark green)
-        "3D66E2", -- (11) new blue1
-        "3544C9", -- (12) UEF blue
-        "9E18D3", -- (13) dark purple
-        "ff9161ff", -- (14) purple
-        "ff66ffcc", -- (15) aqua
-        "ffffffff", -- (16) white
-        "ff616d7e", -- (17) grey
-        "ffff88ff", -- (18) pink
-        "EC0BEC", -- (19) new fuschia
-		"26018B", -- (20) VIOLET
-        "FFBF00", -- (21) Gold
-        "00BFFF", -- (22) Deep sky blue
-        "26FF00", -- (23) Neon green
-        "FF5E00", -- (24) Hot pink
-        "EAFF004C", -- (25) Raspberry
-        "09498A", -- (26) dark blue
-        "FF009D", -- (27) pinkpink
-        "660066", -- (28) The Great
-        "00FFAA", -- (29) new turquoise
+        "940000", -- (01) dark red
+        "FE0000", -- (02) Cybran red
+        "A54900", -- (03) black and orange
+        "FE8630", -- (04) light orange
+        "FFFC01", -- (05) yellow
+        "00FF01", -- (06) green
+        "007000", -- (07) dark green
+        "00BE32", -- (08) light green
+        "0008FF", -- (09) blue
+        "42AAFF", -- (10) UEF blue
+        "006162", -- (11) dark navy blue
+        "00BDB6", -- (12) dark turquoise
+        "6B01AC", -- (13) violet
+        "FF04F7", -- (14) pink light
+        "ffffffff", -- (15) white
+        "ff616d7e", -- (16) grey
+        "FF009C", -- (17) pink
+        "FF5D00", -- (18) orange
+        "FFBE00", -- (19) gold
+        "004593", -- (20) lacustrine
+        "00FEA4", -- (21) greenish-turquoise
+        "00FFF7", -- (22) turquoise
+        "FF000000", -- (23) black, explicitly opaque
     },
 
     TeamColorMode = {
@@ -149,3 +166,22 @@ GameColors = {
 
     UnidentifiedColor = "FF808080",
 }
+
+--- Shared UI/host policy. The autohost server independently enforces this policy.
+CanUsePlayerColor = function(index, role)
+    if type(index) ~= 'number' or index ~= math.floor(index) or not GameColors.PlayerColors[index] then
+        return false
+    end
+    role = type(role) == 'string' and string.lower(role) or ''
+    local access = GameColors.PlayerColorAccess[index]
+    if access == 'public' then
+        return true
+    end
+    if access == 'admin' then
+        return role == 'admin'
+    end
+    if access == 'premium' then
+        return role == 'admin' or role == 'mod' or role == 'bal' or role == 'yt' or role == 'bs'
+    end
+    return false
+end

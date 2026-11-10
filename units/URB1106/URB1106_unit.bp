@@ -7,7 +7,7 @@ UnitBlueprint{
         DoneBeingBuilt = Sound { Bank = 'URB',        Cue = 'URB1106_Activate',       LodCutoff = 'UnitMove_LodCutoff' },
         UISelection    = Sound { Bank = 'Interface',  Cue = 'Cybran_Select_Resource', LodCutoff = 'UnitMove_LodCutoff' },
     },
-    AverageDensity = 600,
+    AverageDensity = 300,
     BuildIconSortPriority = 60,
     Categories = {
         "BUILTBYTIER1ENGINEER",
@@ -31,8 +31,8 @@ UnitBlueprint{
     Defense = {
         ArmorType = "Structure",
         EconomyThreatLevel = 7,
-        Health = 600,
-        MaxHealth = 600,
+        Health = 300,
+        MaxHealth = 300,
         RegenRate = 3,
     },
     Display = {
@@ -83,10 +83,10 @@ UnitBlueprint{
     },
     Economy = {
         AdjacentMassProductionMod = 0.25,
-        BuildCostEnergy = 1500,
-        BuildCostMass = 200,
-        BuildTime = 250,
-        RebuildBonusIds = { "urb1106" },
+        BuildCostEnergy = 750,
+        BuildCostMass = 100,
+        BuildTime = 120,
+        RebuildBonusIds = { "uab1106" },
         StorageMass = 500,
     },
     General = {

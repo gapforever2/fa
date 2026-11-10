@@ -294,7 +294,7 @@ UnitBlueprint{
             FiringRandomness = 0.3,
             FiringTolerance = 2,
             Label = "ParticleGun",
-            MaxRadius = 85,
+            MaxRadius = 80,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 2,
             MuzzleVelocity = 30,

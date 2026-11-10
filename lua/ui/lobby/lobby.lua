@@ -164,6 +164,8 @@ local selectedUIMods = {} -- Similar map for activated UI mods
 
 local CPU_Benchmarks = {} -- Stores CPU benchmark data
 
+local UserMute = import("/lua/ui/usermute.lua")
+
 local function parseCommandlineArguments()
     -- Set of all possible command line option keys.
     -- The client sometimes gives us empty-string as some args, which gets interpreted as that key
@@ -203,17 +205,10 @@ local function parseCommandlineArguments()
         playerMean = tonumber(GetCommandLineArgOrDefault("/mean", 1500)),
         playerClan = tostring(GetCommandLineArgOrDefault("/clan", "")),
         playerDeviation = tonumber(GetCommandLineArgOrDefault("/deviation", 500)),
-        foe_list = tostring(GetCommandLineArgOrDefault("/foe", "")),
         groupDev = tostring(GetCommandLineArgOrDefault("/group", "")),
     }
 end
 local argv = parseCommandlineArguments()
-local foe_list_ = {}
-local foe_it1212 = 1
-for it1212 in string.gmatch(argv.foe_list, "[^,]+") do
-   foe_list_[foe_it1212] = it1212
-   foe_it1212 = foe_it1212 + 1
-end
 
 local playerRating = math.floor(Trueskill.round2((argv.playerMean - 3 * argv.playerDeviation) / 100.0) * 100)
 
@@ -2959,11 +2954,14 @@ function CreateSlotsUI(makeLabel)
         colorSelector.OnClick = function(self, index)
             local playerInfo = gameInfo.PlayerOptions[curRow]
             local isHuman = playerInfo.Human
-            local isDev   = isHuman and groupDevColors[playerInfo.GroupRole] ~= nil
 
-            if isHuman and not isDev and index > 19 then
+            if isHuman and not import('/lua/GameColors.lua').CanUsePlayerColor(index, playerInfo.GroupRole) then
                 self:SetItem(playerInfo.PlayerColor)
-                AddChatText(LOC("<LOC lobui_0013_gaf>Color #" .. index .. " available only for Boosty subscribers and Staff."))
+                if gameColors.PlayerColorAccess[index] == 'admin' then
+                    AddChatText(LOC('<LOC lobui_admin_color_gaf>This color is available only to administrators.'))
+                else
+                    AddChatText(LOC("<LOC lobui_0013_gaf>Color #" .. index .. " available only for Boosty subscribers and Staff."))
+                end
 
                 return
             end
@@ -4799,7 +4797,7 @@ function setupChatEdit(chatPanel)
     local commandQueueIndex = 0
     local commandQueue = {}
     GUI.chatEdit.OnEnterPressed = function(self, text)
-	    if HasCommandLineArg('/mute') then
+	    if UserMute.IsGloballyMuted() then
             WARN("You are muted from lobby")
             return
         end
@@ -5497,9 +5495,7 @@ local MessageHandlers = {
             return data.SenderName == FindNameForID(data.SenderID)
         end,
         Handle = function(data)
-            for _, mutedPlayerName in foe_list_ do
-                if mutedPlayerName == data.SenderName then return end
-            end
+            if UserMute.IsMuted(data.SenderName) then return end
             AddChatText(data.Text, data.SenderID)
         end,
     },
@@ -5509,9 +5505,7 @@ local MessageHandlers = {
             return data.SenderName == FindNameForID(data.SenderID)
         end,
         Handle = function(data)
-            for _, mutedPlayerName in foe_list_ do
-                if mutedPlayerName == data.SenderName then return end
-            end
+            if UserMute.IsMuted(data.SenderName) then return end
             AddChatText("<<" .. LOCF("<LOC lobui_0442>From %s", data.SenderName) .. ">> " .. data.Text)
         end
     },
@@ -5719,7 +5713,11 @@ local MessageHandlers = {
         Accept = AmHost,
         Handle = function(data)
             local TargetSlot = FindSlotForID(data.SenderID)
-            if IsColorFree(data.Color) then
+            if not TargetSlot then
+                return
+            end
+            local playerInfo = gameInfo.PlayerOptions[TargetSlot]
+            if import('/lua/GameColors.lua').CanUsePlayerColor(data.Color, playerInfo.GroupRole) and IsColorFree(data.Color) then
                 -- Color is available, let everyone else know
                 SetPlayerColor(gameInfo.PlayerOptions[TargetSlot], data.Color)
                 lobbyComm:BroadcastData({ Type = 'SetColor', Color = data.Color, Slot = TargetSlot })
