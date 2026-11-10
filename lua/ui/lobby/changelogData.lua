@@ -1,16 +1,16 @@
 ---@type number
-last_version = 13
+last_version = 14
 
 ---@type PatchNotes[]
 gamePatches = {
 	{
-        version = 13,
-        name = "Storm",
+        version = 14,
+        name = "lending a hand",
         patchnoteUrl = "balances/11.html",
         description = {
-            "# Баг фикс 13 (10 апреля 2026)",
+            "https://gapforever2.github.io/patchnotes/balances/14.html#t1-uef-hra-aa-projectile",
             "",
-            "★«Шторм» Баг фикс",
+            "★«На подхвате»",
             "Баланс-команда: LIN,Armagedon,Angel_Fugu.",
         }
 	},
@@ -190,7 +190,7 @@ gamePatches = {
     },
     {
         version = 2,
-        name = "GAF Balance",
+        name = "GAP Balance",
         hasPrettyGithubRelease = true,
         description = {
             "# Баланс-патч 1.1 (26 января 2025)",
@@ -204,7 +204,7 @@ gamePatches = {
     },
     {
         version = 1,
-        name = "GAF Balance",
+        name = "GAP Balance",
         hasPrettyGithubRelease = true,
         description = {
             "# Баланс-патч 1.0 (20 января 2025)",
