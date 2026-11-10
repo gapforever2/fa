@@ -5,7 +5,7 @@ last_version = 14
 gamePatches = {
 	{
         version = 14,
-        name = "On standby",
+        name = "lending a hand",
         patchnoteUrl = "balances/11.html",
         description = {
             "https://gapforever2.github.io/patchnotes/balances/14.html#t1-uef-hra-aa-projectile",
