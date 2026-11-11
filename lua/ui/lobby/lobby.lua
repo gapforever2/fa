@@ -178,6 +178,8 @@ local function parseCommandlineArguments()
         ["/country"] = true,
         ["/numgames"] = true,
         ["/mean"] = true,
+        ["/performance"] = true,
+        ["/performancegames"] = true,
         ["/clan"] = true,
         ["/deviation"] = true,
         ["/joincustom"] = true,
@@ -203,6 +205,8 @@ local function parseCommandlineArguments()
         Tlpava = tostring(string.lower(GetCommandLineArgOrDefault("/avatartlp", ""))),
         numGames = tonumber(GetCommandLineArgOrDefault("/numgames", 0)),
         playerMean = tonumber(GetCommandLineArgOrDefault("/mean", 1500)),
+        performance = tonumber(GetCommandLineArgOrDefault("/performance", "none")),
+        performanceGames = tonumber(GetCommandLineArgOrDefault("/performancegames", 0)),
         playerClan = tostring(GetCommandLineArgOrDefault("/clan", "")),
         playerDeviation = tonumber(GetCommandLineArgOrDefault("/deviation", 500)),
         groupDev = tostring(GetCommandLineArgOrDefault("/group", "")),
@@ -474,6 +478,8 @@ function GetLocalPlayerData()
             Faction = GetSanitisedLastFaction(),
             PlayerClan = argv.playerClan,
             PL = playerRating,
+            Performance = argv.performance or false,
+            PerformanceGames = argv.performanceGames,
             NG = argv.numGames,
             MEAN = argv.playerMean,
             DEV = argv.playerDeviation,
@@ -1151,6 +1157,7 @@ function SetSlotInfo(slotNum, playerInfo)
     local slotState
     if not playerInfo.Human then
         slot.ratingText:Hide()
+        slot.performanceText:Hide()
         slotState = 'ai'
     elseif isLocallyOwned then
         slotState = nil
@@ -1185,6 +1192,11 @@ function SetSlotInfo(slotNum, playerInfo)
     slot.ratingText:Show()
     slot.ratingText:SetText(playerInfo.PL)
     slot.ratingText:SetColor("ffffffff")
+    slot.performanceText:Show()
+    slot.performanceText:SetText(type(playerInfo.Performance) == 'number'
+        and string.format('%+.2f', playerInfo.Performance) or '--')
+    Tooltip.AddControlTooltip(slot.performanceText, {text = 'EXP',
+        body = 'Experimental performance: ' .. tostring(playerInfo.PerformanceGames or 0) .. ' games'})
 
     -- dynamic tooltip to show rating and deviation for each player
     local tooltipText = {}
@@ -2780,8 +2792,8 @@ function CreateSlotsUI(makeLabel)
     local ColumnLayout = import("/lua/ui/controls/columnlayout.lua").ColumnLayout
 
     -- The dimensions of the columns used for slot UI controls.
-     local COLUMN_POSITIONS = {1, 21, 47, 91, 133, 380, 425, 495, 565, 637, 709, 749}
-    local COLUMN_WIDTHS = {20, 20, 45, 45, 241, 40, 62, 59, 59, 62, 62, 51}
+     local COLUMN_POSITIONS = {1, 21, 47, 91, 143, 185, 380, 425, 495, 565, 637, 709, 749}
+    local COLUMN_WIDTHS = {20, 20, 45, 52, 42, 189, 40, 62, 59, 59, 62, 62, 51}
 
     local labelGroup = ColumnLayout(GUI.playerPanel, COLUMN_POSITIONS, COLUMN_WIDTHS)
 
@@ -2797,6 +2809,7 @@ function CreateSlotsUI(makeLabel)
 
     local ratingLabel = makeLabel("R", 14)
     labelGroup:AddChild(ratingLabel)
+    labelGroup:AddChild(makeLabel('EXP', 14))
 
     local numGamesLabel = makeLabel("G", 14)
     labelGroup:AddChild(numGamesLabel)
@@ -2906,6 +2919,11 @@ function CreateSlotsUI(makeLabel)
         ratingText:SetDropShadow(true)
         newSlot:AddChild(ratingText)
 
+        local performanceText = UIUtil.CreateText(newSlot, '', 12, 'Arial')
+        newSlot.performanceText = performanceText
+        performanceText:SetColor('FF8ED8C0')
+        newSlot:AddChild(performanceText)
+
         -- NumGame
         local numGamesText = UIUtil.CreateText(newSlot, "", 14, 'Arial')
         newSlot.numGamesText = numGamesText
@@ -2919,7 +2937,7 @@ function CreateSlotsUI(makeLabel)
         newSlot.name = nameLabel
         nameLabel._text:SetFont('Arial Gras', 15)
         newSlot:AddChild(nameLabel)
-        LayoutHelpers.SetWidth(nameLabel, COLUMN_WIDTHS[5])
+        LayoutHelpers.SetWidth(nameLabel, COLUMN_WIDTHS[6])
         -- left deal with name clicks
         nameLabel.OnEvent = defaultHandler
         nameLabel.OnClick = function(self, index, text)
@@ -2937,7 +2955,7 @@ function CreateSlotsUI(makeLabel)
         -- Avatar
         local avatar = Bitmap(newSlot)
         newSlot.KinderAvatar = avatar
-        LayoutHelpers.SetWidth(avatar, COLUMN_WIDTHS[6])
+        LayoutHelpers.SetWidth(avatar, COLUMN_WIDTHS[7])
         newSlot:AddChild(avatar)
 
     -- Color
@@ -2949,7 +2967,7 @@ function CreateSlotsUI(makeLabel)
         )
         newSlot.color = colorSelector
         newSlot:AddChild(colorSelector)
-        LayoutHelpers.SetWidth(colorSelector, COLUMN_WIDTHS[7])
+        LayoutHelpers.SetWidth(colorSelector, COLUMN_WIDTHS[8])
 
         colorSelector.OnClick = function(self, index)
             local playerInfo = gameInfo.PlayerOptions[curRow]
@@ -3003,7 +3021,7 @@ function CreateSlotsUI(makeLabel)
         newSlot.faction = factionSelector
         newSlot.AvailableFactions = factionList
         newSlot:AddChild(factionSelector)
-        LayoutHelpers.SetWidth(factionSelector, COLUMN_WIDTHS[8])
+        LayoutHelpers.SetWidth(factionSelector, COLUMN_WIDTHS[9])
         factionSelector.OnClick = function(self, index)
             SetPlayerOption(curRow, 'Faction', index)
             if curRow == FindSlotForID(FindIDForName(localPlayerName)) then
@@ -3029,7 +3047,7 @@ function CreateSlotsUI(makeLabel)
         teamSelector._titleColor = 'White'
         newSlot.team = teamSelector
         newSlot:AddChild(teamSelector)
-        LayoutHelpers.SetWidth(teamSelector, COLUMN_WIDTHS[9])
+        LayoutHelpers.SetWidth(teamSelector, COLUMN_WIDTHS[10])
         teamSelector.OnClick = function(self, index, text)
             Tooltip.DestroyMouseoverDisplay()
             SetPlayerOption(curRow, 'Team', index)
@@ -3042,7 +3060,7 @@ function CreateSlotsUI(makeLabel)
         local barMin = 0
         local CPUGroup = Group(newSlot)
         newSlot.CPUGroup = CPUGroup
-        LayoutHelpers.SetWidth(CPUGroup, COLUMN_WIDTHS[10])
+        LayoutHelpers.SetWidth(CPUGroup, COLUMN_WIDTHS[11])
         CPUGroup.Height:Set(newSlot.Height)
         newSlot:AddChild(CPUGroup)
         local CPUSpeedBar = StatusBar(CPUGroup, barMin, barMax, false, false,
@@ -3062,7 +3080,7 @@ function CreateSlotsUI(makeLabel)
         barMin = 0
         local pingGroup = Group(newSlot)
         newSlot.pingGroup = pingGroup
-        LayoutHelpers.SetWidth(pingGroup, COLUMN_WIDTHS[11])
+        LayoutHelpers.SetWidth(pingGroup, COLUMN_WIDTHS[12])
         pingGroup.Height:Set(newSlot.Height)
         newSlot:AddChild(pingGroup)
         local pingStatus = StatusBar(pingGroup, barMin, barMax, false, false,
@@ -3094,6 +3112,7 @@ function CreateSlotsUI(makeLabel)
             avatar:Hide()
             flag:Hide()
             ratingText:Hide()
+            performanceText:Hide()
             numGamesText:Hide()
             factionSelector:Hide()
             colorSelector:Hide()

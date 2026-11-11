@@ -49,6 +49,8 @@ AutolobbyArgumentsComponent = ClassSimple {
         -- related to rating
         ["/deviation"] = true,
         ["/mean"] = true,
+        ["/performance"] = true,
+        ["/performancegames"] = true,
 
         -- related to divisions
         ["/division"] = true,

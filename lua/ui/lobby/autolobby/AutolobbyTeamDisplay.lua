@@ -43,6 +43,8 @@ local AutolobbyTeamPlayerRow = Class(Group) {
         self.Name = UIUtil.CreateText(self, "", 16, UIUtil.titleFont)
         self.Status = UIUtil.CreateText(self, "", 11, UIUtil.bodyFont)
         self.StatusDot = UIUtil.CreateBitmapColor(self, "FFFFC857")
+        self.Ratings = UIUtil.CreateText(self, '', 11, UIUtil.bodyFont)
+        self.Ratings:SetColor('FF8ED8C0')
 
         self.Name:SetColor("FFFFFFFF")
         self.Name:SetDropShadow(true)
@@ -104,6 +106,7 @@ local AutolobbyTeamPlayerRow = Class(Group) {
 
         self.Name.Width:Set(220)
         self.Status.Width:Set(205)
+        LayoutHelpers.AtRightTopIn(self.Ratings, self, 48, 31)
     end,
 
     ---@param self UIAutolobbyTeamPlayerRow
@@ -112,6 +115,10 @@ local AutolobbyTeamPlayerRow = Class(Group) {
         self.Spot = playerOptions.StartSpot
         self.PlayerOptions = playerOptions
         self.Name:SetText(playerOptions.PlayerName or "")
+        local performance = type(playerOptions.Performance) == 'number'
+            and string.format('%+.2f', playerOptions.Performance) or '--'
+        self.Ratings:SetText('TS ' .. tostring(playerOptions.PL or '--') .. '  EXP ' .. performance)
+        self.Status.Width:Set(100)
 
         local connected = playerOptions.OwnerID != nil
         self:UpdateStatus(nil, connected)

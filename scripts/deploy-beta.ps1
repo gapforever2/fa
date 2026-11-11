@@ -11,6 +11,7 @@ param(
   [switch]$UseWinRar,
   [Parameter(Mandatory=$true)] [string]$RemoteScriptBase,
   [string]$RemoteStagingDir = "/tmp/gf_nx_staging",
+  [string]$RemoteDbRuntimeContainer,
   [ValidateSet('nx2','nx3','nx4')] [string]$Kind = 'nx4',
   [ValidateSet('faf','fafbeta','murderparty')] [string]$Channel = 'fafbeta',
   [Alias('Only')] [string[]]$Archives = @('effects','env','etc','loc','lua','meshes','mods','projectiles','textures','units'),
@@ -310,6 +311,10 @@ if ($ExecutableStagingPath) {
 # "/usr/bin/env: bad interpreter: Text file busy" (ETXTBSY) because the
 # freshly-uploaded file may still be held open for writing.
 $remoteCmd = "bash $remoteIngestPath --script-base $RemoteScriptBase --staging $RemoteStagingDir --channel $Channel --kind $Kind"
+if ($RemoteDbRuntimeContainer) {
+  if ($RemoteDbRuntimeContainer -notmatch '^[A-Za-z0-9_.-]+$') { throw 'Unsafe runtime container name' }
+  $remoteCmd = "GAF_DB_RUNTIME_CONTAINER=$RemoteDbRuntimeContainer $remoteCmd"
+}
 if ($DryRun) { $remoteCmd = "$remoteCmd --dry-run" }
 if ($Archives -and $Archives.Count -gt 0) {
   $onlyArg = ($Archives -join ',')

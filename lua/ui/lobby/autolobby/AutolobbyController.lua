@@ -281,6 +281,8 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         -- retrieve rating
         info.DEV = self:GetCommandLineArgumentNumber("/deviation", 500)
         info.MEAN = self:GetCommandLineArgumentNumber("/mean", 1500)
+        info.Performance = tonumber(self:GetCommandLineArgumentString("/performance", "none"))
+        info.PerformanceGames = self:GetCommandLineArgumentNumber("/performancegames", 0)
         info.NG = self:GetCommandLineArgumentNumber("/numgames", 0)
         info.DIV = self:GetCommandLineArgumentString("/division", "")
         info.SUBDIV = self:GetCommandLineArgumentString("/subdivision", "")
@@ -371,6 +373,8 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
             local teamKey = "GAFExpectedTeam" .. spot
             local colorKey = "GAFExpectedColor" .. spot
             local avatarKey = "GAFExpectedAvatar" .. spot
+            local ratingKey = "GAFExpectedRating" .. spot
+            local performanceKey = "GAFExpectedPerformance" .. spot
             local playerName = gameOptions[playerKey]
 
             if playerName and playerName ~= "" then
@@ -390,6 +394,8 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
                     PlayerColor = color,
                     ArmyColor = color,
                     Avatar = gameOptions[avatarKey] or false,
+                    PL = tonumber(gameOptions[ratingKey]),
+                    Performance = tonumber(gameOptions[performanceKey]),
                     Expected = true,
                 }
             end
@@ -399,6 +405,8 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
             gameOptions[teamKey] = nil
             gameOptions[colorKey] = nil
             gameOptions[avatarKey] = nil
+            gameOptions[ratingKey] = nil
+            gameOptions[performanceKey] = nil
         end
 
         return players

@@ -4,6 +4,30 @@ alliesScore = true
 
 local GameIsOver = false
 local ArmyScore = {}
+local performanceMinute = 0
+
+local function CapturePerformanceMinute()
+    local minute = math.floor(GetGameTimeSeconds() / 60)
+    if minute <= performanceMinute then return end
+    for index, brain in ArmyBrains do
+        local score = ArmyScore[index]
+        if score and score.performance then
+            local income = 0
+            if not brain:IsDefeated() then
+                income = math.max(0, score.resources.massin.rate * 10)
+            end
+            table.insert(score.performance.mass_income, income)
+        end
+    end
+    performanceMinute = minute
+end
+
+local function PerformanceHistoryThread()
+    while not GameIsOver do
+        WaitSeconds(1)
+        CapturePerformanceMinute()
+    end
+end
 local scoreOption = ScenarioInfo.Options.Score or "no"
 scoreData = {interval = historyInterval, current = ArmyScore, history = {}, focusArmyIndex = 0}
 
@@ -165,6 +189,7 @@ local function ScoreThread()
     for index, brain in ArmyBrains do
         if ArmyIsCivilian(index) then continue end
         ArmyScore[index] = {
+            performance = {version = 1, mass_income = {}, duration = 0},
             faction = brain:GetFactionIndex(),
             name = brain.Nickname,
             type = '',
@@ -231,6 +256,7 @@ local function ScoreThread()
     end
 
     ForkThread(ScoreResourcesThread)
+    ForkThread(PerformanceHistoryThread)
     ForkThread(ScoreHistoryThread)
 
     local NextTime = 0
@@ -313,11 +339,13 @@ local function ScoreThread()
 end
 
 local function GameOverScore()
+    CapturePerformanceMinute()
     for index, brain in ArmyBrains do
 
         if ArmyIsCivilian(index) then continue end
 
         local Score = ArmyScore[index]
+        Score.performance.duration = math.floor(GetGameTimeSeconds())
 
         for categoryName, category in categoriesForAchievements do
             Score.units[categoryName] = {kills = 0, built = 0, lost = 0}

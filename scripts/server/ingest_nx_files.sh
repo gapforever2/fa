@@ -81,6 +81,30 @@ set -a
 source "$DB_CONFIG_FILE"
 set +a
 
+# Optionally use the running lobby's authenticated DB connection. Credentials
+# remain inside that container; only SQL and query results cross the boundary.
+query_database() {
+  local query="$1"
+  if [[ -n "${GAF_DB_RUNTIME_CONTAINER:-}" ]]; then
+    [[ "$GAF_DB_RUNTIME_CONTAINER" =~ ^[A-Za-z0-9_.-]+$ ]] || return 2
+    printf '%s' "$query" | docker exec -i "$GAF_DB_RUNTIME_CONTAINER" python -c '
+import sys,pymysql,prometheus_client
+prometheus_client.start_http_server=lambda *a,**k: None
+from server.config import config
+c=pymysql.connect(host=config.DB_SERVER,port=int(config.DB_PORT),user=config.DB_LOGIN,password=config.DB_PASSWORD,database=config.DB_NAME)
+try:
+ with c.cursor() as cursor:
+  cursor.execute(sys.stdin.read())
+  if cursor.description:
+   for row in cursor.fetchall(): print("\t".join(str(value) for value in row))
+ c.commit()
+finally: c.close()
+'
+  else
+    MYSQL_PWD="$MYSQL_ROOT_PASSWORD" docker exec -u root -i -e MYSQL_PWD faf-db mysql -N -D "$MYSQL_DATABASE" -e "$query"
+  fi
+}
+
 case "$CHANNEL" in
   faf)
     DEST_DIR="$SCRIPT_BASE_DIR/data/content/legacy-featured-mod-files/updates_faf_files"
@@ -129,8 +153,7 @@ publish_file() {
   echo "Handling: $(basename "$FILE_PATH") (client name: $CLIENT_FILE_NAME)"
 
   local FILE_ID
-  FILE_ID=$(docker exec -u root -i faf-db mysql -N -p"$MYSQL_ROOT_PASSWORD" -D "$MYSQL_DATABASE" \
-    -e "SELECT id FROM ${TABLE_PREFIX} WHERE filename = '$CLIENT_FILE_NAME' LIMIT 1;")
+  FILE_ID=$(query_database "SELECT id FROM ${TABLE_PREFIX} WHERE filename = '$CLIENT_FILE_NAME' LIMIT 1;")
 
   if [[ -z "$FILE_ID" ]]; then
     if [[ "$REQUIRED" == true ]]; then
@@ -142,8 +165,7 @@ publish_file() {
   fi
 
   local DB_LAST
-  DB_LAST=$(docker exec -u root -i faf-db mysql -N -p"$MYSQL_ROOT_PASSWORD" -D "$MYSQL_DATABASE" \
-    -e "SELECT IFNULL(MAX(version),0) FROM ${TABLE_PREFIX}_files WHERE fileId = $FILE_ID;")
+  DB_LAST=$(query_database "SELECT IFNULL(MAX(version),0) FROM ${TABLE_PREFIX}_files WHERE fileId = $FILE_ID;")
   [[ -z "$DB_LAST" ]] && DB_LAST=0
 
   local FS_LAST
@@ -178,8 +200,7 @@ publish_file() {
   MD5=$(md5sum "$DEST_PATH" | cut -d' ' -f1)
   echo "  MD5: $MD5"
 
-  docker exec -u root -i faf-db mysql -p"$MYSQL_ROOT_PASSWORD" -D "$MYSQL_DATABASE" \
-    -e "INSERT INTO ${TABLE_PREFIX}_files (fileId, name, version, md5) VALUES ($FILE_ID, '$NEW_FILENAME', $NEXT_VERSION, '$MD5') ON DUPLICATE KEY UPDATE version=$NEXT_VERSION, md5='$MD5';"
+  query_database "INSERT INTO ${TABLE_PREFIX}_files (fileId, name, version, md5) VALUES ($FILE_ID, '$NEW_FILENAME', $NEXT_VERSION, '$MD5') ON DUPLICATE KEY UPDATE version=$NEXT_VERSION, md5='$MD5';"
 
   echo "  Published $NEW_FILENAME (version $NEXT_VERSION)"
 }
