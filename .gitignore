@@ -25,3 +25,12 @@ textures/ui/common/BUTTON/BACKUP/
 act.exe
 *.venv
 lua_changelog
+
+# Deployment tooling belongs in gaf-config, outside public game sources.
+/scripts/deploy-*.ps1
+/scripts/publish-drop-ui*
+/scripts/README-deploy.md
+/scripts/scriptbase.txt
+/scripts/server/ingest_*.sh
+/scripts/tests/test-ingest-*.sh
+/scripts/mods/
