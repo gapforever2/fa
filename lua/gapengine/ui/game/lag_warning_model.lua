@@ -45,7 +45,7 @@ function Model:Update(now, snapshot)
         if reason then
             local key = tostring(client.uid or index)
             local pending = self.pending[key]
-            if not pending or now - pending.lastSeen > (pending.confirmed and 1.25 or 0.75) then
+            if not pending or pending.reason ~= reason or now - pending.lastSeen > (pending.confirmed and 1.25 or 0.75) then
                 pending = {firstSeen = now, confirmed = false}
                 self.pending[key] = pending
             end
