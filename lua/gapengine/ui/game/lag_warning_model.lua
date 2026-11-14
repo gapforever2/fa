@@ -24,6 +24,12 @@ local function Reason(snapshot, client)
         and client.armies and table.getn(client.armies) > 0 then
         return 'sim'
     end
+    -- F11 Behind is local dispatch minus the peer's dispatch: a negative value
+    -- means this viewer is behind that peer, not that the peer is holding us up.
+    if not client['local'] and (client.behind or 0) < 0
+        and client.armies and table.getn(client.armies) > 0 then
+        return 'self'
+    end
     return false
 end
 
@@ -47,17 +53,26 @@ function Model:Update(now, snapshot)
             pending.client = client
             pending.reason = reason
             if now - pending.firstSeen >= (reason == 'sim' and 4 or 1.5) then pending.confirmed = true end
+        else
+            local key = tostring(client.uid or index)
+            if self.pending[key] and self.pending[key].reason == 'self' then self.pending[key] = nil end
         end
     end
     local alerts = {}
+    local ownDelay = false
     for key, pending in self.pending do
         if now - pending.lastSeen > (pending.confirmed and 1.25 or 0.75) then
             self.pending[key] = nil
         elseif pending.confirmed then
-            table.insert(alerts, pending)
+            if pending.reason == 'self' then
+                if not ownDelay or pending.client.behind < ownDelay.client.behind then ownDelay = pending end
+            else
+                table.insert(alerts, pending)
+            end
         end
     end
     table.sort(alerts, function(a, b) return (a.client.index or 0) < (b.client.index or 0) end)
+    if ownDelay then table.insert(alerts, 1, ownDelay) end
     self.alerts = alerts
     return alerts
 end

@@ -24,6 +24,10 @@ local function DisplayName(client)
 end
 
 local function AlertText(alert)
+    if alert.reason == 'self' then
+        return (russian and 'Вы отстаёте от ' or 'You are behind ') .. DisplayName(alert.client)
+            .. string.format('   Data: %.0f   Behind: %.0f', alert.client.data or 0, alert.client.behind or 0)
+    end
     local reason
     if alert.reason == 'data' then
         reason = russian and 'ожидаем данные' or 'waiting for data'
