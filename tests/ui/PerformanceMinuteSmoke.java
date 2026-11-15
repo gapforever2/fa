@@ -20,6 +20,9 @@ public class PerformanceMinuteSmoke {
                 + "assert(ArmyScore[1].performance.mass_income[2]==0 and ArmyScore[1].performance.mass_income_active[2]==true)\n"
                 + "dead=true; t=180; CapturePerformanceMinute(); assert(ArmyScore[1].performance.mass_income[3]==0)\n"
                 + "assert(ArmyScore[1].performance.mass_income_active[3]==false)\n"
+                + "for minute=4,24 do t=minute*60; CapturePerformanceMinute() end\n"
+                + "assert(#ArmyScore[1].performance.mass_income==24)\n"
+                + "for minute=3,24 do assert(ArmyScore[1].performance.mass_income[minute]==0 and ArmyScore[1].performance.mass_income_active[minute]==false) end\n"
                 + "assert(ArmyScore[1].performance.mass_income[1]==20)\n";
         JsePlatform.standardGlobals().load(setup + capture + assertions).call();
         System.out.println("Minute boundaries, units, duplicate capture and defeat: passed");
