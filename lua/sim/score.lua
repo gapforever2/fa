@@ -17,6 +17,7 @@ local function CapturePerformanceMinute()
                 income = math.max(0, score.resources.massin.rate * 10)
             end
             table.insert(score.performance.mass_income, income)
+            table.insert(score.performance.mass_income_active, not brain:IsDefeated())
         end
     end
     performanceMinute = minute
@@ -189,7 +190,7 @@ local function ScoreThread()
     for index, brain in ArmyBrains do
         if ArmyIsCivilian(index) then continue end
         ArmyScore[index] = {
-            performance = {version = 1, mass_income = {}, duration = 0},
+            performance = {version = 2, mass_income = {}, mass_income_active = {}, duration = 0},
             faction = brain:GetFactionIndex(),
             name = brain.Nickname,
             type = '',
