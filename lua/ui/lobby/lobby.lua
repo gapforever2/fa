@@ -2482,6 +2482,9 @@ local function UpdateGame()
                 function()
                     -- store in preferences so that we can retrieve it during blueprint loading
                     SetPreference('PreGameData', preGameData)
+                    -- The blueprint prefetch below reads Game.prefs, not the
+                    -- in-memory preferences. Persist icon/map changes first.
+                    SavePreferences()
                 end
             )
 
@@ -2492,9 +2495,8 @@ local function UpdateGame()
 
             -- PREFETCHING --
 
-            -- Note that the PreGameData is not properly updated,
-            -- hence we can not rely on mod and / or lobby option
-            -- changes to be present.
+            -- PreGameData is saved above before a resource loader can cache
+            -- blueprints using the previous strategic icon configuration.
 
             local mods = Mods.GetGameMods(gameInfo.GameMods)
             PrefetchSession(scenarioInfo.map, mods, true)
