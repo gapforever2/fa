@@ -115,9 +115,10 @@ local AutolobbyTeamPlayerRow = Class(Group) {
         self.Spot = playerOptions.StartSpot
         self.PlayerOptions = playerOptions
         self.Name:SetText(playerOptions.PlayerName or "")
-        local performance = type(playerOptions.Performance) == 'number'
-            and string.format('%+.2f', playerOptions.Performance) or '--'
-        self.Ratings:SetText('TS ' .. tostring(playerOptions.PL or '--') .. '  EXP ' .. performance)
+        local value, _, performanceName = import("/lua/ui/lobby/lobby.lua").GetDisplayedPerformance(playerOptions)
+        local performance = type(value) == 'number'
+            and string.format('%+.2f', value) or '--'
+        self.Ratings:SetText('TS ' .. tostring(playerOptions.PL or '--') .. '  ' .. performanceName .. ' ' .. performance)
         self.Status.Width:Set(100)
 
         local connected = playerOptions.OwnerID != nil

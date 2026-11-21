@@ -283,6 +283,8 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         info.MEAN = self:GetCommandLineArgumentNumber("/mean", 1500)
         info.Performance = tonumber(self:GetCommandLineArgumentString("/performance", "none"))
         info.PerformanceGames = self:GetCommandLineArgumentNumber("/performancegames", 0)
+        info.PerformanceMnb = tonumber(self:GetCommandLineArgumentString("/performancemnb", "none"))
+        info.PerformanceMnbGames = self:GetCommandLineArgumentNumber("/performancemnbgames", 0)
         info.NG = self:GetCommandLineArgumentNumber("/numgames", 0)
         info.DIV = self:GetCommandLineArgumentString("/division", "")
         info.SUBDIV = self:GetCommandLineArgumentString("/subdivision", "")
@@ -395,7 +397,10 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
                     ArmyColor = color,
                     Avatar = gameOptions[avatarKey] or false,
                     PL = tonumber(gameOptions[ratingKey]),
-                    Performance = tonumber(gameOptions[performanceKey]),
+                    Performance = tonumber(gameOptions["GAFExpectedPerformanceStandard" .. spot] or gameOptions[performanceKey]),
+                    PerformanceGames = tonumber(gameOptions["GAFExpectedPerformanceStandardGames" .. spot]) or 0,
+                    PerformanceMnb = tonumber(gameOptions["GAFExpectedPerformanceMnb" .. spot]),
+                    PerformanceMnbGames = tonumber(gameOptions["GAFExpectedPerformanceMnbGames" .. spot]) or 0,
                     Expected = true,
                 }
             end
@@ -407,6 +412,10 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
             gameOptions[avatarKey] = nil
             gameOptions[ratingKey] = nil
             gameOptions[performanceKey] = nil
+            gameOptions["GAFExpectedPerformanceStandard" .. spot] = nil
+            gameOptions["GAFExpectedPerformanceStandardGames" .. spot] = nil
+            gameOptions["GAFExpectedPerformanceMnb" .. spot] = nil
+            gameOptions["GAFExpectedPerformanceMnbGames" .. spot] = nil
         end
 
         return players

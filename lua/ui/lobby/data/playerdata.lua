@@ -52,6 +52,8 @@ local DEFAULT_MAPPING = {
     NG = 0,  -- Number of games.
     Performance = false,
     PerformanceGames = 0,
+    PerformanceMnb = false,
+    PerformanceMnbGames = 0,
 
     Avatar = false,
     TooltipAvatar = false,

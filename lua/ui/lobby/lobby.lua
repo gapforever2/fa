@@ -15,6 +15,7 @@ local ResourceMapPreview = import("/lua/ui/controls/resmappreview.lua").Resource
 local Popup = import("/lua/ui/controls/popups/popup.lua").Popup
 local Slider = import("/lua/maui/slider.lua").Slider
 local PlayerData = import("/lua/ui/lobby/data/playerdata.lua").PlayerData
+local PerformanceDisplay = import("/lua/ui/lobby/performance.lua")
 local GameInfo = import("/lua/ui/lobby/data/gamedata.lua")
 local WatchedValueArray = import("/lua/ui/lobby/data/watchedvalue/watchedvaluearray.lua").WatchedValueArray
 local LayoutHelpers = import("/lua/maui/layouthelpers.lua")
@@ -180,6 +181,9 @@ local function parseCommandlineArguments()
         ["/mean"] = true,
         ["/performance"] = true,
         ["/performancegames"] = true,
+        ["/performancemnb"] = true,
+        ["/performancemnbgames"] = true,
+        ["/performancemnbmods"] = true,
         ["/clan"] = true,
         ["/deviation"] = true,
         ["/joincustom"] = true,
@@ -207,6 +211,9 @@ local function parseCommandlineArguments()
         playerMean = tonumber(GetCommandLineArgOrDefault("/mean", 1500)),
         performance = tonumber(GetCommandLineArgOrDefault("/performance", "none")),
         performanceGames = tonumber(GetCommandLineArgOrDefault("/performancegames", 0)),
+        performanceMnb = tonumber(GetCommandLineArgOrDefault("/performancemnb", "none")),
+        performanceMnbGames = tonumber(GetCommandLineArgOrDefault("/performancemnbgames", 0)),
+        performanceMnbMods = GetCommandLineArgOrDefault("/performancemnbmods", "none"),
         playerClan = tostring(GetCommandLineArgOrDefault("/clan", "")),
         playerDeviation = tonumber(GetCommandLineArgOrDefault("/deviation", 500)),
         groupDev = tostring(GetCommandLineArgOrDefault("/group", "")),
@@ -462,6 +469,10 @@ function GetSanitisedLastFaction()
 end
 
 --- Get a PlayerData object for the local player, configured using data from their profile.
+function GetDisplayedPerformance(playerInfo)
+    return PerformanceDisplay.Select(playerInfo, gameInfo and gameInfo.GameMods or {}, argv.performanceMnbMods)
+end
+
 function GetLocalPlayerData()
     local version, gametype, commit = import("/lua/version.lua").GetVersionData()
     local mean = argv.playerMean
@@ -480,6 +491,8 @@ function GetLocalPlayerData()
             PL = playerRating,
             Performance = argv.performance or false,
             PerformanceGames = argv.performanceGames,
+            PerformanceMnb = argv.performanceMnb or false,
+            PerformanceMnbGames = argv.performanceMnbGames,
             NG = argv.numGames,
             MEAN = argv.playerMean,
             DEV = argv.playerDeviation,
@@ -1193,10 +1206,11 @@ function SetSlotInfo(slotNum, playerInfo)
     slot.ratingText:SetText(playerInfo.PL)
     slot.ratingText:SetColor("ffffffff")
     slot.performanceText:Show()
-    slot.performanceText:SetText(type(playerInfo.Performance) == 'number'
-        and string.format('%+.2f', playerInfo.Performance) or '--')
-    Tooltip.AddControlTooltip(slot.performanceText, {text = 'EXP',
-        body = 'Experimental performance: ' .. tostring(playerInfo.PerformanceGames or 0) .. ' games'})
+    local performance, performanceGames, performanceName = GetDisplayedPerformance(playerInfo)
+    slot.performanceText:SetText(type(performance) == 'number'
+        and string.format('%+.2f', performance) or '--')
+    Tooltip.AddControlTooltip(slot.performanceText, {text = performanceName,
+        body = performanceName .. ': ' .. tostring(performanceGames) .. ' games'})
 
     -- dynamic tooltip to show rating and deviation for each player
     local tooltipText = {}
