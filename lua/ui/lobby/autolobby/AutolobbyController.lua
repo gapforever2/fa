@@ -648,6 +648,7 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
             return
         end
 
+        import('/lua/ui/lobby/sessionpreparation.lua').PrepareMap(scenarioPath)
         PrefetchSession(scenarioFile.map, gameMods, true)
     end,
 
@@ -1098,6 +1099,7 @@ AutolobbyCommunications = Class(MohoLobbyMethods, AutolobbyServerCommunicationsC
         self:DebugSpew("LaunchGame")
         self:DebugSpew(reprs(gameConfig, { depth = 10 }))
 
+        import('/lua/ui/lobby/sessionpreparation.lua').PrepareMap(gameConfig.GameOptions.ScenarioFile)
         return MohoLobbyMethods.LaunchGame(self, gameConfig)
     end,
 

@@ -141,7 +141,7 @@ LobbyComm = Class(moho.lobby_methods) {
 
     ---@param self UILobbyCommunication
     LaunchGame = function(self, info)
-        SavePreferences()
+        import('/lua/ui/lobby/sessionpreparation.lua').PrepareMap(info.GameOptions.ScenarioFile)
         moho.lobby_methods.LaunchGame(self, info)
     end,
 }
