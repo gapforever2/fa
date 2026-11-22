@@ -91,8 +91,8 @@ GameColors = {
         [14] = 'public',
         [15] = 'public',
         [16] = 'public',
-        [17] = 'premium',
-        [18] = 'premium',
+        [17] = 'public',
+        [18] = 'public',
         [19] = 'premium',
         [20] = 'premium',
         [21] = 'premium',
@@ -100,7 +100,8 @@ GameColors = {
         [23] = 'premium',
         [24] = 'premium',
         [25] = 'premium',
-        [26] = 'admin',
+        [26] = 'premium',
+        [27] = 'admin',
     },
 
     -- If you end up working with this file, suggestion to install the Color Highlight extension:
@@ -126,15 +127,16 @@ GameColors = {
         "ffffffff", -- (15) white
         "ff616d7e", -- (16) grey
         "ffff88ff", -- (17) pink
-        "26018B",   -- (18) VIOLET
-        "FFBF00",   -- (19) Gold
-        "00BFFF",   -- (20) Deep sky blue
-        "26FF00",   -- (21) Neon green
-        "FF5E00",   -- (22) Hot pink
-        "EAFF004C", -- (23) Raspberry
-        "09498A",   -- (24) dark blue
-        "FF009D",   -- (25) pinkpink
-        "FF000000", -- (26) black, explicitly opaque
+        "EC0BEC",   -- (18) new fuschia
+        "26018B",   -- (19) VIOLET
+        "FFBF00",   -- (20) Gold
+        "00BFFF",   -- (21) Deep sky blue
+        "26FF00",   -- (22) Neon green
+        "FF5E00",   -- (23) Hot pink
+        "EAFF004C", -- (24) Raspberry
+        "09498A",   -- (25) dark blue
+        "FF009D",   -- (26) pinkpink
+        "FF000000", -- (27) black, explicitly opaque
     },
 
     PlayerColors = {
@@ -155,15 +157,16 @@ GameColors = {
         "ffffffff", -- (15) white
         "ff616d7e", -- (16) grey
         "ffff88ff", -- (17) pink
-        "26018B",   -- (18) VIOLET
-        "FFBF00",   -- (19) Gold
-        "00BFFF",   -- (20) Deep sky blue
-        "26FF00",   -- (21) Neon green
-        "FF5E00",   -- (22) Hot pink
-        "EAFF004C", -- (23) Raspberry
-        "09498A",   -- (24) dark blue
-        "FF009D",   -- (25) pinkpink
-        "FF000000", -- (26) black, explicitly opaque
+        "EC0BEC",   -- (18) new fuschia
+        "26018B",   -- (19) VIOLET
+        "FFBF00",   -- (20) Gold
+        "00BFFF",   -- (21) Deep sky blue
+        "26FF00",   -- (22) Neon green
+        "FF5E00",   -- (23) Hot pink
+        "EAFF004C", -- (24) Raspberry
+        "09498A",   -- (25) dark blue
+        "FF009D",   -- (26) pinkpink
+        "FF000000", -- (27) black, explicitly opaque
     },
 
     TeamColorMode = {
