@@ -97,7 +97,10 @@ GameColors = {
         [20] = 'premium',
         [21] = 'premium',
         [22] = 'premium',
-        [23] = 'admin',
+        [23] = 'premium',
+        [24] = 'premium',
+        [25] = 'premium',
+        [26] = 'admin',
     },
 
     -- If you end up working with this file, suggestion to install the Color Highlight extension:
@@ -106,55 +109,61 @@ GameColors = {
 
     -- Faction colours
     ArmyColors = {
-        "940000", -- (01) dark red
-        "FE0000", -- (02) Cybran red
-        "A54900", -- (03) black and orange
-        "FE8630", -- (04) light orange
-        "FFFC01", -- (05) yellow
-        "00FF01", -- (06) green
-        "007000", -- (07) dark green
-        "00BE32", -- (08) light green
-        "0008FF", -- (09) blue
-        "42AAFF", -- (10) UEF blue
-        "006162", -- (11) dark navy blue
-        "00BDB6", -- (12) dark turquoise
-        "6B01AC", -- (13) violet
-        "FF04F7", -- (14) pink light
+        "FFe80a0a", -- (01) Cybran red
+        "7c0000",   -- (02) dark red
+        "FFFF873E", -- (03) Nomads orange
+        "914805",   -- (04) new brown
+        "ffa79602", -- (05) Sera golden
+        "fffafa00", -- (06) new yellow
+        "adff77",   -- (07) Order Green
+        "ff40bf40", -- (08) mid green
+        "257100",   -- (09) new green
+        "FF2F4F4F", -- (10) olive (dark green)
+        "3D66E2",   -- (11) new blue1
+        "9E18D3",   -- (12) dark purple
+        "ff9161ff", -- (13) purple
+        "ff66ffcc", -- (14) aqua
         "ffffffff", -- (15) white
         "ff616d7e", -- (16) grey
-        "FF009C", -- (17) pink
-        "FF5D00", -- (18) orange
-        "FFBE00", -- (19) gold
-        "004593", -- (20) lacustrine
-        "00FEA4", -- (21) greenish-turquoise
-        "00FFF7", -- (22) turquoise
-        "FF000000", -- (23) black, explicitly opaque
+        "ffff88ff", -- (17) pink
+        "26018B",   -- (18) VIOLET
+        "FFBF00",   -- (19) Gold
+        "00BFFF",   -- (20) Deep sky blue
+        "26FF00",   -- (21) Neon green
+        "FF5E00",   -- (22) Hot pink
+        "EAFF004C", -- (23) Raspberry
+        "09498A",   -- (24) dark blue
+        "FF009D",   -- (25) pinkpink
+        "FF000000", -- (26) black, explicitly opaque
     },
 
     PlayerColors = {
-        "940000", -- (01) dark red
-        "FE0000", -- (02) Cybran red
-        "A54900", -- (03) black and orange
-        "FE8630", -- (04) light orange
-        "FFFC01", -- (05) yellow
-        "00FF01", -- (06) green
-        "007000", -- (07) dark green
-        "00BE32", -- (08) light green
-        "0008FF", -- (09) blue
-        "42AAFF", -- (10) UEF blue
-        "006162", -- (11) dark navy blue
-        "00BDB6", -- (12) dark turquoise
-        "6B01AC", -- (13) violet
-        "FF04F7", -- (14) pink light
+       "FFe80a0a", -- (01) Cybran red
+        "7c0000",   -- (02) dark red
+        "FFFF873E", -- (03) Nomads orange
+        "914805",   -- (04) new brown
+        "ffa79602", -- (05) Sera golden
+        "fffafa00", -- (06) new yellow
+        "adff77",   -- (07) Order Green
+        "ff40bf40", -- (08) mid green
+        "257100",   -- (09) new green
+        "FF2F4F4F", -- (10) olive (dark green)
+        "3D66E2",   -- (11) new blue1
+        "9E18D3",   -- (12) dark purple
+        "ff9161ff", -- (13) purple
+        "ff66ffcc", -- (14) aqua
         "ffffffff", -- (15) white
         "ff616d7e", -- (16) grey
-        "FF009C", -- (17) pink
-        "FF5D00", -- (18) orange
-        "FFBE00", -- (19) gold
-        "004593", -- (20) lacustrine
-        "00FEA4", -- (21) greenish-turquoise
-        "00FFF7", -- (22) turquoise
-        "FF000000", -- (23) black, explicitly opaque
+        "ffff88ff", -- (17) pink
+        "26018B",   -- (18) VIOLET
+        "FFBF00",   -- (19) Gold
+        "00BFFF",   -- (20) Deep sky blue
+        "26FF00",   -- (21) Neon green
+        "FF5E00",   -- (22) Hot pink
+        "EAFF004C", -- (23) Raspberry
+        "09498A",   -- (24) dark blue
+        "FF009D",   -- (25) pinkpink
+        "FF000000", -- (26) black, explicitly opaque
     },
 
     TeamColorMode = {
