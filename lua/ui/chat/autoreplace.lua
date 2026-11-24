@@ -33,7 +33,7 @@ local canonicalEndings = {
 -- Wiktionary "Russian swear words" and the public multi-storey mat dictionary.
 local profanityRoots = {
     -- хуй / нахуй / похуй / охуеть
-    'huy', 'hue', 'huyo', 'huli', 'hyy', 'nah', 'poh', 'doh', 'ohu', 'ahu',
+    'huy', 'hue', 'huyo', 'huli', 'hyy', 'nah', 'poh', 'doh', 'deohu', 'ohu', 'ahu',
     -- пизда / пиздец / обходы
     'pizd', 'pezd', 'pzdc', 'pied',
     -- ебать / ёб / заебал / уебать / ибаный / епаный
