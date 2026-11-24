@@ -17,6 +17,7 @@ local Dragger = import("/lua/maui/dragger.lua").Dragger
 local Tooltip = import("/lua/ui/game/tooltip.lua")
 local UIMain = import("/lua/ui/uimain.lua")
 local UserMute = import("/lua/ui/usermute.lua")
+local outgoingChatText = import("/lua/ui/chat/autoreplace.lua").Replace
 --[[ LOC Strings
 <LOC chat_win_0001>To %s:
 <LOC chat_win_0002>Chat (%d - %d of %d lines)
@@ -767,6 +768,7 @@ function CreateChatEdit()
                 msg.camera = GetCamera('WorldCamera'):SaveSettings()
             end
             msg.text = text
+            msg.text = outgoingChatText(msg.text)
             if ChatTo() == 'allies' then
                 if GetFocusArmy() ~= -1 then
                     SessionSendChatMessage(FindClients(), msg)

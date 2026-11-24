@@ -231,6 +231,7 @@ local commands = {
     w = ParseWhisper,
     whisper = ParseWhisper,
 }
+local outgoingChatText = import("/lua/ui/chat/autoreplace.lua").Replace
 
 local Strings = LobbyComm.Strings
 
@@ -1986,6 +1987,7 @@ function SendPersonalSystemMessage(targetID, id, ...)
 end
 
 function PublicChat(text)
+    text = outgoingChatText(text)
     lobbyComm:BroadcastData(
         {
             Type = "PublicChat",
@@ -4804,13 +4806,16 @@ function setupChatEdit(chatPanel)
         if text:gsub("%s+", "") == '' then  -- Если текст без пробелов равен ''
             return
         end
-        GpgNetSend('Chat', text)
+        GpgNetSend('Chat', outgoingChatText(text))
         table.insert(commandQueue, 1, text)
         commandQueueIndex = 0
         if string.sub(text, 1, 1) == '/' then
             local spaceStart = string.find(text, " ") or string.len(text) + 1
             local comKey = string.sub(text, 2, spaceStart - 1)
             local params = string.sub(text, spaceStart + 1)
+            if comKey == 'w' or comKey == 'whisper' or comKey == 'private' or comKey == 'pm' then
+                params = outgoingChatText(params)
+            end
             local commandFunc = commands[string.lower(comKey)]
             if not commandFunc then
                 AddChatText(LOCF("<LOC lobui_0396>Command Not Known: %s", comKey))
@@ -4818,6 +4823,7 @@ function setupChatEdit(chatPanel)
             end
             commandFunc(params)
         else
+            text = outgoingChatText(text)
             PublicChat(text)
         end
     end
