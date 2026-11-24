@@ -69,6 +69,12 @@ local profanityRoots = {
     'whore', 'asshole', 'ashole', 'motherfucker', 'retard', 'nigger', 'niger',
     'bastard', 'slut',
 }
+-- Whole-word entries for borderline insults: a prefix root would also censor
+-- benign words such as "подставка", so these must match the canonical form exactly.
+local profanityWholeWords = {
+    ['podstava'] = true, ['podstavu'] = true, ['podstavy'] = true,
+    ['podstavoy'] = true, ['podstavah'] = true, ['podstavami'] = true,
+}
 local textCommands = {
     send = true, me = true, plain = true, html = true,
     w = true, whisper = true, private = true, pm = true,
@@ -229,17 +235,56 @@ local function utf8Length(text)
     return count
 end
 
+-- Count visible characters for the asterisk mask: separators inserted by an
+-- obfuscator (. _ - space, soft hyphen, zero-width chars) are not letters.
+local function maskingLength(core)
+    local count, i = 0, 1
+    local length = string.len(core)
+    while i <= length do
+        local byte = string.byte(core, i)
+        if byte == 194 and string.byte(core, i + 1) == 173 then
+            i = i + 2
+        elseif byte == 226 or byte == 240 then
+            i = i + (byte == 226 and 3 or 4)
+        elseif byte == 45 or byte == 46 or byte == 95 or byte == 32 then
+            i = i + 1
+        else
+            count = count + 1
+            if byte >= 240 then i = i + 4
+            elseif byte >= 224 then i = i + 3
+            elseif byte >= 192 then i = i + 2
+            else i = i + 1 end
+        end
+    end
+    return count
+end
+
 local function profanityReplacement(canonical, core)
+    if profanityWholeWords[canonical] then
+        return string.rep('*', maskingLength(core))
+    end
     for _, root in ipairs(profanityRoots) do
         local at = string.find(canonical, root, 1, true)
         if at then
             local previous = at > 1 and string.sub(canonical, at - 1, at - 1) or ''
             if at == 1 or not string.find(previous, '%a') then
-                return string.rep('*', utf8Length(core))
+                return string.rep('*', maskingLength(core))
             end
         end
     end
     return nil
+end
+
+-- Used for space-obfuscated words: the root must start the joined canonical
+-- form, otherwise ordinary multi-word phrases would be swallowed.
+local function profanityPrefixMatch(canonical)
+    if profanityWholeWords[canonical] then return true end
+    for _, root in ipairs(profanityRoots) do
+        if string.sub(canonical, 1, string.len(root)) == root then
+            return true
+        end
+    end
+    return false
 end
 
 local function replaceToken(token)
@@ -288,12 +333,91 @@ local function maskProfanityToken(token)
     return token
 end
 
+-- Short chunks may be glued to their neighbours: obfuscators insert spaces
+-- inside a profane word ("х у й", "под ста ва"). Long chunks, URLs, mentions
+-- and markup are never glued, so ordinary phrases stay untouched.
+local function joinableParts(token)
+    if string.find(token, '[<>]') then return nil end
+    if string.find(token, '://', 1, true)
+        or string.find(token, 'matrix:', 1, true)
+        or string.find(token, 'www.', 1, true)
+        or string.find(token, '@', 1, true) then
+        return nil
+    end
+    local first, last = coreBounds(token)
+    if not first then return nil end
+    if first > 1 then
+        local prefix = string.sub(token, 1, 1)
+        if prefix == '@' or prefix == '#' or prefix == '!' then return nil end
+    end
+    local core = string.sub(token, first, last)
+    if utf8Length(core) > 5 then return nil end
+    local canonical = canonicalize(core)
+    return canonical, maskingLength(core)
+end
+
+local function maskProfanityText(text)
+    local tokens, i, n = {}, 1, string.len(text)
+    while i <= n do
+        while i <= n and string.find(string.sub(text, i, i), '%s') do i = i + 1 end
+        if i > n then break end
+        local first = i
+        while i <= n and not string.find(string.sub(text, i, i), '%s') do i = i + 1 end
+        table.insert(tokens, { first = first, last = i - 1, value = string.sub(text, first, i - 1) })
+    end
+
+    local pieces, pos, k = {}, 1, 1
+    local total = #tokens
+    while k <= total do
+        local token = tokens[k]
+        if token.first > pos then
+            table.insert(pieces, string.sub(text, pos, token.first - 1))
+        end
+
+        local firstCanonical = joinableParts(token.value)
+        local matchedEnd, mask = nil, nil
+        -- If the first chunk is already profane, let the single-token path
+        -- handle it instead of swallowing the following word.
+        if firstCanonical and not profanityPrefixMatch(firstCanonical) then
+            for count = 5, 2, -1 do
+                if k + count - 1 <= total then
+                    local joined, length, ok = {}, 0, true
+                    for j = k, k + count - 1 do
+                        local canonical, partLength = joinableParts(tokens[j].value)
+                        if not canonical then ok = false; break end
+                        table.insert(joined, canonical)
+                        length = length + partLength
+                    end
+                    if ok and profanityPrefixMatch(table.concat(joined)) then
+                        matchedEnd = k + count - 1
+                        mask = string.rep('*', length)
+                        break
+                    end
+                end
+            end
+        end
+
+        if matchedEnd then
+            table.insert(pieces, mask)
+            pos = tokens[matchedEnd].last + 1
+            k = matchedEnd + 1
+        else
+            table.insert(pieces, maskProfanityToken(token.value))
+            pos = token.last + 1
+            k = k + 1
+        end
+    end
+    if pos <= n then
+        table.insert(pieces, string.sub(text, pos))
+    end
+    return table.concat(pieces)
+end
+
 function MaskProfanity(text)
     if type(text) ~= 'string' then return text end
     refreshCensorship()
     if not censorshipEnabled then return text end
-    local result = string.gsub(text, '%S+', maskProfanityToken)
-    return result
+    return maskProfanityText(text)
 end
 
 local function skipWhitespace(text, i)
