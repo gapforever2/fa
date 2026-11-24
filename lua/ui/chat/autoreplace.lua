@@ -374,25 +374,28 @@ local function maskProfanityText(text)
             table.insert(pieces, string.sub(text, pos, token.first - 1))
         end
 
-        local firstCanonical = joinableParts(token.value)
+        local firstCanonical, firstLength = joinableParts(token.value)
         local matchedEnd, mask = nil, nil
-        -- If the first chunk is already profane, let the single-token path
-        -- handle it instead of swallowing the following word.
-        if firstCanonical and not profanityPrefixMatch(firstCanonical) then
-            for count = 5, 2, -1 do
-                if k + count - 1 <= total then
-                    local joined, length, ok = {}, 0, true
-                    for j = k, k + count - 1 do
-                        local canonical, partLength = joinableParts(tokens[j].value)
-                        if not canonical then ok = false; break end
-                        table.insert(joined, canonical)
-                        length = length + partLength
-                    end
-                    if ok and profanityPrefixMatch(table.concat(joined)) then
-                        matchedEnd = k + count - 1
-                        mask = string.rep('*', length)
-                        break
-                    end
+        -- A 4+ letter chunk already containing a root is handled on its own;
+        -- shorter fragments ("ёб ан ый") may be part of a split word.
+        if firstCanonical and (firstLength <= 3 or not profanityPrefixMatch(firstCanonical)) then
+            local maxSpan = math.min(8, total - k + 1)
+            for span = maxSpan, 2, -1 do
+                local joined, length, canonicalLength, ok = {}, 0, 0, true
+                for j = k, k + span - 1 do
+                    local canonical, partLength = joinableParts(tokens[j].value)
+                    if not canonical then ok = false; break end
+                    table.insert(joined, canonical)
+                    length = length + partLength
+                    canonicalLength = canonicalLength + string.len(canonical)
+                    if canonicalLength > 16 then ok = false; break end
+                end
+                -- Repeats can be split across chunks ("не еб" -> "нееб"),
+                -- so collapse them on the joined form before matching.
+                if ok and profanityPrefixMatch(collapseRepeats(table.concat(joined))) then
+                    matchedEnd = k + span - 1
+                    mask = string.rep('*', length)
+                    break
                 end
             end
         end
