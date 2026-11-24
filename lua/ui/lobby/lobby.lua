@@ -7078,6 +7078,16 @@ function ShowLobbyOptionsDialog()
         end
     end
 
+    local cbox_ChatCensorship = UIUtil.CreateCheckbox(dialogContent, '/CHECKBOX/', LOC("<LOC OPTIONS_CHAT_CENSORSHIP>Цензура"))
+    LayoutHelpers.AtRightTopIn(cbox_ChatCensorship, dialogContent, 20, 146)
+    Tooltip.AddCheckboxTooltip(cbox_ChatCensorship, {
+        text = LOC("<LOC OPTIONS_CHAT_CENSORSHIP>Цензура"),
+        body = LOC("<LOC OPTIONS_CHAT_CENSORSHIP_DESC>Заменять маты и оскорбления звёздочками во входящих сообщениях."),
+    })
+    cbox_ChatCensorship.OnCheck = function(self, checked)
+        Prefs.SetOption('chat_censorship', checked == true)
+    end
+
     -- Quit button
     local QuitButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', LOC("<LOC _Close>Close"))
     LayoutHelpers.AtHorizontalCenterIn(QuitButton, dialogContent, 0)
@@ -7102,6 +7112,9 @@ function ShowLobbyOptionsDialog()
 
     local chatPlayerColor = Prefs.GetFromCurrentProfile('ChatPlayerColor')
     cbox_ChatPlayerColor:SetCheck(chatPlayerColor == true or chatPlayerColor == nil, true)
+    --
+    local chatCensorship = Prefs.GetOption('chat_censorship')
+    cbox_ChatCensorship:SetCheck(chatCensorship == true or chatCensorship == nil, true)
 end
 
 ---Applies new game settings, including map, mods
