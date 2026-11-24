@@ -718,6 +718,10 @@ Tooltips = {
         title = "<LOC OPTIONS_0102>Multiplayer Taunts",
         description = "<LOC OPTIONS_0122>Turns taunts on and off in multiplayer",
     },
+    options_chat_censorship = {
+        title = "<LOC OPTIONS_CHAT_CENSORSHIP>Цензура",
+        description = "<LOC OPTIONS_CHAT_CENSORSHIP_DESC>Заменять маты и оскорбления звёздочками во входящих сообщениях.",
+    },
     options_dual_mon_edge = {
         title = "<LOC OPTIONS_0003>Dual Monitor Screen Edge",
         description = "<LOC OPTIONS_0037>Toggles the Edge between 2 Monitors as blocking Mouse Movement or allowing a Cursor Transition",
