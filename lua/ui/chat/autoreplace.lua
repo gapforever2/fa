@@ -1,5 +1,16 @@
 ﻿-- Local outgoing chat wording policy shared by lobby and game chat.
--- Keeps gaf-chat's whole-word/case rules, plus local obfuscation and profanity masking.
+-- Keeps gaf-chat's whole-word/case rules, plus local obfuscation.
+-- Outgoing: FAF/фаф is always replaced. Profanity masking is incoming-only and
+-- gated by the "Цензура" Interface option.
+local Prefs = import and import("/lua/user/prefs.lua") or nil
+local censorshipEnabled = true
+
+local function refreshCensorship()
+    if not Prefs then return end
+    local value = Prefs.GetOption('chat_censorship')
+    censorshipEnabled = value ~= false and value ~= 'false'
+end
+
 local replacements = {
     [''] = 'другой сервер',
     ['а'] = 'другого сервера',
@@ -245,10 +256,6 @@ local function replaceToken(token)
     if faf then
         return string.sub(token, 1, first - 1) .. faf .. string.sub(token, last + 1)
     end
-    local profanity = profanityReplacement(canonical, core)
-    if profanity then
-        return string.sub(token, 1, first - 1) .. profanity .. string.sub(token, last + 1)
-    end
     if string.find(token, '://', 1, true)
         or string.find(token, 'matrix:', 1, true)
         or string.find(token, 'www.', 1, true)
@@ -256,6 +263,37 @@ local function replaceToken(token)
         return token
     end
     return token
+end
+
+-- Incoming chat: mask profanity only, never touch FAF/фаф or markup tokens.
+local function maskProfanityToken(token)
+    if string.find(token, '[<>]') then return token end
+    if string.find(token, '://', 1, true)
+        or string.find(token, 'matrix:', 1, true)
+        or string.find(token, 'www.', 1, true)
+        or string.find(token, '@', 1, true) then
+        return token
+    end
+    local first, last = coreBounds(token)
+    if not first then return token end
+    if first > 1 then
+        local prefix = string.sub(token, 1, 1)
+        if prefix == '@' or prefix == '#' or prefix == '!' then return token end
+    end
+    local core = string.sub(token, first, last)
+    local profanity = profanityReplacement(canonicalize(core), core)
+    if profanity then
+        return string.sub(token, 1, first - 1) .. profanity .. string.sub(token, last + 1)
+    end
+    return token
+end
+
+function MaskProfanity(text)
+    if type(text) ~= 'string' then return text end
+    refreshCensorship()
+    if not censorshipEnabled then return text end
+    local result = string.gsub(text, '%S+', maskProfanityToken)
+    return result
 end
 
 local function skipWhitespace(text, i)
@@ -286,4 +324,4 @@ function Replace(text)
         .. string.gsub(string.sub(text, bodyStart), '%S+', replaceToken)
 end
 
-return { Replace = Replace }
+return { Replace = Replace, MaskProfanity = MaskProfanity }

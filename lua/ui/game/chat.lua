@@ -18,6 +18,7 @@ local Tooltip = import("/lua/ui/game/tooltip.lua")
 local UIMain = import("/lua/ui/uimain.lua")
 local UserMute = import("/lua/ui/usermute.lua")
 local outgoingChatText = import("/lua/ui/chat/autoreplace.lua").Replace
+local incomingChatText = import("/lua/ui/chat/autoreplace.lua").MaskProfanity
 --[[ LOC Strings
 <LOC chat_win_0001>To %s:
 <LOC chat_win_0002>Chat (%d - %d of %d lines)
@@ -855,6 +856,8 @@ function ReceiveChatFromSim(sender, msg)
     elseif type(msg) ~= 'table' then
         msg = { text = repr(msg) }
     end
+
+    msg.text = incomingChatText(msg.text)
 
     local armyData = GetArmyData(sender)
     if not armyData and GetFocusArmy() ~= -1 and not SessionIsReplay() then

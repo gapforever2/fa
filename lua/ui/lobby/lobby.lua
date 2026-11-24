@@ -232,6 +232,7 @@ local commands = {
     whisper = ParseWhisper,
 }
 local outgoingChatText = import("/lua/ui/chat/autoreplace.lua").Replace
+local incomingChatText = import("/lua/ui/chat/autoreplace.lua").MaskProfanity
 
 local Strings = LobbyComm.Strings
 
@@ -5502,7 +5503,7 @@ local MessageHandlers = {
         end,
         Handle = function(data)
             if UserMute.IsMuted(data.SenderName) then return end
-            AddChatText(data.Text, data.SenderID)
+            AddChatText(incomingChatText(data.Text), data.SenderID)
         end,
     },
 
@@ -5512,7 +5513,7 @@ local MessageHandlers = {
         end,
         Handle = function(data)
             if UserMute.IsMuted(data.SenderName) then return end
-            AddChatText("<<" .. LOCF("<LOC lobui_0442>From %s", data.SenderName) .. ">> " .. data.Text)
+            AddChatText("<<" .. LOCF("<LOC lobui_0442>From %s", data.SenderName) .. ">> " .. incomingChatText(data.Text))
         end
     },
 
