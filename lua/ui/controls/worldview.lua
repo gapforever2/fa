@@ -11,6 +11,7 @@ local Button = import("/lua/maui/button.lua").Button
 local Group = import("/lua/maui/group.lua").Group
 local Dragger = import("/lua/maui/dragger.lua").Dragger
 local Ping = import("/lua/ui/game/ping.lua")
+local MarkerText = import("/lua/ui/game/markertext.lua")
 local UserDecal = import("/lua/user/userdecal.lua").UserDecal
 local WorldViewMgr = import("/lua/ui/game/worldview.lua")
 local Prefs = import("/lua/user/prefs.lua")
@@ -1192,7 +1193,8 @@ WorldView = ClassUI(moho.UIWorldView, Control, WorldViewShapeComponent, WorldVie
                 LayoutHelpers.AtCenterIn(PingGroup.BGMid, PingGroup, 17)
                 PingGroup.BGMid.Depth:Set(function() return PingGroup.Marker.Depth() - 2 end)
 
-                PingGroup.Name = UIUtil.CreateText(PingGroup, PingGroup.data.Name, 14, UIUtil.bodyFont)
+                PingGroup.Name = UIUtil.CreateText(PingGroup, '', 14, UIUtil.bodyFont)
+                MarkerText.Refresh(PingGroup)
                 PingGroup.Name:DisableHitTest()
                 PingGroup.Name:SetDropShadow(true)
                 PingGroup.Name:SetColor('ff00cc00')
@@ -1208,7 +1210,9 @@ WorldView = ClassUI(moho.UIWorldView, Control, WorldViewShapeComponent, WorldVie
                 PingGroup.BGLeft.Right:Set(function() return math.min(PingGroup.Name.Left(), PingGroup.BGMid.Left()) end)
                 PingGroup.BGLeft.Depth:Set(PingGroup.BGMid.Depth)
 
-                if PingGroup.Name.Width() > PingGroup.BGMid.Width() then
+                -- The displayed name can grow after a rename or a censorship
+                -- toggle. These layout bindings also allow zero-width fills.
+                do
                     PingGroup.StretchLeft = Bitmap(PingGroup, UIUtil.UIFile('/game/ping-info-panel/bg-stretch.dds'))
                     LayoutHelpers.AtVerticalCenterIn(PingGroup.StretchLeft, PingGroup.BGMid, 1)
                     PingGroup.StretchLeft.Left:Set(PingGroup.BGLeft.Right)
@@ -1228,6 +1232,7 @@ WorldView = ClassUI(moho.UIWorldView, Control, WorldViewShapeComponent, WorldVie
                 PingGroup.Top:Set(function() return PingGroup.coords.y - PingGroup.Width() / 2 end)
                 PingGroup:SetNeedsFrameUpdate(true)
                 PingGroup.OnFrame = function(pinggrp, deltaTime)
+                    MarkerText.OnFrame(pinggrp, deltaTime)
                     pinggrp.coords = self:Project(Vector(PingGroup.data.Location[1], PingGroup.data.Location[2], PingGroup.data.Location[3]))
                     PingGroup.Left:Set(function() return self.Left() + (PingGroup.coords.x - PingGroup.Height() / 2) end)
                     PingGroup.Top:Set(function() return self.Top() + (PingGroup.coords.y - PingGroup.Width() / 2) end)
@@ -1280,8 +1285,8 @@ WorldView = ClassUI(moho.UIWorldView, Control, WorldViewShapeComponent, WorldVie
                 marker.NewPosition = false
                 marker.Marker:EnableHitTest()
             elseif pingData.Action == 'rename' then
-                marker.Name:SetText(pingData.Name)
                 marker.data.Name = pingData.Name
+                MarkerText.Refresh(marker)
             end
         end
     end,
