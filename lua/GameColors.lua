@@ -185,3 +185,19 @@ CanUsePlayerColor = function(index, role)
     end
     return false
 end
+
+--- Automatic choices never spend a premium/admin entitlement, including for AI.
+-- The predicate is optional so saved local preferences can be sanitized before a lobby exists.
+FindPublicPlayerColor = function(isFree)
+    for _, color in ipairs(GameColors.LobbyColorOrder) do
+        if CanUsePlayerColor(color, false) and (not isFree or isFree(color)) then
+            return color
+        end
+    end
+    for color = 1, table.getn(GameColors.PlayerColors) do
+        if CanUsePlayerColor(color, false) and (not isFree or isFree(color)) then
+            return color
+        end
+    end
+    return nil
+end

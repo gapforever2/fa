@@ -439,8 +439,8 @@ end
 -- In case a new patch removes a color
 function GetSanitisedLastColor()
     local lastColor = Prefs.GetFromCurrentProfile('LastColorFAF') or 1
-    if lastColor > table.getn(gameColors.PlayerColors) or lastColor < 1 then
-        lastColor = 1
+    if not import('/lua/GameColors.lua').CanUsePlayerColor(lastColor, argv.groupDev) then
+        lastColor = import('/lua/GameColors.lua').FindPublicPlayerColor()
     end
 
     return lastColor
@@ -546,15 +546,17 @@ function GetAIPlayerData(name, AIPersonality, slot)
    -- gets the color of the player/AI occupying the slot directly prior if available
     for i = 1, LobbyComm.maxPlayerSlots do
         if gameInfo.PlayerOptions[i].StartSpot == slot then
-            if IsColorFree(gameInfo.PlayerOptions[i].PlayerColor, slot) then
+            if import('/lua/GameColors.lua').CanUsePlayerColor(gameInfo.PlayerOptions[i].PlayerColor, false)
+                and IsColorFree(gameInfo.PlayerOptions[i].PlayerColor, slot) then
                 AIColor =  gameInfo.PlayerOptions[i].PlayerColor
             end
             break
         end
     end
     if not AIColor then
-        AIColor = GetAvailableColor()
+        AIColor = GetAvailableColor(slot)
     end
+    if not AIColor then return nil end
 
     -- retrieve properties from AI table
     ---@type AILobbyProperties | nil
@@ -2698,13 +2700,21 @@ function OnModsChanged(simMods, UIMods, ignoreRefresh)
     end
 end
 
-function GetAvailableColor()
-    for i = 1, LobbyComm.maxPlayerSlots do
-        if IsColorFree(gameColors.LobbyColorOrder[i]) then
-            return gameColors.LobbyColorOrder[i]
-        end
+function GetAvailableColor(currentSlotNumber)
+    local color = import('/lua/GameColors.lua').FindPublicPlayerColor(function(candidate)
+        return IsColorFree(candidate, currentSlotNumber)
+    end)
+    if not color then WARN('Error: No public colors available.') end
+    return color
+end
+
+function GetPlayerColorForSlot(playerData, slot)
+    local role = playerData.Human and playerData.GroupRole or false
+    if import('/lua/GameColors.lua').CanUsePlayerColor(playerData.PlayerColor, role)
+        and IsColorFree(playerData.PlayerColor, slot) then
+        return playerData.PlayerColor
     end
-    WARN('Error: No available colors found.')
+    return GetAvailableColor(slot)
 end
 
 --- This function is retarded.
@@ -2958,7 +2968,7 @@ function CreateSlotsUI(makeLabel)
             local playerInfo = gameInfo.PlayerOptions[curRow]
             local isHuman = playerInfo.Human
 
-            if isHuman and not import('/lua/GameColors.lua').CanUsePlayerColor(index, playerInfo.GroupRole) then
+            if not import('/lua/GameColors.lua').CanUsePlayerColor(index, isHuman and playerInfo.GroupRole or false) then
                 self:SetItem(playerInfo.PlayerColor)
                 if gameColors.PlayerColorAccess[index] == 'admin' then
                     AddChatText(LOC('<LOC lobui_admin_color_gaf>This color is available only to administrators.'))
@@ -5724,7 +5734,7 @@ local MessageHandlers = {
                 return
             end
             local playerInfo = gameInfo.PlayerOptions[TargetSlot]
-            if import('/lua/GameColors.lua').CanUsePlayerColor(data.Color, playerInfo.GroupRole) and IsColorFree(data.Color) then
+            if import('/lua/GameColors.lua').CanUsePlayerColor(data.Color, playerInfo.Human and playerInfo.GroupRole or false) and IsColorFree(data.Color) then
                 -- Color is available, let everyone else know
                 SetPlayerColor(gameInfo.PlayerOptions[TargetSlot], data.Color)
                 lobbyComm:BroadcastData({ Type = 'SetColor', Color = data.Color, Slot = TargetSlot })
@@ -7357,11 +7367,12 @@ function InitHostUtils()
 
             local incomingPlayer = gameInfo.Observers[fromObserverSlot]
 
-            -- Give them a default colour if the one they already have isn't free.
-            if not IsColorFree(incomingPlayer.PlayerColor) then
-                local newColour = GetAvailableColor()
-                SetPlayerColor(incomingPlayer, newColour)
+            local newColour = GetPlayerColorForSlot(incomingPlayer, toPlayerSlot)
+            if not newColour then
+                WARN('Cannot convert observer: no public colors available.')
+                return
             end
+            SetPlayerColor(incomingPlayer, newColour)
 
             gameInfo.PlayerOptions[toPlayerSlot] = incomingPlayer
             gameInfo.Observers[fromObserverSlot] = nil
@@ -7540,6 +7551,7 @@ function InitHostUtils()
         -- @param slot The slot to insert the player to. A value of less than 1 indicates "any slot"
         -- @param playerData A PlayerData object representing the player to add.
         TryAddPlayer = function(senderID, slot, playerData)
+            if not playerData then return end
             -- CPU benchmark code
             if playerData.Human and not singlePlayer then
                 lobbyComm:SendData(senderID, {Type='CPUBenchmark', Benchmarks=CPU_Benchmarks})
@@ -7560,10 +7572,13 @@ function InitHostUtils()
                 return
             end
 
-            -- if a color is requested, attempt to use that color if available, otherwise, assign first available
-            if not IsColorFree(playerData.PlayerColor, slot) then
-                SetPlayerColor(playerData, GetAvailableColor())
+            -- Saved preferences and automatic replacements follow the same access policy as clicks.
+            local color = GetPlayerColorForSlot(playerData, newSlot)
+            if not color then
+                WARN('Cannot add player: no public colors available.')
+                return
             end
+            SetPlayerColor(playerData, color)
 
             gameInfo.PlayerOptions[newSlot] = playerData
             lobbyComm:BroadcastData(
