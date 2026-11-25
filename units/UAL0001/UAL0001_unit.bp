@@ -80,7 +80,7 @@ UnitBlueprint{
         },
         AnimationWalk = "/units/ual0001/ual0001_awalk.sca",
 		AnimationAction = "/units/ual0001/CERDACER.sca",
-        AnimationWalkRate = 2.5,
+        AnimationWalkRate = 1.3,
         IdleEffects = {
             Seabed = {
                 Effects = {
