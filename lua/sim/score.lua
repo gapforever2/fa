@@ -190,7 +190,7 @@ local function ScoreThread()
     for index, brain in ArmyBrains do
         if ArmyIsCivilian(index) then continue end
         ArmyScore[index] = {
-            performance = {version = 3, mass_income = {}, mass_income_active = {}, duration = 0},
+            performance = {version = 4, mass_income = {}, mass_income_active = {}, duration = 0},
             faction = brain:GetFactionIndex(),
             name = brain.Nickname,
             type = '',

@@ -242,6 +242,8 @@ local commands = {
     w = ParseWhisper,
     whisper = ParseWhisper,
 }
+local outgoingChatText = import("/lua/ui/chat/autoreplace.lua").Replace
+local incomingChatText = import("/lua/ui/chat/autoreplace.lua").MaskProfanity
 
 local Strings = LobbyComm.Strings
 
@@ -2012,6 +2014,7 @@ function SendPersonalSystemMessage(targetID, id, ...)
 end
 
 function PublicChat(text)
+    text = outgoingChatText(text)
     lobbyComm:BroadcastData(
         {
             Type = "PublicChat",
@@ -4839,13 +4842,16 @@ function setupChatEdit(chatPanel)
         if text:gsub("%s+", "") == '' then  -- Если текст без пробелов равен ''
             return
         end
-        GpgNetSend('Chat', text)
+        GpgNetSend('Chat', outgoingChatText(text))
         table.insert(commandQueue, 1, text)
         commandQueueIndex = 0
         if string.sub(text, 1, 1) == '/' then
             local spaceStart = string.find(text, " ") or string.len(text) + 1
             local comKey = string.sub(text, 2, spaceStart - 1)
             local params = string.sub(text, spaceStart + 1)
+            if comKey == 'w' or comKey == 'whisper' or comKey == 'private' or comKey == 'pm' then
+                params = outgoingChatText(params)
+            end
             local commandFunc = commands[string.lower(comKey)]
             if not commandFunc then
                 AddChatText(LOCF("<LOC lobui_0396>Command Not Known: %s", comKey))
@@ -4853,6 +4859,7 @@ function setupChatEdit(chatPanel)
             end
             commandFunc(params)
         else
+            text = outgoingChatText(text)
             PublicChat(text)
         end
     end
@@ -5531,7 +5538,7 @@ local MessageHandlers = {
         end,
         Handle = function(data)
             if UserMute.IsMuted(data.SenderName) then return end
-            AddChatText(data.Text, data.SenderID)
+            AddChatText(incomingChatText(data.Text), data.SenderID)
         end,
     },
 
@@ -5541,7 +5548,7 @@ local MessageHandlers = {
         end,
         Handle = function(data)
             if UserMute.IsMuted(data.SenderName) then return end
-            AddChatText("<<" .. LOCF("<LOC lobui_0442>From %s", data.SenderName) .. ">> " .. data.Text)
+            AddChatText("<<" .. LOCF("<LOC lobui_0442>From %s", data.SenderName) .. ">> " .. incomingChatText(data.Text))
         end
     },
 
@@ -7071,6 +7078,16 @@ function ShowLobbyOptionsDialog()
         end
     end
 
+    local cbox_ChatCensorship = UIUtil.CreateCheckbox(dialogContent, '/CHECKBOX/', LOC("<LOC OPTIONS_CHAT_CENSORSHIP>Цензура"))
+    LayoutHelpers.AtRightTopIn(cbox_ChatCensorship, dialogContent, 20, 146)
+    Tooltip.AddCheckboxTooltip(cbox_ChatCensorship, {
+        text = LOC("<LOC OPTIONS_CHAT_CENSORSHIP>Цензура"),
+        body = LOC("<LOC OPTIONS_CHAT_CENSORSHIP_DESC>Заменять маты и оскорбления звёздочками во входящих сообщениях."),
+    })
+    cbox_ChatCensorship.OnCheck = function(self, checked)
+        Prefs.SetOption('chat_censorship', checked == true)
+    end
+
     -- Quit button
     local QuitButton = UIUtil.CreateButtonWithDropshadow(dialogContent, '/BUTTON/medium/', LOC("<LOC _Close>Close"))
     LayoutHelpers.AtHorizontalCenterIn(QuitButton, dialogContent, 0)
@@ -7095,6 +7112,9 @@ function ShowLobbyOptionsDialog()
 
     local chatPlayerColor = Prefs.GetFromCurrentProfile('ChatPlayerColor')
     cbox_ChatPlayerColor:SetCheck(chatPlayerColor == true or chatPlayerColor == nil, true)
+    --
+    local chatCensorship = Prefs.GetOption('chat_censorship')
+    cbox_ChatCensorship:SetCheck(chatCensorship == true or chatCensorship == nil, true)
 end
 
 ---Applies new game settings, including map, mods

@@ -1397,6 +1397,18 @@ options = {
                     },
                 },
             },
+            {
+                title = "<LOC OPTIONS_CHAT_CENSORSHIP>Цензура",
+                key = 'chat_censorship',
+                type = 'toggle',
+                default = true,
+                custom = {
+                    states = {
+                        { text = "<LOC _On>", key = true },
+                        { text = "<LOC _Off>", key = false },
+                    },
+                },
+            },
 
             {
                 title = "<LOC OPTIONS_0329>Casting tools",
