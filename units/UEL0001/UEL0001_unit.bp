@@ -87,7 +87,7 @@ UnitBlueprint{
         },
         AnimationWalk = "/units/uel0001/uel0001_a001.sca",
 		AnimationAction = "/units/uel0001/CERDACER.sca",
-        AnimationWalkRate = 1.7,
+        AnimationWalkRate = 1.1,
         AttackReticleSize = 55,
         DamageEffects = {
             { Bone = 0,     OffsetX = 0.25,  OffsetY = 0.75,  OffsetZ = 0 },
