@@ -38,7 +38,6 @@ UnitBlueprint{
         "OVERLAYANTINAVY",
         "OVERLAYDEFENSE",
         "OVERLAYDIRECTFIRE",
-        "OVERLAYRADAR",
         "OVERLAYSONAR",
         "PRODUCTSC1",
         "RECLAIMABLE",
@@ -60,7 +59,6 @@ UnitBlueprint{
         Abilities = {
             "<LOC ability_amphibious>Amphibious",
             "<LOC ability_aa>Anti-Air",
-            "<LOC ability_radar>Radar",
             "<LOC ability_sonar>Sonar",
             "<LOC ability_torpedo>Torpedoes",
             "<LOC ability_torpedodef>Torpedo Defense",
@@ -232,7 +230,6 @@ UnitBlueprint{
         UnitName = "<LOC urs0201_name>Salem Class",
     },
     Intel = {
-        RadarRadius = 44,
         SonarRadius = 44,
         VisionRadius = 32,
         WaterVisionRadius = 36,
@@ -294,7 +291,7 @@ UnitBlueprint{
             FiringRandomness = 0.3,
             FiringTolerance = 2,
             Label = "ParticleGun",
-            MaxRadius = 80,
+            MaxRadius = 75,
             MuzzleSalvoDelay = 0,
             MuzzleSalvoSize = 2,
             MuzzleVelocity = 30,
@@ -497,7 +494,7 @@ UnitBlueprint{
             RackSalvoSize = 1,
             RackSlavedToTurret = false,
             RangeCategory = "UWRC_Countermeasure",
-            RateOfFire = 10/38, --10/integer interval in ticks
+            RateOfFire = 10/50, --10/integer interval in ticks
             TargetRestrictDisallow = "UNTARGETABLE",
             TargetRestrictOnlyAllow = "TORPEDO",
             TargetType = "RULEWTT_Projectile",

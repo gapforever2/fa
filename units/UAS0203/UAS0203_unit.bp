@@ -154,7 +154,7 @@ UnitBlueprint{
     Economy = {
         BuildCostEnergy = 2880,
         BuildCostMass = 360,
-        BuildTime = 1440,
+        BuildTime = 1200,
     },
     Footprint = {
         SizeX = 2,
@@ -188,10 +188,10 @@ UnitBlueprint{
         CatchUpAcc = 10,
         DragCoefficient = 0.2,
         Elevation = -1.5,
-        MaxAcceleration = 6,
-        MaxBrake = 6,
-        MaxSpeed = 6,
-        MaxSpeedReverse = 6,
+        MaxAcceleration = 7,
+        MaxBrake = 7,
+        MaxSpeed = 7,
+        MaxSpeedReverse = 7,
         MaxSteerForce = 5,
         MeshExtentsX = 0.6,
         MeshExtentsY = 0.65,

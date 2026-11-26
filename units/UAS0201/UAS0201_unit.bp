@@ -25,7 +25,6 @@ UnitBlueprint{
         "OVERLAYDEFENSE",
         "OVERLAYDIRECTFIRE",
         "OVERLAYINDIRECTFIRE",
-        "OVERLAYRADAR",
         "OVERLAYSONAR",
         "PRODUCTSC1",
         "RECLAIMABLE",
@@ -44,7 +43,6 @@ UnitBlueprint{
     Display = {
         Abilities = {
             "<LOC ability_depthcharge>Depth Charges",
-            "<LOC ability_radar>Radar",
             "<LOC ability_sonar>Sonar",
             "<LOC ability_torpedo>Torpedoes",
             "<LOC ability_torpedodef>Torpedo Defense",
@@ -125,7 +123,6 @@ UnitBlueprint{
         UnitName = "<LOC uas0201_name>Exodus Class",
     },
     Intel = {
-        RadarRadius = 44,
         SonarRadius = 44,
         VisionRadius = 32,
         WaterVisionRadius = 36,

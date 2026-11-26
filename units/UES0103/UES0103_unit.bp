@@ -21,7 +21,6 @@ UnitBlueprint{
         "BUILTBYTIER1FACTORY",
         "BUILTBYTIER2FACTORY",
         "BUILTBYTIER3FACTORY",
-        "COUNTERINTELLIGENCE",
         "DIRECTFIRE",
         "FRIGATE",
         "INTELLIGENCE",
@@ -53,7 +52,6 @@ UnitBlueprint{
     Display = {
         Abilities = {
             "<LOC ability_aa>Anti-Air",
-            "<LOC ability_jamming>Jamming",
             "<LOC ability_radar>Radar",
             "<LOC ability_sonar>Sonar",
         },
@@ -120,9 +118,9 @@ UnitBlueprint{
         UniformScale = 0.09,
     },
     Economy = {
-        BuildCostEnergy = 2800,
-        BuildCostMass = 280,
-        BuildTime = 1400,
+        BuildCostEnergy = 2500,
+        BuildCostMass = 205,
+        BuildTime = 900,
         MaintenanceConsumptionPerSecondEnergy = 5,
     },
     Footprint = {
@@ -140,7 +138,6 @@ UnitBlueprint{
         },
         FactionName = "UEF",
         Icon = "sea",
-        ToggleCaps = { RULEUTC_JammingToggle = true },
         UnitName = "<LOC ues0103_name>Thunderhead Class",
     },
     Intel = {
@@ -148,11 +145,6 @@ UnitBlueprint{
             Radar = true,
             Sonar = true,
         },
-        JamRadius = {
-            Max = 70,
-            Min = 70,
-        },
-        JammerBlips = 5,
         RadarRadius = 80,
         SonarRadius = 16,
         VisionRadius = 32,
