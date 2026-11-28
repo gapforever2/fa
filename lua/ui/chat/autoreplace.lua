@@ -40,7 +40,7 @@ local profanityRoots = {
     'ebat', 'ebal', 'eban', 'ebu', 'ebi', 'ebl', 'ebly', 'ebun', 'ebash',
     'eby', 'ebos', 'ebanat', 'yob', 'iban', 'ipat', 'epat', 'epan',
     'zaeb', 'zayob', 'zaib', 'zaep', 'naeb', 'ueb', 'uyob', 'doeb', 'proeb',
-    'vyeb', 'obeb', 'podeb', 'prieb', 'seb', 'nebich', 'zlyoeb',
+    'vyeb', 'obeb', 'podeb', 'prieb', 'nebich', 'zlyoeb',
     -- блядь
     'blya',
     -- сука / сцука / сучара
@@ -65,7 +65,7 @@ local profanityRoots = {
     'daun', 'kozyol', 'kozel', 'osyol', 'osel', 'pidrila',
     -- гей (как оскорбление) и англоязычные ругательства
     'gey', 'gei', 'gay', 'homo', 'fag', 'fuck', 'fuk', 'fck', 'fkin', 'fack',
-    'shit', 'sht', 'bitch', 'cunt', 'dick', 'cock', 'cok', 'pussy', 'pusy',
+    'shit', 'bitch', 'cunt', 'dick', 'cock', 'cok', 'pussy', 'pusy',
     'whore', 'asshole', 'ashole', 'motherfucker', 'retard', 'nigger', 'niger',
     'bastard', 'slut',
 }
@@ -75,6 +75,20 @@ local profanityWholeWords = {
     ['podstava'] = true, ['podstavu'] = true, ['podstavy'] = true,
     ['podstavoy'] = true, ['podstavah'] = true, ['podstavami'] = true,
 }
+-- Canonical prefixes of ordinary words that share a stem with profanity
+-- ("себе", "походу", "штож", ...). Checked before roots, including on the
+-- glued form used for space-obfuscated words, so normal speech stays intact.
+local profanitySafePrefixes = {
+    'seb', 'poho', 'pohozh', 'pohval', 'pohme',
+    'dohod', 'nahod', 'nahozh', 'sht', 'huligan',
+    'geymer', 'geyt', 'mandat', 'mandarin', 'fagot', 'lohmat', 'lohmot',
+}
+local function isProfanitySafe(canonical)
+    for _, prefix in ipairs(profanitySafePrefixes) do
+        if string.sub(canonical, 1, string.len(prefix)) == prefix then return true end
+    end
+    return false
+end
 local textCommands = {
     send = true, me = true, plain = true, html = true,
     w = true, whisper = true, private = true, pm = true,
@@ -260,6 +274,7 @@ local function maskingLength(core)
 end
 
 local function profanityReplacement(canonical, core)
+    if isProfanitySafe(canonical) then return nil end
     if profanityWholeWords[canonical] then
         return string.rep('*', maskingLength(core))
     end
@@ -278,6 +293,7 @@ end
 -- Used for space-obfuscated words: the root must start the joined canonical
 -- form, otherwise ordinary multi-word phrases would be swallowed.
 local function profanityPrefixMatch(canonical)
+    if isProfanitySafe(canonical) then return false end
     if profanityWholeWords[canonical] then return true end
     for _, root in ipairs(profanityRoots) do
         if string.sub(canonical, 1, string.len(root)) == root then
